@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profilim - PlatformAvrupa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="utils.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }</style>
+</head>
+<body class="bg-slate-50">
+
+    <nav class="bg-[#020617] text-white h-20 flex items-center px-6 sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto w-full flex justify-between items-center">
+            <a href="index.html" class="font-bold text-2xl flex items-center gap-2 hover:text-indigo-400 transition">
+                <i class="fa-solid fa-arrow-left"></i>
+                PlatformAvrupa
+            </a>
+            <div class="text-sm text-slate-400">Profil Yönetimi</div>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto p-6 py-10">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+            
+            <div class="md:col-span-1 space-y-6">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 text-center">
+                    <div class="w-24 h-24 mx-auto bg-indigo-600 rounded-full flex items-center justify-center text-3xl font-bold text-white mb-4 shadow-lg shadow-indigo-200" id="avatarBox">
+                        PA
+                    </div>
+                    <h2 class="font-bold text-xl text-slate-900" id="profileDisplayName">Yükleniyor...</h2>
+                    <p class="text-xs text-slate-400 mt-1 uppercase tracking-wide">ÜYE PROFİLİ</p>
+                    <div class="mt-4 inline-flex items-center gap-2 px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">
+                        <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Onaylı Hesap
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <a href="#" class="flex items-center gap-3 px-6 py-4 bg-indigo-50 text-indigo-700 font-bold border-l-4 border-indigo-600">
+                        <i class="fa-regular fa-user"></i> Hesap Bilgileri
+                    </a>
+                    <a href="ilanlarim.html" class="flex items-center gap-3 px-6 py-4 text-slate-600 hover:bg-slate-50 transition border-l-4 border-transparent">
+                        <i class="fa-solid fa-list"></i> İlanlarım
+                    </a>
+                    <a href="#" onclick="cikisYap()" class="flex items-center gap-3 px-6 py-4 text-red-600 hover:bg-red-50 transition">
+                        <i class="fa-solid fa-right-from-bracket"></i> Çıkış Yap
+                    </a>
+                </div>
+            </div>
+
+            <div class="md:col-span-3">
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 class="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
+                        <span class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600 text-lg"><i class="fa-solid fa-sliders"></i></span>
+                        Hesap Detayları
+                    </h3>
+
+                    <form onsubmit="profilGuncelle(event)">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                            
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Gerçek Ad Soyad <i class="fa-solid fa-lock text-slate-300 ml-1"></i></label>
+                                <input type="text" id="realName" class="w-full p-3 bg-slate-100 border border-slate-200 rounded-xl text-slate-500 cursor-not-allowed font-medium" readonly>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase mb-2">E-Posta <i class="fa-solid fa-lock text-slate-300 ml-1"></i></label>
+                                <input type="text" id="email" class="w-full p-3 bg-slate-100 border border-slate-200 rounded-xl text-slate-500 cursor-not-allowed font-medium" readonly>
+                            </div>
+
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-bold text-indigo-600 uppercase mb-2">Görünen İsim (Takma Ad)</label>
+                                <input type="text" id="displayName" placeholder="Sohbetlerde görünecek isim" class="w-full p-3 bg-white border-2 border-indigo-100 rounded-xl text-slate-900 font-bold focus:border-indigo-500 focus:outline-none transition">
+                                <p class="text-xs text-slate-400 mt-1">Bu isim ilanlarda ve sohbetlerde görünür.</p>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Telefon Numarası</label>
+                                <input type="tel" id="userPhone" placeholder="+90 555 ..." class="w-full p-3 bg-white border border-slate-200 rounded-xl text-slate-700 font-medium focus:border-indigo-500 focus:outline-none transition">
+                            </div>
+
+                            <div class="hidden md:block"></div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Ülke <i class="fa-solid fa-lock text-slate-300 ml-1"></i></label>
+                                <input type="text" id="country" class="w-full p-3 bg-slate-100 border border-slate-200 rounded-xl text-slate-500 cursor-not-allowed font-medium" readonly>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Şehir <i class="fa-solid fa-lock text-slate-300 ml-1"></i></label>
+                                <input type="text" id="city" class="w-full p-3 bg-slate-100 border border-slate-200 rounded-xl text-slate-500 cursor-not-allowed font-medium" readonly>
+                            </div>
+
+                        </div>
+
+                        <div class="bg-blue-50 border border-blue-100 p-5 rounded-xl flex items-start gap-4 mb-8">
+                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 shrink-0">
+                                <i class="fa-solid fa-info-circle"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-blue-800 text-sm mb-1">Bilgilendirme</h4>
+                                <p class="text-blue-700 text-sm">Güvenlik gereği Gerçek Ad ve Konum bilgileri değiştirilemez.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end">
+                            <button type="submit" id="saveBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-xl transition shadow-lg shadow-indigo-200 flex items-center gap-2">
+                                <i class="fa-solid fa-save"></i> Değişiklikleri Kaydet
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="genel_veriler.js"></script>
+    <script>
+        // Supabase bağlantısı config.js'den geliyor
+
+        let currentUser = null;
+
+        window.onload = async function() {
+            // 1. Önce Hızlıca LocalStorage'dan Çek
+            // NOT: Burada '||' operatörünü kaldırdık. Gerçek isim yoksa BOŞ kalsın, takma ad yazmasın.
+            const lsRealName = localStorage.getItem('userRealName');
+            doldurForm(
+                lsRealName, 
+                localStorage.getItem('userName'),
+                localStorage.getItem('userEmail'),
+                localStorage.getItem('userPhone'),
+                localStorage.getItem('userCountry'),
+                localStorage.getItem('userCity')
+            );
+
+            // 2. Veritabanından En Güncelini Çek
+            const { data: { user } } = await sb.auth.getUser();
+            
+            if (user) {
+                currentUser = user;
+                const { data: profile } = await sb.from('profiles').select('*').eq('id', user.id).single();
+
+                if (profile) {
+                    // Veritabanı verisiyle formu güncelle
+                    doldurForm(
+                        profile.real_name,
+                        profile.full_name,
+                        profile.email,
+                        profile.phone,
+                        profile.country,
+                        profile.city
+                    );
+
+                    // Verileri tazele
+                    localStorage.setItem('userName', profile.full_name);
+                    localStorage.setItem('userCity', profile.city);
+                    localStorage.setItem('userLocation', profile.city); 
+                    localStorage.setItem('userRealName', profile.real_name); // Artık veritabanından doğrusunu alıp kaydedecek
+                    localStorage.setItem('userCountry', profile.country);
+                }
+            } else {
+                window.location.href = "login.html";
+            }
+        };
+
+        function doldurForm(realName, nickName, email, phone, country, city) {
+            // EĞER GERÇEK İSİM YOKSA BOŞ BIRAK, BAŞKA ŞEY YAZMA
+            document.getElementById('realName').value = realName || ''; 
+            
+            if(nickName) {
+                document.getElementById('displayName').value = nickName;
+                document.getElementById('profileDisplayName').innerText = nickName;
+                document.getElementById('avatarBox').innerText = nickName.substring(0,2).toUpperCase();
+            }
+            if(email) document.getElementById('email').value = email;
+            if(phone) document.getElementById('userPhone').value = phone;
+            
+            // Ülke kodu varsa ismini bul
+            let ulkeYazisi = country;
+            if (typeof ulkelerListesi !== 'undefined' && ulkelerListesi[country]) {
+                ulkeYazisi = ulkelerListesi[country];
+            }
+            document.getElementById('country').value = ulkeYazisi || country || '';
+            document.getElementById('city').value = city || '';
+        }
+
+        async function profilGuncelle(e) {
+            e.preventDefault();
+            const btn = document.getElementById('saveBtn');
+            const newNick = document.getElementById('displayName').value;
+            const newPhone = document.getElementById('userPhone').value;
+
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Kaydediliyor...';
+            btn.disabled = true;
+
+            const { error } = await sb.from('profiles').update({
+                full_name: newNick,
+                phone: newPhone
+            }).eq('id', currentUser.id);
+
+            if (error) {
+                alert("Hata: " + error.message);
+                btn.innerHTML = 'Hata!';
+            } else {
+                localStorage.setItem('userName', newNick);
+                localStorage.setItem('userPhone', newPhone);
+                
+                document.getElementById('profileDisplayName').innerText = newNick;
+                document.getElementById('avatarBox').innerText = newNick.substring(0,2).toUpperCase();
+
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Kaydedildi!';
+                setTimeout(() => {
+                    btn.innerHTML = '<i class="fa-solid fa-save"></i> Değişiklikleri Kaydet';
+                    btn.disabled = false;
+                }, 2000);
+            }
+        }
+
+        function cikisYap() {
+            sb.auth.signOut();
+            localStorage.clear();
+            window.location.href = "index.html";
+        }
+    </script>
+</body>
+</html>

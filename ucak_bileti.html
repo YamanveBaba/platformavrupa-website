@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uçak Bileti | PlatformAvrupa</title>
+    <meta name="description" content="En uygun uçak bileti fiyatlarını karşılaştırın, gurbetçi rotaları için özel fırsatları yakalayın.">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f0f9ff; }
+        .glass-header { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); border-bottom: 1px solid #e2e8f0; }
+        
+        .flight-input {
+            width: 100%; border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px;
+            font-weight: 600; color: #334155; outline: none; transition: all 0.2s; cursor: pointer;
+        }
+        .flight-input:focus { border-color: #3b82f6; background-color: white; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
+        
+        #cocuk-yaslari-wrapper { transition: all 0.3s ease-in-out; }
+    </style>
+</head>
+<body class="text-slate-800 flex flex-col min-h-screen relative">
+    
+    <img src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?q=80&w=2000&auto=format&fit=crop" 
+         class="fixed inset-0 w-full h-full object-cover -z-10" 
+         alt="Background" loading="lazy">
+    
+    <div class="fixed inset-0 bg-slate-900/40 -z-10 pointer-events-none"></div>
+
+    <nav class="glass-header sticky top-0 z-50 px-6 py-4 shadow-sm">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <a href="index.html" class="flex items-center gap-2 text-slate-600 hover:text-blue-600 transition font-bold group">
+                <div class="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center group-hover:bg-blue-50 transition"><i class="fa-solid fa-arrow-left"></i></div>
+                <span class="hidden sm:inline">Ana Sayfa</span>
+            </a>
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-blue-500/30"><i class="fa-solid fa-plane"></i></div>
+                <span class="font-extrabold text-lg text-blue-900 tracking-tight">UÇAK BİLETİ</span>
+            </div>
+            <div class="w-20"></div>
+        </div>
+    </nav>
+
+    <main class="flex-grow max-w-4xl mx-auto px-4 py-12 w-full relative z-10">
+        
+        <div class="bg-white p-6 md:p-8 rounded-3xl shadow-2xl border border-slate-200 backdrop-blur-sm bg-white/95">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-extrabold text-slate-800 mb-2">En Uygun Bileti Bul</h1>
+                <p class="text-slate-500">Yüzlerce havayolunu karşılaştır, en ucuz bileti yakala.</p>
+            </div>
+
+            <form onsubmit="biletAra(event)" class="space-y-6">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 relative">
+                    <div class="relative flex flex-col gap-2">
+                        <label class="text-xs font-bold text-slate-400 uppercase ml-1 block">Nereden</label>
+                        <div class="relative group">
+                            <i class="fa-solid fa-earth-europe absolute left-4 top-4 text-slate-400 z-10 group-focus-within:text-blue-500 transition"></i>
+                            <select id="nereden-ulke" class="flight-input pl-10 appearance-none bg-slate-50" onchange="sehirleriGetirOrtak(this.value, 'nereden-sehir')">
+                                <option value="">Ülke Seçiniz...</option>
+                            </select>
+                        </div>
+                        <div class="relative group">
+                            <i class="fa-solid fa-location-dot absolute left-4 top-4 text-slate-400 z-10 group-focus-within:text-blue-500 transition"></i>
+                            <select id="nereden-sehir" class="flight-input pl-10 appearance-none bg-slate-50" disabled>
+                                <option value="">Önce Ülke Seçiniz</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="relative flex flex-col gap-2">
+                        <label class="text-xs font-bold text-slate-400 uppercase ml-1 block">Nereye</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-flag absolute left-4 top-4 text-slate-400 z-10"></i>
+                            <select id="nereye-ulke" class="flight-input pl-10 appearance-none bg-slate-100 cursor-not-allowed" disabled>
+                                <option value="TR" selected>🇹🇷 Türkiye</option>
+                            </select>
+                        </div>
+                        <div class="relative group">
+                            <i class="fa-solid fa-location-dot absolute left-4 top-4 text-slate-400 z-10 group-focus-within:text-blue-500 transition"></i>
+                            <select id="nereye-sehir" class="flight-input pl-10 appearance-none bg-slate-50">
+                                <option value="">Şehir Seçiniz...</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="relative cursor-pointer group bg-slate-50 border-2 border-slate-200 rounded-xl hover:border-blue-500 transition" onclick="openDatePicker()">
+                        <div class="p-3 pointer-events-none">
+                            <label class="text-xs font-bold text-slate-400 uppercase block mb-1">Gidiş Tarihi</label>
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-calendar-days text-slate-400 group-hover:text-blue-500 transition"></i>
+                                <input type="date" id="tarih" class="bg-transparent border-none outline-none text-slate-800 font-bold w-full pointer-events-auto" required onclick="this.showPicker()">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="relative group">
+                        <label class="text-xs font-bold text-slate-400 uppercase ml-1 mb-1 block">Yetişkin (+18)</label>
+                        <i class="fa-solid fa-user absolute left-4 top-9 text-slate-400 z-10 group-focus-within:text-blue-500 transition"></i>
+                        <select id="yetiskinSayisi" class="flight-input pl-10 appearance-none bg-slate-50">
+                            <option value="1">1 Yetişkin</option>
+                            <option value="2">2 Yetişkin</option>
+                            <option value="3">3 Yetişkin</option>
+                            <option value="4">4 Yetişkin</option>
+                            <option value="5">5 Yetişkin</option>
+                        </select>
+                    </div>
+
+                    <div class="relative group">
+                        <label class="text-xs font-bold text-slate-400 uppercase ml-1 mb-1 block">Çocuk (0-17)</label>
+                        <i class="fa-solid fa-child absolute left-4 top-9 text-slate-400 z-10 group-focus-within:text-blue-500 transition"></i>
+                        <select id="cocukSayisi" class="flight-input pl-10 appearance-none bg-slate-50" onchange="cocukYasKutulariniOlustur()">
+                            <option value="0">Çocuk Yok</option>
+                            <option value="1">1 Çocuk</option>
+                            <option value="2">2 Çocuk</option>
+                            <option value="3">3 Çocuk</option>
+                            <option value="4">4 Çocuk</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="cocuk-yaslari-wrapper" class="hidden bg-slate-50 border border-slate-200 rounded-xl p-4 animate-fade-in">
+                    <label class="text-xs font-bold text-slate-500 uppercase block mb-2">Çocukların Yaşları</label>
+                    <div id="cocuk-yaslari-container" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
+                    <p class="text-[10px] text-slate-400 mt-2">* Doğru fiyatlandırma için yaş bilgisi zorunludur.</p>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl text-lg shadow-lg shadow-blue-200 transition transform active:scale-[0.98] flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-magnifying-glass"></i> UÇUŞLARI ARA
+                </button>
+
+            </form>
+            
+            <p class="text-center text-xs text-slate-400 mt-4 flex items-center justify-center gap-1">
+                <i class="fa-solid fa-shield-halved"></i> Sonuçlar Skyscanner güvencesiyle açılır.
+            </p>
+        </div>
+
+        <div class="mt-12">
+            <h2 class="text-xl font-bold text-white mb-4 drop-shadow-md px-1">Popüler Rotalar</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div onclick="hizliAra('BRU', 'IST')" class="bg-white/90 backdrop-blur rounded-2xl p-4 cursor-pointer hover:bg-white hover:-translate-y-1 transition shadow-lg group border border-white/20">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <span class="text-xs font-bold text-slate-500 block mb-1">BELÇİKA ✈️ TÜRKİYE</span>
+                            <span class="font-bold text-slate-800 text-lg">Brüksel - İstanbul</span>
+                        </div>
+                        <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition">
+                            <i class="fa-solid fa-angle-right"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div onclick="hizliAra('DUS', 'ESB')" class="bg-white/90 backdrop-blur rounded-2xl p-4 cursor-pointer hover:bg-white hover:-translate-y-1 transition shadow-lg group border border-white/20">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <span class="text-xs font-bold text-slate-500 block mb-1">ALMANYA ✈️ TÜRKİYE</span>
+                            <span class="font-bold text-slate-800 text-lg">Düsseldorf - Ankara</span>
+                        </div>
+                        <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition">
+                            <i class="fa-solid fa-angle-right"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div onclick="hizliAra('AMS', 'ADB')" class="bg-white/90 backdrop-blur rounded-2xl p-4 cursor-pointer hover:bg-white hover:-translate-y-1 transition shadow-lg group border border-white/20">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <span class="text-xs font-bold text-slate-500 block mb-1">HOLLANDA ✈️ TÜRKİYE</span>
+                            <span class="font-bold text-slate-800 text-lg">Amsterdam - İzmir</span>
+                        </div>
+                        <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition">
+                            <i class="fa-solid fa-angle-right"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <div class="bg-slate-900 text-white py-8 text-center text-xs opacity-90 relative z-10">
+        &copy; 2025 Platform Avrupa. Tüm hakları saklıdır.
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="genel_veriler.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('tarih').valueAsDate = new Date();
+            if(typeof ulkeleriDoldur === 'function') {
+                 ulkeleriDoldur('nereden-ulke');
+            }
+            if(typeof sehirleriGetirOrtak === 'function') {
+                sehirleriGetirOrtak('TR', 'nereye-sehir');
+            }
+        });
+
+        function openDatePicker() {
+            document.getElementById('tarih').showPicker();
+        }
+
+        function cocukYasKutulariniOlustur() {
+            const adet = parseInt(document.getElementById('cocukSayisi').value);
+            const wrapper = document.getElementById('cocuk-yaslari-wrapper');
+            const container = document.getElementById('cocuk-yaslari-container');
+            container.innerHTML = ''; 
+
+            if (adet > 0) {
+                wrapper.classList.remove('hidden');
+                for (let i = 1; i <= adet; i++) {
+                    const div = document.createElement('div');
+                    let options = '';
+                    for(let yas=0; yas<=17; yas++) {
+                        options += `<option value="${yas}">${yas} Yaş</option>`;
+                    }
+                    div.innerHTML = `
+                        <select class="cocuk-yas-input w-full p-2 border border-slate-300 rounded-lg text-sm bg-white focus:border-blue-500 outline-none">
+                            <option value="" disabled selected>${i}. Çocuğun Yaşı</option>
+                            ${options}
+                        </select>
+                    `;
+                    container.appendChild(div);
+                }
+            } else {
+                wrapper.classList.add('hidden');
+            }
+        }
+
+        // --- HAVALİMANI VERİTABANI ---
+        
+        const countryDefaults = {
+            "TR": { code: "IST", name: "İstanbul" }, "DE": { code: "FRA", name: "Frankfurt" },
+            "BE": { code: "BRU", name: "Brüksel" }, "NL": { code: "AMS", name: "Amsterdam" },
+            "FR": { code: "PAR", name: "Paris" }, "AT": { code: "VIE", name: "Viyana" },
+            "CH": { code: "ZRH", name: "Zürih" }, "GB": { code: "LON", name: "Londra" },
+            "default": { code: "IST", name: "İstanbul" }
+        };
+
+        const cityToAirport = {
+            'istanbul': 'IST', 'ankara': 'ESB', 'izmir': 'ADB', 'antalya': 'AYT',
+            'adana': 'COV', 'mersin': 'COV', 'bursa': 'YEI', 'kocaeli': 'KCO',
+            'samsun': 'SZF', 'trabzon': 'TZX', 'ordu': 'OGU', 'giresun': 'OGU',
+            'erzurum': 'ERZ', 'van': 'VAN', 'diyarbakir': 'DIY', 'gaziantep': 'GZT',
+            'kayseri': 'ASR', 'sivas': 'VAS', 'malatya': 'MLX', 'elazig': 'EZS',
+            'konya': 'KYA', 'bodrum': 'BJV', 'dalaman': 'DLM', 'hatay': 'HTY',
+            'brussels': 'BRU', 'bruxelles': 'BRU', 'charleroi': 'CRL',
+            'amsterdam': 'AMS', 'rotterdam': 'RTM', 'eindhoven': 'EIN',
+            'paris': 'PAR', 'lyon': 'LYS', 'marseille': 'MRS',
+            'berlin': 'BER', 'hamburg': 'HAM', 'munich': 'MUC', 'munchen': 'MUC',
+            'frankfurt': 'FRA', 'cologne': 'CGN', 'koln': 'CGN', 'dusseldorf': 'DUS',
+            'stuttgart': 'STR', 'vienna': 'VIE', 'wien': 'VIE', 'zurich': 'ZRH',
+            'london': 'LON', 'manchester': 'MAN'
+        };
+
+        function getAirportData(cityName, countryCode) {
+            if (!cityName) return null;
+            let clean = cityName.toLowerCase().split('(')[0].trim();
+            
+            // Türkçe karakter temizliği
+            const trMap = { 'ç':'c', 'ğ':'g', 'ş':'s', 'ü':'u', 'ı':'i', 'ö':'o' };
+            for(let key in trMap) clean = clean.replace(new RegExp(key, 'g'), trMap[key]);
+
+            if (cityToAirport[clean]) return { code: cityToAirport[clean], name: cityName, isDefault: false };
+
+            if (countryCode && countryDefaults[countryCode]) {
+                return { code: countryDefaults[countryCode].code, name: countryDefaults[countryCode].name, isDefault: true };
+            }
+            return { code: "IST", name: "İstanbul", isDefault: true };
+        }
+
+        function biletAra(e) {
+            e.preventDefault();
+            
+            const neredenUlke = document.getElementById('nereden-ulke').value;
+            const neredenSehir = document.getElementById('nereden-sehir').value;
+            const nereyeUlke = document.getElementById('nereye-ulke').value;
+            const nereyeSehir = document.getElementById('nereye-sehir').value;
+
+            if (!neredenSehir || !nereyeSehir) { alert("Lütfen şehirleri seçiniz."); return; }
+
+            const originData = getAirportData(neredenSehir, neredenUlke);
+            const destData = getAirportData(nereyeSehir, nereyeUlke);
+            
+            let msj = "";
+            let onayGerekli = false;
+
+            if(originData.isDefault) {
+                msj += `⚠️ "${neredenSehir}" için havalimanı bulunamadı. En yakın merkez: ${originData.name} seçildi.\n`;
+                onayGerekli = true;
+            }
+            if(destData.isDefault) {
+                msj += `⚠️ "${nereyeSehir}" için havalimanı bulunamadı. En yakın merkez: ${destData.name} seçildi.\n`;
+                onayGerekli = true;
+            }
+
+            if(onayGerekli) {
+                if(!confirm(msj + "\nDevam etmek istiyor musunuz?")) return;
+            }
+
+            const yetiskin = document.getElementById('yetiskinSayisi').value;
+            const cocuk = document.getElementById('cocukSayisi').value;
+            const tarih = document.getElementById('tarih').value.slice(2).replace(/-/g, "");
+
+            let params = `?adultsv2=${yetiskin}&cabinclass=economy&ref=day-view`;
+            if (cocuk > 0) {
+                const yaslar = Array.from(document.querySelectorAll('.cocuk-yas-input')).map(i => i.value);
+                if(yaslar.includes("")) { alert("Lütfen çocuk yaşlarını giriniz."); return; }
+                params += `&childrenv2=${yaslar.join('|')}`;
+            }
+
+            const link = `https://www.skyscanner.com.tr/transport/flights/${originData.code}/${destData.code}/${tarih}${params}`;
+            
+            // Affiliate tracking
+            if (typeof trackAffiliateClick === 'function') {
+                trackAffiliateClick('skyscanner', 'ucak_bileti.html', {
+                    origin: originData.code,
+                    destination: destData.code,
+                    date: tarih,
+                    adults: yetiskin,
+                    children: cocuk
+                });
+            }
+            
+            window.open(link, '_blank');
+        }
+
+        function hizliAra(from, to) {
+            const date = new Date(); date.setDate(date.getDate()+14);
+            const dStr = date.toISOString().slice(2,10).replace(/-/g,"");
+            
+            // Affiliate tracking
+            if (typeof trackAffiliateClick === 'function') {
+                trackAffiliateClick('skyscanner', 'ucak_bileti.html', {
+                    origin: from,
+                    destination: to,
+                    type: 'quick_search'
+                });
+            }
+            
+            window.open(`https://www.skyscanner.com.tr/transport/flights/${from}/${to}/${dStr}?adultsv2=1&cabinclass=economy`, '_blank');
+        }
+    </script>
+</body>
+</html>

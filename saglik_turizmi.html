@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Türkiye Sağlık Turizmi | PlatformAvrupa</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="auth.js"></script>
+    <script src="utils.js"></script>
+    <script src="genel_veriler.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%);
+            min-height: 100vh;
+        }
+        .glass-card { 
+            background: rgba(255,255,255,0.95); 
+            backdrop-filter: blur(20px); 
+            border-radius: 24px; 
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+        }
+        .clinic-card { 
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        .clinic-card:hover { 
+            transform: translateY(-8px) scale(1.03); 
+            box-shadow: 0 20px 60px rgba(236, 72, 153, 0.2); 
+            border-color: rgba(236, 72, 153, 0.3);
+        }
+        .category-card {
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .category-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255,255,255,0.4);
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%);
+        }
+        .category-card.active {
+            border-color: rgba(236, 72, 153, 0.5);
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.2) 0%, rgba(236, 72, 153, 0.1) 100%);
+            transform: scale(1.05);
+        }
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-content {
+            background: #0f172a;
+            border: 1px solid rgba(255,255,255,0.1);
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            border-radius: 20px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body class="pb-24 text-white">
+
+    <!-- Header -->
+    <nav class="bg-slate-900/95 backdrop-blur-xl sticky top-0 z-50 shadow-xl border-b border-slate-700/50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="index.html" class="flex items-center gap-2 text-slate-300 hover:text-white transition font-bold">
+                <div class="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </div>
+            </a>
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-gradient-to-br from-pink-500 to-rose-600 rounded-2xl flex items-center justify-center text-white text-xl shadow-lg shadow-pink-500/30">
+                    <i class="fa-solid fa-heart-pulse"></i>
+                </div>
+                <div>
+                    <h1 class="font-black text-xl text-white tracking-tight">Sağlık Turizmi</h1>
+                    <p class="text-xs text-slate-400">Türkiye'de Tedavi</p>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="relative bg-rose-950 text-white overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-b from-rose-900/90 to-rose-950/95"></div>
+
+        <div class="max-w-4xl mx-auto px-4 py-24 relative z-10 text-center">
+            <span class="bg-white/10 backdrop-blur-md text-rose-100 text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-widest mb-6 inline-block shadow-sm border border-white/20">Türkiye'deki Sağlık Turizmi</span>
+            <h1 class="text-4xl md:text-5xl font-extrabold mb-6 leading-tight tracking-tight text-white drop-shadow-lg">
+                Sağlık Sorunlarınızda<br>Yanınızdayız
+            </h1>
+            <p class="text-rose-100 text-lg mb-8 max-w-2xl mx-auto leading-relaxed font-light">
+                Saç ekimi, diş tedavisi, estetik cerrahi ve cinsel sağlık konularında Türkiye'nin en iyi klinikleriyle sizleri buluşturuyoruz. %50-70 daha uygun fiyatlarla kaliteli tedavi.
+            </p>
+            <button onclick="openConsultationForm()" class="bg-gradient-to-r from-pink-500 to-rose-600 text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-lg shadow-pink-500/30 hover:shadow-pink-500/50 transition transform hover:scale-105">
+                <i class="fa-brands fa-whatsapp mr-2"></i> Ücretsiz Danışmanlık Al
+            </button>
+            <div class="mt-8 animate-bounce text-rose-300">
+                <i class="fa-solid fa-chevron-down"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Neden Türkiye? -->
+    <div class="max-w-7xl mx-auto px-4 py-12 mb-8">
+        <div class="text-center mb-8">
+            <h3 class="text-3xl font-extrabold text-white mb-2">Neden Türkiye?</h3>
+            <p class="text-slate-400">Dünya standartlarında sağlık hizmetleri, uygun fiyatlar</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="glass-card p-6 bg-slate-800/50 border border-slate-700 text-center hover:border-pink-500/50 transition">
+                <div class="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fa-solid fa-check-circle text-green-400 text-3xl"></i>
+                </div>
+                <h4 class="font-bold text-white mb-2 text-lg">%50-70 Daha Uygun Fiyat</h4>
+                <p class="text-slate-400 text-sm">Avrupa'ya göre çok daha ekonomik</p>
+            </div>
+            <div class="glass-card p-6 bg-slate-800/50 border border-slate-700 text-center hover:border-pink-500/50 transition">
+                <div class="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fa-solid fa-microchip text-blue-400 text-3xl"></i>
+                </div>
+                <h4 class="font-bold text-white mb-2 text-lg">Modern Teknoloji</h4>
+                <p class="text-slate-400 text-sm">Son teknoloji cihazlar ve teknikler</p>
+            </div>
+            <div class="glass-card p-6 bg-slate-800/50 border border-slate-700 text-center hover:border-pink-500/50 transition">
+                <div class="w-16 h-16 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fa-solid fa-award text-purple-400 text-3xl"></i>
+                </div>
+                <h4 class="font-bold text-white mb-2 text-lg">JCI Akreditasyonlu</h4>
+                <p class="text-slate-400 text-sm">Uluslararası kalite standartları</p>
+            </div>
+            <div class="glass-card p-6 bg-slate-800/50 border border-slate-700 text-center hover:border-pink-500/50 transition">
+                <div class="w-16 h-16 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fa-solid fa-globe text-amber-400 text-3xl"></i>
+                </div>
+                <h4 class="font-bold text-white mb-2 text-lg">1.5M+ Sağlık Turisti/Yıl</h4>
+                <p class="text-slate-400 text-sm">Dünya çapında güvenilir</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hizmet Kategorileri -->
+    <div class="max-w-7xl mx-auto px-4 mb-8">
+        <h3 class="text-2xl font-bold text-white mb-4 text-center">Hizmet Kategorilerimiz</h3>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div class="category-card rounded-2xl p-6 text-center cursor-pointer" data-category="sac_ekimi" onclick="filterByCategory('sac_ekimi', this)">
+                <i class="fa-solid fa-scissors text-4xl text-pink-400 mb-3"></i>
+                <h4 class="font-bold text-white mb-2">Saç Ekimi</h4>
+                <p class="text-xs text-slate-400">FUE, DHI, Sapphire</p>
+            </div>
+            <div class="category-card rounded-2xl p-6 text-center cursor-pointer" data-category="dis" onclick="filterByCategory('dis', this)">
+                <i class="fa-solid fa-tooth text-4xl text-blue-400 mb-3"></i>
+                <h4 class="font-bold text-white mb-2">Diş Tedavisi</h4>
+                <p class="text-xs text-slate-400">İmplant, Veneer, Estetik</p>
+            </div>
+            <div class="category-card rounded-2xl p-6 text-center cursor-pointer" data-category="estetik" onclick="filterByCategory('estetik', this)">
+                <i class="fa-solid fa-sparkles text-4xl text-purple-400 mb-3"></i>
+                <h4 class="font-bold text-white mb-2">Estetik Cerrahi</h4>
+                <p class="text-xs text-slate-400">Rinoplasti, Meme, Vücut</p>
+            </div>
+            <div class="category-card rounded-2xl p-6 text-center cursor-pointer" data-category="erkek_cinsel" onclick="filterByCategory('erkek_cinsel', this)">
+                <i class="fa-solid fa-mars text-4xl text-indigo-400 mb-3"></i>
+                <h4 class="font-bold text-white mb-2">Erkek Cinsel Sağlık</h4>
+                <p class="text-xs text-slate-400">Erken boşalma, Erektil disfonksiyon</p>
+            </div>
+            <div class="category-card rounded-2xl p-6 text-center cursor-pointer" data-category="kadin_cinsel" onclick="filterByCategory('kadin_cinsel', this)">
+                <i class="fa-solid fa-venus text-4xl text-rose-400 mb-3"></i>
+                <h4 class="font-bold text-white mb-2">Kadın Cinsel Sağlık</h4>
+                <p class="text-xs text-slate-400">Vajinismus, Vajinal estetik</p>
+            </div>
+            <div class="category-card rounded-2xl p-6 text-center cursor-pointer" data-category="tup_bebek" onclick="filterByCategory('tup_bebek', this)">
+                <i class="fa-solid fa-baby text-4xl text-amber-400 mb-3"></i>
+                <h4 class="font-bold text-white mb-2">Tüp Bebek</h4>
+                <p class="text-xs text-slate-400">IVF, Embriyo transferi</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Klinik Kartları -->
+    <div class="max-w-7xl mx-auto px-4 mb-8">
+        <div id="clinicsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Klinikler buraya yüklenecek -->
+        </div>
+        <div id="noClinics" class="hidden text-center py-12">
+            <i class="fa-solid fa-hospital text-6xl text-slate-600 mb-4"></i>
+            <p class="text-slate-400 text-lg">Filtre kriterlerinize uygun klinik bulunamadı.</p>
+        </div>
+    </div>
+
+    <!-- Nasıl Çalışır? -->
+    <div class="max-w-7xl mx-auto px-4 mb-8">
+        <h3 class="text-2xl font-bold text-white mb-6 text-center">Nasıl Çalışır?</h3>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="glass-card p-6 bg-slate-800/50 border border-slate-700 text-center">
+                <div class="w-16 h-16 bg-pink-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-2xl font-black text-pink-400">1</span>
+                </div>
+                <h4 class="font-bold text-white mb-2">Online Ön Değerlendirme</h4>
+                <p class="text-sm text-slate-400">Formu doldurun, fotoğraf yükleyin</p>
+            </div>
+            <div class="glass-card p-6 bg-slate-800/50 border border-slate-700 text-center">
+                <div class="w-16 h-16 bg-pink-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-2xl font-black text-pink-400">2</span>
+                </div>
+                <h4 class="font-bold text-white mb-2">Danışmanlık & Teklif</h4>
+                <p class="text-sm text-slate-400">WhatsApp üzerinden size ulaşacağız</p>
+            </div>
+            <div class="glass-card p-6 bg-slate-800/50 border border-slate-700 text-center">
+                <div class="w-16 h-16 bg-pink-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-2xl font-black text-pink-400">3</span>
+                </div>
+                <h4 class="font-bold text-white mb-2">Uçak + Konaklama</h4>
+                <p class="text-sm text-slate-400">Tüm planlamayı birlikte yapıyoruz</p>
+            </div>
+            <div class="glass-card p-6 bg-slate-800/50 border border-slate-700 text-center">
+                <div class="w-16 h-16 bg-pink-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-2xl font-black text-pink-400">4</span>
+                </div>
+                <h4 class="font-bold text-white mb-2">İşlem & Takip</h4>
+                <p class="text-sm text-slate-400">Tedavi sonrası da yanınızdayız</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Klinik Detay Modal -->
+    <div id="clinicDetailModal" class="modal-overlay" onclick="closeClinicDetailModal(event)">
+        <div class="modal-content p-6" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-white">Klinik Detayları</h3>
+                <button onclick="closeClinicDetailModal()" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-times text-2xl"></i>
+                </button>
+            </div>
+            <div id="clinicDetailContent" class="space-y-4">
+                <!-- Klinik bilgileri buraya yüklenecek -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Ön Değerlendirme Formu Modal -->
+    <div id="consultationModal" class="modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content p-6" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-white">Ücretsiz Ön Değerlendirme</h3>
+                <button onclick="closeConsultationModal()" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-times text-2xl"></i>
+                </button>
+            </div>
+            <form id="leadForm" onsubmit="submitLead(event)" class="space-y-4">
+                <input type="hidden" id="selectedClinicId" name="clinicId">
+                
+                <div>
+                    <label class="block text-sm font-bold text-slate-300 mb-2">Ad Soyad *</label>
+                    <input type="text" id="fullName" name="fullName" required class="w-full bg-slate-800 text-white rounded-lg px-4 py-3 border border-slate-700 focus:border-pink-500 focus:outline-none">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold text-slate-300 mb-2">E-posta *</label>
+                    <input type="email" id="email" name="email" required class="w-full bg-slate-800 text-white rounded-lg px-4 py-3 border border-slate-700 focus:border-pink-500 focus:outline-none">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold text-slate-300 mb-2">Telefon *</label>
+                    <div class="flex gap-2">
+                        <select id="phoneCountryCode" name="phoneCountryCode" required onchange="updatePhoneCode()" class="w-32 bg-slate-800 text-white rounded-lg px-3 py-3 border border-slate-700 focus:border-pink-500 focus:outline-none">
+                            <option value="">Kod</option>
+                        </select>
+                        <input type="tel" id="phone" name="phone" required placeholder="Telefon numarası" class="flex-1 bg-slate-800 text-white rounded-lg px-4 py-3 border border-slate-700 focus:border-pink-500 focus:outline-none">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold text-slate-300 mb-2">WhatsApp *</label>
+                    <div class="flex gap-2">
+                        <select id="whatsappCountryCode" name="whatsappCountryCode" required onchange="updateWhatsAppCode()" class="w-32 bg-slate-800 text-white rounded-lg px-3 py-3 border border-slate-700 focus:border-pink-500 focus:outline-none">
+                            <option value="">Kod</option>
+                        </select>
+                        <input type="tel" id="whatsapp" name="whatsapp" required placeholder="WhatsApp numarası" class="flex-1 bg-slate-800 text-white rounded-lg px-4 py-3 border border-slate-700 focus:border-pink-500 focus:outline-none">
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-300 mb-2">Ülke *</label>
+                        <select id="countryCode" name="countryCode" required onchange="updateCityDropdown()" class="w-full bg-slate-800 text-white rounded-lg px-4 py-3 border border-slate-700 focus:border-pink-500 focus:outline-none">
+                            <option value="">Seçiniz</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-300 mb-2">Şehir</label>
+                        <select id="city" name="city" class="w-full bg-slate-800 text-white rounded-lg px-4 py-3 border border-slate-700 focus:border-pink-500 focus:outline-none" disabled>
+                            <option value="">Önce ülke seçin</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold text-slate-300 mb-2">Tedavi Kategorisi *</label>
+                    <select id="treatmentCategory" name="treatmentCategory" required onchange="updateTreatmentTypes()" class="w-full bg-slate-800 text-white rounded-lg px-4 py-3 border border-slate-700 focus:border-pink-500 focus:outline-none">
+                        <option value="">Seçiniz</option>
+                        <option value="sac_ekimi">Saç Ekimi</option>
+                        <option value="dis">Diş Tedavisi</option>
+                        <option value="estetik">Estetik Cerrahi</option>
+                        <option value="erkek_cinsel">Erkek Cinsel Sağlık</option>
+                        <option value="kadin_cinsel">Kadın Cinsel Sağlık</option>
+                        <option value="tup_bebek">Tüp Bebek</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold text-slate-300 mb-2">Tedavi Tipi</label>
+                    <select id="treatmentType" name="treatmentType" class="w-full bg-slate-800 text-white rounded-lg px-4 py-3 border border-slate-700 focus:border-pink-500 focus:outline-none">
+                        <option value="">Bilmiyorum / Danışmanlık İstiyorum</option>
+                    </select>
+                    <p class="text-xs text-slate-400 mt-1">Size uygun tedaviyi birlikte belirleyeceğiz</p>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold text-slate-300 mb-2">Tercih Edilen Tarih</label>
+                    <input type="date" id="preferredDate" name="preferredDate" min="" class="w-full bg-slate-800 text-white rounded-lg px-4 py-3 border border-slate-700 focus:border-pink-500 focus:outline-none">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold text-slate-300 mb-2">Öncesi Fotoğraflar (Opsiyonel)</label>
+                    <input type="file" id="photos" name="photos" multiple accept="image/*" class="w-full bg-slate-800 text-white rounded-lg px-4 py-3 border border-slate-700 focus:border-pink-500 focus:outline-none">
+                    <p class="text-xs text-slate-400 mt-1">Saç, diş veya estetik için öncesi fotoğraflarınızı yükleyebilirsiniz</p>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold text-slate-300 mb-2">Notlar / Açıklama</label>
+                    <textarea id="description" name="description" rows="3" class="w-full bg-slate-800 text-white rounded-lg px-4 py-3 border border-slate-700 focus:border-pink-500 focus:outline-none"></textarea>
+                </div>
+                
+                <button type="submit" class="w-full bg-gradient-to-r from-pink-500 to-rose-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-pink-500/30 hover:shadow-pink-500/50 transition">
+                    <i class="fa-solid fa-paper-plane mr-2"></i> Başvuruyu Gönder
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentFilters = {};
+        let allClinics = [];
+
+        // Sayfa yüklendiğinde
+        window.onload = async function() {
+            await loadClinics();
+            populateCountryDropdown();
+            populatePhoneCodeDropdowns();
+            setMinDate();
+        };
+
+        // Minimum tarihi bugün yap
+        function setMinDate() {
+            const today = new Date().toISOString().split('T')[0];
+            const dateInput = document.getElementById('preferredDate');
+            if (dateInput) {
+                dateInput.setAttribute('min', today);
+            }
+        }
+
+        // Ülke dropdown'ını doldur
+        function populateCountryDropdown() {
+            const select = document.getElementById('countryCode');
+            if (!select || typeof lokasyonVeritabani === 'undefined') return;
+            
+            const sortedCountries = Object.keys(lokasyonVeritabani).sort((a, b) => 
+                lokasyonVeritabani[a].isim.localeCompare(lokasyonVeritabani[b].isim, 'tr')
+            );
+            
+            sortedCountries.forEach(code => {
+                const country = lokasyonVeritabani[code];
+                const option = document.createElement('option');
+                option.value = code;
+                option.textContent = `${country.bayrak} ${country.isim}`;
+                select.appendChild(option);
+            });
+        }
+
+        // Telefon kodu dropdown'larını doldur
+        function populatePhoneCodeDropdowns() {
+            if (typeof lokasyonVeritabani === 'undefined') return;
+            
+            const phoneSelect = document.getElementById('phoneCountryCode');
+            const whatsappSelect = document.getElementById('whatsappCountryCode');
+            
+            if (!phoneSelect || !whatsappSelect) return;
+            
+            const sortedCountries = Object.keys(lokasyonVeritabani).sort((a, b) => 
+                lokasyonVeritabani[a].isim.localeCompare(lokasyonVeritabani[b].isim, 'tr')
+            );
+            
+            sortedCountries.forEach(code => {
+                const country = lokasyonVeritabani[code];
+                const phoneOption = document.createElement('option');
+                phoneOption.value = country.tel;
+                phoneOption.textContent = `${country.bayrak} ${country.tel}`;
+                phoneSelect.appendChild(phoneOption);
+                
+                const whatsappOption = document.createElement('option');
+                whatsappOption.value = country.tel;
+                whatsappOption.textContent = `${country.bayrak} ${country.tel}`;
+                whatsappSelect.appendChild(whatsappOption);
+            });
+        }
+
+        // Telefon kodu güncelle
+        function updatePhoneCode() {
+            const countryCode = document.getElementById('countryCode').value;
+            if (countryCode && lokasyonVeritabani[countryCode]) {
+                document.getElementById('phoneCountryCode').value = lokasyonVeritabani[countryCode].tel;
+            }
+        }
+
+        // WhatsApp kodu güncelle
+        function updateWhatsAppCode() {
+            const countryCode = document.getElementById('countryCode').value;
+            if (countryCode && lokasyonVeritabani[countryCode]) {
+                document.getElementById('whatsappCountryCode').value = lokasyonVeritabani[countryCode].tel;
+            }
+        }
+
+        // Şehir dropdown'ını güncelle
+        function updateCityDropdown() {
+            const countryCode = document.getElementById('countryCode').value;
+            const citySelect = document.getElementById('city');
+            
+            if (!citySelect) return;
+            
+            // Önce telefon kodlarını güncelle
+            updatePhoneCode();
+            updateWhatsAppCode();
+            
+            // Şehir dropdown'ını temizle
+            citySelect.innerHTML = '<option value="">Seçiniz</option>';
+            
+            if (countryCode && lokasyonVeritabani[countryCode]) {
+                const cities = lokasyonVeritabani[countryCode].sehirler || [];
+                cities.sort((a, b) => a.localeCompare(b, 'tr'));
+                
+                cities.forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city;
+                    option.textContent = city;
+                    citySelect.appendChild(option);
+                });
+                
+                citySelect.disabled = false;
+                citySelect.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else {
+                citySelect.disabled = true;
+                citySelect.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        // Klinikleri yükle (sadece görünür alanlar)
+        async function loadClinics(filters = {}) {
+            try {
+                // Tüm klinikleri çek (filtreleme client-side yapılacak)
+                let query = sb
+                    .from('health_clinics')
+                    .select('id, display_name, city, district, specialties, price_range_min, price_range_max, rating, review_count, accreditations, logo_url, images')
+                    .eq('is_active', true)
+                    .eq('is_verified', true);
+
+                const { data, error } = await query.order('rating', { ascending: false });
+
+                if (error) {
+                    // Tablo yoksa veya 404 hatası - graceful handle et
+                    if (error.code === 'PGRST116' || error.message.includes('404') || error.message.includes('relation') || error.message.includes('does not exist') || error.message.includes('schema cache')) {
+                        console.warn('⚠️ health_clinics tablosu bulunamadı. SQL script\'lerini Supabase\'de çalıştırın.');
+                        // Swal gösterme, sadece boş liste göster
+                        allClinics = [];
+                        renderClinics([]);
+                        return;
+                    }
+                    // Diğer hatalar için de boş liste göster
+                    console.error('Klinikler yüklenirken hata:', error.message || error.code || error);
+                    allClinics = [];
+                    renderClinics([]);
+                    return;
+                }
+
+                // Tüm klinikleri sakla
+                allClinics = data || [];
+                
+                // Client-side filtreleme
+                let filteredClinics = allClinics;
+                if (filters.category) {
+                    filteredClinics = allClinics.filter(clinic => {
+                        const specialties = clinic.specialties || [];
+                        return specialties.includes(filters.category);
+                    });
+                }
+                
+                renderClinics(filteredClinics);
+            } catch (error) {
+                // Herhangi bir hata durumunda boş liste göster, sayfa çalışmaya devam etsin
+                console.error('Klinikler yüklenemedi:', error.message || error.code || error);
+                allClinics = [];
+                renderClinics([]);
+            }
+        }
+
+        // Klinikleri render et
+        function renderClinics(clinics) {
+            const grid = document.getElementById('clinicsGrid');
+            const noClinics = document.getElementById('noClinics');
+            
+            if (!grid) return;
+
+            if (clinics.length === 0) {
+                grid.classList.add('hidden');
+                noClinics.classList.remove('hidden');
+                // Mesajı güncelle
+                const noClinicsElement = document.getElementById('noClinics');
+                if (noClinicsElement) {
+                    noClinicsElement.innerHTML = `
+                        <div class="text-center py-12">
+                            <i class="fa-solid fa-hospital text-6xl text-slate-600 mb-4"></i>
+                            <p class="text-slate-400 text-lg mb-2">Henüz klinik eklenmemiş</p>
+                            <p class="text-slate-500 text-sm">Klinikler eklendiğinde burada görünecek</p>
+                        </div>
+                    `;
+                }
+                return;
+            }
+
+            grid.classList.remove('hidden');
+            noClinics.classList.add('hidden');
+
+            grid.innerHTML = clinics.map(clinic => {
+                const specialties = clinic.specialties || [];
+                const priceRange = clinic.price_range_min && clinic.price_range_max 
+                    ? `€${clinic.price_range_min.toLocaleString()} - €${clinic.price_range_max.toLocaleString()}`
+                    : 'Fiyat bilgisi için danışın';
+                
+                return `
+                    <div class="clinic-card p-6 cursor-pointer" onclick="showClinicDetail('${clinic.id}')">
+                        ${clinic.logo_url ? `<img src="${clinic.logo_url}" alt="${clinic.display_name}" class="w-full h-32 object-cover rounded-xl mb-4">` : ''}
+                        <h3 class="font-bold text-slate-800 text-lg mb-2">${sanitize(clinic.display_name)}</h3>
+                        <p class="text-slate-600 text-sm mb-3">
+                            <i class="fa-solid fa-location-dot text-pink-500 mr-1"></i>
+                            ${sanitize(clinic.city)}${clinic.district ? `, ${sanitize(clinic.district)}` : ''}
+                        </p>
+                        <div class="flex flex-wrap gap-2 mb-3">
+                            ${specialties.map(s => `<span class="bg-pink-100 text-pink-700 text-xs px-2 py-1 rounded-full">${sanitize(s)}</span>`).join('')}
+                        </div>
+                        <div class="flex items-center gap-2 mb-3">
+                            <div class="flex items-center">
+                                ${'★'.repeat(Math.floor(clinic.rating || 0))}${'☆'.repeat(5 - Math.floor(clinic.rating || 0))}
+                            </div>
+                            <span class="text-slate-600 text-sm">${clinic.rating?.toFixed(1) || '0.0'}</span>
+                            <span class="text-slate-400 text-xs">(${clinic.review_count || 0} yorum)</span>
+                        </div>
+                        <p class="text-slate-700 font-bold mb-4">${priceRange}</p>
+                        ${clinic.accreditations?.length > 0 ? `
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                ${clinic.accreditations.map(acc => `<span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">${sanitize(acc)}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                        <button onclick="event.stopPropagation(); openConsultationForm('${clinic.id}')" class="w-full bg-gradient-to-r from-pink-500 to-rose-600 text-white py-3 rounded-xl font-bold hover:shadow-lg transition">
+                            <i class="fa-brands fa-whatsapp mr-2"></i> Ücretsiz Danışmanlık Al
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Kategoriye göre filtrele
+        function filterByCategory(category, element) {
+            console.log('Kategori seçildi:', category, element);
+            
+            // Önceki aktif kategoriyi kaldır
+            document.querySelectorAll('.category-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            
+            // Yeni kategoriyi aktif yap (tablo yoksa bile çalışsın)
+            if (element) {
+                element.classList.add('active');
+            } else {
+                // Eğer element yoksa, data-category attribute'una göre bul
+                const card = document.querySelector(`[data-category="${category}"]`);
+                if (card) card.classList.add('active');
+            }
+            
+            // Klinikleri filtrele (tablo yoksa bile çalışsın, boş liste gösterir)
+            currentFilters = { category: category };
+            loadClinics(currentFilters).catch(error => {
+                // Hata durumunda bile aktif state korunur
+                console.warn('Klinikler yüklenirken hata (kategori seçimi çalışıyor):', error.message || error);
+            });
+            
+            // Klinikler bölümüne scroll yap
+            setTimeout(() => {
+                const clinicsSection = document.getElementById('clinicsGrid');
+                if (clinicsSection) {
+                    clinicsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 100);
+        }
+
+
+        // Ön değerlendirme formu aç
+        function openConsultationForm(clinicId = null) {
+            if (clinicId) {
+                document.getElementById('selectedClinicId').value = clinicId;
+            }
+            document.getElementById('consultationModal').classList.add('active');
+        }
+
+        // Modal kapat
+        function closeConsultationModal() {
+            document.getElementById('consultationModal').classList.remove('active');
+        }
+
+        function closeModal(event) {
+            if (event.target.id === 'consultationModal') {
+                closeConsultationModal();
+            }
+        }
+
+        // Klinik detayını göster
+        async function showClinicDetail(clinicId) {
+            try {
+                // Eğer klinikler yüklenmemişse önce yükle
+                if (!allClinics || allClinics.length === 0) {
+                    await loadClinics();
+                }
+                
+                const clinic = allClinics.find(c => c.id === clinicId);
+                if (!clinic) {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Klinik Bulunamadı',
+                        text: 'Klinik bilgisi yüklenemedi. Lütfen sayfayı yenileyin.',
+                        confirmButtonText: 'Tamam'
+                    });
+                    return;
+                }
+                
+                renderClinicDetail(clinic);
+                document.getElementById('clinicDetailModal').classList.add('active');
+            } catch (error) {
+                console.error('Klinik detay hatası:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Hata',
+                    text: 'Klinik detayları yüklenemedi: ' + (error.message || 'Bilinmeyen hata'),
+                    confirmButtonText: 'Tamam'
+                });
+            }
+        }
+
+        // Klinik detayını render et
+        function renderClinicDetail(clinic) {
+            const content = document.getElementById('clinicDetailContent');
+            const specialties = clinic.specialties || [];
+            const priceRange = clinic.price_range_min && clinic.price_range_max 
+                ? `€${clinic.price_range_min.toLocaleString()} - €${clinic.price_range_max.toLocaleString()}`
+                : 'Fiyat bilgisi için danışın';
+            
+            content.innerHTML = `
+                ${clinic.logo_url ? `
+                    <div class="mb-4">
+                        <img src="${clinic.logo_url}" alt="${sanitize(clinic.display_name)}" class="w-full h-48 object-cover rounded-xl">
+                    </div>
+                ` : ''}
+                
+                <h3 class="text-2xl font-bold text-white mb-2">${sanitize(clinic.display_name)}</h3>
+                
+                <div class="flex items-center gap-2 mb-4">
+                    <i class="fa-solid fa-location-dot text-pink-400"></i>
+                    <span class="text-slate-300">${sanitize(clinic.city)}${clinic.district ? `, ${sanitize(clinic.district)}` : ''}</span>
+                </div>
+                
+                <div class="mb-4">
+                    <h4 class="text-sm font-bold text-slate-400 mb-2">Hizmet Alanları</h4>
+                    <div class="flex flex-wrap gap-2">
+                        ${specialties.map(s => `<span class="bg-pink-500/20 text-pink-300 text-xs px-3 py-1 rounded-full border border-pink-500/30">${sanitize(s)}</span>`).join('')}
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h4 class="text-sm font-bold text-slate-400 mb-2">Değerlendirme</h4>
+                    <div class="flex items-center gap-2">
+                        <div class="flex items-center text-yellow-400">
+                            ${'★'.repeat(Math.floor(clinic.rating || 0))}${'☆'.repeat(5 - Math.floor(clinic.rating || 0))}
+                        </div>
+                        <span class="text-white font-bold">${clinic.rating?.toFixed(1) || '0.0'}</span>
+                        <span class="text-slate-400 text-sm">(${clinic.review_count || 0} yorum)</span>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h4 class="text-sm font-bold text-slate-400 mb-2">Fiyat Aralığı</h4>
+                    <p class="text-white font-bold text-lg">${priceRange}</p>
+                </div>
+                
+                ${clinic.accreditations?.length > 0 ? `
+                    <div class="mb-4">
+                        <h4 class="text-sm font-bold text-slate-400 mb-2">Akreditasyonlar</h4>
+                        <div class="flex flex-wrap gap-2">
+                            ${clinic.accreditations.map(acc => `<span class="bg-green-500/20 text-green-300 text-xs px-3 py-1 rounded-full border border-green-500/30">${sanitize(acc)}</span>`).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+                
+                ${clinic.images?.length > 0 ? `
+                    <div class="mb-4">
+                        <h4 class="text-sm font-bold text-slate-400 mb-2">Galeri</h4>
+                        <div class="grid grid-cols-2 gap-2">
+                            ${clinic.images.slice(0, 4).map(img => `
+                                <img src="${img}" alt="Klinik görseli" class="w-full h-24 object-cover rounded-lg">
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+                
+                <button onclick="closeClinicDetailModal(); openConsultationForm('${clinic.id}')" class="w-full bg-gradient-to-r from-pink-500 to-rose-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-pink-500/30 hover:shadow-pink-500/50 transition mt-6">
+                    <i class="fa-brands fa-whatsapp mr-2"></i> Ücretsiz Danışmanlık Al
+                </button>
+            `;
+        }
+
+        // Klinik detay modal'ını kapat
+        function closeClinicDetailModal(event = null) {
+            if (event && event.target.id !== 'clinicDetailModal') {
+                return;
+            }
+            document.getElementById('clinicDetailModal').classList.remove('active');
+        }
+
+        // Tedavi tiplerini güncelle
+        function updateTreatmentTypes() {
+            const category = document.getElementById('treatmentCategory').value;
+            const typeSelect = document.getElementById('treatmentType');
+            
+            // "Bilmiyorum" seçeneğini en başa ekle
+            typeSelect.innerHTML = '<option value="">Bilmiyorum / Danışmanlık İstiyorum</option>';
+            
+            const types = {
+                'sac_ekimi': [
+                    { value: 'FUE', label: 'FUE Saç Ekimi (Folikül Ünitesi Ekstraksiyonu)' },
+                    { value: 'DHI', label: 'DHI Saç Ekimi (Direkt Saç İmplantasyonu)' },
+                    { value: 'Sapphire FUE', label: 'Sapphire FUE (Safir Bıçaklı FUE)' },
+                    { value: 'FUT', label: 'FUT Saç Ekimi (Folikül Ünitesi Transplantasyonu)' }
+                ],
+                'dis': [
+                    { value: 'İmplant', label: 'Diş İmplantı' },
+                    { value: 'Veneer', label: 'Veneer (Porselen Lamina)' },
+                    { value: 'Tam Ağız Restorasyonu', label: 'Tam Ağız Restorasyonu' },
+                    { value: 'Diş Beyazlatma', label: 'Diş Beyazlatma (Bleaching)' }
+                ],
+                'estetik': [
+                    { value: 'Rinoplasti', label: 'Rinoplasti (Burun Estetiği)' },
+                    { value: 'Meme Estetiği', label: 'Meme Estetiği' },
+                    { value: 'Liposuction', label: 'Liposuction (Yağ Aldırma)' },
+                    { value: 'Yüz Germe', label: 'Yüz Germe (Facelift)' }
+                ],
+                'erkek_cinsel': [
+                    { value: 'Erken Boşalma', label: 'Erken Boşalma Tedavisi' },
+                    { value: 'Erektil Disfonksiyon', label: 'Erektil Disfonksiyon Tedavisi' },
+                    { value: 'Penis Estetiği', label: 'Penis Estetiği' },
+                    { value: 'PRP', label: 'PRP Tedavisi' }
+                ],
+                'kadin_cinsel': [
+                    { value: 'Vajinismus', label: 'Vajinismus Tedavisi' },
+                    { value: 'Vajinal Estetik', label: 'Vajinal Estetik' },
+                    { value: 'Labioplasti', label: 'Labioplasti (Dudak Estetiği)' },
+                    { value: 'Cinsel Terapi', label: 'Cinsel Terapi' }
+                ],
+                'tup_bebek': [
+                    { value: 'IVF', label: 'IVF (Tüp Bebek)' },
+                    { value: 'ICSI', label: 'ICSI (Mikroenjeksiyon)' },
+                    { value: 'Embriyo Transferi', label: 'Embriyo Transferi' },
+                    { value: 'Donasyon', label: 'Yumurta/Sperm Donasyonu' }
+                ]
+            };
+            
+            if (types[category]) {
+                types[category].forEach(type => {
+                    const option = document.createElement('option');
+                    option.value = type.value;
+                    option.textContent = type.label;
+                    typeSelect.appendChild(option);
+                });
+            }
+        }
+
+        // Başvuru gönder
+        async function submitLead(e) {
+            e.preventDefault();
+            
+            try {
+                const user = await getCurrentUser();
+                const formData = new FormData(e.target);
+                
+                // Referans kodu oluştur
+                const referenceCode = generateHealthReferenceCode();
+                
+                // Fotoğrafları yükle (opsiyonel)
+                const photoFiles = document.getElementById('photos').files;
+                let photoUrls = [];
+                
+                if (photoFiles.length > 0) {
+                    try {
+                        Swal.fire({
+                            title: 'Fotoğraflar yükleniyor...',
+                            allowOutsideClick: false,
+                            didOpen: () => Swal.showLoading()
+                        });
+                        
+                        for (let file of photoFiles) {
+                            try {
+                                const fileExt = file.name.split('.').pop();
+                                const fileName = `health-leads/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+                                const { data: uploadData, error: uploadError } = await sb.storage
+                                    .from('health-lead-photos')
+                                    .upload(fileName, file);
+                                
+                                if (!uploadError && uploadData) {
+                                    const { data: { publicUrl } } = sb.storage
+                                        .from('health-lead-photos')
+                                        .getPublicUrl(fileName);
+                                    photoUrls.push(publicUrl);
+                                } else {
+                                    console.warn('Fotoğraf yükleme hatası:', uploadError);
+                                }
+                            } catch (fileError) {
+                                console.warn('Fotoğraf yükleme hatası:', fileError);
+                                // Fotoğraf yükleme hatası lead kaydını engellemez
+                            }
+                        }
+                    } catch (storageError) {
+                        console.warn('Storage bucket bulunamadı, fotoğraflar atlanıyor:', storageError);
+                        // Storage bucket yoksa devam et, fotoğrafsız kaydet
+                    }
+                }
+                
+                // Telefon ve WhatsApp numaralarını birleştir
+                const phoneCountryCode = formData.get('phoneCountryCode') || '';
+                const phoneNumber = formData.get('phone') || '';
+                const fullPhone = phoneCountryCode && phoneNumber ? `${phoneCountryCode}${phoneNumber.replace(/^\+?[0-9]+/, '')}` : phoneNumber;
+                
+                const whatsappCountryCode = formData.get('whatsappCountryCode') || '';
+                const whatsappNumber = formData.get('whatsapp') || '';
+                const fullWhatsApp = whatsappCountryCode && whatsappNumber ? `${whatsappCountryCode}${whatsappNumber.replace(/^\+?[0-9]+/, '')}` : whatsappNumber;
+                
+                // Lead kaydı oluştur
+                const leadData = {
+                    user_id: user?.id || null,
+                    clinic_id: formData.get('clinicId') || null,
+                    treatment_category: formData.get('treatmentCategory'),
+                    treatment_type: formData.get('treatmentType') || null,
+                    reference_code: referenceCode,
+                    full_name: formData.get('fullName'),
+                    email: formData.get('email'),
+                    phone: fullPhone,
+                    whatsapp: fullWhatsApp,
+                    country_code: formData.get('countryCode'),
+                    city: formData.get('city') || null,
+                    photos: photoUrls,
+                    description: formData.get('description') || null,
+                    preferred_date: formData.get('preferredDate') || null,
+                    status: 'new'
+                };
+                
+                const { data, error } = await sb
+                    .from('health_leads')
+                    .insert([leadData])
+                    .select()
+                    .single();
+                
+                if (error) throw error;
+                
+                // Başarı mesajı + WhatsApp linki
+                const whatsappLink = buildWhatsAppLink(formData.get('treatmentCategory'), referenceCode);
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Başvurunuz Alındı!',
+                    html: `
+                        <p class="mb-4">Referans Kodunuz: <strong class="text-pink-500">${referenceCode}</strong></p>
+                        <p class="mb-4 text-slate-600">En kısa sürede WhatsApp üzerinden sizinle iletişime geçeceğiz.</p>
+                        <a href="${whatsappLink}" target="_blank" class="inline-block bg-green-500 text-white px-6 py-3 rounded-lg font-bold hover:bg-green-600 transition mt-4">
+                            <i class="fa-brands fa-whatsapp mr-2"></i> WhatsApp ile İletişime Geç
+                        </a>
+                    `,
+                    confirmButtonText: 'Tamam'
+                });
+                
+                // Formu temizle ve modalı kapat
+                e.target.reset();
+                closeConsultationModal();
+                
+            } catch (error) {
+                console.error('Başvuru hatası:', error);
+                Swal.fire('Hata', 'Başvurunuz kaydedilemedi: ' + error.message, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

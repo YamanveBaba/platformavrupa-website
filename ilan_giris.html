@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İlan Oluştur - PlatformAvrupa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="config.js"></script>
+    <script src="utils.js"></script>
+    <script src="auth.js"></script>
+
+    <script>
+        // Supabase bağlantısı config.js'den geliyor
+
+        // --- MASTER PLAN: YOLCULUK EKLEME ---
+        async function yeniYolculukIlani() {
+            const { value: formValues } = await Swal.fire({
+                title: '🚗 Yol Arkadaşı Arıyorum',
+                html: `
+                    <input id="swal-from" class="swal2-input" placeholder="Nereden? (Örn: Münih)">
+                    <input id="swal-to" class="swal2-input" placeholder="Nereye? (Örn: İstanbul)">
+                    <input id="swal-date" type="date" class="swal2-input">
+                    <input id="swal-price" type="number" class="swal2-input" placeholder="Kişi Başı Ücret (€)">
+                    <select id="swal-seats" class="swal2-input">
+                        <option value="1">1 Koltuk Boş</option>
+                        <option value="2">2 Koltuk Boş</option>
+                        <option value="3">3 Koltuk Boş</option>
+                    </select>
+                    <div style="margin-top:15px; text-align:left; padding-left:20px;">
+                        <input type="checkbox" id="swal-cargo"> <label for="swal-cargo">Bagajda Kargo da alırım</label>
+                    </div>
+                `,
+                focusConfirm: false,
+                confirmButtonText: 'İlanı Yayınla',
+                preConfirm: () => {
+                    return [
+                        document.getElementById('swal-from').value,
+                        document.getElementById('swal-to').value,
+                        document.getElementById('swal-date').value,
+                        document.getElementById('swal-price').value,
+                        document.getElementById('swal-seats').value,
+                        document.getElementById('swal-cargo').checked
+                    ]
+                }
+            });
+
+            if (formValues) {
+                const [from, to, date, price, seats, cargo] = formValues;
+                if(!from || !to || !price) return Swal.fire('Eksik Bilgi', 'Lütfen zorunlu alanları doldurun.', 'error');
+
+                // Kullanıcı kontrolü
+                const user = await getCurrentUser();
+                if (!user) {
+                    Swal.fire('Giriş Gerekli', 'İlan vermek için giriş yapmalısınız.', 'warning')
+                        .then(() => window.location.href = 'login.html');
+                    return;
+                }
+
+                const { error } = await sb.from('trips').insert([{
+                    user_id: user.id,  // Kullanıcı ID'si eklendi
+                    driver_name: sanitize(localStorage.getItem('userName') || 'Sürücü'),
+                    from_city: sanitize(from), 
+                    to_city: sanitize(to), 
+                    travel_date: date,
+                    price: parseInt(price), 
+                    seats_available: parseInt(seats), 
+                    is_cargo_allowed: cargo
+                }]);
+
+                if(error) Swal.fire('Hata', error.message, 'error');
+                else Swal.fire('Başarılı!', 'Yolculuk ilanınız yayında.', 'success').then(() => window.location.href = 'index.html');
+            }
+        }
+
+        // --- MASTER PLAN: KARGO EKLEME ---
+        async function yeniKargoIlani() {
+            const { value: formValues } = await Swal.fire({
+                title: '📦 Kargo / Emanet Gönder',
+                html: `
+                    <input id="swal-k-from" class="swal2-input" placeholder="Nereden Alınacak?">
+                    <input id="swal-k-to" class="swal2-input" placeholder="Nereye Gidecek?">
+                    <textarea id="swal-k-desc" class="swal2-textarea" placeholder="Ne gönderilecek? (Koli ebatı, ağırlık vb.)"></textarea>
+                `,
+                confirmButtonText: 'Talebi Oluştur',
+                preConfirm: () => {
+                    return [
+                        document.getElementById('swal-k-from').value,
+                        document.getElementById('swal-k-to').value,
+                        document.getElementById('swal-k-desc').value
+                    ]
+                }
+            });
+
+            if (formValues) {
+                const [from, to, desc] = formValues;
+                if(!from || !to || !desc) return;
+
+                // Kullanıcı kontrolü
+                const user = await getCurrentUser();
+                if (!user) {
+                    Swal.fire('Giriş Gerekli', 'Talep oluşturmak için giriş yapmalısınız.', 'warning')
+                        .then(() => window.location.href = 'login.html');
+                    return;
+                }
+
+                const { error } = await sb.from('shipments').insert([{
+                    user_id: user.id,  // Kullanıcı ID'si eklendi
+                    sender_name: sanitize(localStorage.getItem('userName') || 'Gönderici'),
+                    from_city: sanitize(from), 
+                    to_city: sanitize(to), 
+                    description: sanitize(desc), 
+                    status: 'pending'
+                }]);
+
+                if(error) Swal.fire('Hata', error.message, 'error');
+                else Swal.fire('Başarılı!', 'Kargo talebiniz oluşturuldu.', 'success').then(() => window.location.href = 'index.html');
+            }
+        }
+    </script>
+
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        .kategori-kart { transition: all 0.3s ease; border: 1px solid #e2e8f0; cursor: pointer; }
+        .kategori-kart:hover { transform: translateY(-5px); border-color: #6366f1; box-shadow: 0 10px 30px -10px rgba(99, 102, 241, 0.3); }
+        .master-card { background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); color: white; border: none; }
+        .master-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px -10px rgba(49, 46, 129, 0.5); }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen text-slate-800">
+
+    <nav class="bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center sticky top-0 z-50">
+        <a href="index.html" class="flex items-center justify-center w-10 h-10 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 transition">
+            <i class="fa-solid fa-arrow-left"></i>
+        </a>
+        <span class="font-bold text-slate-900">İLAN OLUŞTUR</span>
+        <div class="w-10"></div>
+    </nav>
+
+    <main class="flex-grow flex flex-col items-center justify-center p-6 w-full max-w-5xl mx-auto">
+        
+        <div class="text-center mb-10">
+            <h1 class="text-3xl font-bold text-slate-900 mb-2">Ne İlanı Vereceksiniz?</h1>
+            <p class="text-slate-500">Kategori seçerek ilan detaylarını girebilirsiniz.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full mb-8">
+            <button onclick="yeniYolculukIlani()" class="kategori-kart master-card p-6 rounded-2xl flex items-center gap-6 text-left">
+                <div class="w-16 h-16 rounded-xl bg-white/10 flex items-center justify-center text-3xl text-indigo-300">
+                    <i class="fa-solid fa-car-side"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-xl mb-1">Yol Arkadaşı Ol</h3>
+                    <p class="text-indigo-200 text-sm">Arabanla gidiyorsan ilan aç, masrafı bölüş.</p>
+                </div>
+            </button>
+
+            <button onclick="yeniKargoIlani()" class="kategori-kart master-card p-6 rounded-2xl flex items-center gap-6 text-left bg-gradient-to-br from-slate-800 to-slate-900">
+                <div class="w-16 h-16 rounded-xl bg-white/10 flex items-center justify-center text-3xl text-amber-300">
+                    <i class="fa-solid fa-box-open"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-xl mb-1">Kargo & Emanet</h3>
+                    <p class="text-slate-400 text-sm">Bir şey göndermek istiyorsan talep oluştur.</p>
+                </div>
+            </button>
+        </div>
+
+        <div class="w-full h-px bg-slate-200 mb-8 relative">
+            <span class="absolute left-1/2 -translate-x-1/2 -top-3 bg-[#f8fafc] px-4 text-xs font-bold text-slate-400 uppercase">Diğer Kategoriler</span>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
+            
+            <a href="ilan_is.html" class="kategori-kart bg-white p-6 rounded-2xl flex flex-col items-center gap-3 group">
+                <div class="text-3xl text-purple-500 group-hover:scale-110 transition"><i class="fa-solid fa-briefcase"></i></div>
+                <span class="font-bold text-slate-700">İş & Kariyer</span>
+            </a>
+
+            <a href="ilan_emlak.html" class="kategori-kart bg-white p-6 rounded-2xl flex flex-col items-center gap-3 group">
+                <div class="text-3xl text-blue-500 group-hover:scale-110 transition"><i class="fa-solid fa-house"></i></div>
+                <span class="font-bold text-slate-700">Emlak</span>
+            </a>
+
+            <a href="ilan_araba.html" class="kategori-kart bg-white p-6 rounded-2xl flex flex-col items-center gap-3 group">
+                <div class="text-3xl text-emerald-500 group-hover:scale-110 transition"><i class="fa-solid fa-car"></i></div>
+                <span class="font-bold text-slate-700">Vasıta</span>
+            </a>
+
+            <a href="ilan_esya.html" class="kategori-kart bg-white p-6 rounded-2xl flex flex-col items-center gap-3 group">
+                <div class="text-3xl text-yellow-500 group-hover:scale-110 transition"><i class="fa-solid fa-couch"></i></div>
+                <span class="font-bold text-slate-700">İkinci El</span>
+            </a>
+
+            <a href="ilan_hizmet.html" class="kategori-kart bg-white p-6 rounded-2xl flex flex-col items-center gap-3 group">
+                <div class="text-3xl text-cyan-500 group-hover:scale-110 transition"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+                <span class="font-bold text-slate-700">Hizmetler</span>
+            </a>
+
+            <a href="ilan_yemek.html" class="kategori-kart bg-white p-6 rounded-2xl flex flex-col items-center gap-3 group">
+                <div class="text-3xl text-orange-500 group-hover:scale-110 transition"><i class="fa-solid fa-utensils"></i></div>
+                <span class="font-bold text-slate-700">Mutfak</span>
+            </a>
+
+            <a href="ilan_diger.html" class="kategori-kart bg-white p-6 rounded-2xl flex flex-col items-center gap-3 group">
+                <div class="text-3xl text-slate-500 group-hover:scale-110 transition"><i class="fa-solid fa-ellipsis"></i></div>
+                <span class="font-bold text-slate-700">Diğer</span>
+            </a>
+
+        </div>
+    </main>
+
+</body>
+</html>

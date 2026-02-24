@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akademi Video Yönetimi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>body { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="bg-slate-50 text-slate-800 p-10">
+
+    <div class="max-w-4xl mx-auto">
+        
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-900">Video Yönetim Paneli</h1>
+                <p class="text-slate-500">Akademi sayfasına buradan içerik ekleyip silebilirsin.</p>
+            </div>
+            <a href="akademi.html" target="_blank" class="bg-slate-200 text-slate-700 px-4 py-2 rounded-lg text-sm font-bold hover:bg-slate-300 transition">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i> Siteyi Gör
+            </a>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-8">
+            <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+                <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center"><i class="fa-solid fa-plus"></i></div>
+                Yeni Video Ekle
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div class="col-span-2">
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Video Başlığı</label>
+                    <input type="text" id="inpBaslik" placeholder="Örn: Almanca Ders 1" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 transition">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Kategori</label>
+                    <select id="inpKategori" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 transition">
+                        <option value="Dil">Dil</option>
+                        <option value="Ehliyet">Ehliyet</option>
+                        <option value="Yazılım">Yazılım</option>
+                        <option value="Meslek">Meslek</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Süre (Dk)</label>
+                    <input type="text" id="inpSure" placeholder="Örn: 15" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 transition">
+                </div>
+
+                <div class="col-span-2">
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">YouTube Linki (Tamamını Yapıştırabilirsin)</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                            <i class="fa-brands fa-youtube"></i>
+                        </div>
+                        <input type="text" id="inpLink" placeholder="https://www.youtube.com/watch?v=..." class="w-full pl-10 bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 transition">
+                    </div>
+                    <p class="text-xs text-slate-400 mt-1">Sistem linki otomatik temizleyip sadece ID'yi alır.</p>
+                </div>
+            </div>
+
+            <button onclick="videoEkle()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-blue-200">
+                <i class="fa-solid fa-save mr-2"></i> Kaydet ve Yayınla
+            </button>
+        </div>
+
+        <h2 class="text-lg font-bold mb-4 text-slate-800">Yayındaki Videolar</h2>
+        <div id="videoListesi" class="space-y-3">
+            <div class="text-center py-10 text-slate-400">Yükleniyor...</div>
+        </div>
+
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        const supabase = initSupabase();
+
+        // Sayfa Açılınca Listeyi Getir
+        window.onload = function() {
+            listeyiYenile();
+        };
+
+        // 1. VİDEOLARI LİSTELE
+        async function listeyiYenile() {
+            const listDiv = document.getElementById('videoListesi');
+            
+            const { data, error } = await supabase
+                .from('ilanlar')
+                .select('*')
+                .eq('kategori', 'Akademi')
+                .order('created_at', { ascending: false });
+
+            if(error) {
+                console.error(error);
+                listDiv.innerHTML = '<div class="text-red-500">Hata oluştu!</div>';
+                return;
+            }
+
+            listDiv.innerHTML = ''; // Temizle
+
+            if(data.length === 0) {
+                listDiv.innerHTML = '<div class="text-slate-400 text-center py-4">Hiç video yok. Yukarıdan ekleyebilirsin.</div>';
+                return;
+            }
+
+            data.forEach(vid => {
+                const thumb = `https://img.youtube.com/vi/${vid.aciklama}/mqdefault.jpg`;
+                
+                listDiv.innerHTML += `
+                    <div class="bg-white p-3 rounded-xl border border-slate-100 flex items-center gap-4 group hover:border-blue-200 transition">
+                        <img src="${thumb}" class="w-24 h-16 object-cover rounded-lg bg-slate-100">
+                        <div class="flex-1">
+                            <h4 class="font-bold text-slate-800">${vid.baslik}</h4>
+                            <div class="flex gap-2 text-xs text-slate-500 mt-1">
+                                <span class="bg-slate-100 px-2 py-0.5 rounded text-slate-600 font-bold">${vid.altKategori}</span>
+                                <span class="flex items-center gap-1"><i class="fa-regular fa-clock"></i> ${vid.fiyat} Dk</span>
+                            </div>
+                        </div>
+                        <button onclick="videoSil(${vid.id})" class="text-slate-300 hover:text-red-500 px-3 py-2 transition">
+                            <i class="fa-solid fa-trash-can text-lg"></i>
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        // 2. YENİ VİDEO EKLE (AKILLI LİNK TEMİZLEYİCİ İLE)
+        async function videoEkle() {
+            const baslik = document.getElementById('inpBaslik').value;
+            const kat = document.getElementById('inpKategori').value;
+            const sure = document.getElementById('inpSure').value;
+            let link = document.getElementById('inpLink').value;
+
+            if(!baslik || !sure || !link) {
+                alert("Lütfen tüm alanları doldurun!");
+                return;
+            }
+
+            // --- SİHİRLİ KISIM: LİNKİ TEMİZLE ---
+            // Kullanıcı uzun link de girse, kısa link de girse sadece ID'yi alırız.
+            let videoId = "";
+            try {
+                if(link.includes("v=")) {
+                    videoId = link.split('v=')[1].split('&')[0]; // & varsa sonrasını at
+                } else if(link.includes("youtu.be/")) {
+                    videoId = link.split('youtu.be/')[1].split('?')[0];
+                } else {
+                    videoId = link; // Zaten ID girmiş olabilir
+                }
+            } catch (e) {
+                alert("Link formatı hatalı!");
+                return;
+            }
+            // ------------------------------------
+
+            const { error } = await supabase.from('ilanlar').insert({
+                baslik: baslik,
+                kategori: 'Akademi', // Sabit
+                altKategori: kat,
+                fiyat: sure,
+                aciklama: videoId  // Temizlenmiş ID'yi kaydediyoruz
+            });
+
+            if(error) {
+                alert("Hata: " + error.message);
+            } else {
+                // Formu temizle ve listeyi yenile
+                document.getElementById('inpBaslik').value = '';
+                document.getElementById('inpLink').value = '';
+                document.getElementById('inpSure').value = '';
+                listeyiYenile();
+                alert("Video başarıyla eklendi! 🎉");
+            }
+        }
+
+        // 3. VİDEO SİL
+        async function videoSil(id) {
+            if(!confirm("Bu videoyu silmek istediğine emin misin?")) return;
+
+            const { error } = await supabase
+                .from('ilanlar')
+                .delete()
+                .eq('id', id);
+
+            if(error) {
+                alert("Silinemedi: " + error.message);
+            } else {
+                listeyiYenile();
+            }
+        }
+    </script>
+</body>
+</html>

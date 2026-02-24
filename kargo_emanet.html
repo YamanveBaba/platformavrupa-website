@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kargo & Emanet - PlatformAvrupa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="config.js"></script>
+    <script src="auth.js"></script>
+    <script src="utils.js"></script>
+    <script src="genel_veriler.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+        .cargo-card { background: white; border-radius: 20px; overflow: hidden; transition: all 0.3s; cursor: pointer; border: 2px solid transparent; }
+        .cargo-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.15); border-color: #f59e0b; }
+        .trust-badge { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+        .status-badge { padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-active { background: #d1fae5; color: #065f46; }
+        .status-completed { background: #e0e7ff; color: #3730a3; }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- Header -->
+    <nav class="bg-white/95 backdrop-blur sticky top-0 z-50 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
+            <a href="index.html" class="flex items-center gap-2 text-slate-800 hover:text-orange-600 transition font-bold">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span class="hidden sm:inline">Ana Sayfa</span>
+            </a>
+            
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-box-open text-2xl text-orange-600"></i>
+                <h1 class="font-bold text-xl text-slate-800">Kargo & Emanet</h1>
+            </div>
+            
+            <a href="kargo_talep.html" class="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg flex items-center gap-2">
+                <i class="fa-solid fa-plus"></i>
+                <span class="hidden sm:inline">Talep Oluştur</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="bg-white/10 backdrop-blur border-b border-white/20 py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-6">
+                <h2 class="text-3xl md:text-4xl font-black text-white mb-2">Güvenli Kargo Taşıma</h2>
+                <p class="text-orange-100 text-lg">Yolculuğundan kazanç sağla, emanet taşıyarak yol masrafını çıkar</p>
+            </div>
+
+            <!-- Filtreler -->
+            <div class="bg-white rounded-2xl p-4 shadow-2xl max-w-4xl mx-auto">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+                    <div>
+                        <label class="text-xs font-bold text-slate-600 mb-1 block">Nereden Ülke</label>
+                        <select id="filterFromCountry" onchange="updateFromCities()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+                            <option value="">Tüm Ülkeler</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-600 mb-1 block">Nereden Şehir</label>
+                        <select id="filterFromCity" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+                            <option value="">Tüm Şehirler</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-600 mb-1 block">Nereye Ülke</label>
+                        <select id="filterToCountry" onchange="updateToCities()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+                            <option value="">Tüm Ülkeler</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-600 mb-1 block">Nereye Şehir</label>
+                        <select id="filterToCity" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+                            <option value="">Tüm Şehirler</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <button onclick="applyFilters()" class="w-full bg-gradient-to-r from-orange-600 to-amber-600 text-white py-2 rounded-lg font-bold hover:shadow-lg transition">
+                            <i class="fa-solid fa-search mr-2"></i>Ara
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab Menü -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
+            <button onclick="switchTab('requests')" id="tab-requests" class="tab-btn bg-white text-orange-600 px-6 py-3 rounded-full font-bold text-sm shadow-lg whitespace-nowrap">
+                <i class="fa-solid fa-box-open mr-2"></i>Paket Gönderenler
+            </button>
+            <button onclick="switchTab('carriers')" id="tab-carriers" class="tab-btn bg-white/20 text-white px-6 py-3 rounded-full font-bold text-sm whitespace-nowrap hover:bg-white/30 transition">
+                <i class="fa-solid fa-truck mr-2"></i>Paket Kabul Edenler
+            </button>
+        </div>
+    </div>
+
+    <!-- Kargo Talepleri -->
+    <div id="content-requests" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+        <div id="requestsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="col-span-full text-center py-20">
+                <i class="fa-solid fa-spinner fa-spin text-5xl text-white mb-4"></i>
+                <p class="text-white text-lg">Talepler yükleniyor...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Taşıyıcılar -->
+    <div id="content-carriers" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+        <div id="carriersList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="col-span-full text-center py-20">
+                <i class="fa-solid fa-spinner fa-spin text-5xl text-white mb-4"></i>
+                <p class="text-white text-lg">Taşıyıcılar yükleniyor...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detay Modal -->
+    <div id="detailModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div class="sticky top-0 bg-gradient-to-r from-orange-600 to-amber-600 p-6 flex justify-between items-start">
+                <div>
+                    <h3 class="text-2xl font-bold text-white mb-1" id="modalTitle">Detay</h3>
+                    <p class="text-orange-100 text-sm" id="modalRoute"></p>
+                </div>
+                <button onclick="closeModal()" class="text-white hover:bg-white/20 w-8 h-8 rounded-full flex items-center justify-center transition">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            <div id="modalContent" class="p-6"></div>
+        </div>
+    </div>
+
+    <script>
+        let allRequests = [];
+        let allCarriers = [];
+
+        window.onload = async function() {
+            initCountryDropdowns();
+            await loadRequests();
+            await loadCarriers();
+        };
+
+        // Ülke dropdown'larını doldur
+        function initCountryDropdowns() {
+            const fromCountry = document.getElementById('filterFromCountry');
+            const toCountry = document.getElementById('filterToCountry');
+            
+            const countries = Object.keys(lokasyonVeritabani).map(code => ({
+                code,
+                name: lokasyonVeritabani[code].isim,
+                flag: lokasyonVeritabani[code].bayrak
+            })).sort((a, b) => a.name.localeCompare(b.name, 'tr'));
+
+            countries.forEach(country => {
+                const option1 = document.createElement('option');
+                option1.value = country.code;
+                option1.textContent = `${country.flag} ${country.name}`;
+                fromCountry.appendChild(option1);
+
+                const option2 = document.createElement('option');
+                option2.value = country.code;
+                option2.textContent = `${country.flag} ${country.name}`;
+                toCountry.appendChild(option2);
+            });
+        }
+
+        function updateFromCities() {
+            const countryCode = document.getElementById('filterFromCountry').value;
+            const citySelect = document.getElementById('filterFromCity');
+            citySelect.innerHTML = '<option value="">Tüm Şehirler</option>';
+            if (countryCode && lokasyonVeritabani[countryCode]) {
+                lokasyonVeritabani[countryCode].sehirler.forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city;
+                    option.textContent = city;
+                    citySelect.appendChild(option);
+                });
+            }
+        }
+
+        function updateToCities() {
+            const countryCode = document.getElementById('filterToCountry').value;
+            const citySelect = document.getElementById('filterToCity');
+            citySelect.innerHTML = '<option value="">Tüm Şehirler</option>';
+            if (countryCode && lokasyonVeritabani[countryCode]) {
+                lokasyonVeritabani[countryCode].sehirler.forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city;
+                    option.textContent = city;
+                    citySelect.appendChild(option);
+                });
+            }
+        }
+
+        // Kargo taleplerini yükle (Paket Gönderenler - sender)
+        async function loadRequests() {
+            try {
+                const { data, error } = await sb
+                    .from('shipments')
+                    .select('*')
+                    .eq('request_type', 'sender')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                allRequests = data || [];
+                console.log('✅ Paket Gönderenler yüklendi:', allRequests.length, 'talep');
+                if (allRequests.length > 0) {
+                    console.log('İlk talep örneği:', allRequests[0]);
+                }
+                renderRequests(allRequests);
+            } catch (error) {
+                console.error('❌ Talepler yüklenemedi:', error);
+                document.getElementById('requestsList').innerHTML = `
+                    <div class="col-span-full text-center py-20">
+                        <i class="fa-solid fa-exclamation-triangle text-5xl text-red-400 mb-4"></i>
+                        <p class="text-white text-lg">Talepler yüklenemedi</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Paket kabul edenleri yükle (carrier tipindeki talepler + yolculuk ilanları)
+        async function loadCarriers() {
+            try {
+                // Önce carrier tipindeki shipments taleplerini yükle
+                const { data: carrierRequests, error: reqError } = await sb
+                    .from('shipments')
+                    .select('*')
+                    .eq('request_type', 'carrier')
+                    .order('created_at', { ascending: false });
+
+                // Sonra yolculuk ilanlarını yükle (kargo kabul edenler)
+                const { data: trips, error: tripsError } = await sb
+                    .from('trips')
+                    .select('*')
+                    .eq('is_cargo_allowed', true)
+                    .order('travel_date', { ascending: true });
+
+                if (reqError) throw reqError;
+                if (tripsError) throw tripsError;
+
+                // İkisini birleştir (carrier requests + trips)
+                allCarriers = [...(carrierRequests || []), ...(trips || [])];
+                renderCarriers(allCarriers);
+            } catch (error) {
+                console.error('Paket kabul edenler yüklenemedi:', error);
+            }
+        }
+
+        // Talepleri render et
+        function renderRequests(requests) {
+            const container = document.getElementById('requestsList');
+            
+            if (!requests || requests.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-20">
+                        <i class="fa-solid fa-box-open text-6xl text-white/30 mb-4"></i>
+                        <h3 class="text-2xl font-bold text-white mb-2">Henüz Talep Yok</h3>
+                        <p class="text-orange-100 mb-6">İlk kargo talebini siz oluşturun!</p>
+                        <a href="kargo_talep.html" class="inline-block bg-white text-orange-600 px-6 py-3 rounded-full font-bold hover:shadow-xl transition">
+                            <i class="fa-solid fa-plus mr-2"></i>Talep Oluştur
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '';
+            requests.forEach((req, index) => {
+                const card = document.createElement('div');
+                card.className = 'cargo-card';
+                card.dataset.requestId = req.id;
+                card.dataset.requestIndex = index;
+                card.style.cursor = 'pointer';
+                card.innerHTML = `
+                    <div class="p-6">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                                    <i class="fa-solid fa-box"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-800">${sanitize(req.sender_name)}</h4>
+                                    <span class="trust-badge"><i class="fa-solid fa-shield-check"></i> Doğrulanmış</span>
+                                </div>
+                            </div>
+                            <span class="status-badge status-${req.status || 'pending'}">${req.status === 'pending' ? 'Bekliyor' : req.status === 'active' ? 'Aktif' : 'Tamamlandı'}</span>
+                        </div>
+
+                        <div class="bg-slate-50 rounded-xl p-4 mb-3">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1">
+                                    <div class="text-xs text-slate-500 mb-1">Nereden</div>
+                                    <div class="font-bold text-slate-800 text-sm">${sanitize(req.from_city)}</div>
+                                </div>
+                                <div class="flex-shrink-0 px-4">
+                                    <i class="fa-solid fa-arrow-right text-orange-500 text-xl"></i>
+                                </div>
+                                <div class="flex-1 text-right">
+                                    <div class="text-xs text-slate-500 mb-1">Nereye</div>
+                                    <div class="font-bold text-slate-800 text-sm">${sanitize(req.to_city)}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between text-xs">
+                            <div class="text-slate-600">
+                                <i class="fa-solid fa-box text-orange-500 mr-1"></i>
+                                ${sanitize(req.description || 'Paket')}
+                            </div>
+                            <div class="text-orange-600 font-bold text-lg">
+                                ${req.price_offer ? req.price_offer + '€' : 'Fiyat Belirtilmemiş'}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-slate-50 px-6 py-3 flex items-center justify-between border-t">
+                        <div class="text-xs text-slate-500">
+                            <i class="fa-solid fa-clock mr-1"></i>
+                            ${new Date(req.created_at).toLocaleDateString('tr-TR')}
+                        </div>
+                        <span class="text-orange-600 font-bold text-sm hover:text-orange-700 transition pointer-events-none">
+                            Detayları Gör <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </span>
+                    </div>
+                `;
+                
+                // Click event listener ekle
+                card.addEventListener('click', function() {
+                    showRequestDetail(req.id);
+                });
+                
+                container.appendChild(card);
+            });
+        }
+
+        // Taşıyıcıları render et
+        function renderCarriers(carriers) {
+            const container = document.getElementById('carriersList');
+            
+            if (!carriers || carriers.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-20">
+                        <i class="fa-solid fa-truck text-6xl text-white/30 mb-4"></i>
+                        <h3 class="text-2xl font-bold text-white mb-2">Henüz Taşıyıcı Yok</h3>
+                        <p class="text-orange-100">Yolculuk ilanı veren kişiler burada görünecek</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '';
+            carriers.forEach((carrier, index) => {
+                const isTrip = carrier.travel_date ? true : false; // trip mi yoksa carrier request mi?
+                const card = document.createElement('div');
+                card.className = 'cargo-card';
+                card.dataset.carrierId = carrier.id;
+                card.dataset.carrierIndex = index;
+                card.dataset.isTrip = isTrip;
+                card.style.cursor = 'pointer';
+                card.innerHTML = `
+                    <div class="p-6">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                                    ${isTrip ? sanitize(carrier.driver_name).substring(0, 2).toUpperCase() : '<i class="fa-solid fa-truck"></i>'}
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-800">${sanitize(carrier.driver_name || carrier.sender_name)}</h4>
+                                    <div class="text-xs text-slate-600">
+                                        <i class="fa-solid fa-star text-yellow-500 mr-1"></i>${carrier.avg_rating ? carrier.avg_rating.toFixed(1) : 'Yeni'}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 rounded-xl p-4 mb-3">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1">
+                                    <div class="text-xs text-slate-500 mb-1">Nereden</div>
+                                    <div class="font-bold text-slate-800 text-sm">${sanitize(carrier.from_city)}</div>
+                                </div>
+                                <div class="flex-shrink-0 px-4">
+                                    <i class="fa-solid fa-arrow-right text-orange-500"></i>
+                                </div>
+                                <div class="flex-1 text-right">
+                                    <div class="text-xs text-slate-500 mb-1">Nereye</div>
+                                    <div class="font-bold text-slate-800 text-sm">${sanitize(carrier.to_city)}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between text-xs text-slate-600">
+                            <span><i class="fa-solid fa-calendar text-orange-500 mr-1"></i>${carrier.travel_date || 'Esnek tarih'}</span>
+                            <span class="text-green-600 font-bold"><i class="fa-solid fa-box mr-1"></i>Kargo Kabul Eder</span>
+                        </div>
+                    </div>
+                    <div class="bg-slate-50 px-6 py-3 flex items-center justify-between border-t">
+                        <div class="text-xs text-slate-500">
+                            <i class="fa-solid fa-chair mr-1"></i>${carrier.seats_available || 'Koltuk bilgisi yok'}
+                        </div>
+                        <span class="text-orange-600 font-bold text-sm hover:text-orange-700 transition pointer-events-none">
+                            Detayları Gör <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </span>
+                    </div>
+                `;
+                
+                // Click event listener ekle
+                card.addEventListener('click', function() {
+                    showCarrierDetail(carrier.id, isTrip);
+                });
+                
+                container.appendChild(card);
+            });
+        }
+
+        // Tab değiştir
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-white', 'text-orange-600', 'shadow-lg');
+                btn.classList.add('bg-white/20', 'text-white');
+            });
+            
+            document.getElementById(`tab-${tab}`).classList.remove('bg-white/20', 'text-white');
+            document.getElementById(`tab-${tab}`).classList.add('bg-white', 'text-orange-600', 'shadow-lg');
+            
+            document.getElementById('content-requests').classList.add('hidden');
+            document.getElementById('content-carriers').classList.add('hidden');
+            document.getElementById(`content-${tab}`).classList.remove('hidden');
+        }
+
+        // Filtrele
+        function applyFilters() {
+            const fromCity = document.getElementById('filterFromCity').value;
+            const toCity = document.getElementById('filterToCity').value;
+
+            const filtered = allRequests.filter(req => {
+                const matchFrom = !fromCity || req.from_city === fromCity;
+                const matchTo = !toCity || req.to_city === toCity;
+                return matchFrom && matchTo;
+            });
+
+            renderRequests(filtered);
+        }
+
+        // Detay göster
+        function showRequestDetail(id) {
+            const req = allRequests.find(r => {
+                // UUID, string veya number karşılaştırması
+                if (typeof r.id === 'string' && typeof id === 'string') {
+                    return r.id === id;
+                } else if (typeof r.id === 'number' && typeof id === 'number') {
+                    return r.id === id;
+                } else {
+                    return r.id == id; // Loose equality
+                }
+            });
+            if (!req) {
+                console.error('Talep bulunamadı:', id, 'Mevcut talepler:', allRequests);
+                return;
+            }
+
+            document.getElementById('modalTitle').textContent = 'Kargo Talebi Detayı';
+            document.getElementById('modalRoute').textContent = `${req.from_city} → ${req.to_city}`;
+
+            const content = `
+                <div class="space-y-6">
+                    <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-xl">
+                        <div class="w-16 h-16 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-white font-bold text-2xl shadow-lg">
+                            <i class="fa-solid fa-box"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-lg text-slate-800">${sanitize(req.sender_name)}</h4>
+                            <div class="text-sm text-slate-600"><i class="fa-solid fa-shield-check text-green-600 mr-1"></i>Doğrulanmış Profil</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h5 class="font-bold text-slate-800 mb-3">Paket Bilgileri</h5>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="p-3 bg-slate-50 rounded-lg">
+                                <div class="text-xs text-slate-500 mb-1">Açıklama</div>
+                                <div class="font-bold text-slate-800">${sanitize(req.description || 'Belirtilmemiş')}</div>
+                            </div>
+                            <div class="p-3 bg-slate-50 rounded-lg">
+                                <div class="text-xs text-slate-500 mb-1">Teklif Edilen Ücret</div>
+                                <div class="font-bold text-orange-600 text-xl">${req.price_offer ? req.price_offer + '€' : '-'}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
+                        <div class="flex items-center gap-2 text-orange-800 mb-2">
+                            <i class="fa-solid fa-info-circle"></i>
+                            <span class="font-bold text-sm">Nasıl Teklif Verilir?</span>
+                        </div>
+                        <p class="text-xs text-orange-700 mb-3">
+                            Bu güzergahta yolculuğunuz varsa, paketi taşımayı teklif edebilirsiniz. Gönderen ile anlaştıktan sonra teslimat yapılır.
+                        </p>
+                        <button onclick="sendOffer('${req.id}')" class="w-full bg-gradient-to-r from-orange-600 to-amber-600 text-white py-3 rounded-xl font-bold hover:shadow-lg transition">
+                            <i class="fa-solid fa-handshake mr-2"></i>Teklif Ver
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('modalContent').innerHTML = content;
+            document.getElementById('detailModal').classList.remove('hidden');
+            document.getElementById('detailModal').classList.add('flex');
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').classList.add('hidden');
+            document.getElementById('detailModal').classList.remove('flex');
+        }
+
+        async function sendOffer(requestId) {
+            const user = await getCurrentUser();
+            if (!user) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Giriş Gerekli',
+                    text: 'Teklif vermek için giriş yapmalısınız.',
+                    confirmButtonText: 'Giriş Yap',
+                    showCancelButton: true
+                }).then((result) => {
+                    if (result.isConfirmed) window.location.href = 'login.html';
+                });
+                return;
+            }
+            Swal.fire({
+                icon: 'success',
+                title: 'Teklif Gönderildi!',
+                text: 'Gönderen en kısa sürede size dönüş yapacak.',
+                confirmButtonText: 'Tamam'
+            });
+            closeModal();
+        }
+
+        // Taşıyıcı detayını göster (Yolculuk veya Carrier Request)
+        function showCarrierDetail(id, isTrip) {
+            let carrier;
+            
+            // UUID, string veya number karşılaştırması için güvenli arama
+            carrier = allCarriers.find(c => {
+                const idMatch = (typeof c.id === 'string' && typeof id === 'string') 
+                    ? (c.id === id) 
+                    : (c.id == id); // Loose equality for number/string mix
+                
+                if (isTrip) {
+                    return idMatch && c.travel_date;
+                } else {
+                    return idMatch && !c.travel_date;
+                }
+            });
+            
+            if (!carrier) {
+                console.error('Taşıyıcı bulunamadı:', id, 'isTrip:', isTrip, 'Mevcut taşıyıcılar:', allCarriers);
+                return;
+            }
+
+            document.getElementById('modalTitle').textContent = isTrip ? 'Yolculuk Detayı' : 'Taşıyıcı Detayı';
+            document.getElementById('modalRoute').textContent = `${carrier.from_city} → ${carrier.to_city}`;
+
+            const driverName = carrier.driver_name || carrier.sender_name || 'Taşıyıcı';
+            
+            const content = `
+                <div class="space-y-6">
+                    <!-- Taşıyıcı/Sürücü Bilgisi -->
+                    <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-xl">
+                        <div class="w-16 h-16 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-white font-bold text-2xl shadow-lg">
+                            ${isTrip ? sanitize(driverName).substring(0, 2).toUpperCase() : '<i class="fa-solid fa-truck"></i>'}
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-lg text-slate-800">${sanitize(driverName)}</h4>
+                            <div class="text-sm text-slate-600">
+                                <i class="fa-solid fa-star text-yellow-500 mr-1"></i>${carrier.avg_rating ? carrier.avg_rating.toFixed(1) : 'Yeni'} • ${carrier.total_ratings || 0} değerlendirme
+                            </div>
+                            <div class="text-xs text-green-600 font-bold mt-1">
+                                <i class="fa-solid fa-shield-check mr-1"></i>Doğrulanmış Profil
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Yolculuk/Taşıma Bilgileri -->
+                    <div>
+                        <h5 class="font-bold text-slate-800 mb-3">Taşıma Bilgileri</h5>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="p-3 bg-slate-50 rounded-lg">
+                                <div class="text-xs text-slate-500 mb-1">Tarih</div>
+                                <div class="font-bold text-slate-800">${carrier.travel_date || 'Esnek'}</div>
+                            </div>
+                            <div class="p-3 bg-slate-50 rounded-lg">
+                                <div class="text-xs text-slate-500 mb-1">Saat (Tahmini)</div>
+                                <div class="font-bold text-slate-800">${carrier.travel_time || '08:00'}</div>
+                            </div>
+                            ${isTrip ? `
+                            <div class="p-3 bg-slate-50 rounded-lg">
+                                <div class="text-xs text-slate-500 mb-1">Boş Koltuk</div>
+                                <div class="font-bold text-slate-800">${carrier.seats_available || 0}</div>
+                            </div>
+                            <div class="p-3 bg-slate-50 rounded-lg">
+                                <div class="text-xs text-slate-500 mb-1">Koltuk Başı</div>
+                                <div class="font-bold text-orange-600 text-xl">${carrier.price || 0}€</div>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+
+                    ${carrier.notes ? `
+                    <div>
+                        <h5 class="font-bold text-slate-800 mb-3">Notlar</h5>
+                        <p class="text-sm text-slate-600 bg-slate-50 p-3 rounded-lg">${sanitize(carrier.notes)}</p>
+                    </div>
+                    ` : ''}
+
+                    <!-- Kargo Talebi Gönder -->
+                    <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
+                        <div class="flex items-center gap-2 text-orange-800 mb-2">
+                            <i class="fa-solid fa-info-circle"></i>
+                            <span class="font-bold text-sm">Kargo Taşıma Talebi</span>
+                        </div>
+                        <p class="text-xs text-orange-700 mb-3">
+                            Bu yolculukta paket taşımasını talep edebilirsiniz. Sürücü ile anlaştıktan sonra teslimat yapılır.
+                        </p>
+                        <button onclick="sendCargoRequest('${carrier.id}', ${isTrip})" class="w-full bg-gradient-to-r from-orange-600 to-amber-600 text-white py-3 rounded-xl font-bold hover:shadow-lg transition">
+                            <i class="fa-solid fa-box mr-2"></i>Kargo Talebi Gönder
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('modalContent').innerHTML = content;
+            document.getElementById('detailModal').classList.remove('hidden');
+            document.getElementById('detailModal').classList.add('flex');
+        }
+
+        // Kargo talebi gönder
+        async function sendCargoRequest(carrierId, isTrip) {
+            try {
+                const user = await getCurrentUser();
+                if (!user) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Giriş Gerekli',
+                        text: 'Kargo talebi göndermek için giriş yapmalısınız.',
+                        confirmButtonText: 'Giriş Yap',
+                        showCancelButton: true
+                    }).then((result) => {
+                        if (result.isConfirmed) window.location.href = 'login.html';
+                    });
+                    return;
+                }
+
+                // Loading göster
+                Swal.fire({
+                    title: 'Yükleniyor...',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+
+                // Profil bilgilerini al
+                const { data: profile, error: profileError } = await sb
+                    .from('profiles')
+                    .select('real_name, phone')
+                    .eq('user_id', user.id)
+                    .single();
+
+                if (profileError || !profile) {
+                    Swal.close();
+                    Swal.fire('Hata', 'Profil bilgileriniz alınamadı. Lütfen profilinizi tamamlayın.', 'error');
+                    return;
+                }
+
+                // Paket açıklaması sor
+                const { value: description } = await Swal.fire({
+                    title: 'Paket Açıklaması',
+                    input: 'text',
+                    inputPlaceholder: 'Örn: Küçük kutu (30x30cm)',
+                    showCancelButton: true,
+                    confirmButtonText: 'Devam Et',
+                    cancelButtonText: 'İptal',
+                    inputValidator: (value) => {
+                        if (!value) return 'Lütfen paket açıklaması girin!';
+                    }
+                });
+
+                if (!description) return; // İptal
+
+                // Loading göster
+                Swal.fire({
+                    title: 'Talep Gönderiliyor...',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+
+                // Taşıyıcıyı bul
+                const carrier = allCarriers.find(c => c.id == carrierId);
+                if (!carrier) {
+                    Swal.close();
+                    Swal.fire('Hata', 'Taşıyıcı bilgisi bulunamadı.', 'error');
+                    return;
+                }
+
+                // Kargo talebini Supabase'e kaydet
+                const cargoRequest = {
+                    user_id: user.id,
+                    sender_name: profile.real_name || user.email.split('@')[0],
+                    phone: profile.phone || 'Belirtilmemiş',
+                    from_country: carrier.from_country,
+                    from_city: carrier.from_city,
+                    to_country: carrier.to_country,
+                    to_city: carrier.to_city,
+                    description: description,
+                    request_type: 'sender',
+                    status: 'pending',
+                    carrier_id: carrierId,
+                    notes: `${isTrip ? 'Yolculuk' : 'Taşıyıcı'} ID: ${carrierId} - Talep gönderildi`
+                };
+
+                const { data, error } = await sb
+                    .from('shipments')
+                    .insert([cargoRequest])
+                    .select();
+
+                if (error) {
+                    console.error('Kargo talebi kaydetme hatası:', error);
+                    Swal.close();
+                    Swal.fire('Hata', 'Kargo talebi kaydedilemedi: ' + error.message, 'error');
+                    return;
+                }
+
+                Swal.close();
+
+                // Başarı mesajı
+                if (carrier.phone) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Kargo Talebiniz Gönderildi!',
+                        html: `
+                            <p class="text-slate-600 mb-4">Taşıyıcı ile iletişime geçebilirsiniz:</p>
+                            <div class="bg-green-50 p-4 rounded-lg">
+                                <p class="text-lg font-bold text-green-800">📞 ${sanitize(carrier.phone)}</p>
+                                <p class="text-sm text-green-600 mt-2">Taşıyıcı: ${sanitize(carrier.driver_name || carrier.sender_name)}</p>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-4">Talebiniz admin panelinde görüntülenecektir.</p>
+                        `,
+                        confirmButtonText: 'Tamam'
+                    });
+                } else {
+                    Swal.fire('Başarılı!', 'Kargo talebiniz gönderildi. Admin panelinde görüntülenecek.', 'success');
+                }
+
+                closeModal();
+                await loadRequests(); // Listeyi yenile
+            } catch (error) {
+                console.error('Kargo talebi gönderme hatası:', error);
+                Swal.close();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Bir Hata Oluştu',
+                    text: error.message,
+                    footer: 'Lütfen daha sonra tekrar deneyin veya destek ile iletişime geçin.'
+                });
+            }
+        }
+    </script>
+
+</body>
+</html>

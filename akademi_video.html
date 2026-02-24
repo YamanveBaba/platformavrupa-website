@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video | Platform Akademi</title>
+    <meta name="description" content="Platform Akademi eğitim videosu">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: white; }
+        
+        .glass-header { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.05); }
+        
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            background: #000;
+            border-radius: 16px;
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .related-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.3s ease;
+        }
+        .related-card:hover {
+            border-color: rgba(139, 92, 246, 0.5);
+            background: rgba(255,255,255,0.05);
+        }
+        
+        .skeleton { 
+            background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%); 
+            background-size: 200% 100%; 
+            animation: shimmer 1.5s infinite; 
+        }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        
+        .progress-tracker {
+            position: fixed;
+            top: 64px;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            z-index: 40;
+        }
+        .progress-tracker-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #8b5cf6, #3b82f6);
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- NAVBAR -->
+    <nav class="glass-header sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <a href="akademi.html" class="flex items-center gap-3 group">
+                    <div class="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center text-white group-hover:bg-purple-600 transition">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </div>
+                    <span class="font-bold text-lg">Platform <span class="text-purple-400">Akademi</span></span>
+                </a>
+                
+                <div class="flex items-center gap-3">
+                    <button onclick="shareVideo()" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg text-sm transition hidden sm:flex items-center gap-2">
+                        <i class="fa-solid fa-share-nodes"></i> Paylaş
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Progress Tracker -->
+    <div class="progress-tracker">
+        <div id="progressFill" class="progress-tracker-fill" style="width: 0%"></div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- SOL - VİDEO PLAYER -->
+            <div class="lg:col-span-2">
+                <!-- Video Player -->
+                <div id="videoContainer" class="video-container skeleton">
+                    <iframe id="youtubePlayer" src="" frameborder="0" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                            allowfullscreen></iframe>
+                </div>
+                
+                <!-- Video Bilgileri -->
+                <div class="mt-6">
+                    <!-- Kategori Badge -->
+                    <a id="categoryBadge" href="#" class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold mb-3 transition hover:opacity-80">
+                        <i class="fa-solid fa-book"></i> <span id="categoryName">Yükleniyor...</span>
+                    </a>
+                    
+                    <h1 id="videoTitle" class="text-2xl md:text-3xl font-extrabold text-white mb-4">Yükleniyor...</h1>
+                    
+                    <!-- İstatistikler -->
+                    <div class="flex flex-wrap items-center gap-4 text-sm text-slate-400 mb-6">
+                        <span id="viewCount"><i class="fa-solid fa-eye mr-1"></i> 0 izlenme</span>
+                        <span id="likeCount"><i class="fa-solid fa-heart mr-1"></i> 0 beğeni</span>
+                        <span id="publishDate"><i class="fa-solid fa-calendar mr-1"></i> --</span>
+                        <span id="duration"><i class="fa-solid fa-clock mr-1"></i> --</span>
+                    </div>
+                    
+                    <!-- Aksiyon Butonları -->
+                    <div class="flex flex-wrap items-center gap-3 pb-6 border-b border-white/10">
+                        <button onclick="likeVideo()" id="likeBtn" class="bg-white/10 hover:bg-red-600/80 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition flex items-center gap-2">
+                            <i class="fa-regular fa-heart"></i> Beğen
+                        </button>
+                        <button onclick="shareVideo()" class="bg-white/10 hover:bg-white/20 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition flex items-center gap-2">
+                            <i class="fa-solid fa-share-nodes"></i> Paylaş
+                        </button>
+                        <button onclick="reportProblem()" class="bg-white/10 hover:bg-white/20 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition flex items-center gap-2">
+                            <i class="fa-solid fa-flag"></i> Sorun Bildir
+                        </button>
+                    </div>
+                    
+                    <!-- Açıklama -->
+                    <div class="py-6">
+                        <h3 class="font-bold text-white mb-3">Açıklama</h3>
+                        <p id="videoDescription" class="text-slate-400 whitespace-pre-line">Yükleniyor...</p>
+                    </div>
+                </div>
+                
+                <!-- Seri Navigasyonu -->
+                <div id="seriesSection" class="hidden bg-gradient-to-r from-purple-900/30 to-blue-900/30 rounded-2xl p-6 border border-purple-500/20 mb-6">
+                    <div class="flex items-center justify-between flex-wrap gap-4 mb-4">
+                        <div>
+                            <span class="text-purple-300 text-xs font-bold uppercase tracking-wider">Seri</span>
+                            <h3 id="seriesName" class="text-lg font-bold text-white"></h3>
+                        </div>
+                        <span id="seriesPosition" class="text-slate-400 text-sm">1 / 5</span>
+                    </div>
+                    
+                    <div class="flex items-center gap-3">
+                        <button id="prevVideoBtn" onclick="goToPrevVideo()" class="flex-1 bg-white/10 hover:bg-white/20 text-white py-3 rounded-xl text-sm font-medium transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <i class="fa-solid fa-chevron-left"></i> Önceki Video
+                        </button>
+                        <button id="nextVideoBtn" onclick="goToNextVideo()" class="flex-1 bg-purple-600 hover:bg-purple-500 text-white py-3 rounded-xl text-sm font-medium transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                            Sonraki Video <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- SAĞ - İLGİLİ VİDEOLAR -->
+            <aside class="lg:col-span-1">
+                <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-list text-purple-400"></i> İlgili Videolar
+                </h3>
+                
+                <div id="relatedVideos" class="space-y-4">
+                    <div class="h-24 rounded-xl skeleton"></div>
+                    <div class="h-24 rounded-xl skeleton"></div>
+                    <div class="h-24 rounded-xl skeleton"></div>
+                    <div class="h-24 rounded-xl skeleton"></div>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-white/5 py-8 text-center text-slate-500 text-sm mt-auto">
+        <p>&copy; 2026 Platform Avrupa Akademi</p>
+    </footer>
+
+    <script src="config.js"></script>
+    <script src="utils.js"></script>
+    <script>
+        let currentVideo = null;
+        let seriesVideos = [];
+        let currentSeriesIndex = 0;
+        let watchStartTime = null;
+        let viewRecordId = null;
+
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', async function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const videoId = urlParams.get('id');
+            
+            if (!videoId) {
+                window.location.href = 'akademi.html';
+                return;
+            }
+            
+            await loadVideo(videoId);
+            startWatchTracking();
+        });
+
+        // Video yükle
+        async function loadVideo(videoId) {
+            try {
+                const { data: video, error } = await sb
+                    .from('academy_videos')
+                    .select('*, academy_categories(id, name, slug, color, icon), academy_series(id, name)')
+                    .eq('id', videoId)
+                    .single();
+                
+                if (error || !video) {
+                    window.location.href = 'akademi.html';
+                    return;
+                }
+                
+                currentVideo = video;
+                renderVideo();
+                
+                // İzlenme artır
+                await sb.rpc('increment_video_view', { vid: video.id });
+                
+                // İzlenme kaydı oluştur
+                const user = await getCurrentUser();
+                const { data: viewRecord } = await sb.from('academy_views').insert({
+                    video_id: video.id,
+                    user_id: user?.id || null,
+                    session_id: getSessionId()
+                }).select().single();
+                
+                if (viewRecord) viewRecordId = viewRecord.id;
+                
+                // Seri varsa seri videolarını yükle
+                if (video.series_id) {
+                    await loadSeriesVideos(video.series_id);
+                }
+                
+                // İlgili videoları yükle
+                await loadRelatedVideos(video.category_id, video.id);
+                
+            } catch (err) {
+                console.error('Video yükleme hatası:', err);
+            }
+        }
+
+        // Video render
+        function renderVideo() {
+            const v = currentVideo;
+            
+            // Player
+            document.getElementById('youtubePlayer').src = `https://www.youtube.com/embed/${v.youtube_id}?autoplay=0&rel=0`;
+            document.getElementById('videoContainer').classList.remove('skeleton');
+            
+            // Başlık ve meta
+            document.getElementById('videoTitle').textContent = v.title;
+            document.getElementById('videoDescription').textContent = v.description || 'Açıklama bulunmuyor.';
+            document.getElementById('viewCount').innerHTML = `<i class="fa-solid fa-eye mr-1"></i> ${v.view_count || 0} izlenme`;
+            document.getElementById('likeCount').innerHTML = `<i class="fa-solid fa-heart mr-1"></i> ${v.like_count || 0} beğeni`;
+            document.getElementById('duration').innerHTML = `<i class="fa-solid fa-clock mr-1"></i> ${formatDuration(v.duration_seconds)}`;
+            document.getElementById('publishDate').innerHTML = `<i class="fa-solid fa-calendar mr-1"></i> ${formatDate(v.created_at)}`;
+            
+            // Kategori badge
+            const catBadge = document.getElementById('categoryBadge');
+            const cat = v.academy_categories;
+            if (cat) {
+                catBadge.href = `akademi_kategori.html?slug=${cat.slug}`;
+                catBadge.style.backgroundColor = `${cat.color}20`;
+                catBadge.style.color = cat.color;
+                catBadge.innerHTML = `<i class="fa-solid ${cat.icon}"></i> <span>${cat.name}</span>`;
+                document.getElementById('categoryName').textContent = cat.name;
+            }
+            
+            // Sayfa başlığı
+            document.title = `${v.title} | Platform Akademi`;
+        }
+
+        // Seri videolarını yükle
+        async function loadSeriesVideos(seriesId) {
+            const { data: videos } = await sb
+                .from('academy_videos')
+                .select('id, title, youtube_id, thumbnail_url, duration_seconds, series_order')
+                .eq('series_id', seriesId)
+                .eq('is_active', true)
+                .order('series_order');
+            
+            if (videos && videos.length > 1) {
+                seriesVideos = videos;
+                currentSeriesIndex = videos.findIndex(v => v.id === currentVideo.id);
+                
+                const section = document.getElementById('seriesSection');
+                section.classList.remove('hidden');
+                
+                document.getElementById('seriesName').textContent = currentVideo.academy_series?.name || 'Video Serisi';
+                document.getElementById('seriesPosition').textContent = `${currentSeriesIndex + 1} / ${videos.length}`;
+                
+                document.getElementById('prevVideoBtn').disabled = currentSeriesIndex === 0;
+                document.getElementById('nextVideoBtn').disabled = currentSeriesIndex === videos.length - 1;
+            }
+        }
+
+        // İlgili videoları yükle
+        async function loadRelatedVideos(categoryId, excludeId) {
+            const container = document.getElementById('relatedVideos');
+            
+            try {
+                const { data: videos } = await sb
+                    .from('academy_videos')
+                    .select('id, title, youtube_id, thumbnail_url, duration_seconds, view_count')
+                    .eq('category_id', categoryId)
+                    .eq('is_active', true)
+                    .neq('id', excludeId)
+                    .order('view_count', { ascending: false })
+                    .limit(8);
+                
+                if (!videos || videos.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center py-8 text-slate-400">
+                            <p class="text-sm">İlgili video bulunamadı</p>
+                        </div>`;
+                    return;
+                }
+                
+                container.innerHTML = videos.map(v => `
+                    <a href="akademi_video.html?id=${v.id}" class="related-card flex gap-3 p-3 rounded-xl group">
+                        <div class="relative flex-shrink-0 w-32 h-20 rounded-lg overflow-hidden bg-slate-800">
+                            <img src="${v.thumbnail_url || `https://img.youtube.com/vi/${v.youtube_id}/mqdefault.jpg`}" 
+                                 class="w-full h-full object-cover" loading="lazy">
+                            <span class="absolute bottom-1 right-1 bg-black/80 text-white text-xs px-1.5 py-0.5 rounded">
+                                ${formatDuration(v.duration_seconds)}
+                            </span>
+                        </div>
+                        <div class="flex-grow min-w-0">
+                            <h4 class="font-medium text-white text-sm line-clamp-2 group-hover:text-purple-400 transition">${sanitize(v.title)}</h4>
+                            <span class="text-xs text-slate-500 mt-1 block">${v.view_count || 0} izlenme</span>
+                        </div>
+                    </a>
+                `).join('');
+                
+            } catch (err) {
+                console.error('İlgili video yükleme hatası:', err);
+            }
+        }
+
+        // Önceki video
+        function goToPrevVideo() {
+            if (currentSeriesIndex > 0) {
+                const prevVideo = seriesVideos[currentSeriesIndex - 1];
+                window.location.href = `akademi_video.html?id=${prevVideo.id}`;
+            }
+        }
+
+        // Sonraki video
+        function goToNextVideo() {
+            if (currentSeriesIndex < seriesVideos.length - 1) {
+                const nextVideo = seriesVideos[currentSeriesIndex + 1];
+                window.location.href = `akademi_video.html?id=${nextVideo.id}`;
+            }
+        }
+
+        // Beğen
+        async function likeVideo() {
+            if (!currentVideo) return;
+            
+            try {
+                await sb.rpc('increment_video_like', { vid: currentVideo.id });
+                
+                const likeEl = document.getElementById('likeCount');
+                const newCount = (currentVideo.like_count || 0) + 1;
+                likeEl.innerHTML = `<i class="fa-solid fa-heart mr-1 text-red-500"></i> ${newCount} beğeni`;
+                
+                document.getElementById('likeBtn').innerHTML = `<i class="fa-solid fa-heart text-red-500"></i> Beğenildi`;
+                document.getElementById('likeBtn').classList.add('bg-red-600/20');
+                
+                currentVideo.like_count = newCount;
+            } catch (err) {
+                console.error('Beğeni hatası:', err);
+            }
+        }
+
+        // Sorun bildir
+        async function reportProblem() {
+            const user = await getCurrentUser();
+            if (!user) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Giriş Yapın',
+                    text: 'Sorun bildirmek için giriş yapmalısınız.',
+                    confirmButtonColor: '#8b5cf6'
+                });
+                return;
+            }
+            
+            const { value: description } = await Swal.fire({
+                title: '<i class="fa-solid fa-flag text-orange-400 mr-2"></i> Sorun Bildir',
+                input: 'textarea',
+                inputPlaceholder: 'Video ile ilgili sorunu açıklayın...\n\nÖrn: Video açılmıyor, ses yok, yanlış içerik vb.',
+                inputAttributes: { 'aria-label': 'Sorun açıklaması' },
+                showCancelButton: true,
+                confirmButtonText: 'Gönder',
+                cancelButtonText: 'İptal',
+                confirmButtonColor: '#8b5cf6',
+                customClass: { 
+                    popup: 'bg-slate-800 text-white', 
+                    input: 'bg-slate-700 text-white border-slate-600' 
+                }
+            });
+            
+            if (description) {
+                try {
+                    await sb.from('academy_requests').insert({
+                        user_id: user.id,
+                        video_id: currentVideo.id,
+                        category_id: currentVideo.category_id,
+                        request_type: 'problem_report',
+                        title: `Sorun: ${currentVideo.title}`,
+                        description: description
+                    });
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Teşekkürler!',
+                        text: 'Sorun bildiriminiz alındı. En kısa sürede incelenecek.',
+                        confirmButtonColor: '#8b5cf6'
+                    });
+                } catch (err) {
+                    Swal.fire('Hata', 'Bir hata oluştu. Lütfen tekrar deneyin.', 'error');
+                }
+            }
+        }
+
+        // Paylaş
+        function shareVideo() {
+            const url = window.location.href;
+            const title = currentVideo?.title || 'Platform Akademi Video';
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: title,
+                    text: `${title} - Platform Akademi'de izle`,
+                    url: url
+                });
+            } else {
+                navigator.clipboard.writeText(url);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Link Kopyalandı!',
+                    text: 'Video linki panoya kopyalandı.',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            }
+        }
+
+        // İzlenme takibi başlat
+        function startWatchTracking() {
+            watchStartTime = Date.now();
+            
+            // Her 30 saniyede izlenme süresini güncelle
+            setInterval(updateWatchProgress, 30000);
+            
+            // Sayfa kapanırken son güncelleme
+            window.addEventListener('beforeunload', updateWatchProgress);
+        }
+
+        // İzlenme ilerlemesini güncelle
+        async function updateWatchProgress() {
+            if (!viewRecordId || !currentVideo) return;
+            
+            const watchDuration = Math.floor((Date.now() - watchStartTime) / 1000);
+            const videoDuration = currentVideo.duration_seconds || 600; // Varsayılan 10 dk
+            const progressPercent = Math.min(100, Math.floor((watchDuration / videoDuration) * 100));
+            const completed = progressPercent >= 90;
+            
+            // Progress bar güncelle
+            document.getElementById('progressFill').style.width = `${progressPercent}%`;
+            
+            try {
+                await sb.from('academy_views').update({
+                    watch_duration_seconds: watchDuration,
+                    progress_percent: progressPercent,
+                    completed: completed
+                }).eq('id', viewRecordId);
+                
+                // Tamamlandıysa sayacı artır
+                if (completed) {
+                    await sb.rpc('increment_video_completion', { vid: currentVideo.id });
+                }
+            } catch (err) {
+                console.error('İzlenme güncelleme hatası:', err);
+            }
+        }
+
+        // Yardımcı fonksiyonlar
+        function formatDuration(seconds) {
+            if (!seconds) return '00:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '--';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+        }
+
+        function getSessionId() {
+            let sessionId = localStorage.getItem('academy_session_id');
+            if (!sessionId) {
+                sessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('academy_session_id', sessionId);
+            }
+            return sessionId;
+        }
+
+        // Klavye kısayolları
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' && seriesVideos.length > 0) goToNextVideo();
+            if (e.key === 'ArrowLeft' && seriesVideos.length > 0) goToPrevVideo();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Araç Kiralama | PlatformAvrupa</title>
+    <meta name="description" content="Avrupa genelinde uygun fiyatlı araç kiralama. Sıla yolcuları için özel fırsatlar.">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        .glass-header { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid #e2e8f0; }
+        
+        .search-box {
+            background-color: #f8fafc; padding: 12px 16px; border-radius: 16px; border: 1px solid #e2e8f0;
+            transition: all 0.2s; position: relative;
+        }
+        .search-box:focus-within { border-color: #f97316; background-color: white; box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1); }
+        .search-label { display: block; font-size: 0.65rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; }
+        .search-input { width: 100%; background: transparent; outline: none; font-weight: 700; color: #334155; font-size: 0.95rem; }
+        
+        .car-card {
+            background: white; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0;
+            transition: all 0.3s; cursor: pointer;
+        }
+        .car-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); border-color: #f97316; }
+        .car-card img { transition: 0.5s; width: 100%; height: 180px; object-fit: cover; }
+        .car-card:hover img { transform: scale(1.05); }
+        
+        input[type="date"]::-webkit-calendar-picker-indicator, input[type="time"]::-webkit-calendar-picker-indicator {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; color: transparent; background: transparent; cursor: pointer;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <nav class="glass-header sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+            <a href="index.html" class="flex items-center gap-2 text-slate-600 hover:text-orange-600 transition font-bold">
+                <div class="w-9 h-9 bg-slate-100 rounded-xl flex items-center justify-center"><i class="fa-solid fa-arrow-left"></i></div>
+                <span class="hidden sm:inline">Ana Sayfa</span>
+            </a>
+            <div class="flex items-center gap-2">
+                <div class="w-10 h-10 bg-orange-500 rounded-xl flex items-center justify-center text-white text-xl shadow-lg shadow-orange-200">
+                    <i class="fa-solid fa-car"></i>
+                </div>
+                <span class="font-extrabold text-xl text-slate-900 tracking-tight">Araç <span class="text-orange-500">Kiralama</span></span>
+            </div>
+            <div class="w-20"></div>
+        </div>
+    </nav>
+
+    <main class="flex-grow">
+        
+        <!-- Hero Section -->
+        <div class="relative bg-slate-900 py-16 px-6 overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1449965408869-ebd3fee56718?q=80&w=2000" loading="lazy" class="absolute inset-0 w-full h-full object-cover opacity-40">
+            
+            <div class="relative z-10 max-w-6xl mx-auto text-center">
+                <h1 class="text-3xl md:text-5xl font-extrabold text-white mb-4 drop-shadow-md">Avrupa Genelinde Araç Kirala</h1>
+                <p class="text-orange-100 text-lg mb-8 drop-shadow">Rentalcars güvencesiyle 160+ ülkede hizmet. Sıla yolcularına özel fiyatlar!</p>
+                
+                <div class="bg-white p-6 md:p-8 rounded-3xl shadow-2xl relative z-20 text-left">
+                    <form onsubmit="aracAra(event)">
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                            
+                            <!-- Alış Yeri - Ülke -->
+                            <div class="md:col-span-2 search-box">
+                                <label class="search-label">Alış Ülke</label>
+                                <div class="flex items-center gap-2">
+                                    <i class="fa-solid fa-globe text-orange-500"></i>
+                                    <select id="pickupCountry" class="search-input appearance-none" onchange="updatePickupCities()" required>
+                                        <option value="">Seçiniz</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Alış Yeri - Şehir -->
+                            <div class="md:col-span-2 search-box">
+                                <label class="search-label">Alış Şehir</label>
+                                <div class="flex items-center gap-2">
+                                    <i class="fa-solid fa-location-dot text-orange-500"></i>
+                                    <select id="pickupCity" class="search-input appearance-none" required disabled>
+                                        <option value="">Önce ülke seçin</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Alış Tarihi & Saati -->
+                            <div class="md:col-span-2 grid grid-cols-2 gap-2">
+                                <div class="search-box cursor-pointer" onclick="document.getElementById('pickupDate').showPicker()">
+                                    <label class="search-label">Alış Tarihi</label>
+                                    <input type="date" id="pickupDate" class="search-input text-sm" required>
+                                </div>
+                                <div class="search-box cursor-pointer" onclick="document.getElementById('pickupTime').showPicker()">
+                                    <label class="search-label">Saat</label>
+                                    <input type="time" id="pickupTime" class="search-input text-sm" value="10:00" required>
+                                </div>
+                            </div>
+
+                            <!-- Teslim Yeri - Ülke (Türkiye) -->
+                            <div class="md:col-span-2 search-box">
+                                <label class="search-label">Teslim Ülke</label>
+                                <div class="flex items-center gap-2">
+                                    <i class="fa-solid fa-globe text-orange-500"></i>
+                                    <select id="dropoffCountry" class="search-input appearance-none" disabled>
+                                        <option value="TR">🇹🇷 Türkiye</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Teslim Yeri - Şehir -->
+                            <div class="md:col-span-2 search-box">
+                                <label class="search-label">Teslim Şehir</label>
+                                <div class="flex items-center gap-2">
+                                    <i class="fa-solid fa-location-dot text-orange-500"></i>
+                                    <select id="dropoffCity" class="search-input appearance-none" required>
+                                        <option value="">Seçiniz</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Teslim Tarihi & Saati -->
+                            <div class="md:col-span-2 grid grid-cols-2 gap-2">
+                                <div class="search-box cursor-pointer" onclick="document.getElementById('dropoffDate').showPicker()">
+                                    <label class="search-label">Teslim Tarihi</label>
+                                    <input type="date" id="dropoffDate" class="search-input text-sm" required>
+                                </div>
+                                <div class="search-box cursor-pointer" onclick="document.getElementById('dropoffTime').showPicker()">
+                                    <label class="search-label">Saat</label>
+                                    <input type="time" id="dropoffTime" class="search-input text-sm" value="10:00" required>
+                                </div>
+                            </div>
+
+                            <!-- Sürücü Yaşı -->
+                            <div class="md:col-span-2 search-box">
+                                <label class="search-label">Sürücü Yaşı</label>
+                                <select id="driverAge" class="search-input appearance-none">
+                                    <option value="25">25-65</option>
+                                    <option value="21">21-24</option>
+                                    <option value="18">18-20</option>
+                                    <option value="70">65+</option>
+                                </select>
+                            </div>
+
+                            <!-- Arama Butonu -->
+                            <div class="md:col-span-12 mt-2">
+                                <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 rounded-2xl text-lg shadow-lg shadow-orange-200 transition transform active:scale-[0.99] flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-magnifying-glass"></i> Araç Bul
+                                </button>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+                
+                <p class="text-xs text-white/60 mt-4 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-shield-halved"></i> Tüm işlemler Rentalcars.com güvencesiyle yapılır.
+                </p>
+            </div>
+        </div>
+
+        <!-- Sıla Yolu Özel Banner -->
+        <div class="bg-gradient-to-r from-orange-500 to-amber-500 py-6 px-6">
+            <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-4 text-white">
+                    <div class="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center text-2xl">
+                        <i class="fa-solid fa-road"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-xl">Sıla Yolu Özel</h3>
+                        <p class="text-orange-100 text-sm">Türkiye'ye giderken araç kiralayın, dönüşte teslim edin!</p>
+                    </div>
+                </div>
+                <button onclick="silaYoluAra()" class="bg-white text-orange-600 font-bold px-6 py-3 rounded-xl hover:bg-orange-50 transition">
+                    Tek Yön Fırsatları <i class="fa-solid fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Popüler Lokasyonlar -->
+        <div class="max-w-7xl mx-auto px-6 py-16">
+            <h2 class="text-2xl font-bold text-slate-800 mb-8 flex items-center gap-2">
+                <i class="fa-solid fa-fire text-orange-500"></i> Popüler Alış Noktaları
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                
+                <div onclick="hizliAra('Frankfurt Airport')" class="car-card group">
+                    <div class="relative overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1569154941061-e231b4725ef1?q=80&w=800" alt="Frankfurt">
+                        <div class="absolute top-3 right-3 bg-orange-500 text-white px-2 py-1 rounded-lg text-xs font-bold">
+                            <i class="fa-solid fa-plane"></i> Havalimanı
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-lg font-bold text-slate-800">Frankfurt Havalimanı</h3>
+                        <p class="text-xs text-slate-500 mb-3">Almanya'nın en büyük havalimanı</p>
+                        <span class="text-orange-600 text-xs font-bold group-hover:underline">Araçları Gör ></span>
+                    </div>
+                </div>
+
+                <div onclick="hizliAra('Munich Airport')" class="car-card group">
+                    <div class="relative overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?q=80&w=800" alt="Münih">
+                        <div class="absolute top-3 right-3 bg-orange-500 text-white px-2 py-1 rounded-lg text-xs font-bold">
+                            <i class="fa-solid fa-plane"></i> Havalimanı
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-lg font-bold text-slate-800">Münih Havalimanı</h3>
+                        <p class="text-xs text-slate-500 mb-3">Bavyera'nın kapısı</p>
+                        <span class="text-orange-600 text-xs font-bold group-hover:underline">Araçları Gör ></span>
+                    </div>
+                </div>
+
+                <div onclick="hizliAra('Vienna Airport')" class="car-card group">
+                    <div class="relative overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1516550893923-42d28e5677af?q=80&w=800" alt="Viyana">
+                        <div class="absolute top-3 right-3 bg-orange-500 text-white px-2 py-1 rounded-lg text-xs font-bold">
+                            <i class="fa-solid fa-plane"></i> Havalimanı
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-lg font-bold text-slate-800">Viyana Havalimanı</h3>
+                        <p class="text-xs text-slate-500 mb-3">Doğu Avrupa'ya geçiş</p>
+                        <span class="text-orange-600 text-xs font-bold group-hover:underline">Araçları Gör ></span>
+                    </div>
+                </div>
+
+                <div onclick="hizliAra('Istanbul Airport')" class="car-card group">
+                    <div class="relative overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?q=80&w=800" alt="İstanbul">
+                        <div class="absolute top-3 right-3 bg-green-500 text-white px-2 py-1 rounded-lg text-xs font-bold">
+                            <i class="fa-solid fa-flag"></i> Türkiye
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-lg font-bold text-slate-800">İstanbul Havalimanı</h3>
+                        <p class="text-xs text-slate-500 mb-3">Varışta araç hazır</p>
+                        <span class="text-orange-600 text-xs font-bold group-hover:underline">Araçları Gör ></span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Avantajlar -->
+        <div class="bg-slate-50 py-16 px-6">
+            <div class="max-w-6xl mx-auto">
+                <h2 class="text-2xl font-bold text-slate-800 mb-8 text-center">Neden Platform Avrupa ile Kiralayın?</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="bg-white p-6 rounded-2xl text-center border border-slate-100">
+                        <div class="w-14 h-14 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                            <i class="fa-solid fa-percent"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-800 mb-2">En İyi Fiyat Garantisi</h3>
+                        <p class="text-sm text-slate-500">Başka yerde daha ucuz bulursanız farkı iade</p>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-2xl text-center border border-slate-100">
+                        <div class="w-14 h-14 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                            <i class="fa-solid fa-ban"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-800 mb-2">Gizli Masraf Yok</h3>
+                        <p class="text-sm text-slate-500">Tüm vergiler ve ücretler dahil</p>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-2xl text-center border border-slate-100">
+                        <div class="w-14 h-14 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                            <i class="fa-solid fa-xmark"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-800 mb-2">Ücretsiz İptal</h3>
+                        <p class="text-sm text-slate-500">48 saat öncesine kadar ücretsiz iptal</p>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-2xl text-center border border-slate-100">
+                        <div class="w-14 h-14 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                            <i class="fa-solid fa-headset"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-800 mb-2">7/24 Destek</h3>
+                        <p class="text-sm text-slate-500">Türkçe müşteri hizmetleri</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 py-8 text-center text-slate-400 text-xs">
+        &copy; 2025 Platform Avrupa. <b>Rentalcars.com</b> iş ortağı.
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="genel_veriler.js"></script>
+    <script>
+        // Tarihleri ayarla ve dropdown'ları doldur
+        window.onload = function() {
+            const today = new Date();
+            const nextWeek = new Date(today);
+            nextWeek.setDate(nextWeek.getDate() + 7);
+            
+            document.getElementById('pickupDate').valueAsDate = today;
+            document.getElementById('dropoffDate').valueAsDate = nextWeek;
+            
+            // Ülke dropdown'ını doldur
+            populateCountries();
+            // Teslim yeri için Türkiye şehirlerini doldur
+            updateDropoffCities();
+        }
+
+        // Ülke dropdown'ını doldur
+        function populateCountries() {
+            const countrySelect = document.getElementById('pickupCountry');
+            if (!countrySelect || typeof lokasyonVeritabani === 'undefined') return;
+            
+            // Alfabetik sırala
+            const sortedCountries = Object.keys(lokasyonVeritabani).sort((a, b) => 
+                lokasyonVeritabani[a].isim.localeCompare(lokasyonVeritabani[b].isim, 'tr')
+            );
+            
+            sortedCountries.forEach(code => {
+                const country = lokasyonVeritabani[code];
+                const option = document.createElement('option');
+                option.value = code;
+                option.textContent = `${country.bayrak} ${country.isim}`;
+                countrySelect.appendChild(option);
+            });
+        }
+
+        // Alış yeri için şehirleri güncelle
+        function updatePickupCities() {
+            const countryCode = document.getElementById('pickupCountry').value;
+            const citySelect = document.getElementById('pickupCity');
+            
+            if (!citySelect) return;
+            
+            // Dropdown'ı temizle
+            citySelect.innerHTML = '';
+            
+            if (!countryCode) {
+                citySelect.disabled = true;
+                citySelect.innerHTML = '<option value="">Önce ülke seçin</option>';
+                return;
+            }
+            
+            const cities = lokasyonVeritabani[countryCode]?.sehirler || [];
+            
+            if (cities.length === 0) {
+                citySelect.disabled = true;
+                citySelect.innerHTML = '<option value="">Şehir bulunamadı</option>';
+                return;
+            }
+            
+            citySelect.disabled = false;
+            citySelect.innerHTML = '<option value="">Şehir seçiniz</option>';
+            
+            cities.forEach(city => {
+                const option = document.createElement('option');
+                option.value = city;
+                option.textContent = city;
+                citySelect.appendChild(option);
+            });
+        }
+
+        // Teslim yeri için Türkiye şehirlerini doldur
+        function updateDropoffCities() {
+            const citySelect = document.getElementById('dropoffCity');
+            if (!citySelect || typeof lokasyonVeritabani === 'undefined') return;
+            
+            const cities = lokasyonVeritabani['TR']?.sehirler || [];
+            
+            citySelect.innerHTML = '<option value="">Şehir seçiniz</option>';
+            
+            cities.forEach(city => {
+                const option = document.createElement('option');
+                option.value = city;
+                option.textContent = city;
+                citySelect.appendChild(option);
+            });
+        }
+
+        function aracAra(e) {
+            e.preventDefault();
+            
+            const pickupCountry = document.getElementById('pickupCountry').value;
+            const pickupCity = document.getElementById('pickupCity').value;
+            const dropoffCity = document.getElementById('dropoffCity').value;
+            const pickupDate = document.getElementById('pickupDate').value;
+            const pickupTime = document.getElementById('pickupTime').value;
+            const dropoffDate = document.getElementById('dropoffDate').value;
+            const dropoffTime = document.getElementById('dropoffTime').value;
+            const driverAge = document.getElementById('driverAge').value;
+            
+            if (!pickupCountry || !pickupCity) {
+                alert('Lütfen alış ülke ve şehir seçiniz.');
+                return;
+            }
+            
+            if (!dropoffCity) {
+                alert('Lütfen teslim şehir seçiniz.');
+                return;
+            }
+            
+            // Lokasyon bilgilerini birleştir
+            const pickupLocation = pickupCity;
+            const dropoffLocation = dropoffCity;
+            
+            // Rentalcars.com URL oluştur
+            // config.js'deki buildRentalcarsLink formatını kullanıyoruz
+            // Ancak tarih formatını YYYY-MM-DD olarak gönderiyoruz
+            const baseUrl = 'https://www.rentalcars.com';
+            
+            // Tarih formatı: YYYY-MM-DD (config.js formatı)
+            const formattedPickupDate = pickupDate; // Zaten YYYY-MM-DD formatında
+            const formattedDropoffDate = dropoffDate; // Zaten YYYY-MM-DD formatında
+            
+            const params = new URLSearchParams({
+                searchType: 'location',
+                pickupPlace: pickupLocation,
+                dropoffPlace: dropoffLocation,
+                pickupDate: formattedPickupDate,
+                dropoffDate: formattedDropoffDate,
+                puHour: pickupTime.split(':')[0],
+                puMinute: pickupTime.split(':')[1],
+                doHour: dropoffTime.split(':')[0],
+                doMinute: dropoffTime.split(':')[1],
+                driversAge: driverAge,
+                preflang: 'tr',
+                prefcurrency: 'EUR'
+            });
+            
+            // Affiliate parametresi ekle
+            if (typeof AFFILIATE_CONFIG !== 'undefined' && AFFILIATE_CONFIG.rentalcars) {
+                params.append('affiliateCode', AFFILIATE_CONFIG.rentalcars.affiliateCode);
+            }
+            
+            // Affiliate tracking
+            if (typeof trackAffiliateClick === 'function') {
+                trackAffiliateClick('rentalcars', 'arac_kiralama.html', {
+                    pickupCountry: pickupCountry,
+                    pickupCity: pickupCity,
+                    dropoffCity: dropoffCity,
+                    pickupDate: pickupDate,
+                    dropoffDate: dropoffDate,
+                    driverAge: driverAge
+                });
+            }
+            
+            window.open(`${baseUrl}?${params.toString()}`, '_blank');
+        }
+
+        function hizliAra(location) {
+            const today = new Date();
+            const nextWeek = new Date(today);
+            nextWeek.setDate(nextWeek.getDate() + 7);
+            
+            const pickupDate = today.toISOString().split('T')[0];
+            const dropoffDate = nextWeek.toISOString().split('T')[0];
+            
+            const baseUrl = 'https://www.rentalcars.com/search-results';
+            const params = new URLSearchParams({
+                locationName: location,
+                puDay: today.getDate(),
+                puMonth: today.getMonth() + 1,
+                puYear: today.getFullYear(),
+                puHour: 10,
+                puMinute: 0,
+                doDay: nextWeek.getDate(),
+                doMonth: nextWeek.getMonth() + 1,
+                doYear: nextWeek.getFullYear(),
+                doHour: 10,
+                doMinute: 0,
+                driversAge: 30,
+                preflang: 'tr',
+                prefcurrency: 'EUR'
+            });
+            
+            // Affiliate parametresi ekle
+            if (typeof AFFILIATE_CONFIG !== 'undefined' && AFFILIATE_CONFIG.rentalcars) {
+                params.append('affiliateCode', AFFILIATE_CONFIG.rentalcars.affiliateCode);
+            }
+            
+            // Affiliate tracking
+            if (typeof trackAffiliateClick === 'function') {
+                trackAffiliateClick('rentalcars', 'arac_kiralama.html', {
+                    location: location,
+                    type: 'popular_location'
+                });
+            }
+            
+            window.open(`${baseUrl}?${params.toString()}`, '_blank');
+        }
+
+        function silaYoluAra() {
+            // Sıla yolu için özel arama - Avrupa'dan Türkiye'ye tek yön
+            const baseUrl = 'https://www.rentalcars.com';
+            
+            // Affiliate tracking
+            if (typeof trackAffiliateClick === 'function') {
+                trackAffiliateClick('rentalcars', 'arac_kiralama.html', {
+                    type: 'sila_yolu_special'
+                });
+            }
+            
+            // Tek yön araması için ana sayfaya yönlendir
+            let url = baseUrl;
+            if (typeof AFFILIATE_CONFIG !== 'undefined' && AFFILIATE_CONFIG.rentalcars) {
+                url += `?affiliateCode=${AFFILIATE_CONFIG.rentalcars.affiliateCode}&preflang=tr`;
+            }
+            
+            window.open(url, '_blank');
+        }
+    </script>
+</body>
+</html>

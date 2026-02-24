@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>İndirim Paylaş | PlatformAvrupa</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="auth.js"></script>
+    <script src="utils.js"></script>
+    <script src="genel_veriler.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%);
+            min-height: 100vh;
+        }
+        .glass-card { 
+            background: rgba(255,255,255,0.95); 
+            backdrop-filter: blur(20px); 
+            border-radius: 24px; 
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+        }
+        .form-input {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 16px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        .form-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+            outline: none;
+        }
+        .photo-upload {
+            border: 3px dashed #cbd5e1;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .photo-upload:hover, .photo-upload.dragover {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.05);
+        }
+        .photo-upload.has-image {
+            border-style: solid;
+            border-color: #10b981;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+            border-radius: 16px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(245, 158, 11, 0.3);
+        }
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .market-chip {
+            transition: all 0.3s ease;
+        }
+        .market-chip.selected {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="pb-8">
+
+    <!-- Header -->
+    <nav class="bg-white/95 backdrop-blur-xl sticky top-0 z-50 shadow-xl border-b border-slate-200/50">
+        <div class="max-w-2xl mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="market.html" class="flex items-center gap-2 text-slate-600 hover:text-blue-600 transition font-bold">
+                <div class="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center shadow-inner">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </div>
+            </a>
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center text-white text-xl shadow-lg shadow-orange-500/30">
+                    <i class="fa-solid fa-camera"></i>
+                </div>
+                <div>
+                    <h1 class="font-black text-xl text-slate-800 tracking-tight">İndirim Paylaş</h1>
+                    <p class="text-xs text-slate-500">Puan Kazan!</p>
+                </div>
+            </div>
+            <div class="w-10"></div>
+        </div>
+    </nav>
+
+    <!-- Form Container -->
+    <div class="max-w-2xl mx-auto px-4 py-6">
+        
+        <!-- Hero Info -->
+        <div class="glass-card p-6 mb-6">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center text-white text-2xl">
+                    <i class="fa-solid fa-trophy"></i>
+                </div>
+                <div>
+                    <h2 class="font-bold text-slate-800 text-lg">İndirim Avcısı Ol!</h2>
+                    <p class="text-slate-500 text-sm">Her onaylanan paylaşım <span class="font-bold text-orange-500">+10 puan</span> kazandırır</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form -->
+        <form id="dealForm" class="space-y-6">
+            
+            <!-- 1. Konum (Otomatik veya Manuel) -->
+            <div class="glass-card p-6">
+                <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-location-dot text-blue-500"></i> Konum
+                </h3>
+                
+                <div class="flex gap-3 mb-4">
+                    <button type="button" onclick="detectMyLocation()" 
+                        class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 px-4 rounded-xl font-bold transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-location-crosshairs"></i>
+                        <span>Konumumu Bul</span>
+                    </button>
+                    <button type="button" onclick="toggleManualLocation()" 
+                        class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-3 px-4 rounded-xl font-bold transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-pen"></i>
+                        <span>Manuel Seç</span>
+                    </button>
+                </div>
+                
+                <!-- Tespit Edilen Konum -->
+                <div id="detectedLocation" class="hidden bg-emerald-50 border-2 border-emerald-200 rounded-xl p-4 mb-4">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-check-circle text-emerald-500 text-xl"></i>
+                        <div>
+                            <p class="text-sm text-emerald-600">Konum Tespit Edildi</p>
+                            <p id="locationText" class="font-bold text-emerald-800"></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Manuel Seçim -->
+                <div id="manualLocation" class="hidden space-y-3">
+                    <div class="grid grid-cols-2 gap-3">
+                        <select id="countrySelect" onchange="onCountryChange()" class="form-input">
+                            <option value="">Ülke Seçin</option>
+                        </select>
+                        <select id="citySelect" class="form-input" disabled>
+                            <option value="">Önce ülke seçin</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <input type="hidden" id="countryCode" name="countryCode">
+                <input type="hidden" id="city" name="city">
+            </div>
+
+            <!-- 2. Fotoğraf -->
+            <div class="glass-card p-6">
+                <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-camera text-purple-500"></i> Fotoğraf <span class="text-red-500">*</span>
+                </h3>
+                
+                <div id="photoUpload" class="photo-upload p-8 text-center" onclick="document.getElementById('photoInput').click()">
+                    <input type="file" id="photoInput" accept="image/*" capture="environment" class="hidden" onchange="handlePhotoSelect(event)">
+                    
+                    <div id="photoPlaceholder">
+                        <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fa-solid fa-camera text-3xl text-slate-400"></i>
+                        </div>
+                        <p class="text-slate-600 font-medium mb-1">Fotoğraf Çek veya Seç</p>
+                        <p class="text-slate-400 text-sm">Etiket, raf veya fişin fotoğrafı</p>
+                    </div>
+                    
+                    <div id="photoPreview" class="hidden">
+                        <img id="previewImage" class="w-full max-h-64 object-contain rounded-xl">
+                        <button type="button" onclick="removePhoto(event)" class="mt-3 text-red-500 font-medium">
+                            <i class="fa-solid fa-trash mr-1"></i> Fotoğrafı Kaldır
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Market Seçimi -->
+            <div class="glass-card p-6">
+                <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-store text-emerald-500"></i> Market <span class="text-red-500">*</span>
+                </h3>
+                
+                <div id="marketChips" class="flex flex-wrap gap-2 mb-4">
+                    <!-- Dinamik olarak doldurulacak -->
+                </div>
+                
+                <div class="relative">
+                    <input type="text" id="customMarket" placeholder="veya market adını yazın..." class="form-input w-full pl-10">
+                    <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                </div>
+                
+                <input type="hidden" id="marketChainId" name="marketChainId">
+            </div>
+
+            <!-- 4. Ürün Bilgileri -->
+            <div class="glass-card p-6">
+                <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-tag text-orange-500"></i> Ürün Bilgileri
+                </h3>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-2">Ürün Adı <span class="text-red-500">*</span></label>
+                        <input type="text" id="productName" placeholder="örn: Süt 1L, Nutella 750g" class="form-input w-full" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-2">Kategori</label>
+                        <select id="category" class="form-input w-full">
+                            <option value="">Seçin (opsiyonel)</option>
+                            <option value="süt-ürünleri">🥛 Süt Ürünleri</option>
+                            <option value="et-tavuk">🥩 Et & Tavuk</option>
+                            <option value="meyve-sebze">🍎 Meyve & Sebze</option>
+                            <option value="ekmek-unlu">🍞 Ekmek & Unlu Mamüller</option>
+                            <option value="atistirmalik">🍫 Atıştırmalık</option>
+                            <option value="icecek">🥤 İçecek</option>
+                            <option value="temizlik">🧹 Temizlik</option>
+                            <option value="kisisel-bakim">🧴 Kişisel Bakım</option>
+                            <option value="dondurulmus">🧊 Dondurulmuş</option>
+                            <option value="konserve">🥫 Konserve</option>
+                            <option value="diger">📦 Diğer</option>
+                        </select>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-2">İndirimli Fiyat <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <input type="number" id="salePrice" step="0.01" min="0" placeholder="0.00" class="form-input w-full pr-10" required>
+                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold" id="currencySymbol">€</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-2">Normal Fiyat</label>
+                            <div class="relative">
+                                <input type="number" id="originalPrice" step="0.01" min="0" placeholder="opsiyonel" class="form-input w-full pr-10">
+                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">€</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- İndirim Yüzdesi (Otomatik Hesaplama) -->
+                    <div id="discountBadge" class="hidden bg-red-50 border-2 border-red-200 rounded-xl p-4 text-center">
+                        <span class="text-2xl font-black text-red-500">%<span id="discountPercent">0</span></span>
+                        <span class="text-red-600 font-medium ml-2">İNDİRİM</span>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-2">Son Geçerlilik</label>
+                        <input type="date" id="validUntil" class="form-input w-full">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" id="submitBtn" class="btn-primary w-full py-4 text-white text-lg flex items-center justify-center gap-2" disabled>
+                <i class="fa-solid fa-paper-plane"></i>
+                <span>Gönder ve Puan Kazan</span>
+            </button>
+            
+            <p class="text-center text-slate-400 text-sm">
+                Paylaşımınız admin onayından sonra yayınlanacaktır
+            </p>
+        </form>
+    </div>
+
+    <script>
+        // --- GLOBAL DEĞİŞKENLER ---
+        let selectedCountryCode = '';
+        let selectedCity = '';
+        let selectedMarketId = '';
+        let photoFile = null;
+        let marketChains = [];
+
+        // --- SAYFA YÜKLENDİĞİNDE ---
+        window.onload = async function() {
+            // Auth kontrolü
+            if (!currentUser) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Giriş Gerekli',
+                    text: 'İndirim paylaşmak için giriş yapmalısınız.',
+                    confirmButtonText: 'Giriş Yap',
+                    allowOutsideClick: false
+                }).then(() => {
+                    window.location.href = 'login.html?redirect=indirim_paylas.html';
+                });
+                return;
+            }
+            
+            // Ülke dropdown'ını doldur
+            ulkeleriDoldur('countrySelect');
+            
+            // Market zincirlerini yükle
+            await loadMarketChains();
+            
+            // Fiyat değişikliklerini dinle
+            document.getElementById('salePrice').addEventListener('input', calculateDiscount);
+            document.getElementById('originalPrice').addEventListener('input', calculateDiscount);
+            
+            // Form submit
+            document.getElementById('dealForm').addEventListener('submit', handleSubmit);
+            
+            // Drag & drop
+            setupDragDrop();
+            
+            // Form validasyonu
+            validateForm();
+        };
+
+        // --- KONUM TESPİTİ ---
+        function detectMyLocation() {
+            if (!navigator.geolocation) {
+                Swal.fire('Hata', 'Tarayıcınız konum desteği sunmuyor.', 'error');
+                return;
+            }
+            
+            Swal.fire({
+                title: 'Konum Tespit Ediliyor...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+            
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    try {
+                        const { latitude, longitude } = position.coords;
+                        
+                        // Nominatim ile reverse geocoding
+                        const response = await fetch(
+                            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=tr`,
+                            { headers: { 'User-Agent': 'PlatformAvrupa/1.0' } }
+                        );
+                        const data = await response.json();
+                        
+                        const countryCode = data.address?.country_code?.toUpperCase();
+                        const city = data.address?.city || data.address?.town || data.address?.village || data.address?.state || '';
+                        
+                        if (countryCode && lokasyonVeritabani[countryCode]) {
+                            selectedCountryCode = countryCode;
+                            selectedCity = city;
+                            
+                            document.getElementById('countryCode').value = countryCode;
+                            document.getElementById('city').value = city;
+                            
+                            const countryData = lokasyonVeritabani[countryCode];
+                            document.getElementById('locationText').textContent = 
+                                `${countryData.bayrak} ${city}, ${countryData.isim}`;
+                            
+                            document.getElementById('detectedLocation').classList.remove('hidden');
+                            document.getElementById('manualLocation').classList.add('hidden');
+                            
+                            // Para birimi güncelle
+                            updateCurrency(countryData.para);
+                            
+                            // Market chiplerini güncelle
+                            renderMarketChips();
+                            
+                            Swal.close();
+                            validateForm();
+                        } else {
+                            Swal.fire('Bilgi', 'Konumunuz desteklenen ülkeler arasında değil. Manuel seçin.', 'info');
+                            toggleManualLocation();
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        Swal.fire('Hata', 'Konum tespit edilemedi. Manuel seçin.', 'error');
+                        toggleManualLocation();
+                    }
+                },
+                (error) => {
+                    Swal.fire('Hata', 'Konum erişimi reddedildi. Manuel seçin.', 'error');
+                    toggleManualLocation();
+                }
+            );
+        }
+
+        function toggleManualLocation() {
+            document.getElementById('manualLocation').classList.toggle('hidden');
+            document.getElementById('detectedLocation').classList.add('hidden');
+        }
+
+        function onCountryChange() {
+            const countryCode = document.getElementById('countrySelect').value;
+            sehirleriGetirOrtak(countryCode, 'citySelect');
+            
+            if (countryCode) {
+                selectedCountryCode = countryCode;
+                document.getElementById('countryCode').value = countryCode;
+                
+                const countryData = lokasyonVeritabani[countryCode];
+                updateCurrency(countryData.para);
+                renderMarketChips();
+            }
+            
+            document.getElementById('citySelect').addEventListener('change', function() {
+                selectedCity = this.value;
+                document.getElementById('city').value = this.value;
+                validateForm();
+            });
+            
+            validateForm();
+        }
+
+        function updateCurrency(currencyCode) {
+            const symbols = { EUR: '€', GBP: '£', CHF: 'Fr.', TRY: '₺', PLN: 'zł', CZK: 'Kč', HUF: 'Ft', RON: 'lei', BGN: 'лв', DKK: 'kr', SEK: 'kr', NOK: 'kr' };
+            document.getElementById('currencySymbol').textContent = symbols[currencyCode] || currencyCode;
+        }
+
+        // --- MARKET ZİNCİRLERİ ---
+        async function loadMarketChains() {
+            if (!sb) return;
+            
+            try {
+                const { data, error } = await sb
+                    .from('market_chains')
+                    .select('*')
+                    .order('name');
+                
+                if (error) throw error;
+                marketChains = data || [];
+            } catch (err) {
+                console.error('Market zincirleri yüklenemedi:', err);
+                // Fallback: genel_veriler.js'den al
+                marketChains = [];
+            }
+            
+            renderMarketChips();
+        }
+
+        function renderMarketChips() {
+            const container = document.getElementById('marketChips');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            // Seçili ülkenin marketlerini göster
+            let markets = [];
+            
+            if (selectedCountryCode && marketZincirleri[selectedCountryCode]) {
+                markets = marketZincirleri[selectedCountryCode].marketler;
+            } else {
+                // Varsayılan: Almanya marketleri
+                markets = marketZincirleri['DE']?.marketler || [];
+            }
+            
+            // İlk 8 marketi göster
+            markets.slice(0, 8).forEach((market, index) => {
+                const chip = document.createElement('button');
+                chip.type = 'button';
+                chip.className = 'market-chip px-4 py-2 bg-white border-2 border-slate-200 rounded-full text-sm font-medium hover:border-blue-400 transition';
+                chip.textContent = market.isim;
+                chip.onclick = () => selectMarket(market, chip);
+                container.appendChild(chip);
+            });
+        }
+
+        function selectMarket(market, chipElement) {
+            // Önceki seçimi kaldır
+            document.querySelectorAll('.market-chip').forEach(c => c.classList.remove('selected'));
+            
+            // Yeni seçimi işaretle
+            chipElement.classList.add('selected');
+            
+            // DB'den market ID'sini bul
+            const dbMarket = marketChains.find(m => m.name === market.isim);
+            selectedMarketId = dbMarket?.id || '';
+            document.getElementById('marketChainId').value = selectedMarketId;
+            
+            // Custom input'u temizle
+            document.getElementById('customMarket').value = market.isim;
+            
+            validateForm();
+        }
+
+        // --- FOTOĞRAF YÜKLEMESİ ---
+        function handlePhotoSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            // Boyut kontrolü (5MB max)
+            if (file.size > 5 * 1024 * 1024) {
+                Swal.fire('Hata', 'Fotoğraf 5MB\'dan küçük olmalı.', 'error');
+                return;
+            }
+            
+            photoFile = file;
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('previewImage').src = e.target.result;
+                document.getElementById('photoPlaceholder').classList.add('hidden');
+                document.getElementById('photoPreview').classList.remove('hidden');
+                document.getElementById('photoUpload').classList.add('has-image');
+                validateForm();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removePhoto(event) {
+            event.stopPropagation();
+            photoFile = null;
+            document.getElementById('photoInput').value = '';
+            document.getElementById('photoPlaceholder').classList.remove('hidden');
+            document.getElementById('photoPreview').classList.add('hidden');
+            document.getElementById('photoUpload').classList.remove('has-image');
+            validateForm();
+        }
+
+        function setupDragDrop() {
+            const dropZone = document.getElementById('photoUpload');
+            
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                });
+            });
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'));
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'));
+            });
+            
+            dropZone.addEventListener('drop', (e) => {
+                const file = e.dataTransfer.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    document.getElementById('photoInput').files = e.dataTransfer.files;
+                    handlePhotoSelect({ target: { files: e.dataTransfer.files } });
+                }
+            });
+        }
+
+        // --- İNDİRİM HESAPLAMA ---
+        function calculateDiscount() {
+            const salePrice = parseFloat(document.getElementById('salePrice').value) || 0;
+            const originalPrice = parseFloat(document.getElementById('originalPrice').value) || 0;
+            
+            if (originalPrice > 0 && salePrice > 0 && originalPrice > salePrice) {
+                const discount = Math.round((1 - salePrice / originalPrice) * 100);
+                document.getElementById('discountPercent').textContent = discount;
+                document.getElementById('discountBadge').classList.remove('hidden');
+            } else {
+                document.getElementById('discountBadge').classList.add('hidden');
+            }
+            
+            validateForm();
+        }
+
+        // --- FORM VALİDASYONU ---
+        function validateForm() {
+            const productName = document.getElementById('productName').value.trim();
+            const salePrice = document.getElementById('salePrice').value;
+            const market = document.getElementById('customMarket').value.trim() || selectedMarketId;
+            const hasLocation = selectedCountryCode || document.getElementById('countrySelect').value;
+            
+            const isValid = productName && salePrice && market && hasLocation && photoFile;
+            document.getElementById('submitBtn').disabled = !isValid;
+        }
+
+        // Inputlara validation listener ekle
+        document.addEventListener('DOMContentLoaded', () => {
+            ['productName', 'salePrice', 'customMarket'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('input', validateForm);
+            });
+        });
+
+        // --- FORM GÖNDERME ---
+        async function handleSubmit(event) {
+            event.preventDefault();
+            
+            if (!currentUser) {
+                Swal.fire('Hata', 'Lütfen giriş yapın.', 'error');
+                return;
+            }
+            
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Gönderiliyor...';
+            
+            try {
+                // 1. Fotoğrafı yükle
+                let imageUrl = null;
+                if (photoFile) {
+                    const fileExt = photoFile.name.split('.').pop();
+                    const fileName = `deals/${currentUser.id}/${Date.now()}.${fileExt}`;
+                    
+                    const { data: uploadData, error: uploadError } = await sb.storage
+                        .from('public')
+                        .upload(fileName, photoFile);
+                    
+                    if (uploadError) {
+                        console.error('Fotoğraf yükleme hatası:', uploadError);
+                        // Storage olmayabilir, devam et
+                    } else {
+                        const { data: urlData } = sb.storage.from('public').getPublicUrl(fileName);
+                        imageUrl = urlData?.publicUrl;
+                    }
+                }
+                
+                // 2. İndirim kaydını oluştur
+                const productName = document.getElementById('productName').value.trim();
+                const salePrice = parseFloat(document.getElementById('salePrice').value);
+                const originalPrice = parseFloat(document.getElementById('originalPrice').value) || null;
+                const category = document.getElementById('category').value || null;
+                const validUntil = document.getElementById('validUntil').value || null;
+                const countryCode = selectedCountryCode || document.getElementById('countrySelect').value;
+                const city = selectedCity || document.getElementById('citySelect').value;
+                
+                const discountPercent = originalPrice && salePrice < originalPrice
+                    ? Math.round((1 - salePrice / originalPrice) * 100)
+                    : null;
+                
+                const { data, error } = await sb
+                    .from('user_deals')
+                    .insert({
+                        user_id: currentUser.id,
+                        market_chain_id: selectedMarketId || null,
+                        country_code: countryCode,
+                        city: city,
+                        product_name: productName,
+                        category: category,
+                        original_price: originalPrice,
+                        sale_price: salePrice,
+                        discount_percent: discountPercent,
+                        image_url: imageUrl,
+                        valid_until: validUntil,
+                        status: 'pending'
+                    })
+                    .select();
+                
+                if (error) throw error;
+                
+                // 3. Kullanıcı puanını güncelle
+                await updateUserPoints();
+                
+                // 4. Başarı mesajı
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Tebrikler! 🎉',
+                    html: `
+                        <p>İndiriminiz başarıyla gönderildi!</p>
+                        <p class="text-sm text-slate-500 mt-2">Admin onayından sonra yayınlanacak.</p>
+                    `,
+                    confirmButtonText: 'Markete Dön'
+                }).then(() => {
+                    window.location.href = 'market.html';
+                });
+                
+            } catch (err) {
+                console.error('Gönderim hatası:', err);
+                Swal.fire('Hata', 'Bir hata oluştu: ' + err.message, 'error');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Gönder ve Puan Kazan';
+            }
+        }
+
+        async function updateUserPoints() {
+            try {
+                // Önce mevcut puanı kontrol et
+                const { data: existing, error: fetchError } = await sb
+                    .from('user_points')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .single();
+                
+                if (existing) {
+                    // Güncelle
+                    await sb
+                        .from('user_points')
+                        .update({ 
+                            deals_shared: (existing.deals_shared || 0) + 1,
+                            updated_at: new Date().toISOString()
+                        })
+                        .eq('user_id', currentUser.id);
+                } else {
+                    // Yeni kayıt
+                    await sb
+                        .from('user_points')
+                        .insert({
+                            user_id: currentUser.id,
+                            points: 0,
+                            deals_shared: 1,
+                            deals_approved: 0,
+                            badges: []
+                        });
+                }
+            } catch (err) {
+                console.error('Puan güncelleme hatası:', err);
+            }
+        }
+    </script>
+</body>
+</html>

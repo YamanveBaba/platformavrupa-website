@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Günün Fırsatları | PlatformAvrupa</title>
+    <meta name="description" content="Uçak bileti, otel, araç kiralama ve tatil fırsatları. En uygun fiyatları yakalayın!">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        .glass-header { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid #e2e8f0; }
+        
+        .tab-btn { 
+            padding: 12px 24px; border-radius: 12px; font-weight: 700; transition: all 0.2s;
+            border: 2px solid transparent; cursor: pointer;
+        }
+        .tab-btn:hover { background: #f1f5f9; }
+        .tab-btn.active { background: #3b82f6; color: white; border-color: #3b82f6; }
+        
+        .deal-card {
+            background: white; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0;
+            transition: all 0.3s; cursor: pointer; position: relative;
+        }
+        .deal-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
+        .deal-card img { width: 100%; height: 160px; object-fit: cover; transition: 0.5s; }
+        .deal-card:hover img { transform: scale(1.05); }
+        
+        .discount-badge {
+            position: absolute; top: 12px; right: 12px; 
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white; padding: 6px 12px; border-radius: 20px; font-weight: 800; font-size: 12px;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+        }
+        
+        .partner-badge {
+            position: absolute; top: 12px; left: 12px;
+            background: white; padding: 4px 8px; border-radius: 8px; font-size: 10px; font-weight: 700;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .skeleton { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%); background-size: 200% 100%; }
+        @keyframes pulse { 0%, 100% { background-position: 200% 0; } 50% { background-position: 0 0; } }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <nav class="glass-header sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+            <a href="index.html" class="flex items-center gap-2 text-slate-600 hover:text-blue-600 transition font-bold">
+                <div class="w-9 h-9 bg-slate-100 rounded-xl flex items-center justify-center"><i class="fa-solid fa-arrow-left"></i></div>
+                <span class="hidden sm:inline">Ana Sayfa</span>
+            </a>
+            <div class="flex items-center gap-2">
+                <div class="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center text-white text-xl shadow-lg">
+                    <i class="fa-solid fa-fire-flame-curved"></i>
+                </div>
+                <span class="font-extrabold text-xl text-slate-900 tracking-tight">Günün <span class="text-orange-500">Fırsatları</span></span>
+            </div>
+            <div class="w-20"></div>
+        </div>
+    </nav>
+
+    <main class="flex-grow">
+        
+        <!-- Hero Banner -->
+        <div class="bg-gradient-to-r from-blue-600 via-purple-600 to-orange-500 py-8 px-6">
+            <div class="max-w-6xl mx-auto text-center">
+                <h1 class="text-2xl md:text-4xl font-extrabold text-white mb-2">🔥 Kaçırılmayacak Fırsatlar!</h1>
+                <p class="text-white/80">Her gün güncellenen en uygun fiyatlar</p>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="bg-white border-b border-slate-200 sticky top-20 z-40">
+            <div class="max-w-6xl mx-auto px-4 py-4">
+                <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                    <button class="tab-btn active" data-tab="all" onclick="filterDeals('all')">
+                        <i class="fa-solid fa-layer-group mr-2"></i>Tümü
+                    </button>
+                    <button class="tab-btn" data-tab="ucak" onclick="filterDeals('ucak')">
+                        <i class="fa-solid fa-plane mr-2"></i>Uçak
+                    </button>
+                    <button class="tab-btn" data-tab="otel" onclick="filterDeals('otel')">
+                        <i class="fa-solid fa-hotel mr-2"></i>Otel
+                    </button>
+                    <button class="tab-btn" data-tab="arac" onclick="filterDeals('arac')">
+                        <i class="fa-solid fa-car mr-2"></i>Araç
+                    </button>
+                    <button class="tab-btn" data-tab="tatil" onclick="filterDeals('tatil')">
+                        <i class="fa-solid fa-umbrella-beach mr-2"></i>Tatil
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Deals Grid -->
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            
+            <!-- Loading State -->
+            <div id="loadingState" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white rounded-2xl overflow-hidden">
+                    <div class="skeleton h-40"></div>
+                    <div class="p-4 space-y-3">
+                        <div class="skeleton h-4 w-3/4 rounded"></div>
+                        <div class="skeleton h-3 w-1/2 rounded"></div>
+                        <div class="skeleton h-6 w-1/3 rounded"></div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl overflow-hidden">
+                    <div class="skeleton h-40"></div>
+                    <div class="p-4 space-y-3">
+                        <div class="skeleton h-4 w-3/4 rounded"></div>
+                        <div class="skeleton h-3 w-1/2 rounded"></div>
+                        <div class="skeleton h-6 w-1/3 rounded"></div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl overflow-hidden">
+                    <div class="skeleton h-40"></div>
+                    <div class="p-4 space-y-3">
+                        <div class="skeleton h-4 w-3/4 rounded"></div>
+                        <div class="skeleton h-3 w-1/2 rounded"></div>
+                        <div class="skeleton h-6 w-1/3 rounded"></div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl overflow-hidden">
+                    <div class="skeleton h-40"></div>
+                    <div class="p-4 space-y-3">
+                        <div class="skeleton h-4 w-3/4 rounded"></div>
+                        <div class="skeleton h-3 w-1/2 rounded"></div>
+                        <div class="skeleton h-6 w-1/3 rounded"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deals Container -->
+            <div id="dealsContainer" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Fırsatlar buraya yüklenecek -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden text-center py-16">
+                <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl text-slate-300">
+                    <i class="fa-solid fa-tag"></i>
+                </div>
+                <h3 class="text-xl font-bold text-slate-700 mb-2">Henüz fırsat yok</h3>
+                <p class="text-slate-500">Bu kategoride şu an aktif fırsat bulunmuyor.</p>
+            </div>
+        </div>
+
+        <!-- Info Section -->
+        <div class="bg-slate-50 py-12 px-6">
+            <div class="max-w-6xl mx-auto">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-2xl text-center border border-slate-100">
+                        <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-3 text-xl">
+                            <i class="fa-solid fa-clock"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-800 mb-1">Günlük Güncelleme</h3>
+                        <p class="text-sm text-slate-500">Fırsatlar her gün otomatik güncellenir</p>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-2xl text-center border border-slate-100">
+                        <div class="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-3 text-xl">
+                            <i class="fa-solid fa-shield-halved"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-800 mb-1">Güvenli Alışveriş</h3>
+                        <p class="text-sm text-slate-500">Tüm işlemler partner sitelerinde yapılır</p>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-2xl text-center border border-slate-100">
+                        <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-3 text-xl">
+                            <i class="fa-solid fa-bell"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-800 mb-1">Bildirim Al</h3>
+                        <p class="text-sm text-slate-500">En iyi fırsatlardan haberdar ol</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 py-8 text-center text-slate-400 text-xs">
+        &copy; 2025 Platform Avrupa. Skyscanner, Booking.com, Rentalcars.com ve Tatil Sepeti iş ortağı.
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script>
+        let allDeals = [];
+        let currentFilter = 'all';
+
+        // Partner bilgileri
+        const partnerInfo = {
+            skyscanner: { name: 'Skyscanner', color: '#0770e3', icon: 'fa-plane' },
+            booking: { name: 'Booking.com', color: '#003580', icon: 'fa-hotel' },
+            rentalcars: { name: 'Rentalcars', color: '#f97316', icon: 'fa-car' },
+            tatilsepeti: { name: 'Tatil Sepeti', color: '#0d9488', icon: 'fa-umbrella-beach' }
+        };
+
+        // Sayfa yüklendiğinde fırsatları getir
+        document.addEventListener('DOMContentLoaded', loadDeals);
+
+        async function loadDeals() {
+            try {
+                // Supabase'den aktif fırsatları çek
+                if (sb) {
+                    const { data, error } = await sb
+                        .from('promotions')
+                        .select('*')
+                        .eq('is_active', true)
+                        .or('valid_until.is.null,valid_until.gte.' + new Date().toISOString().split('T')[0])
+                        .order('is_featured', { ascending: false })
+                        .order('discount_percent', { ascending: false });
+                    
+                    if (error) throw error;
+                    
+                    if (data && data.length > 0) {
+                        allDeals = data;
+                        renderDeals(data);
+                    } else {
+                        // Veritabanında fırsat yoksa demo fırsatlar göster
+                        allDeals = getDemoDeals();
+                        renderDeals(allDeals);
+                    }
+                } else {
+                    // Supabase yoksa demo fırsatlar
+                    allDeals = getDemoDeals();
+                    renderDeals(allDeals);
+                }
+            } catch (error) {
+                console.error('Fırsatlar yüklenemedi:', error);
+                allDeals = getDemoDeals();
+                renderDeals(allDeals);
+            }
+        }
+
+        function getDemoDeals() {
+            return [
+                {
+                    id: 1, partner: 'skyscanner', category: 'ucak',
+                    title: 'Berlin → İstanbul', description: 'Direkt uçuş, ekonomi sınıfı',
+                    price: 89, original_price: 149, currency: 'EUR', discount_percent: 40,
+                    image_url: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=400',
+                    affiliate_link: 'https://www.skyscanner.com.tr/transport/flights/BER/IST',
+                    is_featured: true
+                },
+                {
+                    id: 2, partner: 'booking', category: 'otel',
+                    title: 'Antalya 5* Resort', description: 'Her şey dahil, deniz manzaralı',
+                    price: 75, original_price: 120, currency: 'EUR', discount_percent: 38,
+                    image_url: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400',
+                    affiliate_link: 'https://www.booking.com/searchresults.html?ss=Antalya',
+                    is_featured: true
+                },
+                {
+                    id: 3, partner: 'rentalcars', category: 'arac',
+                    title: 'Frankfurt Havalimanı', description: 'Ekonomi sınıfı araç, 7 gün',
+                    price: 35, original_price: 55, currency: 'EUR', discount_percent: 36,
+                    image_url: 'https://images.unsplash.com/photo-1449965408869-ebd3fee56718?w=400',
+                    affiliate_link: 'https://www.rentalcars.com/search-results?locationName=Frankfurt+Airport',
+                    is_featured: true
+                },
+                {
+                    id: 4, partner: 'tatilsepeti', category: 'tatil',
+                    title: 'Kapadokya Turu', description: '3 gece konaklama + Balon turu',
+                    price: 299, original_price: 449, currency: 'EUR', discount_percent: 33,
+                    image_url: 'https://images.unsplash.com/photo-1641128324972-af3212f0f6bd?w=400',
+                    affiliate_link: 'https://www.tatilsepeti.com/kapadokya-turlari',
+                    is_featured: true
+                },
+                {
+                    id: 5, partner: 'skyscanner', category: 'ucak',
+                    title: 'Brüksel → Antalya', description: 'Tek yön, ekonomi',
+                    price: 69, original_price: 99, currency: 'EUR', discount_percent: 30,
+                    image_url: 'https://images.unsplash.com/photo-1542296332-2e4473faf563?w=400',
+                    affiliate_link: 'https://www.skyscanner.com.tr/transport/flights/BRU/AYT'
+                },
+                {
+                    id: 6, partner: 'booking', category: 'otel',
+                    title: 'İstanbul Taksim Otel', description: 'Kahvaltı dahil, merkezi konum',
+                    price: 45, original_price: 70, currency: 'EUR', discount_percent: 35,
+                    image_url: 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=400',
+                    affiliate_link: 'https://www.booking.com/searchresults.html?ss=Taksim'
+                },
+                {
+                    id: 7, partner: 'rentalcars', category: 'arac',
+                    title: 'İstanbul Havalimanı', description: 'SUV, sınırsız km',
+                    price: 45, original_price: 65, currency: 'EUR', discount_percent: 31,
+                    image_url: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=400',
+                    affiliate_link: 'https://www.rentalcars.com/search-results?locationName=Istanbul+Airport'
+                },
+                {
+                    id: 8, partner: 'tatilsepeti', category: 'tatil',
+                    title: 'Ege Kıyıları Turu', description: 'Bodrum-Marmaris-Fethiye',
+                    price: 399, original_price: 599, currency: 'EUR', discount_percent: 33,
+                    image_url: 'https://images.unsplash.com/photo-1520699049698-acd2fcc51056?w=400',
+                    affiliate_link: 'https://www.tatilsepeti.com/ege-turlari'
+                }
+            ];
+        }
+
+        function renderDeals(deals) {
+            const container = document.getElementById('dealsContainer');
+            const loading = document.getElementById('loadingState');
+            const empty = document.getElementById('emptyState');
+            
+            loading.classList.add('hidden');
+            
+            if (deals.length === 0) {
+                container.classList.add('hidden');
+                empty.classList.remove('hidden');
+                return;
+            }
+            
+            empty.classList.add('hidden');
+            container.classList.remove('hidden');
+            container.style.display = 'grid';
+            
+            container.innerHTML = deals.map(deal => {
+                const partner = partnerInfo[deal.partner] || { name: deal.partner, color: '#6b7280', icon: 'fa-tag' };
+                
+                return `
+                    <div class="deal-card group" onclick="openDeal('${deal.affiliate_link}', '${deal.partner}', '${deal.category}', '${deal.title}')">
+                        <div class="relative overflow-hidden">
+                            <img src="${deal.image_url || 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400'}" 
+                                 alt="${deal.title}" loading="lazy">
+                            
+                            ${deal.discount_percent ? `<div class="discount-badge">-%${deal.discount_percent}</div>` : ''}
+                            
+                            <div class="partner-badge" style="color: ${partner.color}">
+                                <i class="fa-solid ${partner.icon} mr-1"></i>${partner.name}
+                            </div>
+                        </div>
+                        
+                        <div class="p-4">
+                            <h3 class="font-bold text-slate-800 text-lg mb-1 group-hover:text-blue-600 transition">${deal.title}</h3>
+                            <p class="text-sm text-slate-500 mb-3">${deal.description || ''}</p>
+                            
+                            <div class="flex items-end justify-between">
+                                <div>
+                                    ${deal.original_price ? `<span class="text-sm text-slate-400 line-through">${deal.original_price}${deal.currency}</span>` : ''}
+                                    <span class="text-2xl font-extrabold text-slate-900">${deal.price}<span class="text-sm font-bold text-slate-500">${deal.currency}</span></span>
+                                </div>
+                                <div class="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center group-hover:bg-blue-600 transition">
+                                    <i class="fa-solid fa-arrow-right"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filterDeals(category) {
+            currentFilter = category;
+            
+            // Tab butonlarını güncelle
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.tab === category) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Fırsatları filtrele
+            const filtered = category === 'all' 
+                ? allDeals 
+                : allDeals.filter(d => d.category === category);
+            
+            renderDeals(filtered);
+        }
+
+        function openDeal(link, partner, category, title) {
+            // Affiliate tracking
+            if (typeof trackAffiliateClick === 'function') {
+                trackAffiliateClick(partner, 'firsatlar.html', {
+                    category: category,
+                    title: title,
+                    source: 'deals_page'
+                });
+            }
+            
+            // Affiliate parametrelerini ekle
+            let finalLink = link;
+            
+            if (partner === 'booking' && typeof AFFILIATE_CONFIG !== 'undefined' && AFFILIATE_CONFIG.booking) {
+                finalLink += (link.includes('?') ? '&' : '?') + `aid=${AFFILIATE_CONFIG.booking.aid}&label=${AFFILIATE_CONFIG.booking.label}`;
+            }
+            
+            if (partner === 'rentalcars' && typeof AFFILIATE_CONFIG !== 'undefined' && AFFILIATE_CONFIG.rentalcars) {
+                finalLink += (link.includes('?') ? '&' : '?') + `affiliateCode=${AFFILIATE_CONFIG.rentalcars.affiliateCode}`;
+            }
+            
+            if (partner === 'tatilsepeti' && typeof AFFILIATE_CONFIG !== 'undefined' && AFFILIATE_CONFIG.tatilSepeti) {
+                finalLink += (link.includes('?') ? '&' : '?') + `ref=${AFFILIATE_CONFIG.tatilSepeti.ref}`;
+            }
+            
+            window.open(finalLink, '_blank');
+        }
+    </script>
+</body>
+</html>

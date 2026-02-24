@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+
+<html lang="tr">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Duyuru ve Haberler</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+   
+
+    <style>
+
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+
+        .news-card {
+
+            background: white; border: 1px solid #e2e8f0; border-radius: 1.5rem; overflow: hidden;
+
+            transition: all 0.3s ease; cursor: pointer;
+
+        }
+
+        .news-card:hover {
+
+            transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); border-color: #cbd5e1;
+
+        }
+
+    </style>
+
+</head>
+
+<body class="text-slate-800 flex flex-col min-h-screen">
+
+   
+
+    <nav class="bg-white/95 backdrop-blur sticky top-0 z-50 border-b border-slate-200 px-6 py-4 shadow-sm">
+
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+
+            <a href="index.html" class="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition font-bold">
+
+                <div class="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center"><i class="fa-solid fa-arrow-left"></i></div>
+
+                <span>Ana Sayfa</span>
+
+            </a>
+
+            <div class="flex items-center gap-2">
+
+                <span class="w-2 h-2 bg-red-600 rounded-full animate-pulse"></span>
+
+                <h1 class="text-xl font-extrabold text-slate-900 tracking-tight">Duyuru ve Haberler</h1>
+
+            </div>
+
+            <div class="w-24"></div>
+
+        </div>
+
+    </nav>
+
+
+
+    <main class="flex-grow max-w-5xl mx-auto px-4 py-10 w-full">
+
+        <div id="haberListesi" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+            <p class="col-span-2 text-center text-slate-500 mt-10"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Yükleniyor...</p>
+
+        </div>
+
+    </main>
+
+
+
+    <div class="bg-white border-t border-slate-200 mt-auto py-8 text-center text-xs text-slate-400">
+
+        &copy; 2025 PlatformAvrupa. Tüm hakları saklıdır.
+
+    </div>
+
+
+
+    <script>
+
+        const SUPABASE_URL = 'https://vhietrqljahdmloazgpp.supabase.co';
+
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoaWV0cnFsamFoZG1sb2F6Z3BwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTk5MTcsImV4cCI6MjA4MDYzNTkxN30.sxpUrTnR40XuEBPUeQXj352xMziGr_lDqdA8H69ejBA';
+
+        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+
+
+        window.onload = async function() {
+
+            const liste = document.getElementById('haberListesi');
+
+           
+
+            const { data, error } = await sb.from('announcements').select('*').order('created_at', { ascending: false });
+
+
+
+            if (error) { liste.innerHTML = '<p class="text-red-500 text-center col-span-2">Hata oluştu.</p>'; return; }
+
+            if (!data || data.length === 0) { liste.innerHTML = '<p class="text-slate-500 text-center col-span-2">Henüz duyuru yok.</p>'; return; }
+
+
+
+            liste.innerHTML = '';
+
+            data.forEach(haber => {
+
+                const tarih = new Date(haber.created_at).toLocaleDateString('tr-TR');
+
+                const resim = haber.image_url ? haber.image_url : 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=600';
+
+
+
+                const html = `
+
+                <div class="news-card group" onclick="window.location.href='duyuru_detay.html?id=${haber.id}'">
+
+                    <div class="h-56 overflow-hidden relative">
+
+                        <img src="${resim}" class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
+
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60"></div>
+
+                        <span class="absolute top-4 left-4 bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-1 rounded shadow-sm uppercase tracking-wide">DUYURU</span>
+
+                    </div>
+
+                    <div class="p-6">
+
+                        <div class="text-xs text-slate-400 font-bold mb-2 flex items-center gap-1"><i class="fa-regular fa-clock"></i> ${tarih}</div>
+
+                        <h2 class="text-xl font-bold text-slate-800 mb-3 leading-tight group-hover:text-blue-600 transition">${haber.title}</h2>
+
+                        <p class="text-slate-500 text-sm leading-relaxed line-clamp-3">${haber.content}</p>
+
+                        <div class="mt-4 pt-4 border-t border-slate-50 flex items-center text-blue-600 text-sm font-bold gap-2 group-hover:gap-3 transition-all">
+
+                            Haberi Oku <i class="fa-solid fa-arrow-right"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>`;
+
+                liste.innerHTML += html;
+
+            });
+
+        };
+
+    </script>
+
+</body>
+
+</html>

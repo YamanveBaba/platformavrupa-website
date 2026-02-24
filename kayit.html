@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kayıt Ol - PlatformAvrupa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="utils.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; }</style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4 py-8">
+
+    <div class="w-full max-w-lg bg-white p-8 md:p-10 rounded-3xl shadow-xl border border-slate-200">
+        
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-extrabold text-slate-900">Aileye Katılın</h2>
+            <p class="text-slate-500 mt-2 text-sm">Avrupa'daki Türk topluluğunun buluşma noktası.</p>
+        </div>
+
+        <form onsubmit="kayitOl(event)" class="space-y-5">
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-xs font-bold text-slate-500 uppercase ml-1 block mb-1">Ad</label>
+                    <input type="text" id="inputAd" required class="w-full border-2 border-slate-200 rounded-xl p-3 outline-none focus:border-blue-500 transition">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-500 uppercase ml-1 block mb-1">Soyad</label>
+                    <input type="text" id="inputSoyad" required class="w-full border-2 border-slate-200 rounded-xl p-3 outline-none focus:border-blue-500 transition">
+                </div>
+            </div>
+
+            <div>
+                <label class="text-xs font-bold text-slate-500 uppercase ml-1 block mb-1">Konum</label>
+                <div class="grid grid-cols-2 gap-4">
+                    <select id="ulkeSecimi" onchange="ulkeDegisti()" class="w-full border-2 border-slate-200 rounded-xl p-3 bg-white outline-none focus:border-blue-500 cursor-pointer text-slate-700 font-medium">
+                        <option value="">Ülke Seçiniz...</option>
+                    </select>
+                    <select id="sehirSecimi" class="w-full border-2 border-slate-200 rounded-xl p-3 bg-white outline-none focus:border-blue-500 cursor-pointer text-slate-700 font-medium opacity-50" disabled>
+                        <option value="">Şehir</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label class="text-xs font-bold text-slate-500 uppercase ml-1 block mb-1">E-Posta</label>
+                <input type="email" id="kayitEmail" required placeholder="ornek@mail.com" class="w-full border-2 border-slate-200 rounded-xl p-3 outline-none focus:border-blue-500 transition">
+            </div>
+
+            <div>
+                <label class="text-xs font-bold text-slate-500 uppercase ml-1 block mb-1">Telefon Numarası <span class="text-slate-400 font-normal lowercase">(isteğe bağlı)</span></label>
+                <input type="tel" id="inputTel" placeholder="+90 555 123 45 67" class="w-full border-2 border-slate-200 rounded-xl p-3 outline-none focus:border-blue-500 transition">
+            </div>
+            
+            <div>
+                <label class="text-xs font-bold text-slate-500 uppercase ml-1 block mb-1">Şifre Belirleyin</label>
+                <input type="password" id="inputPassword" required class="w-full border-2 border-slate-200 rounded-xl p-3 outline-none focus:border-blue-500 transition">
+                <p class="text-xs text-slate-400 mt-1 ml-1">En az 6 karakter olmalı.</p>
+            </div>
+
+            <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-4">
+                
+                <div>
+                    <h4 class="text-xs font-bold text-slate-500 uppercase flex items-center gap-2 mb-3">
+                        <i class="fa-solid fa-user-shield"></i> İlanlarda İsmim Nasıl Görünsün?
+                    </h4>
+                    
+                    <div class="space-y-2">
+                        <label class="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-white border border-transparent hover:border-slate-200 transition">
+                            <input type="radio" name="isimTercihi" value="tam" class="w-4 h-4 text-blue-600 accent-blue-600" checked onchange="takmaIsimKontrol(false)">
+                            <div class="text-sm text-slate-700">Tam İsmim Görünsün <span class="text-slate-400 text-xs ml-1">(Ahmet Yılmaz)</span></div>
+                        </label>
+                        
+                        <label class="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-white border border-transparent hover:border-slate-200 transition">
+                            <input type="radio" name="isimTercihi" value="bas_harf" class="w-4 h-4 text-blue-600 accent-blue-600" onchange="takmaIsimKontrol(false)">
+                            <div class="text-sm text-slate-700">Sadece Baş Harfler <span class="text-slate-400 text-xs ml-1">(A. Y.)</span></div>
+                        </label>
+
+                        <label class="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-white border border-transparent hover:border-slate-200 transition">
+                            <input type="radio" name="isimTercihi" value="takma" class="w-4 h-4 text-blue-600 accent-blue-600" onchange="takmaIsimKontrol(true)">
+                            <div class="text-sm text-slate-700">Takma İsim (Nick) Kullan</div>
+                        </label>
+                        
+                        <div id="takmaIsimKutu" class="hidden mt-2 ml-7">
+                            <input type="text" id="inputNickname" placeholder="Takma Adınız (Örn: Gezgin34)" class="w-full border-2 border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-blue-500 transition">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-t border-slate-200"></div>
+
+                <div>
+                    <h4 class="text-xs font-bold text-slate-500 uppercase flex items-center gap-2 mb-2">
+                        <i class="fa-solid fa-phone"></i> İletişim Tercihi
+                    </h4>
+                    <label class="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-white border border-transparent hover:border-slate-200 transition">
+                        <input type="checkbox" id="gizliTel" class="w-4 h-4 text-blue-600 rounded border-gray-300">
+                        <span class="text-sm text-slate-700">Telefon numaramı gizle (Mesajla ulaşsınlar)</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="flex items-start gap-3 pt-2">
+                <input type="checkbox" id="sozlesmeOnay" onchange="butonKontrol()" class="accent-blue-600 w-5 h-5 mt-0.5 cursor-pointer">
+                <span class="text-xs text-slate-500 leading-snug">
+                    <a href="sozlesme.html" target="_blank" class="text-blue-600 font-bold hover:underline">Kullanım Koşulları</a>'nı okudum ve kabul ediyorum.
+                </span>
+            </div>
+
+            <button type="submit" id="kayitButton" disabled class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-200 flex items-center justify-center gap-2 transform active:scale-95 opacity-50 cursor-not-allowed transition-all">
+                <i class="fa-solid fa-user-plus"></i> Hesabı Oluştur
+            </button>
+            <p id="hataMesaji" class="text-center text-red-500 text-sm font-bold hidden"></p>
+        </form>
+        
+        <div class="relative my-6">
+            <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-200"></div></div>
+            <div class="relative flex justify-center text-xs"><span class="px-2 bg-white text-slate-500">veya</span></div>
+        </div>
+        
+        <button onclick="googleIleKayit()" class="w-full bg-white border-2 border-slate-200 text-slate-900 font-bold py-4 rounded-xl shadow-lg hover:bg-slate-50 flex items-center justify-center gap-3 transition">
+            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            Google ile Kayıt Ol
+        </button>
+        
+        <div class="mt-8 text-center border-t border-slate-100 pt-6">
+            <p class="text-slate-500 text-sm">Zaten hesabınız var mı? <a href="login.html" class="text-slate-900 font-bold hover:underline">Giriş Yap</a></p>
+        </div>
+
+    </div>
+    
+    <script src="genel_veriler.js"></script>
+
+    <script>
+        // Supabase bağlantısı config.js'den geliyor
+
+        window.onload = function() { if (typeof ulkeleriDoldur === 'function') ulkeleriDoldur('ulkeSecimi'); };
+        function ulkeDegisti() { const kod = document.getElementById('ulkeSecimi').value; if (typeof sehirleriGetir === 'function') sehirleriGetir(kod, 'sehirSecimi'); }
+        
+        function butonKontrol() {
+            const onay = document.getElementById('sozlesmeOnay').checked;
+            const btn = document.getElementById('kayitButton');
+            btn.disabled = !onay;
+            btn.classList.toggle('opacity-50', !onay);
+            btn.classList.toggle('cursor-not-allowed', !onay);
+            btn.classList.toggle('hover:bg-blue-700', onay);
+        }
+
+        function takmaIsimKontrol(aktif) {
+            const kutu = document.getElementById('takmaIsimKutu');
+            if (aktif) { kutu.classList.remove('hidden'); document.getElementById('inputNickname').required = true; } 
+            else { kutu.classList.add('hidden'); document.getElementById('inputNickname').required = false; }
+        }
+
+        async function kayitOl(e) {
+            e.preventDefault();
+            const btn = document.getElementById('kayitButton');
+            const msg = document.getElementById('hataMesaji');
+            
+            // Veri Alma
+            const ad = document.getElementById('inputAd').value;
+            const soyad = document.getElementById('inputSoyad').value;
+            let tamIsim = ad + " " + soyad; 
+            const email = document.getElementById('kayitEmail').value;
+            const telefon = document.getElementById('inputTel').value;
+            const password = document.getElementById('inputPassword').value;
+            const ulke = document.getElementById('ulkeSecimi').value;
+            const sehirSelect = document.getElementById('sehirSecimi');
+            const sehir = sehirSelect.options[sehirSelect.selectedIndex]?.text || sehirSelect.value;
+
+            // İsim Tercihi (Bu 'full_name' olacak yani görünen isim)
+            const isimTercihi = document.querySelector('input[name="isimTercihi"]:checked').value;
+            let finalName = tamIsim;
+            if (isimTercihi === 'bas_harf') finalName = ad[0].toUpperCase() + ". " + soyad[0].toUpperCase() + ".";
+            else if (isimTercihi === 'takma') {
+                const nick = document.getElementById('inputNickname').value.trim();
+                if(!nick) { alert("Takma isim giriniz!"); return; }
+                finalName = nick;
+            }
+
+            if(ulke === "" || sehir === "" || sehir === "Şehir") { alert("Lütfen Şehir Seçiniz!"); return; }
+
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Kaydediliyor...';
+            btn.disabled = true;
+            msg.classList.add('hidden');
+
+            try {
+                // 1. Kullanıcıyı Oluştur
+                const { data, error } = await sb.auth.signUp({ email: email, password: password });
+                if (error) throw error;
+
+                if (data.user) {
+                    // 2. Profili Kaydet
+                    await sb.from('profiles').insert([{
+                        id: data.user.id,
+                        email: email,
+                        full_name: finalName, // Takma ad veya tercih edilen isim
+                        real_name: tamIsim,   // **GERÇEK İSİM (Ad Soyad)**
+                        country: ulke,
+                        city: sehir,
+                        phone: telefon,
+                        role: 'user',
+                        status: 'active'
+                    }]);
+
+                    // 3. HAFIZAYA KAYDET (DÜZELTİLEN KISIM: real_name de ekledik)
+                    localStorage.setItem('isLoggedIn', 'true');
+                    localStorage.setItem('userEmail', email);
+                    localStorage.setItem('userName', finalName); // Görünen isim
+                    localStorage.setItem('userRealName', tamIsim); // **Gerçek isim (Profilde görünecek)**
+                    localStorage.setItem('userCity', sehir);
+                    localStorage.setItem('userLocation', sehir); // Sohbet için yedek
+                    localStorage.setItem('userCountry', ulke);
+
+                    // Direkt yönlendir
+                    window.location.href = 'index.html'; 
+                }
+            } catch (err) {
+                console.error(err);
+                msg.innerText = "Hata: " + err.message;
+                msg.classList.remove('hidden');
+                btn.innerHTML = 'Tekrar Dene';
+                btn.disabled = false;
+            }
+        }
+
+        // Google ile kayıt
+        async function googleIleKayit() {
+            try {
+                const { data, error } = await sb.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo: window.location.origin + '/index.html'
+                    }
+                });
+                
+                if (error) {
+                    console.error('Google kayıt hatası:', error);
+                    document.getElementById('hataMesaji').innerText = 'Google kayıt başarısız.';
+                    document.getElementById('hataMesaji').classList.remove('hidden');
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+    </script>
+</body>
+</html>

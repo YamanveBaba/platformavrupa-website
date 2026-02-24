@@ -1,0 +1,10 @@
+# Platform Avrupa - Statik site (HTML/JS/CSS, build yok)
+# Netlify bu klasörü doğrudan yayınlar.
+
+[build]
+  publish = "."
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

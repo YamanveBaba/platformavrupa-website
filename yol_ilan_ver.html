@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yolculuk İlanı Ver - PlatformAvrupa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="config.js"></script>
+    <script src="auth.js"></script>
+    <script src="utils.js"></script>
+    <script src="genel_veriler.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .form-section { background: white; border-radius: 20px; padding: 2rem; margin-bottom: 1.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .modern-input { width: 100%; border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px; font-size: 14px; transition: all 0.2s; }
+        .modern-input:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+        .toggle-switch { position: relative; width: 50px; height: 26px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; border-radius: 34px; }
+        .toggle-slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .toggle-slider { background-color: #667eea; }
+        input:checked + .toggle-slider:before { transform: translateX(24px); }
+    </style>
+</head>
+<body class="min-h-screen pb-20">
+
+    <!-- Header -->
+    <nav class="bg-white/95 backdrop-blur sticky top-0 z-50 shadow-lg">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
+            <a href="yol_arkadasi.html" class="flex items-center gap-2 text-slate-800 hover:text-purple-600 transition font-bold">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span>Geri</span>
+            </a>
+            
+            <h1 class="font-bold text-xl text-slate-800">
+                <i class="fa-solid fa-car-side text-purple-600 mr-2"></i>
+                Yolculuk İlanı Ver
+            </h1>
+            
+            <div class="w-20"></div>
+        </div>
+    </nav>
+
+    <!-- Form -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Bilgilendirme -->
+        <div class="bg-white/10 backdrop-blur border border-white/20 rounded-2xl p-6 mb-6 text-white">
+            <div class="flex items-start gap-4">
+                <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
+                    <i class="fa-solid fa-shield-check text-2xl"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg mb-2">Güvenli Yolculuk İçin</h3>
+                    <ul class="text-sm text-purple-100 space-y-1">
+                        <li><i class="fa-solid fa-check mr-2"></i>Profiliniz doğrulanmış olmalı</li>
+                        <li><i class="fa-solid fa-check mr-2"></i>Gerçek bilgiler paylaşın</li>
+                        <li><i class="fa-solid fa-check mr-2"></i>Yolcularla önceden iletişime geçin</li>
+                    </ul>
+                    <div class="mt-3 p-3 bg-white/10 rounded-lg">
+                        <div class="text-xs font-bold text-white mb-1 cursor-pointer" onclick="toggleVerificationInfo()">
+                            <i class="fa-solid fa-info-circle mr-1"></i>Onaylı Profil Nedir?
+                        </div>
+                        <div id="verificationInfo" class="hidden text-xs text-purple-100 mt-2 space-y-1">
+                            <p>• Telefon numaranız doğrulanmış olmalı</p>
+                            <p>• Profil bilgileriniz tam doldurulmuş olmalı</p>
+                            <p>• Admin onayı gerekebilir (ilk ilan için)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <form onsubmit="submitTrip(event)">
+            
+            <!-- Rota Bilgileri -->
+            <div class="form-section">
+                <h3 class="font-bold text-xl text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-route text-purple-600"></i>
+                    Rota Bilgileri
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Sol Taraf: Ülke/Şehir Bilgileri -->
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-xs font-bold text-slate-600 mb-2 block">Nereden Ülke*</label>
+                            <select id="fromCountry" required onchange="updateFromCities()" class="modern-input">
+                                <option value="">Ülke Seçin</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-600 mb-2 block">Nereden Şehir*</label>
+                            <select id="fromCity" required class="modern-input">
+                                <option value="">Önce ülke seçin</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-600 mb-2 block">Nereye Ülke*</label>
+                            <select id="toCountry" required onchange="updateToCities()" class="modern-input">
+                                <option value="">Ülke Seçin</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-600 mb-2 block">Nereye Şehir*</label>
+                            <select id="toCity" required class="modern-input">
+                                <option value="">Önce ülke seçin</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Sağ Taraf: Tarih/Saat/Ara Durak -->
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-xs font-bold text-slate-600 mb-2 block">Kalkış Tarihi*</label>
+                            <input type="date" id="travelDate" required class="modern-input">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-600 mb-2 block">Tahmini Kalkış Saati</label>
+                            <select id="travelTime" class="modern-input">
+                                <option value="">Saat Seçin</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-600 mb-2 block">Ara Duraklar (İsteğe Bağlı)</label>
+                            <button type="button" onclick="addStop()" class="bg-purple-100 hover:bg-purple-200 text-purple-700 px-4 py-2 rounded-lg text-sm font-bold mb-3 transition w-full">
+                                <i class="fa-solid fa-plus mr-2"></i>Ara Durak Ekle
+                            </button>
+                            <div id="stopsContainer" class="space-y-2"></div>
+                            <input type="hidden" id="stops" name="stops">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Araç ve Koltuk Bilgileri -->
+            <div class="form-section">
+                <h3 class="font-bold text-xl text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-car text-purple-600"></i>
+                    Araç Bilgileri
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs font-bold text-slate-600 mb-2 block">Araç Markası</label>
+                        <select id="carBrand" onchange="updateCarModels()" class="modern-input">
+                            <option value="">Marka Seçin</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-600 mb-2 block">Araç Modeli</label>
+                        <select id="carModel" class="modern-input" disabled>
+                            <option value="">Önce marka seçin</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div>
+                        <label class="text-xs font-bold text-slate-600 mb-2 block">Boş Koltuk Sayısı*</label>
+                        <select id="seatsAvailable" required class="modern-input">
+                            <option value="1">1 Koltuk</option>
+                            <option value="2">2 Koltuk</option>
+                            <option value="3">3 Koltuk</option>
+                            <option value="4">4 Koltuk</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-600 mb-2 block">Kişi Başı Ücret (€)*</label>
+                        <input type="number" id="price" required placeholder="Örn: 50" class="modern-input" min="0" step="5">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Yolculuk Tercihleri -->
+            <div class="form-section">
+                <h3 class="font-bold text-xl text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-sliders text-purple-600"></i>
+                    Yolculuk Tercihleri
+                </h3>
+                
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-box text-2xl text-green-600"></i>
+                            <div>
+                                <div class="font-bold text-slate-800">Kargo Kabul Ediyorum</div>
+                                <div class="text-xs text-slate-500">Yolculardan küçük paket/emanet kabul ederim</div>
+                            </div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="isCargoAllowed">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-smoking-ban text-2xl text-red-600"></i>
+                            <div>
+                                <div class="font-bold text-slate-800">Sigara İçilmez</div>
+                                <div class="text-xs text-slate-500">Araçta sigara içilmesini istemiyorum</div>
+                            </div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="noSmoking" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-music text-2xl text-purple-600"></i>
+                            <div>
+                                <div class="font-bold text-slate-800">Müzik Açık Olabilir</div>
+                                <div class="text-xs text-slate-500">Yolculuk sırasında müzik dinlenebilir</div>
+                            </div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="musicAllowed" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-paw text-2xl text-orange-600"></i>
+                            <div>
+                                <div class="font-bold text-slate-800">Evcil Hayvan Kabul Ederim</div>
+                                <div class="text-xs text-slate-500">Küçük evcil hayvanlar için uygun</div>
+                            </div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="petsAllowed">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- İletişim -->
+            <div class="form-section">
+                <h3 class="font-bold text-xl text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-phone text-purple-600"></i>
+                    İletişim Bilgileri
+                </h3>
+                
+                <div>
+                    <label class="text-xs font-bold text-slate-600 mb-2 block">Telefon Numarası*</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <select id="phoneCode" required class="modern-input">
+                            <option value="">Ülke Kodu</option>
+                        </select>
+                        <input type="tel" id="phoneNumber" required placeholder="123 456 7890" class="modern-input col-span-2">
+                    </div>
+                    <p class="text-xs text-slate-500 mt-1">
+                        <i class="fa-solid fa-lock mr-1"></i>
+                        Rezervasyon onaylandıktan sonra paylaşılacaktır
+                    </p>
+                </div>
+
+                <div class="mt-4">
+                    <label class="text-xs font-bold text-slate-600 mb-2 block">Ek Notlar</label>
+                    <textarea id="notes" rows="3" placeholder="Yolculuk hakkında eklemek istedikleriniz..." class="modern-input"></textarea>
+                </div>
+            </div>
+
+            <!-- Güvenlik Onayı -->
+            <div class="form-section bg-purple-50 border-2 border-purple-200">
+                <div class="flex items-start gap-3">
+                    <input type="checkbox" id="agreeTerms" required class="mt-1">
+                    <label for="agreeTerms" class="text-sm text-slate-700">
+                        <span class="font-bold">Güvenlik ve Kullanım Şartlarını kabul ediyorum.</span>
+                        Yolculuk ilanımın doğru bilgiler içerdiğini ve yolcuların güvenliğini ön planda tutacağımı taahhüt ediyorum.
+                    </label>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" id="submitBtn" disabled class="w-full bg-gradient-to-r from-purple-400 to-indigo-400 text-white py-4 rounded-2xl font-bold text-lg shadow-2xl transition opacity-50 cursor-not-allowed">
+                <i class="fa-solid fa-rocket mr-2"></i>
+                Yolculuk İlanını Yayınla
+            </button>
+
+            <p class="text-center text-white text-xs mt-4">
+                <i class="fa-solid fa-shield-check mr-1"></i>
+                İlanınız onaya gönderildikten sonra admin onayından geçecektir
+            </p>
+        </form>
+
+    </div>
+
+    <script>
+        let stopsList = [];
+        let stopCounter = 0;
+
+        // Sayfa yüklendiğinde dropdown'ları doldur
+        window.onload = function() {
+            initDropdowns();
+            initTimeDropdown();
+            initCarBrands();
+            initCheckboxHandler();
+            // Bugünden önce tarih seçilmesin
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('travelDate').setAttribute('min', today);
+        };
+
+        // Saat dropdown'ını 15 dakika aralıklı doldur
+        function initTimeDropdown() {
+            const timeSelect = document.getElementById('travelTime');
+            for (let hour = 0; hour < 24; hour++) {
+                for (let minute = 0; minute < 60; minute += 15) {
+                    const timeStr = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+                    const option = document.createElement('option');
+                    option.value = timeStr;
+                    option.textContent = timeStr;
+                    timeSelect.appendChild(option);
+                }
+            }
+        }
+
+        // Araç markalarını doldur
+        function initCarBrands() {
+            const brandSelect = document.getElementById('carBrand');
+            if (typeof arabaVeritabani === 'undefined') return;
+            
+            const brands = Object.keys(arabaVeritabani).sort();
+            brands.forEach(brand => {
+                const option = document.createElement('option');
+                option.value = brand;
+                option.textContent = brand;
+                brandSelect.appendChild(option);
+            });
+        }
+
+        // Marka seçilince modelleri doldur
+        function updateCarModels() {
+            const brand = document.getElementById('carBrand').value;
+            const modelSelect = document.getElementById('carModel');
+            
+            modelSelect.innerHTML = '<option value="">Model Seçin</option>';
+            modelSelect.disabled = !brand;
+            
+            if (brand && typeof arabaVeritabani !== 'undefined' && arabaVeritabani[brand]) {
+                const models = arabaVeritabani[brand].sort();
+                models.forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model;
+                    option.textContent = model;
+                    modelSelect.appendChild(option);
+                });
+            }
+        }
+
+        // Ara durak ekle
+        function addStop() {
+            if (stopsList.length >= 5) {
+                Swal.fire('Uyarı', 'Maksimum 5 ara durak ekleyebilirsiniz.', 'warning');
+                return;
+            }
+
+            stopCounter++;
+            const stopId = `stop_${stopCounter}`;
+            
+            Swal.fire({
+                title: 'Ara Durak Ekle',
+                html: `
+                    <div class="text-left">
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Ülke*</label>
+                        <select id="stopCountry_${stopId}" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm mb-3">
+                            <option value="">Ülke Seçin</option>
+                        </select>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Şehir*</label>
+                        <select id="stopCity_${stopId}" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" disabled>
+                            <option value="">Önce ülke seçin</option>
+                        </select>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Ekle',
+                cancelButtonText: 'İptal',
+                didOpen: () => {
+                    const countrySelect = document.getElementById(`stopCountry_${stopId}`);
+                    const citySelect = document.getElementById(`stopCity_${stopId}`);
+                    
+                    // Ülkeleri doldur
+                    const countries = Object.keys(lokasyonVeritabani).map(code => ({
+                        code,
+                        name: lokasyonVeritabani[code].isim
+                    })).sort((a, b) => a.name.localeCompare(b.name, 'tr'));
+                    
+                    countries.forEach(country => {
+                        const option = document.createElement('option');
+                        option.value = country.code;
+                        option.textContent = country.name;
+                        countrySelect.appendChild(option);
+                    });
+                    
+                    // Ülke değişince şehirleri doldur
+                    countrySelect.addEventListener('change', function() {
+                        const code = this.value;
+                        citySelect.innerHTML = '<option value="">Şehir Seçin</option>';
+                        citySelect.disabled = !code;
+                        
+                        if (code && lokasyonVeritabani[code]) {
+                            lokasyonVeritabani[code].sehirler.forEach(city => {
+                                const option = document.createElement('option');
+                                option.value = city;
+                                option.textContent = city;
+                                citySelect.appendChild(option);
+                            });
+                        }
+                    });
+                },
+                preConfirm: () => {
+                    const country = document.getElementById(`stopCountry_${stopId}`).value;
+                    const city = document.getElementById(`stopCity_${stopId}`).value;
+                    
+                    if (!country || !city) {
+                        Swal.showValidationMessage('Lütfen ülke ve şehir seçin');
+                        return false;
+                    }
+                    
+                    return { country, city, code: country };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const stop = {
+                        id: stopId,
+                        country: result.value.country,
+                        city: result.value.city,
+                        code: result.value.code
+                    };
+                    stopsList.push(stop);
+                    renderStops();
+                    updateStopsInput();
+                }
+            });
+        }
+
+        // Ara durakları render et
+        function renderStops() {
+            const container = document.getElementById('stopsContainer');
+            container.innerHTML = stopsList.map((stop, index) => `
+                <div class="flex items-center justify-between bg-purple-50 p-3 rounded-lg">
+                    <div class="flex items-center gap-2">
+                        <span class="text-lg">${lokasyonVeritabani[stop.code]?.bayrak || '📍'}</span>
+                        <span class="font-bold text-slate-800">${stop.city}, ${lokasyonVeritabani[stop.code]?.isim || stop.country}</span>
+                    </div>
+                    <button type="button" onclick="removeStop('${stop.id}')" class="text-red-600 hover:text-red-700">
+                        <i class="fa-solid fa-times"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Ara durağı kaldır
+        function removeStop(stopId) {
+            stopsList = stopsList.filter(s => s.id !== stopId);
+            renderStops();
+            updateStopsInput();
+        }
+
+        // Stops input'unu güncelle
+        function updateStopsInput() {
+            const stopsArray = stopsList.map(s => `${s.city},${s.code}`);
+            document.getElementById('stops').value = JSON.stringify(stopsArray);
+        }
+
+        // Onaylı profil bilgisi toggle
+        function toggleVerificationInfo() {
+            const info = document.getElementById('verificationInfo');
+            info.classList.toggle('hidden');
+        }
+
+        // Checkbox handler
+        function initCheckboxHandler() {
+            const checkbox = document.getElementById('agreeTerms');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'from-purple-400', 'to-indigo-400');
+                    submitBtn.classList.add('hover:scale-105', 'from-purple-600', 'to-indigo-600');
+                } else {
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('opacity-50', 'cursor-not-allowed', 'from-purple-400', 'to-indigo-400');
+                    submitBtn.classList.remove('hover:scale-105', 'from-purple-600', 'to-indigo-600');
+                }
+            });
+        }
+
+        // Dropdown'ları doldur
+        function initDropdowns() {
+            const fromCountry = document.getElementById('fromCountry');
+            const toCountry = document.getElementById('toCountry');
+            const phoneCode = document.getElementById('phoneCode');
+            
+            // Ülkeleri alfabetik sırala
+            const countries = Object.keys(lokasyonVeritabani).map(code => ({
+                code,
+                name: lokasyonVeritabani[code].isim,
+                flag: lokasyonVeritabani[code].bayrak,
+                tel: lokasyonVeritabani[code].tel
+            })).sort((a, b) => a.name.localeCompare(b.name, 'tr'));
+
+            // Nereden/Nereye ülke dropdown'ları
+            countries.forEach(country => {
+                const option1 = document.createElement('option');
+                option1.value = country.code;
+                option1.textContent = `${country.flag} ${country.name}`;
+                fromCountry.appendChild(option1);
+
+                const option2 = document.createElement('option');
+                option2.value = country.code;
+                option2.textContent = `${country.flag} ${country.name}`;
+                toCountry.appendChild(option2);
+
+                // Telefon kodu dropdown - isimli ve alfabetik
+                const option3 = document.createElement('option');
+                option3.value = country.tel;
+                option3.textContent = `${country.flag} ${country.tel} ${country.name}`;
+                phoneCode.appendChild(option3);
+            });
+        }
+
+        // Nereden ülke değiştiğinde şehirleri güncelle
+        function updateFromCities() {
+            const countryCode = document.getElementById('fromCountry').value;
+            const citySelect = document.getElementById('fromCity');
+            
+            citySelect.innerHTML = '<option value="">Şehir Seçin</option>';
+            
+            if (countryCode && lokasyonVeritabani[countryCode]) {
+                const cities = lokasyonVeritabani[countryCode].sehirler;
+                cities.forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city;
+                    option.textContent = city;
+                    citySelect.appendChild(option);
+                });
+            }
+        }
+
+        // Nereye ülke değiştiğinde şehirleri güncelle
+        function updateToCities() {
+            const countryCode = document.getElementById('toCountry').value;
+            const citySelect = document.getElementById('toCity');
+            
+            citySelect.innerHTML = '<option value="">Şehir Seçin</option>';
+            
+            if (countryCode && lokasyonVeritabani[countryCode]) {
+                const cities = lokasyonVeritabani[countryCode].sehirler;
+                cities.forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city;
+                    option.textContent = city;
+                    citySelect.appendChild(option);
+                });
+            }
+        }
+
+        async function submitTrip(event) {
+            event.preventDefault();
+
+            // Kullanıcı kontrolü
+            const user = await getCurrentUser();
+            if (!user) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Giriş Gerekli',
+                    text: 'İlan vermek için giriş yapmalısınız.',
+                    showCancelButton: true,
+                    confirmButtonText: 'Giriş Yap',
+                    cancelButtonText: 'İptal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = 'login.html';
+                    }
+                });
+                return;
+            }
+
+            // Checkbox kontrolü
+            const agreeCheckbox = document.getElementById('agreeTerms');
+            if (!agreeCheckbox.checked) {
+                Swal.fire('Onay Gerekli', 'Güvenlik şartlarını kabul etmelisiniz.', 'warning');
+                return;
+            }
+
+            // Profil bilgilerini Supabase'den çek
+            const { data: profile, error: profileError } = await sb
+                .from('profiles')
+                .select('real_name, phone, country, phone_verified, verification_method')
+                .eq('user_id', user.id)
+                .single();
+
+            if (profileError) {
+                console.error('Profil hatası:', profileError);
+            }
+
+            // Profil onayı kontrolü
+            if (!profile || (!profile.phone_verified && user.app_metadata?.provider !== 'google')) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Profil Onayı Gerekli',
+                    html: `
+                        <p>İlan vermek için profil onayınızın olması gerekiyor.</p>
+                        <p class="text-sm mt-2">Telefon numaranızı doğrulamanız veya Google ile giriş yapmanız gerekmektedir.</p>
+                    `,
+                    confirmButtonText: 'Tamam'
+                });
+                return;
+            }
+
+            // Form verilerini topla
+            const stopsValue = document.getElementById('stops').value;
+            const stopsArray = stopsValue ? JSON.parse(stopsValue) : null;
+            
+            // Telefon numarasını belirle (profil veya form)
+            const phoneCode = document.getElementById('phoneCode').value;
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            const phoneFromForm = phoneCode && phoneNumber ? `${phoneCode} ${phoneNumber}` : null;
+            const finalPhone = profile?.phone || phoneFromForm || 'Belirtilmemiş';
+            
+            const tripData = {
+                user_id: user.id,
+                driver_name: profile?.real_name || user.user_metadata?.full_name || user.email.split('@')[0],
+                phone: finalPhone,
+                from_country: document.getElementById('fromCountry').value,
+                from_city: document.getElementById('fromCity').value,
+                to_country: document.getElementById('toCountry').value,
+                to_city: document.getElementById('toCity').value,
+                travel_date: document.getElementById('travelDate').value,
+                travel_time: document.getElementById('travelTime').value || null,
+                stops: stopsArray,
+                car_brand: document.getElementById('carBrand').value || null,
+                car_model: document.getElementById('carModel').value || null,
+                seats_available: parseInt(document.getElementById('seatsAvailable').value),
+                price: parseFloat(document.getElementById('price').value),
+                is_cargo_allowed: document.getElementById('isCargoAllowed').checked,
+                no_smoking: document.getElementById('noSmoking').checked,
+                music_allowed: document.getElementById('musicAllowed').checked,
+                pets_allowed: document.getElementById('petsAllowed').checked,
+                notes: document.getElementById('notes').value || null,
+                status: 'pending'
+            };
+
+            try {
+                // Loading göster
+                Swal.fire({
+                    title: 'Yayınlanıyor...',
+                    text: 'İlanınız sisteme kaydediliyor',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                // Supabase'e kaydet
+                const { data, error } = await sb
+                    .from('trips')
+                    .insert([tripData])
+                    .select();
+
+                if (error) throw error;
+
+                // Başarılı - Onaya gönderildi
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Onaya Gönderildi',
+                    html: `
+                        <p class="text-lg mb-4">✅ İlanınız onaya gönderildi.</p>
+                        <p class="text-sm text-slate-600">Admin onayından sonra yayınlanacaktır.</p>
+                    `,
+                    confirmButtonText: 'İlanı Görüntüle',
+                    showCancelButton: true,
+                    cancelButtonText: 'Ana Sayfa'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = 'yol_arkadasi.html';
+                    } else {
+                        window.location.href = 'index.html';
+                    }
+                });
+
+            } catch (error) {
+                console.error('İlan yayınlama hatası:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Hata',
+                    text: 'İlanınız yayınlanamadı. Lütfen tekrar deneyin.',
+                    confirmButtonText: 'Tamam'
+                });
+            }
+        }
+    </script>
+
+</body>
+</html>

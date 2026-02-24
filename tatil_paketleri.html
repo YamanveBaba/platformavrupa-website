@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tatil Paketleri - GurbetBağı</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        .glass-header { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid #e2e8f0; }
+        
+        .tour-card {
+            background: white; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0;
+            transition: all 0.3s; cursor: pointer; position: relative;
+        }
+        .tour-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); border-color: #0d9488; }
+        .tour-card img { transition: 0.5s; width: 100%; height: 220px; object-fit: cover; }
+        .tour-card:hover img { transform: scale(1.05); }
+        .tour-badge {
+            position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); 
+            color: white; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: bold;
+        }
+        
+        /* Dropdown Scrollbar */
+        #customDropdown::-webkit-scrollbar { width: 6px; }
+        #customDropdown::-webkit-scrollbar-track { background: #f1f1f1; }
+        #customDropdown::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        #customDropdown::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen" onclick="closeDropdownOutside(event)">
+
+    <nav class="glass-header sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+            <a href="index.html" class="flex items-center gap-2 text-slate-600 hover:text-teal-600 transition font-bold">
+                <i class="fa-solid fa-arrow-left"></i> Ana Sayfa
+            </a>
+            <div class="flex items-center gap-2">
+                <div class="w-10 h-10 bg-teal-600 rounded-xl flex items-center justify-center text-white text-xl shadow-lg shadow-teal-200">
+                    <i class="fa-solid fa-umbrella-beach"></i>
+                </div>
+                <span class="font-extrabold text-xl text-slate-900 tracking-tight">Tatil <span class="text-teal-600">Sepeti</span></span>
+            </div>
+            <div class="w-20"></div>
+        </div>
+    </nav>
+
+    <main class="flex-grow">
+        
+        <div class="relative bg-slate-900 py-20 px-6 z-30">
+            <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=2000')] bg-cover bg-center opacity-40"></div>
+            
+            <div class="relative z-10 max-w-4xl mx-auto text-center">
+                <h1 class="text-3xl md:text-5xl font-extrabold text-white mb-4">Keşfetmeye Hazır Mısın?</h1>
+                <p class="text-teal-100 text-lg mb-8">Tatil Sepeti güvencesiyle en uygun fiyatlı turlar.</p>
+                
+                <div class="bg-white p-6 rounded-3xl shadow-2xl relative z-20">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-left items-end">
+                        
+                        <div class="md:col-span-3 relative group">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Tur Rotası Seçiniz</label>
+                            
+                            <div class="flex items-center gap-2 bg-slate-50 p-4 rounded-2xl border border-slate-200 focus-within:border-teal-600 focus-within:ring-2 focus-within:ring-teal-100 transition cursor-text" onclick="document.getElementById('searchInput').focus()">
+                                <i class="fa-solid fa-location-dot text-teal-600 text-xl"></i>
+                                <input type="text" id="searchInput" 
+                                       placeholder="Listeden tur seçin veya yazın..." 
+                                       class="w-full bg-transparent outline-none font-bold text-slate-700 placeholder:font-normal placeholder:text-slate-400 text-lg" 
+                                       autocomplete="off"
+                                       onfocus="toggleDropdown(true)">
+                                <i class="fa-solid fa-chevron-down text-slate-300"></i>
+                            </div>
+
+                            <div id="customDropdown" class="hidden absolute top-full left-0 w-full mt-2 bg-white rounded-2xl shadow-xl border border-slate-100 z-50 max-h-96 overflow-y-auto">
+                                
+                                <div class="sticky top-0 bg-slate-100/95 backdrop-blur-sm px-5 py-2 border-b border-slate-200 z-10">
+                                    <span class="text-[11px] font-extrabold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                                        <i class="fa-solid fa-map"></i> TÜRKİYE TURLARI
+                                    </span>
+                                </div>
+                                
+                                <div onclick="git('ege-turlari')" class="px-5 py-3 hover:bg-teal-50 cursor-pointer flex justify-between items-center group transition border-b border-slate-50">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs"><i class="fa-solid fa-umbrella-beach"></i></div>
+                                        <div class="flex flex-col">
+                                            <span class="font-bold text-slate-700 group-hover:text-teal-700">Ege Turları</span>
+                                            <span class="text-xs text-slate-400">Bodrum, Çeşme, Marmaris</span>
+                                        </div>
+                                    </div>
+                                    <i class="fa-solid fa-angle-right text-slate-300 group-hover:text-teal-600 transition"></i>
+                                </div>
+                                
+                                <div onclick="git('likya-turlari')" class="px-5 py-3 hover:bg-teal-50 cursor-pointer flex justify-between items-center group transition border-b border-slate-50">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-xs"><i class="fa-solid fa-sun"></i></div>
+                                        <div class="flex flex-col">
+                                            <span class="font-bold text-slate-700 group-hover:text-teal-700">Akdeniz & Likya</span>
+                                            <span class="text-xs text-slate-400">Antalya, Kaş, Fethiye</span>
+                                        </div>
+                                    </div>
+                                    <i class="fa-solid fa-angle-right text-slate-300 group-hover:text-teal-600 transition"></i>
+                                </div>
+
+                                <div onclick="git('karadeniz-turlari')" class="px-5 py-3 hover:bg-teal-50 cursor-pointer flex justify-between items-center group transition border-b border-slate-50">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xs"><i class="fa-solid fa-tree"></i></div>
+                                        <div class="flex flex-col">
+                                            <span class="font-bold text-slate-700 group-hover:text-teal-700">Karadeniz Turları</span>
+                                            <span class="text-xs text-slate-400">Yaylalar, Batum, Rize</span>
+                                        </div>
+                                    </div>
+                                    <i class="fa-solid fa-angle-right text-slate-300 group-hover:text-teal-600 transition"></i>
+                                </div>
+
+                                <div onclick="git('kapadokya-turlari')" class="px-5 py-3 hover:bg-teal-50 cursor-pointer flex justify-between items-center group transition border-b border-slate-50">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-xs"><i class="fa-solid fa-fire"></i></div>
+                                        <div class="flex flex-col">
+                                            <span class="font-bold text-slate-700 group-hover:text-teal-700">Kapadokya Turları</span>
+                                            <span class="text-xs text-slate-400">Balon, Peri Bacaları</span>
+                                        </div>
+                                    </div>
+                                    <i class="fa-solid fa-angle-right text-slate-300 group-hover:text-teal-600 transition"></i>
+                                </div>
+
+                                <div class="sticky top-0 bg-slate-100/95 backdrop-blur-sm px-5 py-2 border-b border-slate-200 border-t z-10">
+                                    <span class="text-[11px] font-extrabold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                                        <i class="fa-solid fa-globe"></i> YURT DIŞI TURLARI
+                                    </span>
+                                </div>
+
+                                <div onclick="git('balkan-turlari')" class="px-5 py-3 hover:bg-teal-50 cursor-pointer flex justify-between items-center group transition border-b border-slate-50">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-xs"><i class="fa-solid fa-passport"></i></div>
+                                        <div class="flex flex-col">
+                                            <span class="font-bold text-slate-700 group-hover:text-teal-700">Balkan Turları</span>
+                                            <span class="text-xs text-slate-400">Vizesiz: Üsküp, Saraybosna</span>
+                                        </div>
+                                    </div>
+                                    <i class="fa-solid fa-angle-right text-slate-300 group-hover:text-teal-600 transition"></i>
+                                </div>
+
+                                <div onclick="git('italya-turlari')" class="px-5 py-3 hover:bg-teal-50 cursor-pointer flex justify-between items-center group transition border-b border-slate-50">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-xs"><i class="fa-solid fa-plane"></i></div>
+                                        <div class="flex flex-col">
+                                            <span class="font-bold text-slate-700 group-hover:text-teal-700">İtalya Turları</span>
+                                            <span class="text-xs text-slate-400">Roma, Venedik, Floransa</span>
+                                        </div>
+                                    </div>
+                                    <i class="fa-solid fa-angle-right text-slate-300 group-hover:text-teal-600 transition"></i>
+                                </div>
+
+                                <div onclick="git('misir-turlari')" class="px-5 py-3 hover:bg-teal-50 cursor-pointer flex justify-between items-center group transition border-b border-slate-50">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-yellow-100 text-yellow-600 flex items-center justify-center text-xs"><i class="fa-solid fa-pyramid"></i></div>
+                                        <div class="flex flex-col">
+                                            <span class="font-bold text-slate-700 group-hover:text-teal-700">Mısır Turları</span>
+                                            <span class="text-xs text-slate-400">Kahire, Sharm, Piramitler</span>
+                                        </div>
+                                    </div>
+                                    <i class="fa-solid fa-angle-right text-slate-300 group-hover:text-teal-600 transition"></i>
+                                </div>
+
+                                <div class="sticky top-0 bg-slate-100/95 backdrop-blur-sm px-5 py-2 border-b border-slate-200 border-t z-10">
+                                    <span class="text-[11px] font-extrabold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                                        <i class="fa-solid fa-anchor"></i> GEMİ & KIBRIS
+                                    </span>
+                                </div>
+
+                                <div onclick="git('yunan-adalari-turlari')" class="px-5 py-3 hover:bg-teal-50 cursor-pointer flex justify-between items-center group transition border-b border-slate-50">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-cyan-100 text-cyan-600 flex items-center justify-center text-xs"><i class="fa-solid fa-ship"></i></div>
+                                        <div class="flex flex-col">
+                                            <span class="font-bold text-slate-700 group-hover:text-teal-700">Yunan Adaları</span>
+                                            <span class="text-xs text-slate-400">Kapı Vizesi ile Adalar</span>
+                                        </div>
+                                    </div>
+                                    <i class="fa-solid fa-angle-right text-slate-300 group-hover:text-teal-600 transition"></i>
+                                </div>
+
+                                <div onclick="git('kibris-turlari')" class="px-5 py-3 hover:bg-teal-50 cursor-pointer flex justify-between items-center group transition">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs"><i class="fa-solid fa-hotel"></i></div>
+                                        <div class="flex flex-col">
+                                            <span class="font-bold text-slate-700 group-hover:text-teal-700">Kıbrıs Paketleri</span>
+                                            <span class="text-xs text-slate-400">Uçak + Otel + Transfer</span>
+                                        </div>
+                                    </div>
+                                    <i class="fa-solid fa-angle-right text-slate-300 group-hover:text-teal-600 transition"></i>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="md:col-span-1">
+                            <button onclick="document.getElementById('searchInput').focus()" class="w-full bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white font-bold py-4 rounded-2xl text-lg shadow-lg shadow-teal-200 transition transform active:scale-95 flex items-center justify-center gap-2">
+                                Ara <i class="fa-solid fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <p class="text-xs text-white/60 mt-4 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-check-circle"></i> Tüm işlemler Tatil Sepeti güvencesiyle yapılır.
+                </p>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-6 py-16 relative z-10">
+            <h2 class="text-2xl font-bold text-slate-800 mb-8 flex items-center gap-2">
+                <span class="w-2 h-8 bg-teal-600 rounded-full"></span> Sezonun Favorileri
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                
+                <div onclick="git('ege-turlari')" class="tour-card group">
+                    <div class="relative overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1548574505-5e239809ee19?q=80&w=800" alt="Ege">
+                        <div class="tour-badge"><i class="fa-solid fa-water"></i> Yaz Sezonu</div>
+                        <div class="absolute bottom-0 w-full bg-gradient-to-t from-black/80 to-transparent p-4">
+                            <h3 class="text-white font-bold text-lg">Ege Turları</h3>
+                            <p class="text-teal-200 text-xs">Bodrum, Çeşme, Marmaris</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div onclick="git('karadeniz-turlari')" class="tour-card group">
+                    <div class="relative overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?q=80&w=800">
+                        <div class="tour-badge"><i class="fa-solid fa-tree"></i> Doğa</div>
+                        <div class="absolute bottom-0 w-full bg-gradient-to-t from-black/80 to-transparent p-4">
+                            <h3 class="text-white font-bold text-lg">Karadeniz Turları</h3>
+                            <p class="text-teal-200 text-xs">Yaylalar, Batum, Trabzon</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div onclick="git('italya-turlari')" class="tour-card group">
+                    <div class="relative overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?q=80&w=800">
+                        <div class="tour-badge"><i class="fa-solid fa-plane"></i> Yurt Dışı</div>
+                        <div class="absolute bottom-0 w-full bg-gradient-to-t from-black/80 to-transparent p-4">
+                            <h3 class="text-white font-bold text-lg">İtalya Turları</h3>
+                            <p class="text-teal-200 text-xs">Roma, Venedik, Floransa</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div onclick="git('balkan-turlari')" class="tour-card group">
+                    <div class="relative overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1599423300746-b62533397364?q=80&w=800">
+                        <div class="tour-badge"><i class="fa-solid fa-passport"></i> Vizesiz</div>
+                        <div class="absolute bottom-0 w-full bg-gradient-to-t from-black/80 to-transparent p-4">
+                            <h3 class="text-white font-bold text-lg">Balkan Turları</h3>
+                            <p class="text-teal-200 text-xs">Saraybosna, Üsküp, Belgrad</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 py-8 text-center text-slate-500 text-sm">
+        &copy; 2025 Platform Avrupa. <b>Tatil Sepeti</b> iş birliği ile.
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script>
+        function toggleDropdown(show) {
+            const dropdown = document.getElementById('customDropdown');
+            if (show) {
+                dropdown.classList.remove('hidden');
+            } else {
+                dropdown.classList.add('hidden');
+            }
+        }
+
+        function closeDropdownOutside(event) {
+            const dropdown = document.getElementById('customDropdown');
+            const searchInput = document.getElementById('searchInput');
+            
+            if (!dropdown.contains(event.target) && !searchInput.contains(event.target)) {
+                dropdown.classList.add('hidden');
+            }
+        }
+
+        function git(slug) {
+            if(!slug) return;
+            
+            // TATİL SEPETİ YÖNLENDİRMESİ (Affiliate link)
+            let url = `https://www.tatilsepeti.com/${slug}`;
+            
+            // Affiliate parametresi ekle
+            if (typeof AFFILIATE_CONFIG !== 'undefined' && AFFILIATE_CONFIG.tatilSepeti) {
+                url += `?ref=${AFFILIATE_CONFIG.tatilSepeti.ref}`;
+            }
+            
+            // Affiliate tracking
+            if (typeof trackAffiliateClick === 'function') {
+                trackAffiliateClick('tatilsepeti', 'tatil_paketleri.html', {
+                    tour_slug: slug
+                });
+            }
+            
+            window.open(url, '_blank');
+        }
+    </script>
+</body>
+</html>

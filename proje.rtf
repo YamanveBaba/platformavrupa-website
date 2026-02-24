@@ -1,0 +1,1043 @@
+{\rtf1\ansi\deff0\nouicompat{\fonttbl{\f0\fnil\fcharset0 Calibri;}{\f1\fnil\fcharset238 Calibri;}{\f2\fnil\fcharset1 Segoe UI Symbol;}{\f3\fnil\fcharset1 Segoe UI Symbol;}}
+{\colortbl ;\red0\green0\blue255;}
+{\*\generator Riched20 10.0.19041}\viewkind4\uc1 
+\pard\sa200\sl276\slmult1\f0\fs22\lang31\par
+\par
+# PLATFORMAVRUPA - KAPSAMLI PROJE DOK\'dcMANTASYONU\par
+\par
+**Versiyon:** 3.0 Final  \par
+**Tarih:** 2026-02-04  \par
+**Web:** {{\field{\*\fldinst{HYPERLINK www.platformavrupa.com }}{\fldrslt{www.platformavrupa.com\ul0\cf0}}}}\f0\fs22   \par
+**Domain:** platformavrupa.com, platformavrupa.eu (yedek)  \par
+**Hedef:** Avrupa'daki T\'fcrk diasporas\f1\u305? i\f0\lang1033\'e7in "S\'fcper Uygulama"  \par
+**Durum:** Production Ready \f2\u9989?\f0\par
+\par
+---\par
+\par
+## \f3\u-10179?\u-9013?\f0  \f1\u304?\f0\'c7\f1\u304?NDEK\u304?LER\par
+\par
+1. [Proje \f0\'d6zeti](#proje-\'f6zeti)\par
+2. [Teknoloji Stack](#teknoloji-stack)\par
+3. [Mimari Yap\f1\u305?](#mimari-yap\u305?)\par
+4. [Mod\f0\'fcller ve \'d6zellikler](#mod\'fcller-ve-\'f6zellikler)\par
+5. [Veritaban\f1\u305? Yap\u305?s\u305?](#veritaban\u305?-yap\u305?s\u305?)\par
+6. [Dosya Yap\u305?s\u305?](#dosya-yap\u305?s\u305?)\par
+7. [API Entegrasyonlar\u305?](#api-entegrasyonlar\u305?)\par
+8. [G\f0\'fcvenlik](#g\'fcvenlik)\par
+9. [Deployment](#deployment)\par
+10. [Mobil D\'f6n\'fc\f1\'ba\f0\'fcm](#mobil-d\'f6n\'fc\f1\'ba\f0\'fcm)\par
+11. [Geli\f1\'batirme Notlar\u305?](#geli\'batirme-notlar\u305?)\par
+12. [Gelecek Planlar](#gelecek-planlar)\par
+\par
+---\par
+\par
+## \f3\u-10180?\u-8273?\f0  PROJE \'d6ZET\f1\u304?\par
+\par
+### Proje Kimli\u287?i\par
+- **Ad:** Platform Avrupa\par
+- **Misyon:** Avrupa'da ya\'baayan T\f0\'fcrk diasporas\f1\u305? i\f0\'e7in kapsaml\f1\u305? dijital platform\par
+- **Hedef Kitle:** Avrupa'da yerle\'baik, \f0\'e7al\f1\u305?\'bama izni olan T\f0\'fcrkler\par
+- **Vizyon:** Web (PWA) ile ba\f1\'baland\u305?, nihai hedef **Native Mobil Uygulama**\par
+- **Domain:** {{\field{\*\fldinst{HYPERLINK www.platformavrupa.com }}{\fldrslt{www.platformavrupa.com\ul0\cf0}}}}\f1\fs22  (aktif), {{\field{\*\fldinst{HYPERLINK www.platformavrupa.eu }}{\fldrslt{www.platformavrupa.eu\ul0\cf0}}}}\f1\fs22  (yedek)\par
+- **Email:** info@platformavrupa.com (Zoho)\par
+\par
+### Temel \f0\'d6zellikler\par
+- \f2\u9989?\f0  \f1\u304?lan Y\f0\'f6netimi (7 kategori: Emlak, Ara\'e7, \f1\u304?\'ba, Hizmet, E\'baya, Yemek, Di\u287?er)\par
+- \f2\u9989?\f0  Topluluk Sohbeti (Genel + \f1\'aaehir bazl\u305?)\par
+- \f2\u9989?\f0  Yol Arkada\f1\'ba\u305? (BlaBlaCar benzeri, bagaj odakl\u305?)\par
+- \f2\u9989?\f0  Kargo & Emanet (T\'fcrkiye'ye evrak/anahtar/koli g\'f6nderimi)\par
+- \f2\u9989?\f0  Yol Yard\f1\u305?m & SOS (Topluluk destekli acil yard\u305?m)\par
+- \f2\u9989?\f0  Waze Benzeri Yol Bildirimleri (Radar, kaza, trafik, yol \'e7al\f1\u305?\'bamas\u305?)\par
+- \f2\u9989?\f0  Market Fiyatlar\f1\u305? & \u304?ndirimler (30 \f0\'fclke, 100+ market zinciri)\par
+- \f2\u9989?\f0  Akademi (Video e\f1\u287?itimler: Dil, Resmi \u304?\'balemler, Kariyer, Finans, Ya\'baam, S\u305?la Yolu, Hukuk, Aile)\par
+- \f2\u9989?\f0  D\'f6viz & Alt\f1\u305?n Fiyatlar\u305? (Canl\u305?, grafikli)\par
+- \f2\u9989?\f0  S\f1\u305?la Yolu (G\f0\'fcmr\'fck kap\f1\u305?lar\u305?, kameralar, rota planlama)\par
+- \f2\u9989?\f0  Hukuk Dan\f1\u305?\'bamanl\u305?\u287?\u305? (Avukat rehberi)\par
+- \f2\u9989?\f0  Sa\f1\u287?l\u305?k Turizmi (Sa\f0\'e7 ekimi, di\f1\'ba, estetik, cinsel sa\u287?l\u305?k, t\f0\'fcp bebek)\par
+- \f2\u9989?\f0  Affiliate Sistemi (U\'e7ak, Otel, Ara\'e7, Tatil)\par
+- \f2\u9989?\f0  Duyurular (Otomatik haber \'f6nerileri)\par
+- \f2\u9989?\f0  Admin Paneli (Kapsaml\f1\u305? y\f0\'f6netim)\par
+\par
+---\par
+\par
+## \f3\u-10179?\u-8480?\f0  TEKNOLOJ\f1\u304? STACK\par
+\par
+### Frontend\par
+- **HTML5** - Semantic markup\par
+- **Vanilla JavaScript (ES6+)** - Framework-free, derleme gerektirmeyen\par
+- **Tailwind CSS** - Utility-first CSS framework (CDN)\par
+- **Font Awesome 6.5.0** - \u304?konlar\par
+- **Plus Jakarta Sans / Inter / Space Grotesk** - Google Fonts\par
+- **SweetAlert2** - Modern alert/modal\par
+- **Chart.js** - Grafikler (D\f0\'f6viz/Alt\f1\u305?n, Analytics)\par
+\par
+### Backend & Database\par
+- **Supabase** - PostgreSQL veritaban\u305?\par
+  - Authentication (Email/Password)\par
+  - Row Level Security (RLS)\par
+  - Realtime Subscriptions\par
+  - Storage (gelecekte)\par
+  - Edge Functions (Deno)\par
+- **PostgreSQL** - \u304?li\'bakisel veritaban\u305?\par
+\par
+### Harita & Konum\par
+- **Google Maps JavaScript API** - Harita g\f0\'f6rselle\f1\'batirme\par
+- **Google Distance Matrix API** - Mesafe hesaplama\par
+- **Leaflet.js** - Alternatif harita k\f0\'fct\'fcphanesi (S\f1\u305?la Yolu)\par
+- **Nominatim OpenStreetMap API** - Geocoding\par
+- **Browser Geolocation API** - Kullan\u305?c\u305? konumu\par
+\par
+### Harici API'ler\par
+- **NewsAPI** - Otomatik haber \f0\'f6nerileri (100 req/g\'fcn \'fccretsiz)\par
+- **ExchangeRate-API** - D\'f6viz kurlar\f1\u305?\par
+- **Frankfurter API** - Tarihsel d\f0\'f6viz verileri\par
+- **Travelpayouts API** - U\'e7ak bileti f\f1\u305?rsatlar\u305? (yap\u305?land\u305?rma gerekli)\par
+- **Booking.com Deals API** - Otel promosyonlar\u305? (yap\u305?land\u305?rma gerekli)\par
+- **Adzuna API** - \u304?\'ba ilanlar\u305? (admin paneli)\par
+- **Rentalcars.com** - Ara\f0\'e7 kiralama affiliate\par
+- **Supabase Edge Functions** - Backend proxy (alt\f1\u305?n fiyatlar\u305?, CORS bypass)\par
+\par
+### PWA & Mobil\par
+- **Progressive Web App (PWA)** - manifest.json + service-worker.js\par
+- **Capacitor** - Native mobil d\f0\'f6n\'fc\f1\'ba\f0\'fcm i\'e7in haz\f1\u305?r (capacitor.config.json)\par
+- **Service Worker** - Offline destek, cache y\f0\'f6netimi\par
+\par
+### Hosting & CDN\par
+- **Netlify** - Statik hosting\par
+- **CDN** - Tailwind, Font Awesome, Supabase JS (CDN \'fczerinden)\par
+\par
+---\par
+\par
+## \f3\u-10180?\u-8233?\f0  M\f1\u304?MAR\u304? YAPI\par
+\par
+### Mimari Yakla\'ba\u305?m\par
+- **Client-Side Rendering** - T\f0\'fcm i\f1\'balemler taray\u305?c\u305?da\par
+- **SPA Benzeri Yap\u305?** - app-core.js ile routing\par
+- **Merkezi Yap\u305?land\u305?rma** - config.js, auth.js, utils.js\par
+- **Component-Based** - components.js (Navbar, Footer, Bottom Nav)\par
+- **Serverless** - Supabase Edge Functions ile backend i\'balemleri\par
+\par
+### Dosya Organizasyonu\par
+\par
+```\par
+proje-klasoru/\par
+\f2\u9500?\u9472?\u9472?\f0  Core Files (\'c7ekirdek)\par
+\f2\u9474?\f0    \f2\u9500?\u9472?\u9472?\f0  config.js          # Supabase, API keys, Affiliate config\par
+\f2\u9474?\f0    \f2\u9500?\u9472?\u9472?\f0  auth.js            # Authentication logic\par
+\f2\u9474?\f0    \f2\u9500?\u9472?\u9472?\f0  utils.js           # Utility functions (sanitize, XSS koruma)\par
+\f2\u9474?\f0    \f2\u9500?\u9472?\u9472?\f0  components.js      # Reusable UI components\par
+\f2\u9474?\f0    \f2\u9500?\u9472?\u9472?\f0  app-core.js        # SPA routing, PWA, Capacitor haz\f1\u305?rl\u305?\u287?\u305?\par
+\f2\u9474?\f0    \f2\u9500?\u9472?\u9472?\f0  favorites.js       # Favori y\'f6netimi\par
+\f2\u9474?\f0    \f2\u9492?\u9472?\u9472?\f0  service-worker.js  # PWA offline deste\f1\u287?i\par
+\f2\u9474?\f0\par
+\f2\u9500?\u9472?\u9472?\f0  Data Files (Veri)\par
+\f2\u9474?\f0    \f2\u9500?\u9472?\u9472?\f0  genel_veriler.js   # \'dclke/\f1\'baehir, telefon kodlar\u305?, market zincirleri\par
+\f2\u9474?\f0    \f2\u9500?\u9472?\u9472?\f0  supabase_rls_policies.sql  # Veritaban\f1\u305? \'baemas\u305? ve RLS\par
+\f2\u9474?\f0    \f2\u9492?\u9472?\u9472?\f0  supabase_health_sample_data.sql  # Sa\f1\u287?l\u305?k turizmi \f0\'f6rnek veriler\par
+\f2\u9474?\f0\par
+\f2\u9500?\u9472?\u9472?\f0  Pages (Sayfalar) - 57 HTML dosyas\f1\u305?\par
+\f2\u9474?\f0    \f2\u9500?\u9472?\u9472?\f0  index.html         # Ana sayfa\par
+\f2\u9474?\f0    \f2\u9500?\u9472?\u9472?\f0  login.html         # Giri\f1\'ba\par
+\f2\u9474?\f0    \f2\u9500?\u9472?\u9472?\f0  kayit.html         # Kay\f1\u305?t\par
+\f2\u9474?\f0    \f2\u9500?\u9472?\u9472?\f0  profil.html        # Kullan\f1\u305?c\u305? profili\par
+\f2\u9474?\f0    \f2\u9500?\u9472?\u9472?\f0  admin.html         # Admin paneli\par
+\f2\u9474?\f0    \f2\u9500?\u9472?\u9472?\f0  sohbet.html        # Topluluk sohbeti\par
+\f2\u9474?\f0    \f2\u9500?\u9472?\u9472?\f0  ilanlar.html       # \f1\u304?lan listesi\par
+\f2\u9474?\f0    \f2\u9500?\u9472?\u9472?\f0  ilan_giris.html    # \f1\u304?lan verme se\f0\'e7imi\par
+\f2\u9474?\f0    \f2\u9500?\u9472?\u9472?\f0  ilan_*.html        # Kategori bazl\f1\u305? ilan formlar\u305? (7 kategori)\par
+\f2\u9474?\f0    \f2\u9500?\u9472?\u9472?\f0  *_vitrini.html     # Kategori vitrinleri\par
+\f2\u9474?\f0    \f2\u9500?\u9472?\u9472?\f0  akademi*.html      # Akademi sayfalar\f1\u305?\par
+\f2\u9474?\f0    \f2\u9500?\u9472?\u9472?\f0  yol_*.html         # Yol arkada\f1\'ba\u305?, yol yard\u305?m\par
+\f2\u9474?\f0    \f2\u9500?\u9472?\u9472?\f0  kargo_*.html       # Kargo & Emanet\par
+\f2\u9474?\f0    \f2\u9500?\u9472?\u9472?\f0  market.html        # Market fiyatlar\f1\u305?\par
+\f2\u9474?\f0    \f2\u9500?\u9472?\u9472?\f0  doviz_altin.html   # D\'f6viz & Alt\f1\u305?n\par
+\f2\u9474?\f0    \f2\u9500?\u9472?\u9472?\f0  sila_yolu.html     # S\f1\u305?la Yolu\par
+\f2\u9474?\f0    \f2\u9500?\u9472?\u9472?\f0  saglik_turizmi.html  # Sa\f1\u287?l\u305?k Turizmi\par
+\f2\u9474?\f0    \f2\u9500?\u9472?\u9472?\f0  arac_kiralama.html  # Ara\'e7 Kiralama\par
+\f2\u9474?\f0    \f2\u9492?\u9472?\u9472?\f0  ... (di\f1\u287?er sayfalar)\par
+\f2\u9474?\f0\par
+\f2\u9500?\u9472?\u9472?\f0  Config Files (Yap\f1\u305?land\u305?rma)\par
+\f2\u9474?\f0    \f2\u9500?\u9472?\u9472?\f0  manifest.json      # PWA manifest\par
+\f2\u9474?\f0    \f2\u9500?\u9472?\u9472?\f0  capacitor.config.json  # Capacitor config\par
+\f2\u9474?\f0    \f2\u9492?\u9472?\u9472?\f0  _headers           # Netlify cache headers\par
+\f2\u9474?\f0\par
+\f2\u9500?\u9472?\u9472?\f0  Supabase Functions (Edge Functions)\par
+\f2\u9474?\f0    \f2\u9492?\u9472?\u9472?\f0  supabase/functions/gold-price/index.ts  # Alt\f1\u305?n fiyatlar\u305? backend proxy\par
+\f2\u9474?\f0\par
+\f2\u9492?\u9472?\u9472?\f0  Assets (Varl\f1\u305?klar)\par
+    \f2\u9492?\u9472?\u9472?\f0  logo.png           # Logo\par
+```\par
+\par
+---\par
+\par
+## \f3\u-10179?\u-8986?\f0  MOD\'dcLLER VE \'d6ZELL\f1\u304?KLER\par
+\par
+### 1. \u304?lan Y\f0\'f6netimi\par
+**Kategoriler:**\par
+- Emlak (Sat\f1\u305?l\u305?k, Kiral\u305?k, G\f0\'fcnl\'fck Kiral\f1\u305?k)\par
+- Ara\f0\'e7 (Sat\f1\u305?l\u305?k, Kiral\u305?k)\par
+- \u304?\'ba (Tam Zamanl\u305?, Yar\u305? Zamanl\u305?, Freelance)\par
+- Hizmet (Tamirci, \f0\'c7ekici, Temizlik, vb.)\par
+- E\f1\'baya (Sat\u305?l\u305?k, Takas)\par
+- Yemek (Restoran, Ev Yeme\u287?i)\par
+- Di\u287?er\par
+\par
+**\f0\'d6zellikler:**\par
+- Filtreleme (kategori, \f1\'baehir, fiyat, tarih)\par
+- Favorilere ekleme\par
+- Detayl\u305? ilan sayfas\u305?\par
+- Kullan\u305?c\u305? ilanlar\u305? y\f0\'f6netimi\par
+- Admin onay\f1\u305? sistemi\par
+\par
+### 2. Topluluk Sohbeti\par
+- Genel sohbet odas\u305?\par
+- \'aaehir bazl\u305? sohbet odalar\u305?\par
+- Ger\f0\'e7ek zamanl\f1\u305? mesajla\'bama (Supabase Realtime)\par
+- Emoji deste\u287?i\par
+- Admin mesaj y\f0\'f6netimi\par
+\par
+### 3. Yol Arkada\f1\'ba\u305?\par
+- BlaBlaCar benzeri sistem\par
+- Bagaj odakl\u305? ilan yap\u305?s\u305?\par
+- Filtreler: Cinsiyet, sigara, m\f0\'fczik, evcil hayvan\par
+- Rezervasyon sistemi\par
+- Mesafe hesaplama (Google Distance Matrix)\par
+\par
+### 4. Kargo & Emanet\par
+- T\'fcrkiye'ye evrak/anahtar/koli g\'f6nderimi\par
+- Paket kabul edenler ve g\'f6nderenler e\f1\'bale\'batirme\par
+- Takip numaras\u305?\par
+- G\f0\'fcvenlik: Paket kontrol\'fc uyar\f1\u305?s\u305?\par
+- \f0\'d6deme: Nakit (ara\'e7 ba\f1\'ba\u305?nda)\par
+\par
+### 5. Yol Yard\u305?m & SOS\par
+- Acil yard\u305?m talepleri\par
+- Yak\u305?ndaki kullan\u305?c\u305?lara bildirim (50km \f0\'e7ap)\par
+- Do\f1\u287?rulanm\u305?\'ba tamirci/\f0\'e7ekici veritaban\f1\u305?\par
+- Y\u305?ld\u305?z/puanlama sistemi\par
+- Acil numaralar (30 \f0\'fclke)\par
+\par
+### 6. Waze Benzeri Yol Bildirimleri\par
+- Radar uyar\f1\u305?lar\u305?\par
+- Kaza bildirimleri\par
+- Trafik yo\u287?unlu\u287?u\par
+- Yol \f0\'e7al\f1\u305?\'bamas\u305?\par
+- Harita \f0\'fczerinde g\'f6rselle\f1\'batirme\par
+\par
+### 7. Market Fiyatlar\u305? & \u304?ndirimler\par
+- 30 Avrupa \f0\'fclkesi\par
+- 100+ market zinciri\par
+- Haftal\f1\u305?k bro\'ba\f0\'fcrler\par
+- Otomatik konum tespiti\par
+- Direkt bro\f1\'ba\f0\'fcr linkleri\par
+\par
+### 8. Akademi\par
+**Kategoriler:**\par
+- Dil E\f1\u287?itimi\par
+- Resmi \u304?\'balemler\par
+- Kariyer\par
+- Finans\par
+- Ya\'baam\par
+- S\u305?la Yolu\par
+- Hukuk\par
+- Aile\par
+\par
+**\f0\'d6zellikler:**\par
+- Video serileri (YouTube embed)\par
+- \f1\u304?zlenme takibi\par
+- Kullan\u305?c\u305? talepleri\par
+- Admin video y\f0\'f6netimi\par
+\par
+### 9. D\'f6viz & Alt\f1\u305?n Fiyatlar\u305?\par
+- Canl\u305? d\f0\'f6viz kurlar\f1\u305? (30+ para birimi)\par
+- Alt\u305?n fiyatlar\u305? (Gram, \f0\'c7eyrek, Yar\f1\u305?m, Tam, Cumhuriyet, Ata, vb.)\par
+- 30 g\f0\'fcnl\'fck grafik\par
+- Otomatik g\'fcncelleme (30 dakikada bir)\par
+- Supabase Edge Function ile backend proxy\par
+\par
+### 10. S\f1\u305?la Yolu\par
+- G\f0\'fcmr\'fck kap\f1\u305?lar\u305? yo\u287?unluk takibi\par
+- Canl\u305? kamera g\f0\'f6r\'fcnt\'fcleri\par
+- Ak\f1\u305?ll\u305? rota \f0\'f6nerileri\par
+- Mesafe hesaplama\par
+- Trafik durumu\par
+\par
+### 11. Hukuk Dan\f1\u305?\'bamanl\u305?\u287?\u305?\par
+- Avukat rehberi\par
+- Uzmanl\u305?k alanlar\u305?\par
+- \u304?leti\'baim bilgileri\par
+- De\u287?erlendirme sistemi\par
+\par
+### 12. Sa\u287?l\u305?k Turizmi\par
+**Kategoriler:**\par
+- Sa\f0\'e7 Ekimi (FUE, DHI, vb.)\par
+- Di\f1\'ba Tedavisi\par
+- Estetik Cerrahi\par
+- Erkek Cinsel Sa\u287?l\u305?k\par
+- Kad\u305?n Cinsel Sa\u287?l\u305?k\par
+- T\f0\'fcp Bebek\par
+\par
+**\'d6zellikler:**\par
+- Klinik rehberi\par
+- \'dccretsiz dan\f1\u305?\'bamanl\u305?k formu\par
+- WhatsApp entegrasyonu\par
+- Referans kodu sistemi\par
+- Komisyon takibi\par
+- Bypass korumal\u305? sistem (klinik bilgileri gizli)\par
+\par
+### 13. Affiliate Sistemi\par
+- Skyscanner (U\f0\'e7ak bileti)\par
+- Booking.com (Otel)\par
+- Rentalcars.com (Ara\'e7 kiralama)\par
+- Tatil Sepeti (Tatil paketleri)\par
+- Viator (Turlar)\par
+\par
+**\'d6zellikler:**\par
+- T\f1\u305?klama takibi\par
+- Referans kodu\par
+- Komisyon hesaplama\par
+\par
+### 14. Admin Paneli\par
+**Mod\f0\'fcller:**\par
+- Genel Bak\f1\u305?\'ba (Dashboard)\par
+- Market & \u304?ndirim\par
+- Kullan\u305?c\u305?lar\par
+- \u304?lan Y\f0\'f6netimi\par
+- S\f1\u305?n\u305?r Kap\u305?lar\u305?\par
+- Kameralar\par
+- Yolculuk & Kargo\par
+- Yol Yard\u305?m & SOS\par
+- Canl\u305? Yol Bildirimleri\par
+- Bot & Entegrasyon\par
+- Sohbet Y\f0\'f6netimi\par
+- Seyahat & Turlar\par
+- Akademi & E\f1\u287?itim\par
+- Hukuk\par
+- Sa\u287?l\u305?k Turizmi\par
+- Duyurular\par
+- Raporlar\par
+\par
+---\par
+\par
+## \f3\u-10179?\u-8764?\f0  VER\f1\u304?TABANI YAPISI\par
+\par
+### Supabase PostgreSQL Tablolar\u305?\par
+\par
+#### Kullan\u305?c\u305? & Kimlik Do\u287?rulama\par
+- `auth.users` - Supabase auth tablosu\par
+- `profiles` - Kullan\u305?c\u305? profilleri\par
+  - `id` (UUID, PK)\par
+  - `role` (TEXT: 'user', 'admin')\par
+  - `status` (TEXT: 'active', 'banned')\par
+  - `country` (TEXT)\par
+  - `city` (TEXT)\par
+  - `real_name` (TEXT)\par
+  - `avatar_url` (TEXT)\par
+\par
+#### \u304?lanlar\par
+- `listings` - T\f0\'fcm ilanlar\par
+  - `id` (BIGSERIAL, PK)\par
+  - `user_id` (UUID, FK)\par
+  - `category` (TEXT: 'emlak', 'araba', 'is', 'hizmet', 'esya', 'yemek', 'diger')\par
+  - `title` (TEXT)\par
+  - `description` (TEXT)\par
+  - `price` (DECIMAL)\par
+  - `currency` (TEXT)\par
+  - `location` (TEXT)\par
+  - `city` (TEXT)\par
+  - `country` (TEXT)\par
+  - `image_url` (TEXT[])\par
+  - `status` (TEXT: 'pending', 'active', 'sold', 'deleted')\par
+  - `created_at` (TIMESTAMP)\par
+\par
+- `favorites` - Kullan\f1\u305?c\u305? favorileri\par
+  - `id` (UUID, PK)\par
+  - `user_id` (UUID, FK)\par
+  - `ilan_id` (BIGINT, FK)\par
+\par
+#### Topluluk\par
+- `messages` - Sohbet mesajlar\u305?\par
+  - `id` (BIGSERIAL, PK)\par
+  - `user_id` (UUID, FK)\par
+  - `room_id` (TEXT: 'genel' veya \'baehir ad\u305?)\par
+  - `message` (TEXT)\par
+  - `created_at` (TIMESTAMP)\par
+\par
+- `announcements` - Duyurular\par
+  - `id` (BIGSERIAL, PK)\par
+  - `title` (TEXT)\par
+  - `content` (TEXT)\par
+  - `image_url` (TEXT)\par
+  - `status` (TEXT: 'draft', 'published')\par
+  - `created_at` (TIMESTAMP)\par
+\par
+#### Yolculuk & Kargo\par
+- `trips` - Yol arkada\'ba\u305? ilanlar\u305?\par
+  - `id` (BIGSERIAL, PK)\par
+  - `user_id` (UUID, FK)\par
+  - `from_location` (TEXT)\par
+  - `to_location` (TEXT)\par
+  - `from_lat` (DECIMAL)\par
+  - `from_lng` (DECIMAL)\par
+  - `to_lat` (DECIMAL)\par
+  - `to_lng` (DECIMAL)\par
+  - `departure_date` (DATE)\par
+  - `departure_time` (TIME)\par
+  - `available_seats` (INTEGER)\par
+  - `price_per_seat` (DECIMAL)\par
+  - `currency` (TEXT)\par
+  - `phone` (TEXT)\par
+  - `travel_time` (TEXT)\par
+  - `stops` (TEXT)\par
+  - `car_brand` (TEXT)\par
+  - `car_model` (TEXT)\par
+  - `car_color` (TEXT)\par
+  - `no_smoking` (BOOLEAN)\par
+  - `music_allowed` (BOOLEAN)\par
+  - `pets_allowed` (BOOLEAN)\par
+  - `notes` (TEXT)\par
+  - `status` (TEXT: 'active', 'completed', 'cancelled')\par
+\par
+- `trip_reservations` - Yol rezervasyonlar\u305?\par
+  - `id` (UUID, PK)\par
+  - `trip_id` (BIGINT, FK)\par
+  - `passenger_id` (UUID, FK)\par
+  - `passenger_name` (TEXT)\par
+  - `passenger_phone` (TEXT)\par
+  - `seats_requested` (INTEGER)\par
+  - `status` (TEXT: 'pending', 'approved', 'rejected', 'cancelled')\par
+  - `message` (TEXT)\par
+\par
+- `shipments` - Kargo & Emanet talepleri\par
+  - `id` (BIGSERIAL, PK)\par
+  - `user_id` (UUID, FK)\par
+  - `type` (TEXT: 'request', 'offer')\par
+  - `from_location` (TEXT)\par
+  - `to_location` (TEXT)\par
+  - `from_lat` (DECIMAL)\par
+  - `from_lng` (DECIMAL)\par
+  - `to_lat` (DECIMAL)\par
+  - `to_lng` (DECIMAL)\par
+  - `departure_date` (DATE)\par
+  - `weight` (DECIMAL)\par
+  - `size` (TEXT)\par
+  - `package_count` (INTEGER)\par
+  - `is_fragile` (BOOLEAN)\par
+  - `price_offer` (DECIMAL)\par
+  - `insurance` (TEXT)\par
+  - `phone` (TEXT)\par
+  - `delivery_preference` (TEXT)\par
+  - `notes` (TEXT)\par
+  - `tracking_number` (TEXT, UNIQUE)\par
+  - `status` (TEXT: 'active', 'matched', 'completed', 'cancelled')\par
+\par
+#### Yol Yard\u305?m & SOS\par
+- `sos_alerts` - Acil yard\u305?m talepleri\par
+  - `id` (BIGSERIAL, PK)\par
+  - `user_id` (UUID, FK)\par
+  - `location` (TEXT)\par
+  - `lat` (DECIMAL)\par
+  - `lng` (DECIMAL)\par
+  - `problem_type` (TEXT)\par
+  - `description` (TEXT)\par
+  - `phone` (TEXT)\par
+  - `status` (TEXT: 'active', 'resolved', 'cancelled')\par
+  - `created_at` (TIMESTAMP)\par
+\par
+- `help_responses` - Yard\u305?m teklifleri\par
+  - `id` (BIGSERIAL, PK)\par
+  - `alert_id` (BIGINT, FK)\par
+  - `user_id` (UUID, FK)\par
+  - `message` (TEXT)\par
+  - `phone` (TEXT)\par
+  - `status` (TEXT: 'pending', 'accepted', 'rejected')\par
+\par
+- `emergency_numbers` - Acil numaralar (30 \f0\'fclke)\par
+  - `id` (BIGSERIAL, PK)\par
+  - `country` (TEXT)\par
+  - `police` (TEXT)\par
+  - `ambulance` (TEXT)\par
+  - `fire` (TEXT)\par
+  - `other` (JSONB)\par
+\par
+- `user_locations` - Kullan\f1\u305?c\u305? konumlar\u305?\par
+  - `id` (BIGSERIAL, PK)\par
+  - `user_id` (UUID, FK)\par
+  - `lat` (DECIMAL)\par
+  - `lng` (DECIMAL)\par
+  - `updated_at` (TIMESTAMP)\par
+\par
+#### Yol Bildirimleri\par
+- `road_reports` - Waze benzeri yol bildirimleri\par
+  - `id` (BIGSERIAL, PK)\par
+  - `user_id` (UUID, FK)\par
+  - `report_type` (TEXT: 'radar', 'accident', 'traffic', 'roadwork', 'hazard')\par
+  - `location` (TEXT)\par
+  - `lat` (DECIMAL)\par
+  - `lng` (DECIMAL)\par
+  - `description` (TEXT)\par
+  - `verified_count` (INTEGER)\par
+  - `created_at` (TIMESTAMP)\par
+\par
+#### Market & \u304?ndirimler\par
+- `market_chains` - Market zincirleri (30 \f0\'fclke)\par
+  - `id` (BIGSERIAL, PK)\par
+  - `name` (TEXT)\par
+  - `country` (TEXT)\par
+  - `logo_url` (TEXT)\par
+  - `website` (TEXT)\par
+  - `brochure_url` (TEXT)\par
+  - `is_active` (BOOLEAN)\par
+\par
+- `user_deals` - Kullan\f1\u305?c\u305? payla\'ba\u305?mlar\u305?\par
+  - `id` (BIGSERIAL, PK)\par
+  - `user_id` (UUID, FK)\par
+  - `market_id` (BIGINT, FK)\par
+  - `product_name` (TEXT)\par
+  - `old_price` (DECIMAL)\par
+  - `new_price` (DECIMAL)\par
+  - `image_url` (TEXT)\par
+  - `location` (TEXT)\par
+  - `status` (TEXT: 'pending', 'approved', 'rejected')\par
+\par
+- `user_points` - Gamification\par
+  - `id` (BIGSERIAL, PK)\par
+  - `user_id` (UUID, FK)\par
+  - `points` (INTEGER)\par
+  - `badges` (TEXT[])\par
+\par
+#### Akademi\par
+- `academy_categories` - E\u287?itim kategorileri\par
+  - `id` (BIGSERIAL, PK)\par
+  - `name` (TEXT)\par
+  - `description` (TEXT)\par
+  - `icon` (TEXT)\par
+\par
+- `academy_series` - Video serileri\par
+  - `id` (BIGSERIAL, PK)\par
+  - `category_id` (BIGINT, FK)\par
+  - `title` (TEXT)\par
+  - `description` (TEXT)\par
+  - `thumbnail_url` (TEXT)\par
+  - `order` (INTEGER)\par
+\par
+- `academy_videos` - Videolar\par
+  - `id` (BIGSERIAL, PK)\par
+  - `series_id` (BIGINT, FK)\par
+  - `title` (TEXT)\par
+  - `description` (TEXT)\par
+  - `youtube_id` (TEXT)\par
+  - `duration` (INTEGER)\par
+  - `order` (INTEGER)\par
+\par
+- `academy_views` - \u304?zlenme takibi\par
+  - `id` (BIGSERIAL, PK)\par
+  - `user_id` (UUID, FK)\par
+  - `video_id` (BIGINT, FK)\par
+  - `watched_at` (TIMESTAMP)\par
+\par
+- `academy_requests` - Kullan\u305?c\u305? talepleri\par
+  - `id` (BIGSERIAL, PK)\par
+  - `user_id` (UUID, FK)\par
+  - `category` (TEXT)\par
+  - `request_text` (TEXT)\par
+  - `status` (TEXT: 'pending', 'in_progress', 'completed')\par
+\par
+#### Affiliate & Monetizasyon\par
+- `affiliate_clicks` - T\u305?klama takibi\par
+  - `id` (BIGSERIAL, PK)\par
+  - `user_id` (UUID, FK)\par
+  - `partner` (TEXT)\par
+  - `click_url` (TEXT)\par
+  - `referral_code` (TEXT)\par
+  - `clicked_at` (TIMESTAMP)\par
+\par
+- `promotions` - Promosyonlar\par
+  - `id` (BIGSERIAL, PK)\par
+  - `type` (TEXT: 'flight', 'hotel', 'car', 'vacation')\par
+  - `title` (TEXT)\par
+  - `description` (TEXT)\par
+  - `image_url` (TEXT)\par
+  - `affiliate_url` (TEXT)\par
+  - `is_active` (BOOLEAN)\par
+\par
+#### Sa\u287?l\u305?k Turizmi\par
+- `health_clinics` - Klinikler\par
+  - `id` (UUID, PK)\par
+  - `display_name` (TEXT) - Kullan\u305?c\u305?ya g\f0\'f6sterilen isim\par
+  - `internal_name` (TEXT) - Ger\'e7ek klinik ismi (sadece admin)\par
+  - `slug` (TEXT, UNIQUE)\par
+  - `city` (TEXT)\par
+  - `district` (TEXT)\par
+  - `country` (TEXT, DEFAULT 'TR')\par
+  - `specialties` (TEXT[]) - ['sa\'e7_ekimi', 'di\f1\'ba', 'estetik', 'erkek_cinsel', 'kad\u305?n_cinsel', 't\f0\'fcp_bebek']\par
+  - `description` (TEXT)\par
+  - `internal_address` (TEXT) - Sadece admin\par
+  - `internal_phone` (TEXT) - Sadece admin\par
+  - `internal_email` (TEXT) - Sadece admin\par
+  - `internal_website` (TEXT) - Sadece admin\par
+  - `logo_url` (TEXT)\par
+  - `images` (TEXT[])\par
+  - `accreditations` (TEXT[])\par
+  - `price_range_min` (DECIMAL)\par
+  - `price_range_max` (DECIMAL)\par
+  - `currency` (TEXT, DEFAULT 'EUR')\par
+  - `rating` (DECIMAL(3,2))\par
+  - `review_count` (INTEGER, DEFAULT 0)\par
+  - `languages` (TEXT[])\par
+  - `services` (JSONB)\par
+  - `packages` (JSONB)\par
+  - `commission_rate` (DECIMAL(5,2))\par
+  - `commission_type` (TEXT, DEFAULT 'percentage')\par
+  - `minimum_commission` (DECIMAL(10,2))\par
+  - `is_verified` (BOOLEAN, DEFAULT false)\par
+  - `is_active` (BOOLEAN, DEFAULT true)\par
+\par
+- `health_leads` - Dan\f1\u305?\'bamanl\u305?k talepleri\par
+  - `id` (UUID, PK)\par
+  - `user_id` (UUID, FK)\par
+  - `clinic_id` (UUID, FK)\par
+  - `treatment_category` (TEXT)\par
+  - `treatment_type` (TEXT)\par
+  - `reference_code` (TEXT, UNIQUE)\par
+  - `full_name` (TEXT)\par
+  - `email` (TEXT)\par
+  - `phone` (TEXT)\par
+  - `whatsapp` (TEXT)\par
+  - `country_code` (TEXT)\par
+  - `photos` (TEXT[])\par
+  - `description` (TEXT)\par
+  - `preferred_date` (DATE)\par
+  - `status` (TEXT, DEFAULT 'new')\par
+  - `clinic_contacted_at` (TIMESTAMP)\par
+  - `clinic_quote` (DECIMAL)\par
+  - `clinic_quote_currency` (TEXT, DEFAULT 'EUR')\par
+  - `commission_amount` (DECIMAL(10,2))\par
+  - `commission_paid` (BOOLEAN, DEFAULT false)\par
+  - `commission_paid_at` (TIMESTAMP)\par
+  - `admin_notes` (TEXT)\par
+\par
+- `health_treatments` - Tedavi t\f0\'fcrleri\par
+  - `id` (UUID, PK)\par
+  - `clinic_id` (UUID, FK)\par
+  - `category` (TEXT)\par
+  - `subcategory` (TEXT)\par
+  - `name` (TEXT)\par
+  - `description` (TEXT)\par
+  - `duration_days` (INTEGER)\par
+  - `price_min` (DECIMAL)\par
+  - `price_max` (DECIMAL)\par
+  - `display_price_range` (TEXT)\par
+  - `currency` (TEXT, DEFAULT 'EUR')\par
+  - `techniques` (TEXT[])\par
+\par
+- `health_reservations` - Rezervasyonlar\par
+  - `id` (UUID, PK)\par
+  - `lead_id` (UUID, FK)\par
+  - `user_id` (UUID, FK)\par
+  - `clinic_id` (UUID, FK)\par
+  - `treatment_id` (UUID, FK)\par
+  - `reference_code` (TEXT, UNIQUE)\par
+  - `full_name` (TEXT)\par
+  - `email` (TEXT)\par
+  - `phone` (TEXT)\par
+  - `preferred_date` (DATE)\par
+  - `preferred_time` (TIME)\par
+  - `notes` (TEXT)\par
+  - `status` (TEXT, DEFAULT 'pending')\par
+  - `commission_amount` (DECIMAL(10,2))\par
+  - `commission_paid` (BOOLEAN, DEFAULT false)\par
+\par
+- `health_reviews` - De\f1\u287?erlendirmeler\par
+  - `id` (UUID, PK)\par
+  - `clinic_id` (UUID, FK)\par
+  - `user_id` (UUID, FK)\par
+  - `treatment_id` (UUID, FK)\par
+  - `lead_id` (UUID, FK)\par
+  - `rating` (INTEGER, CHECK 1-5)\par
+  - `comment` (TEXT)\par
+  - `before_after_images` (TEXT[])\par
+  - `is_verified` (BOOLEAN, DEFAULT false)\par
+\par
+- `health_commission_log` - Komisyon loglar\u305?\par
+  - `id` (UUID, PK)\par
+  - `lead_id` (UUID, FK)\par
+  - `reservation_id` (UUID, FK)\par
+  - `clinic_id` (UUID, FK)\par
+  - `amount` (DECIMAL(10,2))\par
+  - `currency` (TEXT, DEFAULT 'EUR')\par
+  - `status` (TEXT, DEFAULT 'pending')\par
+  - `paid_at` (TIMESTAMP)\par
+  - `payment_method` (TEXT)\par
+  - `notes` (TEXT)\par
+\par
+#### Di\u287?er\par
+- `borders` - S\u305?n\u305?r kap\u305?lar\u305?\par
+  - `id` (BIGSERIAL, PK)\par
+  - `name` (TEXT)\par
+  - `country` (TEXT)\par
+  - `lat` (DECIMAL)\par
+  - `lng` (DECIMAL)\par
+  - `current_queue` (INTEGER)\par
+  - `estimated_wait_time` (INTEGER)\par
+  - `last_updated` (TIMESTAMP)\par
+\par
+- `cameras` - G\f0\'fcmr\'fck kameralar\f1\u305?\par
+  - `id` (BIGSERIAL, PK)\par
+  - `border_id` (BIGINT, FK)\par
+  - `name` (TEXT)\par
+  - `stream_url` (TEXT)\par
+  - `is_active` (BOOLEAN)\par
+\par
+### Row Level Security (RLS)\par
+- T\f0\'fcm tablolarda RLS aktif\par
+- Admin-only: `profiles.role = 'admin'` kontrol\'fc\par
+- User-specific: `auth.uid() = user_id` kontrol\'fc\par
+- Public read: Baz\f1\u305? tablolar herkese a\f0\'e7\f1\u305?k (listings, announcements)\par
+- Sa\u287?l\u305?k Turizmi: `internal_*` alanlar\u305? sadece admin g\f0\'f6r\'fcr\par
+\par
+---\par
+\par
+## \f3\u-10179?\u-9023?\f0  DOSYA YAPISI\par
+\par
+### Toplam Dosya Say\f1\u305?s\u305?\par
+- **HTML Sayfalar\u305?:** 57\par
+- **JavaScript Mod\f0\'fclleri:** 8\par
+- **SQL Dosyalar\f1\u305?:** 2 (supabase_rls_policies.sql, supabase_health_sample_data.sql)\par
+- **Config Dosyalar\u305?:** 3 (manifest.json, capacitor.config.json, _headers)\par
+- **Edge Functions:** 1 (supabase/functions/gold-price/index.ts)\par
+\par
+### \f0\'d6nemli Dosyalar\par
+\par
+#### config.js\par
+- Supabase ba\f1\u287?lant\u305?s\u305?\par
+- API anahtarlar\u305? (Google Maps, Adzuna, NewsAPI)\par
+- Affiliate yap\u305?land\u305?rmas\u305?\par
+- Helper fonksiyonlar (isAdmin, getCurrentUser, trackAffiliateClick)\par
+- WhatsApp link builder (Sa\u287?l\u305?k Turizmi)\par
+\par
+#### auth.js\par
+- Authentication state y\f0\'f6netimi\par
+- UI g\'fcncellemeleri (login/logout)\par
+- requireAuth() fonksiyonu\par
+- getCurrentUser() fonksiyonu\par
+\par
+#### utils.js\par
+- `sanitize()` - XSS korumas\f1\u305?\par
+- `sanitizeURL()` - URL do\u287?rulama\par
+- `sanitizePhone()` - Telefon format\u305?\par
+- `escapeHTML()` - HTML escape\par
+\par
+#### components.js\par
+- `getNavbarHTML()` - Navbar component\par
+- `getFooterHTML()` - Footer component\par
+- `getBottomNavHTML()` - Mobil alt navigasyon\par
+\par
+#### app-core.js\par
+- Platform detection (Web/Native/iOS/Android)\par
+- Basit routing\par
+- PWA lifecycle\par
+- Capacitor entegrasyonu haz\u305?rl\u305?\u287?\u305?\par
+\par
+#### genel_veriler.js\par
+- 30 Avrupa \f0\'fclkesi ve \f1\'baehirleri\par
+- Telefon kodlar\u305?\par
+- Market zincirleri ve bro\'ba\f0\'fcr linkleri\par
+- Acil numaralar (30 \'fclke)\par
+- Bildirim t\'fcrleri (Waze benzeri)\par
+- Alt\f1\u305?n t\f0\'fcrleri ve para birimleri\par
+- Ziyaret\'e7i takip sistemi\par
+\par
+#### service-worker.js\par
+- Offline cache y\'f6netimi\par
+- External API bypass (CORS \'f6nleme)\par
+- Supabase Edge Function bypass\par
+- Market bro\f1\'ba\f0\'fcr siteleri bypass\par
+\par
+---\par
+\par
+## \f3\u-10179?\u-8948?\f0  API ENTEGRASYONLARI\par
+\par
+### Google Maps API\par
+- **Kullan\f1\u305?m:** Harita g\f0\'f6rselle\f1\'batirme, mesafe hesaplama\par
+- **Sayfalar:** admin.html, sila_yolu.html, yol_yardim.html\par
+- **G\f0\'fcvenlik:** HTTP referer k\f1\u305?s\u305?tlamas\u305? \f0\'f6nerilir\par
+- **Key:** AIzaSyDhMlLszA1wpS9lk_T7yJIc8hb8gIiatgc\par
+\par
+### Supabase Realtime\par
+- **Kullan\f1\u305?m:** Canl\u305? sohbet, bildirimler\par
+- **Channels:** `public:messages`, `public:sos_alerts`, `public:road_reports`\par
+- **Subscription:** JavaScript client-side\par
+\par
+### NewsAPI\par
+- **Kullan\u305?m:** Otomatik haber \f0\'f6nerileri (admin paneli)\par
+- **Limit:** 100 request/g\'fcn (\'fccretsiz)\par
+- **Filtreler:** T\'fcrk\'e7e, Avrupa \'fclkeleri, \'f6zelle\f1\'batirilebilir\par
+- **Key:** fe4b9d88c63545f6a824467f7ccd25df\par
+\par
+### ExchangeRate-API\par
+- **Kullan\u305?m:** Canl\u305? d\f0\'f6viz kurlar\f1\u305?\par
+- **Sayfa:** doviz_altin.html\par
+- **G\f0\'fcncelleme:** Sayfa y\'fcklendi\f1\u287?inde + 30 dakikada bir\par
+- **Endpoint:** {{\field{\*\fldinst{HYPERLINK https://api.exchangerate-api.com/v4/latest/EUR }}{\fldrslt{https://api.exchangerate-api.com/v4/latest/EUR\ul0\cf0}}}}\f1\fs22\par
+\par
+### Frankfurter API\par
+- **Kullan\u305?m:** Tarihsel d\f0\'f6viz verileri (grafik i\'e7in)\par
+- **Sayfa:** doviz_altin.html\par
+- **Endpoint:** {{\field{\*\fldinst{HYPERLINK https://api.frankfurter.app/latest?from=EUR&to=TRY }}{\fldrslt{https://api.frankfurter.app/latest?from=EUR&to=TRY\ul0\cf0}}}}\f0\fs22\par
+\par
+### Supabase Edge Functions\par
+- **gold-price** - Alt\f1\u305?n fiyatlar\u305? backend proxy\par
+  - Metals API (primary)\par
+  - FreeGoldAPI (fallback)\par
+  - TCMB (fallback)\par
+  - CORS bypass\par
+  - Deno runtime\par
+\par
+### Adzuna API\par
+- **Kullan\u305?m:** \u304?\'ba ilanlar\u305? (admin paneli)\par
+- **Sayfa:** admin.html\par
+- **ID:** c0c66624\par
+- **Key:** 5a2d86df68a24e6fe8b1e9b4319347f0\par
+\par
+### Rentalcars.com\par
+- **Kullan\u305?m:** Ara\f0\'e7 kiralama affiliate\par
+- **Sayfa:** arac_kiralama.html\par
+- **Affiliate Code:** Yap\f1\u305?land\u305?rma gerekli\par
+\par
+### WhatsApp Business API\par
+- **Kullan\u305?m:** Sa\u287?l\u305?k Turizmi dan\u305?\'bamanl\u305?k talepleri\par
+- **Sayfa:** saglik_turizmi.html\par
+- **Y\f0\'f6ntem:** WhatsApp link (wa.me)\par
+\par
+---\par
+\par
+## \f3\u-10179?\u-8942?\f0  G\'dcVENL\f1\u304?K\par
+\par
+### XSS Korumas\u305?\par
+- T\f0\'fcm kullan\f1\u305?c\u305? girdileri `sanitize()` ile temizleniyor\par
+- `utils.js` i\f0\'e7inde merkezi sanitization fonksiyonlar\f1\u305?\par
+- HTML escape i\f0\'e7in `escapeHTML()`\par
+- URL do\f1\u287?rulama i\f0\'e7in `sanitizeURL()`\par
+\par
+### Authentication\par
+- Supabase Auth ile email/password\par
+- JWT token tabanl\f1\u305?\par
+- `auth.js` ile merkezi y\f0\'f6netim\par
+- Session y\'f6netimi\par
+\par
+### Row Level Security (RLS)\par
+- T\'fcm tablolarda RLS aktif\par
+- Admin-only i\f1\'balemler: `profiles.role = 'admin'` kontrol\f0\'fc\par
+- User-specific veriler: `auth.uid() = user_id` kontrol\'fc\par
+- Public read: Baz\f1\u305? tablolar herkese a\f0\'e7\f1\u305?k (listings, announcements)\par
+- Sa\u287?l\u305?k Turizmi: `internal_*` alanlar\u305? sadece admin g\f0\'f6r\'fcr\par
+\par
+### API Key G\'fcvenli\f1\u287?i\par
+- Google Maps: HTTP referer k\u305?s\u305?tlamas\u305? \f0\'f6nerilir\par
+- Adzuna: Sadece admin panelinde kullan\f1\u305?l\u305?yor\par
+- NewsAPI: \f0\'dccretsiz plan (100 req/g\'fcn)\par
+- Supabase anon key: Client-side'da g\'fcvenli (RLS ile korunur)\par
+\par
+### Admin Korumas\f1\u305?\par
+- `isAdmin()` fonksiyonu ile kontrol\par
+- `requireAdmin()` ile sayfa korumas\u305?\par
+- Admin paneli: admin.html\par
+- RLS policies ile backend korumas\u305?\par
+\par
+### CORS Y\f0\'f6netimi\par
+- Service worker ile external API bypass\par
+- Supabase Edge Functions ile backend proxy\par
+- CORS proxy kullan\f1\u305?m\u305? (api.allorigins.win)\par
+\par
+---\par
+\par
+## \f3\u-10179?\u-8576?\f0  DEPLOYMENT\par
+\par
+### Hosting\par
+- **Platform:** Netlify\par
+- **Y\'f6ntem:** Manuel s\'fcr\'fckle-b\f1\u305?rak veya Git entegrasyonu\par
+- **Domain:** platformavrupa.com\par
+- **SSL:** Otomatik (Netlify)\par
+\par
+### Cache Y\f0\'f6netimi\par
+- **Dosya:** `_headers`\par
+- **HTML:** no-cache (her zaman g\'fcncel)\par
+- **JS/CSS:** 1 saat cache\par
+- **Resimler:** 1 g\'fcn cache\par
+\par
+### Build Process\par
+- **Build Tool:** Yok (statik HTML)\par
+- **Derleme:** Gerektirmiyor\par
+- **CDN:** Tailwind, Font Awesome, Supabase JS\par
+\par
+### Environment Variables\par
+- Supabase URL/Key: `config.js` i\'e7inde\par
+- API Keys: `config.js` i\'e7inde\par
+- Production'da environment variables kullan\f1\u305?labilir (Netlify)\par
+\par
+### Supabase Edge Functions Deployment\par
+- **Platform:** Supabase Dashboard\par
+- **Runtime:** Deno\par
+- **Deployment:** `supabase functions deploy gold-price`\par
+\par
+---\par
+\par
+## \f3\u-10179?\u-8975?\f0  MOB\f1\u304?L D\f0\'d6N\'dc\f1\'aa\f0\'dcM\par
+\par
+### PWA (Progressive Web App)\par
+- \f2\u9989?\f0  manifest.json mevcut\par
+- \f2\u9989?\f0  service-worker.js mevcut\par
+- \f2\u9989?\f0  Offline destek haz\f1\u305?r\par
+- \f2\u9989?\f0  Install prompt haz\f1\u305?r\par
+- \f2\u9989?\f0  Theme color ayarl\f1\u305?\par
+\par
+### Capacitor Haz\u305?rl\u305?\u287?\u305?\par
+- \f2\u9989?\f0  capacitor.config.json mevcut\par
+- \f2\u9989?\f0  app-core.js platform detection i\'e7eriyor\par
+- \f2\u9989?\f0  Native plugin entegrasyonu i\'e7in haz\f1\u305?r\par
+- \f2\u9989?\f0  App ID: com.platformavrupa.app\par
+\par
+### Mobil Optimizasyon\par
+- \f2\u9989?\f0  Responsive design (Tailwind CSS)\par
+- \f2\u9989?\f0  Mobil-first yakla\f1\'ba\u305?m\par
+- \f2\u9989?\f0  Touch-friendly UI\par
+- \f2\u9989?\f0  Bottom navigation (mobil)\par
+- \f2\u9989?\f0  Viewport meta tag\par
+\par
+### Native \'d6zellikler (Gelecek)\par
+- Push notifications (Capacitor Push)\par
+- Geolocation (Capacitor Geolocation)\par
+- Camera (Capacitor Camera)\par
+- File System (Capacitor Filesystem)\par
+- Background tasks\par
+\par
+---\par
+\par
+## \f3\u-10179?\u-9014?\f0  \f1\u304?STAT\u304?ST\u304?KLER\par
+\par
+### Kod \u304?statistikleri\par
+- **Toplam HTML Sayfas\u305?:** 57\par
+- **JavaScript Mod\f0\'fcl\'fc:** 8\par
+- **SQL Tablo Say\f1\u305?s\u305?:** 40+\par
+- **Toplam Kod Sat\u305?r\u305?:** ~20,000+ (tahmini)\par
+\par
+### \f0\'d6zellikler\par
+- **\f1\u304?lan Kategorisi:** 7 (Emlak, Ara\f0\'e7, \f1\u304?\'ba, Hizmet, E\'baya, Yemek, Di\u287?er)\par
+- **Akademi Kategorisi:** 8 (Dil, Resmi \u304?\'balemler, Kariyer, Finans, Ya\'baam, S\u305?la Yolu, Hukuk, Aile)\par
+- **Sa\u287?l\u305?k Turizmi Kategorisi:** 6 (Sa\f0\'e7 Ekimi, Di\f1\'ba, Estetik, Erkek Cinsel, Kad\u305?n Cinsel, T\f0\'fcp Bebek)\par
+- **Desteklenen \'dclke:** 30 Avrupa \'fclkesi\par
+- **Market Zinciri:** 100+\par
+- **Affiliate Partner:** 5 (Skyscanner, Booking, Rentalcars, Tatil Sepeti, Viator)\par
+\par
+---\par
+\par
+## \f3\u-10179?\u-8956?\f0  GEL\f1\u304?\'aaT\u304?RME NOTLARI\par
+\par
+### Kod Standartlar\u305?\par
+- **Dil:** T\f0\'fcrk\'e7e (de\f1\u287?i\'baken isimleri, yorumlar)\par
+- **Format:** ES6+ JavaScript\par
+- **Stil:** Tailwind utility classes\par
+- **Naming:** camelCase (JavaScript), kebab-case (HTML dosyalar\u305?)\par
+\par
+### Best Practices\par
+- \f2\u9989?\f0  Merkezi yap\f1\u305?land\u305?rma (config.js)\par
+- \f2\u9989?\f0  Component reusability (components.js)\par
+- \f2\u9989?\f0  XSS korumas\f1\u305? (utils.js)\par
+- \f2\u9989?\f0  RLS ile g\'fcvenlik\par
+- \f2\u9989?\f0  Mobile-first design\par
+- \f2\u9989?\f0  Service worker ile offline destek\par
+- \f2\u9989?\f0  Error handling (try-catch)\par
+- \f2\u9989?\f0  Console logging (debug i\'e7in)\par
+\par
+### \'d6nemli Notlar\par
+- **Asla Bozma:** Mevcut \'e7al\f1\u305?\'baan fonksiyonlara dokunma, sadece \f0\'fczerine ekle\par
+- **Mobil First:** Yazd\f1\u305?\u287?\u305?n her kod mobilde (telefonda) kusursuz g\f0\'f6r\'fcnmeli\par
+- **Sadelik:** Karma\f1\'ba\u305?k frameworkler kurma. CDN kullan\par
+- **Backend Vizyonu:** \u304?stemci taraf\u305?nda (client-side) \f0\'e7al\f1\u305?\'ba\u305?yoruz ama veritaban\u305? sorgular\u305?n\u305? optimize et\par
+\par
+---\par
+\par
+## \f3\u-10179?\u-8537?\f0  GELECEK PLANLAR\par
+\par
+### K\f1\u305?sa Vadeli (1-3 Ay)\par
+- [ ] Native mobil uygulama (Capacitor)\par
+- [ ] Push notifications\par
+- [ ] Image optimization\par
+- [ ] SEO iyile\'batirmeleri\par
+- [ ] Analytics entegrasyonu (Google Analytics)\par
+- [ ] Error tracking (Sentry)\par
+\par
+### Orta Vadeli (3-6 Ay)\par
+- [ ] Offline-first yakla\'ba\u305?m\par
+- [ ] S\u305?n\u305?r kap\u305?lar\u305? otomatik veri \f0\'e7ekme (web scraping)\par
+- [ ] G\'fcmr\'fck kameralar\f1\u305? canl\u305? yay\u305?n\par
+- [ ] Waze benzeri bildirim sistemi tam entegrasyon\par
+- [ ] \f0\'c7oklu dil deste\f1\u287?i (T\f0\'fcrk\'e7e, Almanca, Frans\f1\u305?zca)\par
+\par
+### Uzun Vadeli (6-12 Ay)\par
+- [ ] AI chatbot (dil deste\u287?i, soru-cevap)\par
+- [ ] \f0\'d6deme sistemi entegrasyonu\par
+- [ ] Video streaming (Akademi)\par
+- [ ] Sosyal medya entegrasyonu\par
+- [ ] API dok\'fcmantasyonu\par
+- [ ] Developer portal\par
+\par
+---\par
+\par
+## \f3\u-10179?\u-8994?\f0  TEKN\f1\u304?K DESTEK\par
+\par
+### \f0\'d6nemli Dosyalar\par
+- **Config:** `config.js`\par
+- **Auth:** `auth.js`\par
+- **Utils:** `utils.js`\par
+- **Database:** `supabase_rls_policies.sql`\par
+- **Health Tourism:** `supabase_health_sample_data.sql`\par
+\par
+### Loglama\par
+- Console.log ile debug\par
+- Supabase dashboard'da loglar\par
+- Netlify'da deploy loglar\f1\u305?\par
+- Service worker loglar\u305?\par
+\par
+### Hata Ay\u305?klama\par
+- Browser DevTools (F12)\par
+- Supabase Dashboard > Logs\par
+- Netlify Functions Logs\par
+- Service Worker DevTools\par
+\par
+---\par
+\par
+## \f3\u-10179?\u-8995?\f0  EK B\f1\u304?LG\u304?LER\par
+\par
+### Domain Bilgileri\par
+- **Aktif Domain:** {{\field{\*\fldinst{HYPERLINK www.platformavrupa.com }}{\fldrslt{www.platformavrupa.com\ul0\cf0}}}}\f1\fs22\par
+- **Yedek Domain:** {{\field{\*\fldinst{HYPERLINK www.platformavrupa.eu }}{\fldrslt{www.platformavrupa.eu\ul0\cf0}}}}\f1\fs22  (hen\f0\'fcz kullan\f1\u305?lm\u305?yor)\par
+- **Email:** info@platformavrupa.com (Zoho)\par
+\par
+### Master Plan (15.01.2026)\par
+1. **Ak\u305?ll\u305? S\u305?n\u305?r Kap\u305?lar\u305? Sistemi** - G\f0\'fcmr\'fck yo\f1\u287?unluk takibi, kameralar, rota \f0\'f6nerileri\par
+2. **Yol Arkada\f1\'ba\u305?m & Emanet** - Bagaj odakl\u305? yolculuk payla\'ba\u305?m\u305?, kargo/emanet e\'bale\'batirme\par
+3. **Yol Yard\u305?m & SOS** - Topluluk destekli acil yard\u305?m, do\u287?rulanm\u305?\'ba tamirci/\f0\'e7ekici veritaban\f1\u305?\par
+4. **Mobil Uygulama & Waze \f0\'d6zellikleri** - Native app, anl\f1\u305?k yol bildirimleri\par
+\par
+### Test Dosyalar\u305?\par
+- `TEST_RESULTS_YOL_ARKADASI.md` - Yol Arkada\'ba\u305? mod\f0\'fcl\'fc test sonu\'e7lar\f1\u305?\par
+- `YOL_ARKADASI_TEST_OZETI.md` - Yol Arkada\'ba\u305? test \f0\'f6zeti\par
+- `MOBILE_TEST_CHECKLIST.md` - Mobil test checklist\par
+\par
+---\par
+\par
+**Son G\'fcncelleme:** 2026-02-04  \par
+**Versiyon:** 3.0 Final  \par
+**Durum:** Production Ready \f2\u9989?\f0   \par
+**Haz\f1\u305?rlayan:** AI Assistant (Cursor)  \par
+**Proje Sahibi:** PlatformAvrupa Team\par
+\par
+---\par
+\par
+## \f3\u-10179?\u-9012?\f0  NOTLAR\par
+\par
+Bu dok\'fcmantasyon Gemini AI ile payla\f1\'ba\u305?m i\f0\'e7in haz\f1\u305?rlanm\u305?\'bat\u305?r. Projenin t\f0\'fcm teknik detaylar\f1\u305?n\u305?, mimarisini, veritaban\u305? yap\u305?s\u305?n\u305? ve gelecek planlar\u305?n\u305? i\f0\'e7ermektedir. G\'fcncellemeler yap\f1\u305?ld\u305?k\f0\'e7a bu dok\'fcmantasyon da g\'fcncellenmelidir.\lang31\par
+}
+ 

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Otel Rezervasyonu | PlatformAvrupa</title>
+    <meta name="description" content="Dünya genelinde en uygun otel fiyatları ve rezervasyon fırsatları.">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        .glass-header { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid #e2e8f0; }
+        
+        .hotel-card {
+            background: white; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0;
+            transition: all 0.3s; cursor: pointer;
+        }
+        .hotel-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); border-color: #003580; }
+        .hotel-card img { transition: 0.5s; width: 100%; height: 200px; object-fit: cover; }
+        .hotel-card:hover img { transform: scale(1.05); }
+
+        /* Form Elemanları */
+        .search-input {
+            width: 100%; background: transparent; outline: none; font-weight: 700; color: #334155;
+            cursor: pointer; font-size: 0.95rem;
+        }
+        .search-box {
+            background-color: #f8fafc; padding: 12px 16px; border-radius: 16px; border: 1px solid #e2e8f0;
+            transition: all 0.2s; position: relative;
+        }
+        .search-box:focus-within { border-color: #2563eb; background-color: white; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
+        .search-label { display: block; font-size: 0.65rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; color: transparent; background: transparent; cursor: pointer;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <nav class="glass-header sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+            <a href="index.html" class="flex items-center gap-2 text-slate-600 hover:text-blue-900 transition font-bold">
+                <div class="w-9 h-9 bg-slate-100 rounded-xl flex items-center justify-center group-hover:bg-blue-50 transition"><i class="fa-solid fa-arrow-left"></i></div>
+                <span class="hidden sm:inline">Ana Sayfa</span>
+            </a>
+            <div class="flex items-center gap-2">
+                <div class="w-10 h-10 bg-blue-900 rounded-xl flex items-center justify-center text-white text-xl shadow-lg shadow-blue-200">
+                    <i class="fa-solid fa-hotel"></i>
+                </div>
+                <span class="font-extrabold text-xl text-slate-900 tracking-tight">Otel <span class="text-blue-900">Rezervasyon</span></span>
+            </div>
+            <div class="w-20"></div>
+        </div>
+    </nav>
+
+    <main class="flex-grow">
+        
+        <div class="relative bg-slate-900 py-16 px-6 overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2000" loading="lazy" class="absolute inset-0 w-full h-full object-cover opacity-40">
+            
+            <div class="relative z-10 max-w-6xl mx-auto text-center">
+                <h1 class="text-3xl md:text-5xl font-extrabold text-white mb-4 drop-shadow-md">Dünya Çapında Otel Fırsatları</h1>
+                <p class="text-blue-100 text-lg mb-8 drop-shadow">Booking.com güvencesiyle rezervasyon yapın, otelde ödeyin.</p>
+                
+                <div class="bg-white p-6 md:p-8 rounded-3xl shadow-2xl relative z-20 text-left">
+                    <form onsubmit="otelAra(event)">
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                            
+                            <div class="md:col-span-3 search-box">
+                                <label class="search-label">Ülke</label>
+                                <div class="flex items-center gap-2">
+                                    <i class="fa-solid fa-earth-europe text-blue-500"></i>
+                                    <select id="ulkeSelect" onchange="ulkeSecildi()" class="search-input appearance-none">
+                                        <option value="">Yükleniyor...</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="md:col-span-4 search-box">
+                                <label class="search-label">Şehir / Bölge</label>
+                                <div class="flex items-center gap-2">
+                                    <i class="fa-solid fa-location-dot text-blue-500"></i>
+                                    <select id="sehirSelect" class="search-input appearance-none" disabled>
+                                        <option value="">Önce Ülke Seçin</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="md:col-span-3 grid grid-cols-2 gap-2">
+                                <div class="search-box cursor-pointer" onclick="document.getElementById('checkIn').showPicker()">
+                                    <label class="search-label">Giriş</label>
+                                    <input type="date" id="checkIn" onchange="tarihAyarla()" class="search-input text-sm">
+                                </div>
+                                <div class="search-box cursor-pointer" onclick="document.getElementById('checkOut').showPicker()">
+                                    <label class="search-label">Çıkış</label>
+                                    <input type="date" id="checkOut" class="search-input text-sm">
+                                </div>
+                            </div>
+
+                            <div class="md:col-span-2 grid grid-cols-2 gap-2">
+                                <div class="search-box">
+                                    <label class="search-label">Yetişkin</label>
+                                    <select id="adultCount" class="search-input text-center appearance-none">
+                                        <option value="1">1</option>
+                                        <option value="2" selected>2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                    </select>
+                                </div>
+                                <div class="search-box">
+                                    <label class="search-label">Çocuk</label>
+                                    <select id="childCount" onchange="cocukAyarla()" class="search-input text-center appearance-none">
+                                        <option value="0">0</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div id="childAgesRow" class="md:col-span-12 hidden mt-2">
+                                <div class="bg-blue-50 border border-blue-100 p-4 rounded-2xl flex flex-col items-center">
+                                    <p class="text-xs font-bold text-blue-400 uppercase mb-2">Çocukların Yaşları</p>
+                                    <div id="yasKutulari" class="flex flex-wrap justify-center gap-3"></div>
+                                </div>
+                            </div>
+
+                            <div class="md:col-span-12 mt-2">
+                                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl text-lg shadow-lg shadow-blue-200 transition transform active:scale-[0.99] flex items-center justify-center gap-2">
+                                    En Uygun Oteli Bul <i class="fa-solid fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-6 py-16">
+            <h2 class="text-2xl font-bold text-slate-800 mb-8 flex items-center gap-2">
+                <i class="fa-solid fa-fire text-orange-500"></i> Popüler Destinasyonlar
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div onclick="hizliAra('Antalya')" class="hotel-card group">
+                    <div class="relative overflow-hidden h-48">
+                        <img src="https://images.unsplash.com/photo-1542051841857-5f90071e7989?q=80&w=800" loading="lazy">
+                        <div class="absolute top-3 right-3 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold text-slate-800 shadow-sm">⭐ 4.9</div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-lg font-bold text-slate-800">Antalya</h3>
+                        <p class="text-xs text-slate-500 mb-3">Her şey dahil tatil köyleri.</p>
+                        <span class="text-blue-600 text-xs font-bold group-hover:underline">Fiyatları Gör ></span>
+                    </div>
+                </div>
+
+                <div onclick="hizliAra('Bodrum')" class="hotel-card group">
+                    <div class="relative overflow-hidden h-48">
+                        <img src="https://images.unsplash.com/photo-1520699049698-acd2fcc51056?q=80&w=800" loading="lazy">
+                        <div class="absolute top-3 right-3 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold text-slate-800 shadow-sm">⭐ 4.8</div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-lg font-bold text-slate-800">Bodrum</h3>
+                        <p class="text-xs text-slate-500 mb-3">Lüks ve butik oteller.</p>
+                        <span class="text-blue-600 text-xs font-bold group-hover:underline">Fiyatları Gör ></span>
+                    </div>
+                </div>
+
+                <div onclick="hizliAra('Paris')" class="hotel-card group">
+                    <div class="relative overflow-hidden h-48">
+                        <img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=800" loading="lazy">
+                        <div class="absolute top-3 right-3 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold text-slate-800 shadow-sm">⭐ 4.7</div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-lg font-bold text-slate-800">Paris</h3>
+                        <p class="text-xs text-slate-500 mb-3">Romantik şehir otelleri.</p>
+                        <span class="text-blue-600 text-xs font-bold group-hover:underline">Fiyatları Gör ></span>
+                    </div>
+                </div>
+
+                <div onclick="hizliAra('Berlin')" class="hotel-card group">
+                    <div class="relative overflow-hidden h-48">
+                        <img src="https://images.unsplash.com/photo-1560930950-5cc58e021233?q=80&w=800" loading="lazy">
+                        <div class="absolute top-3 right-3 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold text-slate-800 shadow-sm">⭐ 4.6</div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-lg font-bold text-slate-800">Berlin</h3>
+                        <p class="text-xs text-slate-500 mb-3">Şehir merkezi konaklama.</p>
+                        <span class="text-blue-600 text-xs font-bold group-hover:underline">Fiyatları Gör ></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 py-8 text-center text-slate-400 text-xs">
+        &copy; 2025 Platform Avrupa. <b>Booking.com</b> iş ortağı.
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="genel_veriler.js"></script>
+    <script>
+        window.onload = function() {
+            // Tarihleri ayarla
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+
+            document.getElementById('checkIn').valueAsDate = today;
+            document.getElementById('checkOut').valueAsDate = tomorrow;
+            
+            // Ülkeleri Doldur
+            if(typeof ulkeleriDoldur === 'function') {
+                ulkeleriDoldur('ulkeSelect');
+            }
+        }
+
+        // Ülke değişince şehirleri getir
+        function ulkeSecildi() {
+            const ulkeKodu = document.getElementById('ulkeSelect').value;
+            const sehirSelect = document.getElementById('sehirSelect');
+            
+            if(typeof sehirleriGetirOrtak === 'function') {
+                sehirleriGetirOrtak(ulkeKodu, 'sehirSelect');
+                sehirSelect.disabled = false;
+            }
+        }
+
+        function tarihAyarla() {
+            const checkIn = new Date(document.getElementById('checkIn').value);
+            const checkOutInput = document.getElementById('checkOut');
+            const checkOut = new Date(checkOutInput.value);
+
+            if(checkIn >= checkOut) {
+                const newCheckOut = new Date(checkIn);
+                newCheckOut.setDate(newCheckOut.getDate() + 1);
+                checkOutInput.valueAsDate = newCheckOut;
+            }
+        }
+
+        function cocukAyarla() {
+            const count = parseInt(document.getElementById('childCount').value);
+            const container = document.getElementById('childAgesRow');
+            const wrapper = document.getElementById('yasKutulari');
+            
+            wrapper.innerHTML = '';
+
+            if (count > 0) {
+                container.classList.remove('hidden');
+                for(let i=1; i<=count; i++) {
+                    const div = document.createElement('div');
+                    div.className = "bg-white px-2 py-1 rounded-lg border border-slate-200 shadow-sm";
+                    
+                    const select = document.createElement('select');
+                    select.className = "bg-transparent text-sm font-bold text-slate-700 outline-none cursor-pointer child-age-select";
+                    
+                    for(let age=0; age<=17; age++) {
+                        const opt = document.createElement('option');
+                        opt.value = age;
+                        opt.innerText = age + " Yaş";
+                        select.appendChild(opt);
+                    }
+                    div.appendChild(select);
+                    wrapper.appendChild(div);
+                }
+            } else {
+                container.classList.add('hidden');
+            }
+        }
+
+        function otelAra(e) {
+            e.preventDefault();
+            
+            const sehir = document.getElementById('sehirSelect').value;
+            const ulkeSelect = document.getElementById('ulkeSelect');
+            const ulkeIsmi = ulkeSelect.options[ulkeSelect.selectedIndex].text;
+            
+            const checkInRaw = document.getElementById('checkIn').value;
+            const checkOutRaw = document.getElementById('checkOut').value;
+            const adultCount = document.getElementById('adultCount').value;
+            const childCount = document.getElementById('childCount').value;
+
+            if(!sehir) {
+                alert("Lütfen bir şehir seçiniz.");
+                return;
+            }
+
+            // Booking.com URL Oluşturma (Affiliate link)
+            let baseUrl = "https://www.booking.com/searchresults.html";
+            // Şehir ve Ülke ismini birleştirerek daha doğru sonuç alıyoruz
+            let query = `?ss=${encodeURIComponent(sehir + ", " + ulkeIsmi)}&checkin=${checkInRaw}&checkout=${checkOutRaw}&group_adults=${adultCount}&group_children=${childCount}&no_rooms=1`;
+            
+            // Affiliate parametreleri ekle
+            if (typeof AFFILIATE_CONFIG !== 'undefined' && AFFILIATE_CONFIG.booking) {
+                query += `&aid=${AFFILIATE_CONFIG.booking.aid}&label=${AFFILIATE_CONFIG.booking.label}`;
+            }
+
+            if(childCount > 0) {
+                const yaslar = document.querySelectorAll('.child-age-select');
+                yaslar.forEach(y => {
+                    query += `&age=${y.value}`;
+                });
+            }
+            
+            // Affiliate tracking
+            if (typeof trackAffiliateClick === 'function') {
+                trackAffiliateClick('booking', 'otel_rezervasyon.html', {
+                    destination: sehir + ", " + ulkeIsmi,
+                    checkIn: checkInRaw,
+                    checkOut: checkOutRaw,
+                    adults: adultCount,
+                    children: childCount
+                });
+            }
+
+            window.open(baseUrl + query, '_blank');
+        }
+
+        function hizliAra(sehir) {
+            const today = new Date().toISOString().split('T')[0];
+            const tomorrowDate = new Date();
+            tomorrowDate.setDate(tomorrowDate.getDate() + 7);
+            const tomorrow = tomorrowDate.toISOString().split('T')[0];
+
+            let baseUrl = "https://www.booking.com/searchresults.html";
+            let query = `?ss=${encodeURIComponent(sehir)}&checkin=${today}&checkout=${tomorrow}&group_adults=2&group_children=0&no_rooms=1`;
+            
+            // Affiliate parametreleri ekle
+            if (typeof AFFILIATE_CONFIG !== 'undefined' && AFFILIATE_CONFIG.booking) {
+                query += `&aid=${AFFILIATE_CONFIG.booking.aid}&label=${AFFILIATE_CONFIG.booking.label}`;
+            }
+            
+            // Affiliate tracking
+            if (typeof trackAffiliateClick === 'function') {
+                trackAffiliateClick('booking', 'otel_rezervasyon.html', {
+                    destination: sehir,
+                    type: 'popular_destination'
+                });
+            }
+            
+            window.open(baseUrl + query, '_blank');
+        }
+    </script>
+</body>
+</html>

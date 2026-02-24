@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vasıta Vitrini - Geniş Veritabanı</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; }
+        /* Scrollbar Gizleme */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Animasyonlar */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+    <div class="max-w-6xl mx-auto p-4">
+        
+        <div class="flex justify-between items-center mb-8 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                    <span class="bg-blue-600 text-white px-2 py-0.5 rounded text-sm">TR</span>
+                    Vasıta Vitrini
+                </h1>
+                <p class="text-gray-500 text-sm mt-1">Geniş veritabanı ile hayalinizdeki aracı bulun</p>
+            </div>
+            <button onclick="toggleForm()" id="toggleBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 shadow-lg shadow-blue-200">
+                <i class="fa-solid fa-plus"></i> Ücretsiz İlan Ver
+            </button>
+        </div>
+
+        <div id="addForm" class="hidden bg-white p-6 rounded-xl shadow-lg border border-gray-100 mb-8 animate-fade-in">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">Yeni Araç İlanı Oluştur</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                
+                <div class="relative group">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Marka</label>
+                    <div class="relative">
+                        <input type="text" id="brandInput" 
+                               onkeyup="filterBrands()" 
+                               onfocus="showBrandList()" 
+                               placeholder="Marka yazın (örn: Tofaş, Tesla)" 
+                               autocomplete="off"
+                               class="w-full border border-gray-300 rounded-lg p-2 pl-3 focus:ring-2 focus:ring-blue-500 outline-none font-semibold text-gray-700">
+                        <i class="fa-solid fa-chevron-down absolute right-3 top-3 text-gray-400 text-xs pointer-events-none"></i>
+                    </div>
+                    
+                    <div id="brandDropdown" class="hidden absolute z-50 w-full bg-white border border-gray-200 mt-1 rounded-lg shadow-xl max-h-60 overflow-y-auto">
+                        </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Model</label>
+                    <select id="modelSelect" disabled class="w-full border border-gray-300 rounded-lg p-2 bg-white focus:ring-2 focus:ring-blue-500 outline-none disabled:bg-gray-100 disabled:text-gray-400 text-gray-700 font-semibold">
+                        <option value="">Önce Marka Seçin</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Yıl</label>
+                    <input type="number" id="yearInput" placeholder="2024" class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Fiyat (TL)</label>
+                    <input type="number" id="priceInput" placeholder="1.500.000" class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kilometre</label>
+                    <input type="number" id="kmInput" placeholder="0" class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Yakıt</label>
+                    <select id="fuelInput" class="w-full border border-gray-300 rounded-lg p-2 bg-white outline-none focus:ring-2 focus:ring-blue-500">
+                        <option>Benzin</option>
+                        <option>Dizel</option>
+                        <option>Hibrit</option>
+                        <option>Elektrik</option>
+                        <option>LPG</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Vites</label>
+                    <select id="gearInput" class="w-full border border-gray-300 rounded-lg p-2 bg-white outline-none focus:ring-2 focus:ring-blue-500">
+                        <option>Otomatik</option>
+                        <option>Manuel</option>
+                        <option>Yarı Otomatik</option>
+                    </select>
+                </div>
+
+                <div class="md:col-span-2 lg:col-span-1">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Fotoğraf</label>
+                    <div class="relative">
+                        <input type="file" accept="image/*" id="imageInput" onchange="previewImage(event)" class="hidden">
+                        <label for="imageInput" class="flex items-center justify-center w-full h-10 border border-gray-300 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 text-gray-600 text-sm transition-colors hover:border-blue-400 hover:text-blue-500">
+                            <i class="fa-solid fa-camera mr-2"></i> Fotoğraf Seç
+                        </label>
+                    </div>
+                </div>
+
+                <div id="previewContainer" class="hidden md:col-span-2 lg:col-span-4 mt-2 bg-gray-50 p-2 rounded border border-gray-200 flex items-center gap-4">
+                     <img id="imagePreview" src="" alt="Önizleme" class="h-24 w-32 object-cover rounded shadow-sm border">
+                     <div class="text-xs text-gray-500">
+                        <p class="font-semibold text-green-600"><i class="fa-solid fa-check"></i> Fotoğraf Hazır</p>
+                        <p>Yayınla butonuna basarak işlemi tamamlayın.</p>
+                     </div>
+                </div>
+
+                <div class="md:col-span-2 lg:col-span-4 mt-4">
+                    <button onclick="publishListing()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg shadow-md transition-all active:scale-95 flex justify-center items-center gap-2">
+                        <i class="fa-solid fa-paper-plane"></i> İlanı Yayınla
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="emptyState" class="flex flex-col items-center justify-center py-24 text-center bg-white rounded-xl border-2 border-dashed border-gray-300 mx-auto max-w-2xl">
+            <div class="bg-blue-50 p-6 rounded-full mb-4 animate-bounce">
+                <i class="fa-solid fa-car-side text-4xl text-blue-500"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-800">Vitrin Henüz Boş</h3>
+            <p class="text-gray-500 max-w-sm mt-2 mb-6">Şu an yayında olan bir araç ilanı yok. Kendi aracınızı ekleyerek vitrini şenlendirin.</p>
+            <button onclick="toggleForm()" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow-lg shadow-blue-200">
+                Şimdi ilan ekle
+            </button>
+        </div>
+
+        <div id="listingsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 hidden pb-20">
+            </div>
+
+    </div>
+
+    <script>
+        // --- 1. GENİŞLETİLMİŞ ARAÇ VERİTABANI (Eski Sohbetten Alınan Tam Liste) ---
+        // Not: Önceki sohbetimizde verdiğim listenin tamamını buraya entegre ettim.
+        const aracVeritabani = {
+            "Abarth": { "500": [], "124 Spider": [] },
+            "Alfa Romeo": { "Giulia": [], "Stelvio": [], "Tonale": [], "Giulietta": [] },
+            "Alpine": { "A110": [] },
+            "Aston Martin": { "DB11": [], "Vantage": [], "DBX": [] },
+            "Audi": { "A1": [], "A3": [], "A4": [], "A5": [], "A6": [], "A7": [], "A8": [], "Q2": [], "Q3": [], "Q5": [], "Q7": [], "Q8": [], "TT": [], "R8": [], "e-tron GT": [] },
+            "Bentley": { "Continental GT": [], "Bentayga": [], "Flying Spur": [] },
+            "BMW": { "1 Serisi": [], "2 Serisi": [], "3 Serisi": [], "4 Serisi": [], "5 Serisi": [], "7 Serisi": [], "X1": [], "X3": [], "X5": [], "X6": [], "X7": [], "Z4": [], "iX": [], "i4": [] },
+            "BYD": { "Atto 3": [], "Han": [], "Tang": [], "Dolphin": [], "Seal": [] },
+            "Chevrolet": { "Camaro": [], "Corvette": [], "Spark": [], "Aveo": [], "Cruze": [], "Captiva": [] },
+            "Chrysler": { "300C": [], "Voyager": [] },
+            "Citroen": { "C3": [], "C4": [], "C5 Aircross": [], "Berlingo": [], "Ami": [], "C-Elysee": [] },
+            "Cupra": { "Formentor": [], "Leon": [], "Born": [], "Ateca": [] },
+            "Dacia": { "Duster": [], "Sandero": [], "Jogger": [], "Spring": [], "Lodgy": [], "Dokker": [] },
+            "DS Automobiles": { "DS 3": [], "DS 4": [], "DS 7": [], "DS 9": [] },
+            "Ferrari": { "Roma": [], "F8": [], "296": [], "SF90": [], "Purosangue": [], "458": [], "488": [] },
+            "Fiat": { "500": [], "Egea": [], "Panda": [], "Doblo": [], "Fiorino": [], "Ducato": [], "Linea": [], "Punto": [] },
+            "Ford": { "Fiesta": [], "Focus": [], "Puma": [], "Kuga": [], "Transit": [], "Ranger": [], "Mustang": [], "Mondeo": [], "Courier": [] },
+            "Honda": { "Civic": [], "Jazz": [], "HR-V": [], "CR-V": [], "City": [], "Accord": [] },
+            "Hyundai": { "i10": [], "i20": [], "i30": [], "Tucson": [], "Bayon": [], "IONIQ 5": [], "Kona": [], "Staria": [], "Elantra": [], "Accent Blue": [] },
+            "Jaguar": { "F-Pace": [], "E-Pace": [], "I-Pace": [], "F-Type": [], "XE": [], "XF": [] },
+            "Jeep": { "Renegade": [], "Compass": [], "Wrangler": [], "Avenger": [], "Grand Cherokee": [] },
+            "Kia": { "Picanto": [], "Rio": [], "Stonic": [], "Ceed": [], "Sportage": [], "Niro": [], "EV6": [], "Sorento": [], "Cerato": [] },
+            "Lamborghini": { "Urus": [], "Huracan": [], "Revuelto": [], "Aventador": [] },
+            "Land Rover": { "Defender": [], "Discovery": [], "Range Rover": [], "Range Rover Sport": [], "Range Rover Evoque": [], "Range Rover Velar": [] },
+            "Lexus": { "UX": [], "NX": [], "RX": [], "ES": [], "LS": [] },
+            "Maserati": { "Ghibli": [], "Levante": [], "Grecale": [], "Quattroporte": [] },
+            "Mazda": { "2": [], "3": [], "6": [], "CX-5": [], "CX-30": [], "MX-5": [] },
+            "McLaren": { "GT": [], "Artura": [], "720S": [] },
+            "Mercedes-Benz": { "A-Serisi": [], "B-Serisi": [], "C-Serisi": [], "E-Serisi": [], "S-Serisi": [], "CLA": [], "GLA": [], "GLB": [], "GLC": [], "GLE": [], "G-Serisi": [], "EQA": [], "EQB": [], "EQE": [], "EQS": [], "Vito": [], "Sprinter": [] },
+            "MG": { "ZS": [], "HS": [], "MG4": [], "Marvel R": [] },
+            "Mini": { "Cooper": [], "Countryman": [], "Clubman": [] },
+            "Mitsubishi": { "Space Star": [], "Eclipse Cross": [], "L200": [], "Colt": [], "ASX": [], "Lancer": [] },
+            "Nissan": { "Micra": [], "Juke": [], "Qashqai": [], "X-Trail": [], "Navara": [] },
+            "Opel": { "Corsa": [], "Astra": [], "Mokka": [], "Crossland": [], "Grandland": [], "Insignia": [], "Zafira": [], "Combo": [] },
+            "Peugeot": { "208": [], "308": [], "408": [], "508": [], "2008": [], "3008": [], "5008": [], "Rifter": [], "Partner": [] },
+            "Polestar": { "2": [] },
+            "Porsche": { "911": [], "Taycan": [], "Cayenne": [], "Macan": [], "Panamera": [], "718": [] },
+            "Renault": { "Clio": [], "Captur": [], "Megane": [], "Austral": [], "Taliant": [], "Zoe": [], "Kangoo": [], "Trafic": [], "Symbol": [], "Fluence": [], "Kadjar": [] },
+            "Rolls-Royce": { "Ghost": [], "Phantom": [], "Cullinan": [] },
+            "Seat": { "Ibiza": [], "Leon": [], "Arona": [], "Ateca": [], "Tarraco": [], "Toledo": [] },
+            "Skoda": { "Fabia": [], "Scala": [], "Octavia": [], "Superb": [], "Kamiq": [], "Karoq": [], "Kodiaq": [] },
+            "Smart": { "EQ fortwo": [], "EQ forfour": [], "#1": [] },
+            "Subaru": { "Forester": [], "XV": [], "Solterra": [] },
+            "Suzuki": { "Swift": [], "Vitara": [], "S-Cross": [], "Jimny": [] },
+            "Tesla": { "Model 3": [], "Model Y": [], "Model S": [], "Model X": [] },
+            "Tofaş": { "Şahin": [], "Doğan": [], "Kartal": [], "Serçe": [] },
+            "Toyota": { "Yaris": [], "Corolla": [], "C-HR": [], "RAV4": [], "Camry": [], "Hilux": [], "Proace": [], "Auris": [], "Avensis": [] },
+            "Volkswagen": { "Polo": [], "Golf": [], "T-Roc": [], "Tiguan": [], "Taigo": [], "Passat": [], "Arteon": [], "Touareg": [], "Caddy": [], "Transporter": [], "Amarok": [], "Jetta": [], "Scirocco": [], "Beetle": [] },
+            "Volvo": { "XC40": [], "XC60": [], "XC90": [], "S60": [], "S90": [], "V40": [], "V60": [], "V90": [], "C40": [], "EX30": [] }
+        };
+
+        let selectedImageURL = null;
+
+        // --- 2. FONKSİYONLAR ---
+
+        function toggleForm() {
+            const form = document.getElementById('addForm');
+            const btn = document.getElementById('toggleBtn');
+            
+            if (form.classList.contains('hidden')) {
+                form.classList.remove('hidden');
+                btn.innerHTML = '<i class="fa-solid fa-times"></i> İptal Et';
+                btn.className = "bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2";
+            } else {
+                form.classList.add('hidden');
+                btn.innerHTML = '<i class="fa-solid fa-plus"></i> Ücretsiz İlan Ver';
+                btn.className = "bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 shadow-lg shadow-blue-200";
+            }
+        }
+
+        // --- MARKA AUTOCOMPLETE ---
+        function showBrandList() {
+            document.getElementById('brandDropdown').classList.remove('hidden');
+            filterBrands();
+        }
+
+        function filterBrands() {
+            const input = document.getElementById('brandInput').value.toLowerCase();
+            const dropdown = document.getElementById('brandDropdown');
+            dropdown.innerHTML = ''; 
+
+            const brands = Object.keys(aracVeritabani);
+            // Sadece baş harfi veya içeriği uyanları filtrele
+            const filtered = brands.filter(brand => brand.toLowerCase().startsWith(input));
+
+            if (filtered.length === 0) {
+                dropdown.innerHTML = '<div class="p-3 text-gray-500 text-sm italic">Marka bulunamadı.</div>';
+            } else {
+                filtered.forEach(brand => {
+                    const item = document.createElement('div');
+                    item.className = 'p-2 hover:bg-blue-50 cursor-pointer text-gray-700 border-b border-gray-50 last:border-0 font-medium';
+                    item.textContent = brand;
+                    item.onclick = () => selectBrand(brand);
+                    dropdown.appendChild(item);
+                });
+            }
+        }
+
+        function selectBrand(brand) {
+            document.getElementById('brandInput').value = brand;
+            document.getElementById('brandDropdown').classList.add('hidden');
+            
+            // Modelleri Getir
+            const modelSelect = document.getElementById('modelSelect');
+            modelSelect.innerHTML = '<option value="">Model Seçiniz</option>';
+            modelSelect.disabled = false;
+            
+            if(aracVeritabani[brand]) {
+                const modeller = Object.keys(aracVeritabani[brand]);
+                modeller.forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model;
+                    option.textContent = model;
+                    modelSelect.appendChild(option);
+                });
+            }
+        }
+
+        // Dropdown dışına tıklanınca kapatma
+        document.addEventListener('click', function(e) {
+            const input = document.getElementById('brandInput');
+            const dropdown = document.getElementById('brandDropdown');
+            if (e.target !== input && e.target.parentNode !== dropdown) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        // --- RESİM ÖNİZLEME ---
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                selectedImageURL = URL.createObjectURL(file);
+                document.getElementById('imagePreview').src = selectedImageURL;
+                document.getElementById('previewContainer').classList.remove('hidden');
+            }
+        }
+
+        // --- İLANI YAYINLA ---
+        function publishListing() {
+            const brand = document.getElementById('brandInput').value;
+            const model = document.getElementById('modelSelect').value;
+            const price = document.getElementById('priceInput').value;
+            const year = document.getElementById('yearInput').value;
+            const km = document.getElementById('kmInput').value;
+            const fuel = document.getElementById('fuelInput').value;
+            const gear = document.getElementById('gearInput').value;
+
+            if (!brand || !model || !price) {
+                alert("Lütfen Marka, Model ve Fiyat alanlarını eksiksiz doldurun.");
+                return;
+            }
+
+            // Boş durumu gizle
+            document.getElementById('emptyState').classList.add('hidden');
+            document.getElementById('listingsGrid').classList.remove('hidden');
+
+            const listingHTML = `
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 group relative animate-fade-in">
+                    <div class="h-48 bg-gray-100 relative overflow-hidden group">
+                        ${selectedImageURL ? `<img src="${selectedImageURL}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">` : 
+                        `<div class="w-full h-full flex flex-col items-center justify-center text-gray-400">
+                            <i class="fa-solid fa-camera text-3xl mb-2 opacity-30"></i>
+                            <span class="text-xs font-medium opacity-50">Görsel Yok</span>
+                        </div>`}
+                        <div class="absolute bottom-2 left-2 bg-black/60 backdrop-blur-sm text-white text-xs px-2 py-1 rounded flex items-center gap-1">
+                            <i class="fa-solid fa-location-dot text-red-400"></i> İstanbul
+                        </div>
+                    </div>
+
+                    <div class="p-4">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-bold text-gray-800 text-lg truncate pr-2" title="${brand} ${model}">${brand} ${model}</h3>
+                            <span class="text-blue-600 font-bold whitespace-nowrap bg-blue-50 px-2 py-0.5 rounded text-sm">${Number(price).toLocaleString('tr-TR')} ₺</span>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-y-2 text-sm text-gray-600 mb-4 mt-3">
+                            <div class="flex items-center gap-2"><i class="fa-regular fa-calendar text-gray-400 w-4"></i> ${year || '-'}</div>
+                            <div class="flex items-center gap-2"><i class="fa-solid fa-gauge-high text-gray-400 w-4"></i> ${Number(km).toLocaleString('tr-TR')}</div>
+                            <div class="flex items-center gap-2"><i class="fa-solid fa-gas-pump text-gray-400 w-4"></i> ${fuel}</div>
+                            <div class="flex items-center gap-2"><i class="fa-solid fa-code-branch text-gray-400 w-4"></i> ${gear}</div>
+                        </div>
+
+                        <button class="w-full border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white font-medium py-2 rounded-lg transition-colors text-sm flex items-center justify-center gap-2">
+                            İlanı İncele <i class="fa-solid fa-arrow-right text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            const grid = document.getElementById('listingsGrid');
+            grid.insertAdjacentHTML('afterbegin', listingHTML);
+
+            resetForm();
+            toggleForm();
+        }
+
+        function resetForm() {
+            document.getElementById('brandInput').value = '';
+            const modelSelect = document.getElementById('modelSelect');
+            modelSelect.innerHTML = '<option value="">Önce Marka Seçin</option>';
+            modelSelect.disabled = true;
+            document.getElementById('yearInput').value = '';
+            document.getElementById('priceInput').value = '';
+            document.getElementById('kmInput').value = '';
+            document.getElementById('previewContainer').classList.add('hidden');
+            document.getElementById('imagePreview').src = '';
+            selectedImageURL = null;
+        }
+    </script>
+</body>
+</html>

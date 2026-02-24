@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kargo Talebi Oluştur - PlatformAvrupa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="config.js"></script>
+    <script src="auth.js"></script>
+    <script src="utils.js"></script>
+    <script src="genel_veriler.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+        .form-section { background: white; border-radius: 20px; padding: 2rem; margin-bottom: 1.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .modern-input { width: 100%; border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px; font-size: 14px; transition: all 0.2s; }
+        .modern-input:focus { outline: none; border-color: #f59e0b; box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1); }
+    </style>
+</head>
+<body class="min-h-screen pb-20">
+
+    <nav class="bg-white/95 backdrop-blur sticky top-0 z-50 shadow-lg">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
+            <a href="kargo_emanet.html" class="flex items-center gap-2 text-slate-800 hover:text-orange-600 transition font-bold">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span>Geri</span>
+            </a>
+            
+            <h1 class="font-bold text-xl text-slate-800">
+                <i class="fa-solid fa-box-open text-orange-600 mr-2"></i>
+                Kargo Talebi
+            </h1>
+            
+            <div class="w-20"></div>
+        </div>
+    </nav>
+
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Talep Tipi Seçimi -->
+        <div id="requestTypeSelection" class="bg-white rounded-3xl p-8 shadow-2xl mb-6">
+            <h3 class="text-2xl font-bold text-slate-800 mb-6 text-center">Hangi tür talep oluşturmak istiyorsunuz?</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button onclick="selectRequestType('carrier')" class="bg-gradient-to-br from-orange-50 to-amber-50 border-2 border-orange-200 rounded-2xl p-6 text-left hover:border-orange-400 hover:shadow-lg transition group">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 bg-orange-600 rounded-full flex items-center justify-center text-white text-xl flex-shrink-0 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-truck"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-lg text-slate-800 mb-2">Yapacağım yolculuk için paket göndermek isteyenleri arıyorum</h4>
+                            <p class="text-sm text-slate-600">Yolculuğunuzu paylaşın, paket taşımak isteyenler size ulaşsın</p>
+                        </div>
+                    </div>
+                </button>
+                <button onclick="selectRequestType('sender')" class="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-2xl p-6 text-left hover:border-blue-400 hover:shadow-lg transition group">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white text-xl flex-shrink-0 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-box-open"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-lg text-slate-800 mb-2">Paketimi götürecek birini arıyorum</h4>
+                            <p class="text-sm text-slate-600">Paketinizi taşıyacak yolculuk yapan birini bulun</p>
+                        </div>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Form (Başlangıçta gizli) -->
+        <div id="requestForm" class="hidden">
+            <div class="bg-white/10 backdrop-blur border border-white/20 rounded-2xl p-6 mb-6 text-white">
+                <div class="flex items-start gap-4">
+                    <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-shield-check text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg mb-2">Güvenli Kargo Taşıma</h3>
+                        <ul class="text-sm text-orange-100 space-y-1">
+                            <li><i class="fa-solid fa-check mr-2"></i>Taşıyıcı profilleri doğrulanmış</li>
+                            <li><i class="fa-solid fa-check mr-2"></i>Takip numarası ile izleme</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <form onsubmit="submitRequest(event)">
+            
+            <div class="form-section">
+                <h3 class="font-bold text-xl text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-route text-orange-600"></i>
+                    Güzergah Bilgileri
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs font-bold text-slate-600 mb-2 block">Nereden Ülke*</label>
+                        <select id="fromCountry" required onchange="updateFromCities()" class="modern-input">
+                            <option value="">Ülke Seçin</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-600 mb-2 block">Nereden Şehir*</label>
+                        <select id="fromCity" required class="modern-input">
+                            <option value="">Önce ülke seçin</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div>
+                        <label class="text-xs font-bold text-slate-600 mb-2 block">Nereye Ülke*</label>
+                        <select id="toCountry" required onchange="updateToCities()" class="modern-input">
+                            <option value="">Ülke Seçin</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-600 mb-2 block">Nereye Şehir*</label>
+                        <select id="toCity" required class="modern-input">
+                            <option value="">Önce ülke seçin</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="font-bold text-xl text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-box text-orange-600"></i>
+                    Paket Detayları
+                </h3>
+                
+                <div>
+                    <label class="text-xs font-bold text-slate-600 mb-2 block">Paket Açıklaması*</label>
+                    <input type="text" id="description" required placeholder="Örn: 2 kutu kitap, elektronik eşya vb." class="modern-input">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                    <div>
+                        <label class="text-xs font-bold text-slate-600 mb-2 block">Ağırlık (kg)</label>
+                        <select id="weight" class="modern-input">
+                            <option value="">Ağırlık Seçin</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-600 mb-2 block">Boyut</label>
+                        <select id="size" class="modern-input">
+                            <option value="Küçük">Küçük (Kutu)</option>
+                            <option value="Orta">Orta (Çanta)</option>
+                            <option value="Büyük">Büyük (Valiz)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-600 mb-2 block">Paket Sayısı</label>
+                        <select id="packageCount" class="modern-input">
+                            <option value="1">1 Paket</option>
+                            <option value="2">2 Paket</option>
+                            <option value="3">3 Paket</option>
+                            <option value="4">4 Paket</option>
+                            <option value="5">5 Paket</option>
+                            <option value="6">6 Paket</option>
+                            <option value="7">7 Paket</option>
+                            <option value="8">8 Paket</option>
+                            <option value="9">9 Paket</option>
+                            <option value="10">10 Paket</option>
+                            <option value="15">15 Paket</option>
+                            <option value="20">20 Paket</option>
+                            <option value="25">25 Paket</option>
+                            <option value="30">30+ Paket</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <label class="text-xs font-bold text-slate-600 mb-2 block">Kırılabilir mi?</label>
+                    <div class="flex gap-4">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="fragile" value="false" checked>
+                            <span class="text-sm">Hayır</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="fragile" value="true">
+                            <span class="text-sm">Evet, Hassas</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="font-bold text-xl text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-euro-sign text-orange-600"></i>
+                    Ücret Bilgisi
+                </h3>
+                
+                <div>
+                    <label class="text-xs font-bold text-slate-600 mb-2 block">Teklif Ettiğiniz Ücret (€)*</label>
+                    <input type="number" id="priceOffer" required placeholder="Örn: 20" class="modern-input" min="0" step="5">
+                    <p class="text-xs text-slate-500 mt-1">Taşıyıcıya ödemeyi düşündüğünüz miktar</p>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="font-bold text-xl text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-phone text-orange-600"></i>
+                    İletişim Bilgileri
+                </h3>
+                
+                <div>
+                    <label class="text-xs font-bold text-slate-600 mb-2 block">Telefon Numarası*</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <select id="phoneCode" required class="modern-input">
+                            <option value="">Ülke Kodu</option>
+                        </select>
+                        <input type="tel" id="phoneNumber" required placeholder="123 456 7890" class="modern-input col-span-2">
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <label class="text-xs font-bold text-slate-600 mb-2 block">Teslimat Tercihi</label>
+                    <select id="deliveryPreference" class="modern-input">
+                        <option value="hand">Elden Teslim</option>
+                        <option value="address">Adrese Teslim</option>
+                        <option value="flexible">Esnek (Anlaşmaya Göre)</option>
+                    </select>
+                </div>
+
+                <div class="mt-4">
+                    <label class="text-xs font-bold text-slate-600 mb-2 block">Ek Notlar</label>
+                    <textarea id="notes" rows="3" placeholder="Taşıyıcıya iletmek istediğiniz özel notlar..." class="modern-input"></textarea>
+                </div>
+            </div>
+
+            <div class="form-section bg-orange-50 border-2 border-orange-200">
+                <div class="flex items-start gap-3">
+                    <input type="checkbox" id="agreeTerms" required class="mt-1">
+                    <label for="agreeTerms" class="text-sm text-slate-700">
+                        <span class="font-bold">Kargo Güvenlik ve Kullanım Şartlarını kabul ediyorum.</span>
+                        Paket içeriğinin yasal olduğunu ve doğru bilgi verdiğimi taahhüt ediyorum.
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" id="submitBtn" disabled class="w-full bg-gradient-to-r from-orange-400 to-amber-400 text-white py-4 rounded-2xl font-bold text-lg shadow-2xl transition opacity-50 cursor-not-allowed">
+                <i class="fa-solid fa-paper-plane mr-2"></i>
+                Kargo Talebini Yayınla
+            </button>
+
+            <p class="text-center text-white text-xs mt-4">
+                <i class="fa-solid fa-shield-check mr-1"></i>
+                Talebiniz yayınlandıktan sonra taşıyıcılar size ulaşacak
+            </p>
+        </form>
+
+    </div>
+
+    <script>
+        let selectedRequestType = null;
+
+        window.onload = function() {
+            // Form başlangıçta gizli, sadece talep tipi seçimi gösterilecek
+        };
+
+        // Talep tipi seçimi
+        function selectRequestType(type) {
+            selectedRequestType = type;
+            document.getElementById('requestTypeSelection').classList.add('hidden');
+            document.getElementById('requestForm').classList.remove('hidden');
+            
+            // Formu talep tipine göre güncelle
+            updateFormForRequestType(type);
+            
+            // Dropdown'ları başlat
+            setTimeout(() => {
+                initDropdowns();
+                if (type === 'sender') {
+                    initWeightDropdown();
+                } else {
+                    initTimeDropdown();
+                    initMaxWeightDropdown();
+                }
+                initCheckboxHandler();
+            }, 100);
+        }
+
+        // Talep tipine göre formu güncelle
+        function updateFormForRequestType(type) {
+            const formContainer = document.querySelector('#requestForm form');
+            
+            if (type === 'carrier') {
+                // Taşıyıcı formu (yolculuk bilgileri + paket kabul şartları)
+                formContainer.innerHTML = getCarrierFormHTML();
+            } else {
+                // Gönderen formu (paket bilgileri - mevcut form)
+                // Form zaten doğru, sadece başlıkları güncelle
+            }
+        }
+
+        // Taşıyıcı formu HTML'i
+        function getCarrierFormHTML() {
+            return `
+                <div class="form-section">
+                    <h3 class="font-bold text-xl text-slate-800 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-route text-orange-600"></i>
+                        Yolculuk Bilgileri
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="text-xs font-bold text-slate-600 mb-2 block">Nereden Ülke*</label>
+                            <select id="fromCountry" required onchange="updateFromCities()" class="modern-input">
+                                <option value="">Ülke Seçin</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center justify-center pt-6">
+                            <i class="fa-solid fa-arrow-right text-orange-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-600 mb-2 block">Nereden Şehir*</label>
+                            <select id="fromCity" required class="modern-input">
+                                <option value="">Önce ülke seçin</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                        <div>
+                            <label class="text-xs font-bold text-slate-600 mb-2 block">Nereye Ülke*</label>
+                            <select id="toCountry" required onchange="updateToCities()" class="modern-input">
+                                <option value="">Ülke Seçin</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center justify-center pt-6">
+                            <i class="fa-solid fa-arrow-right text-orange-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-600 mb-2 block">Nereye Şehir*</label>
+                            <select id="toCity" required class="modern-input">
+                                <option value="">Önce ülke seçin</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <label class="text-xs font-bold text-slate-600 mb-2 block">Yolculuk Tarihi*</label>
+                            <input type="date" id="travelDate" required class="modern-input" min="${new Date().toISOString().split('T')[0]}">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-600 mb-2 block">Yolculuk Saati*</label>
+                            <select id="travelTime" required class="modern-input">
+                                <option value="">Saat Seçin</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section bg-orange-50 border-2 border-orange-200">
+                    <h3 class="font-bold text-xl text-slate-800 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-box text-orange-600"></i>
+                        Paket Kabul Şartları
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-xs font-bold text-slate-600 mb-2 block">Maksimum Ağırlık (kg)*</label>
+                            <select id="maxWeight" required class="modern-input">
+                                <option value="">Ağırlık Seçin</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-600 mb-2 block">Maksimum Paket Sayısı*</label>
+                            <select id="maxPackageCount" required class="modern-input">
+                                <option value="1">1 Paket</option>
+                                <option value="2">2 Paket</option>
+                                <option value="3">3 Paket</option>
+                                <option value="4">4 Paket</option>
+                                <option value="5">5 Paket</option>
+                                <option value="10">10 Paket</option>
+                                <option value="15">15 Paket</option>
+                                <option value="20">20+ Paket</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <label class="text-xs font-bold text-slate-600 mb-2 block">Paket Boyutu Kısıtlaması</label>
+                        <select id="sizeLimit" class="modern-input">
+                            <option value="any">Herhangi bir boyut</option>
+                            <option value="small">Sadece küçük (Kutu)</option>
+                            <option value="medium">Orta ve küçük (Çanta/Kutu)</option>
+                            <option value="large">Büyük kabul edilmez</option>
+                        </select>
+                    </div>
+
+                    <div class="mt-4">
+                        <label class="text-xs font-bold text-slate-600 mb-2 block">Ücret (Paket başına €)*</label>
+                        <input type="number" id="pricePerPackage" required placeholder="Örn: 10" class="modern-input" min="0" step="1">
+                        <p class="text-xs text-slate-500 mt-1">Her paket için talep edeceğiniz ücret</p>
+                    </div>
+
+                    <div class="mt-4">
+                        <label class="text-xs font-bold text-slate-600 mb-2 block">Ek Notlar</label>
+                        <textarea id="notes" rows="3" placeholder="Paket gönderenlere iletmek istediğiniz özel notlar..." class="modern-input"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-section bg-orange-50 border-2 border-orange-200">
+                    <h3 class="font-bold text-xl text-slate-800 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-phone text-orange-600"></i>
+                        İletişim Bilgileri
+                    </h3>
+                    
+                    <div>
+                        <label class="text-xs font-bold text-slate-600 mb-2 block">Telefon Numarası*</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <select id="phoneCode" required class="modern-input">
+                                <option value="">Ülke Kodu</option>
+                            </select>
+                            <input type="tel" id="phoneNumber" required placeholder="123 456 7890" class="modern-input col-span-2">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section bg-orange-50 border-2 border-orange-200">
+                    <div class="flex items-start gap-3">
+                        <input type="checkbox" id="agreeTerms" required class="mt-1">
+                        <label for="agreeTerms" class="text-sm text-slate-700">
+                            <span class="font-bold">Kargo Güvenlik ve Kullanım Şartlarını kabul ediyorum.</span>
+                            Paket taşıma sorumluluğunu ve doğru bilgi verdiğimi taahhüt ediyorum.
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" id="submitBtn" disabled class="w-full bg-gradient-to-r from-orange-400 to-amber-400 text-white py-4 rounded-2xl font-bold text-lg shadow-2xl transition opacity-50 cursor-not-allowed">
+                    <i class="fa-solid fa-paper-plane mr-2"></i>
+                    Yolculuk İlanını Yayınla
+                </button>
+
+                <p class="text-center text-white text-xs mt-4">
+                    <i class="fa-solid fa-shield-check mr-1"></i>
+                    İlanınız yayınlandıktan sonra paket göndermek isteyenler size ulaşacak
+                </p>
+            `;
+        }
+
+        // Saat dropdown'ını doldur (15 dakika aralıklarla)
+        function initTimeDropdown() {
+            const timeSelect = document.getElementById('travelTime');
+            if (!timeSelect) return;
+            
+            for (let hour = 0; hour < 24; hour++) {
+                for (let minute = 0; minute < 60; minute += 15) {
+                    const option = document.createElement('option');
+                    const timeStr = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+                    option.value = timeStr;
+                    option.textContent = timeStr;
+                    timeSelect.appendChild(option);
+                }
+            }
+        }
+
+        // Maksimum ağırlık dropdown'ını doldur
+        function initMaxWeightDropdown() {
+            const maxWeightSelect = document.getElementById('maxWeight');
+            if (!maxWeightSelect) return;
+            
+            for (let i = 0.5; i <= 50.0; i += 0.5) {
+                const option = document.createElement('option');
+                option.value = i.toFixed(1);
+                option.textContent = `${i.toFixed(1)} kg`;
+                maxWeightSelect.appendChild(option);
+            }
+        }
+
+        // Ağırlık dropdown'ını doldur (0.5, 1.0, 1.5... 50.0)
+        function initWeightDropdown() {
+            const weightSelect = document.getElementById('weight');
+            for (let i = 0.5; i <= 50.0; i += 0.5) {
+                const option = document.createElement('option');
+                option.value = i.toFixed(1);
+                option.textContent = `${i.toFixed(1)} kg`;
+                weightSelect.appendChild(option);
+            }
+        }
+
+        // Checkbox handler
+        function initCheckboxHandler() {
+            const checkbox = document.getElementById('agreeTerms');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'from-orange-400', 'to-amber-400');
+                    submitBtn.classList.add('hover:scale-105', 'from-orange-600', 'to-amber-600');
+                } else {
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('opacity-50', 'cursor-not-allowed', 'from-orange-400', 'to-amber-400');
+                    submitBtn.classList.remove('hover:scale-105', 'from-orange-600', 'to-amber-600');
+                }
+            });
+        }
+
+        function initDropdowns() {
+            const fromCountry = document.getElementById('fromCountry');
+            const toCountry = document.getElementById('toCountry');
+            const phoneCode = document.getElementById('phoneCode');
+            
+            const countries = Object.keys(lokasyonVeritabani).map(code => ({
+                code,
+                name: lokasyonVeritabani[code].isim,
+                flag: lokasyonVeritabani[code].bayrak,
+                tel: lokasyonVeritabani[code].tel
+            })).sort((a, b) => a.name.localeCompare(b.name, 'tr'));
+
+            countries.forEach(country => {
+                const option1 = document.createElement('option');
+                option1.value = country.code;
+                option1.textContent = `${country.flag} ${country.name}`;
+                fromCountry.appendChild(option1);
+
+                const option2 = document.createElement('option');
+                option2.value = country.code;
+                option2.textContent = `${country.flag} ${country.name}`;
+                toCountry.appendChild(option2);
+
+                const option3 = document.createElement('option');
+                option3.value = country.tel;
+                option3.textContent = `${country.flag} ${country.tel} ${country.name}`;
+                phoneCode.appendChild(option3);
+            });
+        }
+
+        function updateFromCities() {
+            const countryCode = document.getElementById('fromCountry').value;
+            const citySelect = document.getElementById('fromCity');
+            citySelect.innerHTML = '<option value="">Şehir Seçin</option>';
+            if (countryCode && lokasyonVeritabani[countryCode]) {
+                lokasyonVeritabani[countryCode].sehirler.forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city;
+                    option.textContent = city;
+                    citySelect.appendChild(option);
+                });
+            }
+        }
+
+        function updateToCities() {
+            const countryCode = document.getElementById('toCountry').value;
+            const citySelect = document.getElementById('toCity');
+            citySelect.innerHTML = '<option value="">Şehir Seçin</option>';
+            if (countryCode && lokasyonVeritabani[countryCode]) {
+                lokasyonVeritabani[countryCode].sehirler.forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city;
+                    option.textContent = city;
+                    citySelect.appendChild(option);
+                });
+            }
+        }
+
+        async function submitRequest(event) {
+            event.preventDefault();
+
+            // Checkbox kontrolü
+            const agreeCheckbox = document.getElementById('agreeTerms');
+            if (!agreeCheckbox.checked) {
+                Swal.fire('Onay Gerekli', 'Güvenlik şartlarını kabul etmelisiniz.', 'warning');
+                return;
+            }
+
+            const user = await getCurrentUser();
+            if (!user) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Giriş Gerekli',
+                    text: 'Kargo talebi oluşturmak için giriş yapmalısınız.',
+                    showCancelButton: true,
+                    confirmButtonText: 'Giriş Yap',
+                    cancelButtonText: 'İptal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = 'login.html';
+                    }
+                });
+                return;
+            }
+
+            try {
+                if (selectedRequestType === 'carrier') {
+                    // Taşıyıcı tipi: trips tablosuna kayıt
+                    const tripData = {
+                        user_id: user.id,
+                        from_country: document.getElementById('fromCountry').value,
+                        from_city: document.getElementById('fromCity').value,
+                        to_country: document.getElementById('toCountry').value,
+                        to_city: document.getElementById('toCity').value,
+                        travel_date: document.getElementById('travelDate').value,
+                        travel_time: document.getElementById('travelTime').value,
+                        is_cargo_allowed: true,
+                        max_cargo_weight: parseFloat(document.getElementById('maxWeight').value),
+                        max_cargo_packages: parseInt(document.getElementById('maxPackageCount').value),
+                        cargo_size_limit: document.getElementById('sizeLimit').value,
+                        cargo_price_per_package: parseFloat(document.getElementById('pricePerPackage').value),
+                        cargo_notes: document.getElementById('notes').value || null,
+                        phone: document.getElementById('phoneCode').value + ' ' + document.getElementById('phoneNumber').value,
+                        status: 'pending'
+                    };
+
+                    Swal.fire({
+                        title: 'Yayınlanıyor...',
+                        text: 'Yolculuk ilanınız oluşturuluyor',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    const { data, error } = await sb
+                        .from('trips')
+                        .insert([tripData])
+                        .select()
+                        .single();
+
+                    if (error) throw error;
+
+                    await Swal.fire({
+                        icon: 'success',
+                        title: 'Başarılı!',
+                        text: 'Yolculuk ilanınız yayınlandı. Paket göndermek isteyenler size ulaşacak.',
+                        confirmButtonText: 'Tamam'
+                    });
+
+                    window.location.href = 'kargo_emanet.html';
+                } else {
+                    // Gönderen tipi: shipments tablosuna kayıt
+                    const requestData = {
+                        user_id: user.id,
+                        sender_name: user.user_metadata?.full_name || user.email.split('@')[0],
+                        from_city: document.getElementById('fromCity').value,
+                        to_city: document.getElementById('toCity').value,
+                        description: document.getElementById('description').value,
+                        weight: document.getElementById('weight')?.value ? parseFloat(document.getElementById('weight').value) : null,
+                        size: document.getElementById('size')?.value || null,
+                        package_count: parseInt(document.getElementById('packageCount')?.value) || 1,
+                        is_fragile: document.querySelector('input[name="fragile"]:checked')?.value === 'true',
+                        price_offer: parseFloat(document.getElementById('priceOffer').value),
+                        phone: document.getElementById('phoneCode').value + ' ' + document.getElementById('phoneNumber').value,
+                        delivery_preference: document.getElementById('deliveryPreference')?.value || null,
+                        notes: document.getElementById('notes')?.value || null,
+                        status: 'pending',
+                        tracking_number: 'PKG-' + Date.now().toString().slice(-8),
+                        request_type: 'sender'
+                    };
+
+                    Swal.fire({
+                        title: 'Yayınlanıyor...',
+                        text: 'Kargo talebiniz oluşturuluyor',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    const { data, error } = await sb
+                        .from('shipments')
+                        .insert([requestData])
+                        .select();
+
+                    if (error) throw error;
+
+                    await Swal.fire({
+                        icon: 'success',
+                        title: 'Harika!',
+                        html: `
+                            <p class="text-lg mb-4">🎉 Kargo talebiniz başarıyla oluşturuldu!</p>
+                            <div class="bg-slate-100 p-3 rounded-lg mb-3">
+                                <p class="text-xs text-slate-600">Takip Numaranız</p>
+                                <p class="text-xl font-bold text-orange-600">${requestData.tracking_number}</p>
+                            </div>
+                            <p class="text-sm text-slate-600">Taşıyıcılar sizinle iletişime geçmeye başlayacak.</p>
+                        `,
+                        confirmButtonText: 'Talebi Görüntüle',
+                        showCancelButton: true,
+                        cancelButtonText: 'Ana Sayfa'
+                    });
+
+                    window.location.href = 'kargo_emanet.html';
+                }
+
+            } catch (error) {
+                console.error('Talep oluşturma hatası:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Hata',
+                    text: 'Talebiniz oluşturulamadı. Lütfen tekrar deneyin.',
+                    confirmButtonText: 'Tamam'
+                });
+            }
+        }
+    </script>
+
+</body>
+</html>

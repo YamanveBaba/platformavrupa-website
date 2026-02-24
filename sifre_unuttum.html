@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Şifremi Unuttum</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; }</style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-md bg-white p-10 rounded-3xl shadow-xl border border-slate-200 text-center">
+        
+        <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-6">
+            <i class="fa-solid fa-key"></i>
+        </div>
+
+        <h2 class="text-2xl font-extrabold text-slate-900 mb-2">Şifreni mi Unuttun?</h2>
+        <p class="text-slate-500 text-sm mb-8">Kayıtlı e-posta adresini gir, sana şifre sıfırlama bağlantısı gönderelim.</p>
+
+        <form onsubmit="sifirla(event)" class="space-y-6">
+            <div class="text-left">
+                <label class="text-xs font-bold text-slate-500 uppercase ml-1 block mb-1">E-Posta</label>
+                <input type="email" required placeholder="ornek@mail.com" class="w-full border-2 border-slate-200 rounded-xl p-3 outline-none focus:border-blue-500 transition">
+            </div>
+
+            <button type="submit" class="w-full bg-slate-900 text-white font-bold py-3.5 rounded-xl hover:bg-slate-800 transition shadow-lg">
+                Bağlantı Gönder
+            </button>
+        </form>
+
+        <div class="mt-8 pt-6 border-t border-slate-100">
+            <a href="login.html" class="text-sm font-bold text-slate-600 hover:text-slate-900 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-arrow-left"></i> Giriş Ekranına Dön
+            </a>
+        </div>
+    </div>
+
+    <script>
+        function sifirla(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            const originalText = btn.innerText;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Gönderiliyor...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                alert("Sıfırlama bağlantısı e-posta adresinize gönderildi!");
+                btn.innerText = "Gönderildi ✔";
+                btn.classList.replace('bg-slate-900', 'bg-green-600');
+                btn.classList.replace('hover:bg-slate-800', 'hover:bg-green-700');
+            }, 1500);
+        }
+    </script>
+</body>
+</html>
