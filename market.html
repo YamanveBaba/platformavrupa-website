@@ -170,6 +170,40 @@
         let selectedCountry = 'DE'; // Varsayılan: Almanya
         let marketChains = [];
 
+        // Market zinciri logoları (logo boş olanlar için fallback; Wikipedia Commons)
+        const MARKET_LOGOS = {
+            'Lidl': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Lidl-Logo.svg/200px-Lidl-Logo.svg.png',
+            'Carrefour': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Carrefour_logo.svg/200px-Carrefour_logo.svg.png',
+            'CarrefourSA': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Carrefour_logo.svg/200px-Carrefour_logo.svg.png',
+            'Delhaize': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Delhaize_Group_Logo.svg/200px-Delhaize_Group_Logo.svg.png',
+            'Colruyt': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Colruyt_logo.svg/200px-Colruyt_logo.svg.png',
+            'Aldi': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Aldi_S%C3%BCd_2017_logo.svg/200px-Aldi_S%C3%BCd_2017_logo.svg.png',
+            'Aldi Süd': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Aldi_S%C3%BCd_2017_logo.svg/200px-Aldi_S%C3%BCd_2017_logo.svg.png',
+            'Aldi Nord': 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Aldi_Nord_Logo_2015.svg/200px-Aldi_Nord_Logo_2015.svg.png',
+            'Edeka': 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Edeka-Logo.svg/200px-Edeka-Logo.svg.png',
+            'Rewe': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/REWE_logo.svg/200px-REWE_logo.svg.png',
+            'Kaufland': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Kaufland_logo.svg/200px-Kaufland_logo.svg.png',
+            'Penny': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Penny_logo.svg/200px-Penny_logo.svg.png',
+            'Netto': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Netto_logo.svg/200px-Netto_logo.svg.png',
+            'Rossmann': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Rossmann_Logo.svg/200px-Rossmann_Logo.svg.png',
+            'dm': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Dm-drogerie_markt.svg/200px-Dm-drogerie_markt.svg.png',
+            'Billa': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Billa_Logo.svg/200px-Billa_Logo.svg.png',
+            'Spar': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Spar-Logo.svg/200px-Spar-Logo.svg.png',
+            'Hofer': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Hofer_Logo.svg/200px-Hofer_Logo.svg.png',
+            'Leclerc': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/E.Leclerc_logo.svg/200px-E.Leclerc_logo.svg.png',
+            'Auchan': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Auchan_Logo.svg/200px-Auchan_Logo.svg.png',
+            'Intermarché': 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Intermarch%C3%A9_logo.svg/200px-Intermarch%C3%A9_logo.svg.png',
+            'Albert': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/REWE_logo.svg/200px-REWE_logo.svg.png',
+            'Rimi': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Rimi_Logo.svg/200px-Rimi_Logo.svg.png',
+            'Maxima': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Maxima_logo.svg/200px-Maxima_logo.svg.png',
+            'Selver': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Selver_logo.svg/200px-Selver_logo.svg.png',
+            'S-Market': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/S-Group_logo.svg/200px-S-Group_logo.svg.png',
+            'K-Market': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/K-Group_logo.svg/200px-K-Group_logo.svg.png',
+            'Prisma': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Prisma_logo.svg/200px-Prisma_logo.svg.png',
+            'Føtex': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/F%C3%B8tex_Logo.svg/200px-F%C3%B8tex_Logo.svg.png',
+            'Bilka': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Bilka_logo.svg/200px-Bilka_logo.svg.png'
+        };
+
         // Broşür agregator siteleri
         const brochureAgregators = {
             'DE': 'https://www.kaufda.de',
@@ -636,15 +670,16 @@
                     const gradientIndex = index % gradients.length;
                     const gradient = gradients[gradientIndex];
                     
-                    // Market adını güvenli hale getir
+                    // Market adını güvenli hale getir; logo: önce veritabanı, yoksa MARKET_LOGOS
                     const marketName = market.name || 'Market';
                     const safeMarketName = marketName.replace(/[<>]/g, '');
+                    const logoUrl = market.logo_url || MARKET_LOGOS[marketName] || '';
                     
                     card.innerHTML = `
                         <div class="p-5 text-center">
                             <div class="w-20 h-20 bg-gradient-to-br ${gradient} rounded-3xl flex items-center justify-center mx-auto mb-4 overflow-hidden shadow-lg">
-                                ${market.logo_url 
-                                    ? `<img src="${market.logo_url}" alt="${safeMarketName}" class="w-16 h-16 object-contain p-2" onerror="this.parentElement.innerHTML='<div class=\\'w-16 h-16 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl flex items-center justify-center\\'><i class=\\'fa-solid fa-store text-2xl text-white\\'></i></div>'">`
+                                ${logoUrl 
+                                    ? `<img src="${logoUrl}" alt="${safeMarketName}" class="w-16 h-16 object-contain p-2" onerror="this.parentElement.innerHTML='<div class=\\'w-16 h-16 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl flex items-center justify-center\\'><i class=\\'fa-solid fa-store text-2xl text-white\\'></i></div>'">`
                                     : `<div class="w-16 h-16 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl flex items-center justify-center">
                                         <i class="fa-solid fa-store text-2xl text-white"></i>
                                        </div>`

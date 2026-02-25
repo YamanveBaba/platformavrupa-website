@@ -183,13 +183,13 @@
                     <div class="h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent flex-1"></div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <button onclick="openModal('market')" class="group relative bg-gradient-to-br from-emerald-900/20 to-emerald-800/10 hover:from-emerald-600/30 hover:to-emerald-500/20 border border-emerald-500/30 hover:border-emerald-400/50 p-6 rounded-2xl transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-emerald-500/20 flex flex-col items-center gap-3">
+                    <a href="market.html" class="group relative bg-gradient-to-br from-emerald-900/20 to-emerald-800/10 hover:from-emerald-600/30 hover:to-emerald-500/20 border border-emerald-500/30 hover:border-emerald-400/50 p-6 rounded-2xl transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-emerald-500/20 flex flex-col items-center gap-3 block">
                         <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300">
                             <i class="fa-solid fa-basket-shopping text-3xl text-emerald-400 group-hover:text-emerald-300"></i>
                         </div>
                         <span class="font-bold text-white text-base">Market Fiyatları</span>
                         <span class="text-xs text-slate-400 text-center">30 ülke, 100+ market</span>
-                    </button>
+                    </a>
                     <a href="doviz_altin.html" class="group relative bg-gradient-to-br from-yellow-900/20 to-yellow-800/10 hover:from-yellow-600/30 hover:to-yellow-500/20 border border-yellow-500/30 hover:border-yellow-400/50 p-6 rounded-2xl transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-yellow-500/20 flex flex-col items-center gap-3">
                         <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-yellow-500/20 to-yellow-600/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300">
                             <i class="fa-solid fa-coins text-3xl text-yellow-400 group-hover:text-yellow-300"></i>
@@ -464,14 +464,6 @@
                         <a href="tel:${sanitizePhone(s.phone)}" class="bg-green-600 px-3 py-1 rounded text-white text-sm font-bold"><i class="fa-solid fa-phone"></i> Ara</a>
                     </div>`).join('') + '</div>';
             
-            } else if (type === 'market') {
-                title.innerHTML = '<i class="fa-solid fa-basket-shopping text-emerald-400 mr-2"></i> Avrupa Market Broşürleri';
-                body.innerHTML = `
-                    <p class="text-slate-400 text-sm mb-4">30 ülke, 100+ market zinciri. Lidl, Carrefour, Aldi ve daha fazlasının haftalık indirim broşürleri.</p>
-                    <a href="market.html" class="block w-full text-center bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold py-3 px-4 rounded-xl transition shadow-lg shadow-emerald-500/25">
-                        <i class="fa-solid fa-tags mr-2"></i> Broşürlere Git
-                    </a>`;
-
             } else if (type === 'doviz') {
                 title.innerHTML = '<i class="fa-solid fa-coins text-yellow-400 mr-2"></i> Döviz & Altın';
                 body.innerHTML = '<div class="text-center py-10"><i class="fa-solid fa-spinner fa-spin text-2xl text-yellow-400"></i><p class="text-slate-400 mt-2">Yükleniyor...</p></div>';
