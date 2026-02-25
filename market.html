@@ -201,7 +201,19 @@
             'K-Market': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/K-Group_logo.svg/200px-K-Group_logo.svg.png',
             'Prisma': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Prisma_logo.svg/200px-Prisma_logo.svg.png',
             'Føtex': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/F%C3%B8tex_Logo.svg/200px-F%C3%B8tex_Logo.svg.png',
-            'Bilka': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Bilka_logo.svg/200px-Bilka_logo.svg.png'
+            'Bilka': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Bilka_logo.svg/200px-Bilka_logo.svg.png',
+            'Konzum': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Konzum_logo.svg/200px-Konzum_logo.svg.png',
+            'Albert Heijn': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Albert_Heijn_logo.svg/200px-Albert_Heijn_logo.svg.png',
+            'Jumbo': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Jumbo_%28supermarkt%29_logo.svg/200px-Jumbo_%28supermarkt%29_logo.svg.png',
+            'Tesco': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Tesco_Logo.svg/200px-Tesco_Logo.svg.png',
+            'Mercadona': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Mercadona_logo.svg/200px-Mercadona_logo.svg.png',
+            'ICA': 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/ICA_logo.svg/200px-ICA_logo.svg.png',
+            'Coop': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Coop_Norden_logo.svg/200px-Coop_Norden_logo.svg.png',
+            'Migros': 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Migros_logo.svg/200px-Migros_logo.svg.png',
+            'Biedronka': 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Biedronka_logo.svg/200px-Biedronka_logo.svg.png',
+            'Mega Image': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Mega_Image_logo.svg/200px-Mega_Image_logo.svg.png',
+            'Mercator': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Mercator_%28company%29_logo.svg/200px-Mercator_%28company%29_logo.svg.png',
+            'Real': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Real_Logo.svg/200px-Real_Logo.svg.png'
         };
 
         // Broşür agregator siteleri
@@ -478,10 +490,13 @@
                                 if (!existing.countries.includes(countryCode)) {
                                     existing.countries.push(countryCode);
                                 }
+                                if (!existing.logo_url && (market.logo && market.logo.trim() || MARKET_LOGOS[market.isim])) {
+                                    existing.logo_url = (market.logo && market.logo.trim()) ? market.logo : MARKET_LOGOS[market.isim];
+                                }
                             } else {
                                 marketChains.push({
                                     name: market.isim,
-                                    logo_url: market.logo || null,
+                                    logo_url: (market.logo && market.logo.trim()) ? market.logo : (MARKET_LOGOS[market.isim] || null),
                                     countries: [countryCode],
                                     brochure_url: market.brosur || '#',
                                     website: market.brosur ? market.brosur.split('/').slice(0, 3).join('/') : '#'
@@ -679,7 +694,7 @@
                         <div class="p-5 text-center">
                             <div class="w-20 h-20 bg-gradient-to-br ${gradient} rounded-3xl flex items-center justify-center mx-auto mb-4 overflow-hidden shadow-lg">
                                 ${logoUrl 
-                                    ? `<img src="${logoUrl}" alt="${safeMarketName}" class="w-16 h-16 object-contain p-2" onerror="this.parentElement.innerHTML='<div class=\\'w-16 h-16 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl flex items-center justify-center\\'><i class=\\'fa-solid fa-store text-2xl text-white\\'></i></div>'">`
+                                    ? `<img src="${logoUrl}" alt="${safeMarketName}" class="w-16 h-16 object-contain p-2" referrerpolicy="no-referrer" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\'w-16 h-16 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl flex items-center justify-center\\'><i class=\\'fa-solid fa-store text-2xl text-white\\'></i></div>'">`
                                     : `<div class="w-16 h-16 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl flex items-center justify-center">
                                         <i class="fa-solid fa-store text-2xl text-white"></i>
                                        </div>`
