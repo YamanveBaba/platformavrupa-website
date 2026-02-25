@@ -465,15 +465,12 @@
                     </div>`).join('') + '</div>';
             
             } else if (type === 'market') {
-                title.innerHTML = '<i class="fa-solid fa-basket-shopping text-emerald-400 mr-2"></i> Avrupa Market Fiyatları';
+                title.innerHTML = '<i class="fa-solid fa-basket-shopping text-emerald-400 mr-2"></i> Avrupa Market Broşürleri';
                 body.innerHTML = `
-                    <div class="space-y-2">
-                        <div class="flex justify-between p-3 bg-white/5 rounded border border-white/5"><span>🥩 Dana Kıyma (1kg)</span> <span class="text-emerald-400 font-bold">12.50 €</span></div>
-                        <div class="flex justify-between p-3 bg-white/5 rounded border border-white/5"><span>🌻 Ayçiçek Yağı (1L)</span> <span class="text-emerald-400 font-bold">1.89 €</span></div>
-                        <div class="flex justify-between p-3 bg-white/5 rounded border border-white/5"><span>🥚 Yumurta (10'lu)</span> <span class="text-emerald-400 font-bold">2.20 €</span></div>
-                        <div class="flex justify-between p-3 bg-white/5 rounded border border-white/5"><span>🥖 Ekmek (Baget)</span> <span class="text-emerald-400 font-bold">1.10 €</span></div>
-                        <div class="flex justify-between p-3 bg-white/5 rounded border border-white/5"><span>⛽ Benzin (1L)</span> <span class="text-emerald-400 font-bold">1.75 €</span></div>
-                    </div>`;
+                    <p class="text-slate-400 text-sm mb-4">30 ülke, 100+ market zinciri. Lidl, Carrefour, Aldi ve daha fazlasının haftalık indirim broşürleri.</p>
+                    <a href="market.html" class="block w-full text-center bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold py-3 px-4 rounded-xl transition shadow-lg shadow-emerald-500/25">
+                        <i class="fa-solid fa-tags mr-2"></i> Broşürlere Git
+                    </a>`;
 
             } else if (type === 'doviz') {
                 title.innerHTML = '<i class="fa-solid fa-coins text-yellow-400 mr-2"></i> Döviz & Altın';
