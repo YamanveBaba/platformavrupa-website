@@ -1243,3 +1243,11 @@ function hesaplaAltinFiyati(gramFiyat, altinTuruId) {
 function getParaBirimi(kod) {
     return paraBirimleri.find(p => p.kod === kod) || { kod, isim: kod, sembol: kod, bayrak: "🏳️" };
 }
+
+// Tarayıcıda sayfaların global erişebilmesi için window'a bağla (const/let window'a eklenmez)
+if (typeof window !== 'undefined') {
+    window.lokasyonVeritabani = lokasyonVeritabani;
+    window.acilNumaralar = acilNumaralar;
+    window.sorunTipleri = sorunTipleri;
+    window.marketZincirleri = marketZincirleri;
+}

@@ -170,51 +170,34 @@
         let selectedCountry = 'DE'; // Varsayılan: Almanya
         let marketChains = [];
 
-        // Market zinciri logoları (logo boş olanlar için fallback; Wikipedia Commons)
-        const MARKET_LOGOS = {
-            'Lidl': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Lidl-Logo.svg/200px-Lidl-Logo.svg.png',
-            'Carrefour': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Carrefour_logo.svg/200px-Carrefour_logo.svg.png',
-            'CarrefourSA': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Carrefour_logo.svg/200px-Carrefour_logo.svg.png',
-            'Delhaize': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Delhaize_Group_Logo.svg/200px-Delhaize_Group_Logo.svg.png',
-            'Colruyt': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Colruyt_logo.svg/200px-Colruyt_logo.svg.png',
-            'Aldi': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Aldi_S%C3%BCd_2017_logo.svg/200px-Aldi_S%C3%BCd_2017_logo.svg.png',
-            'Aldi Süd': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Aldi_S%C3%BCd_2017_logo.svg/200px-Aldi_S%C3%BCd_2017_logo.svg.png',
-            'Aldi Nord': 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Aldi_Nord_Logo_2015.svg/200px-Aldi_Nord_Logo_2015.svg.png',
-            'Edeka': 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Edeka-Logo.svg/200px-Edeka-Logo.svg.png',
-            'Rewe': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/REWE_logo.svg/200px-REWE_logo.svg.png',
-            'Kaufland': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Kaufland_logo.svg/200px-Kaufland_logo.svg.png',
-            'Penny': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Penny_logo.svg/200px-Penny_logo.svg.png',
-            'Netto': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Netto_logo.svg/200px-Netto_logo.svg.png',
-            'Rossmann': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Rossmann_Logo.svg/200px-Rossmann_Logo.svg.png',
-            'dm': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Dm-drogerie_markt.svg/200px-Dm-drogerie_markt.svg.png',
-            'Billa': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Billa_Logo.svg/200px-Billa_Logo.svg.png',
-            'Spar': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Spar-Logo.svg/200px-Spar-Logo.svg.png',
-            'Hofer': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Hofer_Logo.svg/200px-Hofer_Logo.svg.png',
-            'Leclerc': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/E.Leclerc_logo.svg/200px-E.Leclerc_logo.svg.png',
-            'Auchan': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Auchan_Logo.svg/200px-Auchan_Logo.svg.png',
-            'Intermarché': 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Intermarch%C3%A9_logo.svg/200px-Intermarch%C3%A9_logo.svg.png',
-            'Albert': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/REWE_logo.svg/200px-REWE_logo.svg.png',
-            'Rimi': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Rimi_Logo.svg/200px-Rimi_Logo.svg.png',
-            'Maxima': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Maxima_logo.svg/200px-Maxima_logo.svg.png',
-            'Selver': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Selver_logo.svg/200px-Selver_logo.svg.png',
-            'S-Market': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/S-Group_logo.svg/200px-S-Group_logo.svg.png',
-            'K-Market': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/K-Group_logo.svg/200px-K-Group_logo.svg.png',
-            'Prisma': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Prisma_logo.svg/200px-Prisma_logo.svg.png',
-            'Føtex': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/F%C3%B8tex_Logo.svg/200px-F%C3%B8tex_Logo.svg.png',
-            'Bilka': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Bilka_logo.svg/200px-Bilka_logo.svg.png',
-            'Konzum': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Konzum_logo.svg/200px-Konzum_logo.svg.png',
-            'Albert Heijn': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Albert_Heijn_logo.svg/200px-Albert_Heijn_logo.svg.png',
-            'Jumbo': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Jumbo_%28supermarkt%29_logo.svg/200px-Jumbo_%28supermarkt%29_logo.svg.png',
-            'Tesco': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Tesco_Logo.svg/200px-Tesco_Logo.svg.png',
-            'Mercadona': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Mercadona_logo.svg/200px-Mercadona_logo.svg.png',
-            'ICA': 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/ICA_logo.svg/200px-ICA_logo.svg.png',
-            'Coop': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Coop_Norden_logo.svg/200px-Coop_Norden_logo.svg.png',
-            'Migros': 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Migros_logo.svg/200px-Migros_logo.svg.png',
-            'Biedronka': 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Biedronka_logo.svg/200px-Biedronka_logo.svg.png',
-            'Mega Image': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Mega_Image_logo.svg/200px-Mega_Image_logo.svg.png',
-            'Mercator': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Mercator_%28company%29_logo.svg/200px-Mercator_%28company%29_logo.svg.png',
-            'Real': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Real_Logo.svg/200px-Real_Logo.svg.png'
+        // Market adı -> domain (Clearbit Logo API: https://logo.clearbit.com/{domain})
+        const MARKET_LOGO_DOMAINS = {
+            'Lidl': 'lidl.com', 'Carrefour': 'carrefour.com', 'CarrefourSA': 'carrefoursa.com',
+            'Delhaize': 'delhaize.com', 'Colruyt': 'colruyt.com', 'Aldi': 'aldi.com',
+            'Aldi Süd': 'aldi-sued.de', 'Aldi Nord': 'aldi-nord.de', 'Edeka': 'edeka.de',
+            'Rewe': 'rewe.de', 'Kaufland': 'kaufland.de', 'Penny': 'penny.de',
+            'Netto': 'netto-online.de', 'Rossmann': 'rossmann.de', 'dm': 'dm.de',
+            'Billa': 'billa.at', 'Spar': 'spar.at', 'Hofer': 'hofer.at',
+            'Leclerc': 'e.leclerc', 'Auchan': 'auchan.fr', 'Intermarché': 'intermarche.com',
+            'Albert': 'rewe-group.com', 'Rimi': 'rimi.lt', 'Maxima': 'maxima.lt',
+            'Selver': 'selver.ee', 'S-Market': 's-kaupat.fi', 'K-Market': 'k-ruoka.fi',
+            'Prisma': 'prisma.fi', 'Føtex': 'foetex.dk', 'Bilka': 'bilka.dk',
+            'Konzum': 'konzum.hr', 'Albert Heijn': 'ah.nl', 'Jumbo': 'jumbo.com',
+            'Tesco': 'tesco.com', 'Mercadona': 'mercadona.es', 'ICA': 'ica.se',
+            'Coop': 'coop.se', 'Migros': 'migros.ch', 'Biedronka': 'biedronka.pl',
+            'Mega Image': 'mega-image.ro', 'Mercator': 'mercator.si', 'Real': 'real.de',
+            'Dia': 'dia.es', 'Eroski': 'eroski.es', 'Willys': 'willys.se',
+            'Denner': 'denner.ch', 'Conad': 'conad.it', 'Esselunga': 'esselunga.it',
+            'Iki': 'iki.lt', 'Cactus': 'cactus.lu', 'Rema 1000': 'rema.no',
+            'Kiwi': 'kiwi.no', 'Continente': 'continente.pt', 'Pingo Doce': 'pingodoce.pt',
+            'Dunnes': 'dunnesstores.com', 'SuperValu': 'supervalu.ie', 'Sainsbury\'s': 'sainsburys.co.uk',
+            'Asda': 'asda.com', 'Morrisons': 'morrisons.com', 'Plus': 'plus.nl',
+            'Sklavenitis': 'sklavenitis.gr', 'AB Vassilopoulos': 'ab.gr', 'Pavi': 'pavi.com.mt'
         };
+        function getMarketLogoUrl(marketName) {
+            const domain = MARKET_LOGO_DOMAINS[marketName];
+            return domain ? ('https://logo.clearbit.com/' + domain) : '';
+        }
 
         // Broşür agregator siteleri
         const brochureAgregators = {
@@ -490,13 +473,13 @@
                                 if (!existing.countries.includes(countryCode)) {
                                     existing.countries.push(countryCode);
                                 }
-                                if (!existing.logo_url && (market.logo && market.logo.trim() || MARKET_LOGOS[market.isim])) {
-                                    existing.logo_url = (market.logo && market.logo.trim()) ? market.logo : MARKET_LOGOS[market.isim];
+                                if (!existing.logo_url) {
+                                    existing.logo_url = getMarketLogoUrl(market.isim) || (market.logo && market.logo.trim()) || null;
                                 }
                             } else {
                                 marketChains.push({
                                     name: market.isim,
-                                    logo_url: (market.logo && market.logo.trim()) ? market.logo : (MARKET_LOGOS[market.isim] || null),
+                                    logo_url: getMarketLogoUrl(market.isim) || (market.logo && market.logo.trim()) || null,
                                     countries: [countryCode],
                                     brochure_url: market.brosur || '#',
                                     website: market.brosur ? market.brosur.split('/').slice(0, 3).join('/') : '#'
@@ -685,10 +668,10 @@
                     const gradientIndex = index % gradients.length;
                     const gradient = gradients[gradientIndex];
                     
-                    // Market adını güvenli hale getir; logo: önce veritabanı, yoksa MARKET_LOGOS
+                    // Market adını güvenli hale getir; logo: önce veritabanı, yoksa Clearbit
                     const marketName = market.name || 'Market';
                     const safeMarketName = marketName.replace(/[<>]/g, '');
-                    const logoUrl = market.logo_url || MARKET_LOGOS[marketName] || '';
+                    const logoUrl = market.logo_url || getMarketLogoUrl(marketName) || '';
                     
                     card.innerHTML = `
                         <div class="p-5 text-center">
