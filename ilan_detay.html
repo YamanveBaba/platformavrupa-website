@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İlan Detayı | PlatformAvrupa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }</style>
+</head>
+<body class="text-slate-800">
+
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-50 px-4 py-4 shadow-sm">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <a href="javascript:history.back()" class="flex items-center gap-2 text-slate-600 hover:text-slate-900 font-bold">
+                <i class="fa-solid fa-arrow-left"></i> Geri Dön
+            </a>
+            <span class="font-bold text-lg text-indigo-600">İLAN DETAYI</span>
+            <div class="w-20"></div>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto px-4 py-8" id="ilanDetayKutusu">
+        <div class="text-center py-20 text-slate-400">
+            <i class="fa-solid fa-circle-notch fa-spin text-3xl mb-4 text-indigo-300"></i>
+            <p>İlan bilgileri yükleniyor...</p>
+        </div>
+    </main>
+
+    <script>
+        const SUPABASE_URL = 'https://vhietrqljahdmloazgpp.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoaWV0cnFsamFoZG1sb2F6Z3BwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTk5MTcsImV4cCI6MjA4MDYzNTkxN30.sxpUrTnR40XuEBPUeQXj352xMziGr_lDqdA8H69ejBA';
+        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        window.onload = async function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const ilanId = urlParams.get('id');
+
+            if (!ilanId) {
+                document.getElementById('ilanDetayKutusu').innerHTML = '<div class="text-center py-10 text-red-500 font-bold">Hata: İlan ID bulunamadı!</div>';
+                return;
+            }
+
+            // DOĞRUDAN SUPABASE 'listings' TABLOSUNDAN ÇEKİYORUZ
+            const { data, error } = await sb
+                .from('listings')
+                .select('*')
+                .eq('id', ilanId)
+                .single();
+
+            if (error || !data) {
+                console.error(error);
+                document.getElementById('ilanDetayKutusu').innerHTML = '<div class="text-center py-10 text-red-500 font-bold">İlan bulunamadı veya silinmiş.</div>';
+            } else {
+                ilanGoster(data);
+            }
+        };
+
+        function ilanGoster(ilan) {
+            const container = document.getElementById('ilanDetayKutusu');
+            
+            // Veri Eşleştirme (Listings Tablosuna Göre)
+            const baslik = ilan.title || "Başlıksız İlan";
+            const fiyat = ilan.price || "Belirtilmedi";
+            const aciklama = ilan.description || "Açıklama girilmemiş.";
+            const konum = (ilan.city && ilan.country) ? `${ilan.city}, ${ilan.country}` : "Konum Belirtilmemiş";
+            const tarih = new Date(ilan.created_at).toLocaleDateString('tr-TR');
+            const kategori = ilan.category || "Genel";
+            const sahip = ilan.owner_name || "Platform Üyesi";
+            
+            // Resim Kontrolü
+            let resimHTML = "";
+            if (ilan.image_url) {
+                resimHTML = `<img src="${ilan.image_url}" class="w-full h-full object-cover">`;
+            } else {
+                // Kategoriye göre varsayılan ikon
+                let icon = 'fa-image';
+                if(kategori.includes('İş')) icon = 'fa-briefcase';
+                else if(kategori.includes('Emlak')) icon = 'fa-house';
+                else if(kategori.includes('Vasıta')) icon = 'fa-car';
+
+                resimHTML = `
+                    <div class="w-full h-full flex flex-col items-center justify-center bg-slate-100 text-slate-300">
+                        <i class="fa-solid ${icon} text-6xl mb-3"></i>
+                        <span class="text-sm font-semibold text-slate-400">Görsel Yok</span>
+                    </div>
+                `;
+            }
+
+            // Kategoriye Göre Renkler
+            let badgeClass = "bg-indigo-600";
+            if(kategori === 'Emlak') badgeClass = "bg-blue-600";
+            if(kategori === 'Vasıta') badgeClass = "bg-green-600";
+            if(kategori === 'İş İlanları') badgeClass = "bg-purple-600";
+
+            container.innerHTML = `
+                <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-200">
+                    <div class="h-[300px] md:h-[400px] relative group">
+                        ${resimHTML}
+                        <span class="absolute top-6 right-6 ${badgeClass} text-white px-4 py-2 rounded-full font-bold shadow-lg text-sm uppercase tracking-wide border-2 border-white/20">
+                            ${kategori}
+                        </span>
+                        
+                        <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 via-black/40 to-transparent p-6 md:p-8 pt-20">
+                            <h1 class="text-2xl md:text-4xl font-extrabold text-white shadow-sm leading-tight">${baslik}</h1>
+                            <div class="flex items-center gap-4 text-white/90 font-medium text-sm mt-3">
+                                <span class="flex items-center gap-1 bg-white/20 px-3 py-1 rounded-lg backdrop-blur-sm"><i class="fa-solid fa-location-dot"></i> ${konum}</span>
+                                <span class="flex items-center gap-1 bg-white/20 px-3 py-1 rounded-lg backdrop-blur-sm"><i class="fa-regular fa-calendar"></i> ${tarih}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-6 md:p-10 grid grid-cols-1 lg:grid-cols-3 gap-10">
+                        
+                        <div class="lg:col-span-2 space-y-8">
+                            <div class="lg:hidden bg-slate-50 p-4 rounded-2xl border border-slate-100 flex justify-between items-center">
+                                <span class="text-slate-500 font-bold text-sm uppercase">Fiyat / Ücret</span>
+                                <span class="text-2xl font-black text-slate-800">${fiyat}</span>
+                            </div>
+
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                    <i class="fa-solid fa-align-left text-indigo-500"></i> İlan Açıklaması
+                                </h3>
+                                <div class="prose prose-slate max-w-none text-slate-600 leading-relaxed whitespace-pre-line bg-slate-50/50 p-6 rounded-2xl border border-slate-100">
+                                    ${aciklama}
+                                </div>
+                            </div>
+
+                            <div class="bg-amber-50 border border-amber-100 rounded-xl p-4 flex gap-3 items-start">
+                                <i class="fa-solid fa-shield-halved text-amber-500 text-xl mt-1"></i>
+                                <div>
+                                    <h4 class="font-bold text-amber-800 text-sm">Güvenli Alışveriş İpuçları</h4>
+                                    <p class="text-xs text-amber-700 mt-1">Kapora ödemeyin. Ürünü görmeden veya hizmeti almadan para göndermeyin. Şüpheli durumları bize bildirin.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="lg:col-span-1">
+                            <div class="sticky top-24 space-y-6">
+                                
+                                <div class="hidden lg:block bg-slate-900 text-white p-6 rounded-2xl shadow-lg relative overflow-hidden">
+                                    <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-10 -mt-10 blur-2xl"></div>
+                                    <span class="block text-slate-400 text-xs font-bold uppercase mb-1">Değer / Ücret</span>
+                                    <div class="text-4xl font-black tracking-tight">${fiyat}</div>
+                                </div>
+
+                                <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm">
+                                    <div class="flex items-center gap-4 mb-6">
+                                        <div class="w-14 h-14 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-xl font-bold border-2 border-white shadow-md">
+                                            ${sahip.charAt(0).toUpperCase()}
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-slate-400 font-bold uppercase">İlan Sahibi</p>
+                                            <h4 class="font-bold text-slate-900 text-lg">${sahip}</h4>
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-3">
+                                        <button onclick="mesajGonder()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-green-200 transition flex items-center justify-center gap-2 group">
+                                            <i class="fa-brands fa-whatsapp text-2xl group-hover:scale-110 transition"></i> 
+                                            <span>WhatsApp ile Yaz</span>
+                                        </button>
+                                        <button onclick="alert('Numara gizli veya belirtilmemiş.')" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-200 transition flex items-center justify-center gap-2">
+                                            <i class="fa-solid fa-phone"></i>
+                                            <span>Hemen Ara</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <button onclick="navigator.share({title: '${baslik}', url: window.location.href})" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 rounded-xl transition flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-share-nodes"></i> İlanı Paylaş
+                                </button>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            `;
+        }
+
+        function mesajGonder() {
+            // Şimdilik demo
+            alert("Bu özellik yakında aktif olacak! (Gerçek ilanlarda satıcının numarasına yönlendirir)");
+        }
+    </script>
+</body>
+</html>

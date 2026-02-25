@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yeni Gönderi Paylaş</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        .secim-btn { border: 2px solid #e2e8f0; background-color: white; color: #64748b; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; }
+        .secim-btn:hover { border-color: #fbcfe8; background-color: #fdf2f8; }
+        .secim-btn.active { background-color: #fdf2f8; border-color: #db2777; color: #be185d; box-shadow: 0 4px 6px -1px rgba(219, 39, 119, 0.1); }
+        .secim-btn.active i { color: #be185d; }
+    </style>
+</head>
+<body class="text-slate-800 flex flex-col min-h-screen">
+    
+    <nav class="bg-white/90 backdrop-blur border-b border-slate-200 sticky top-0 z-50 px-4 py-4 shadow-sm">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <a href="topluluk_vitrini.html" class="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition font-bold">
+                <i class="fa-solid fa-arrow-left"></i> Vazgeç
+            </a>
+            <span class="font-extrabold text-lg text-pink-600">YENİ PAYLAŞIM</span>
+            <div class="w-16"></div>
+        </div>
+    </nav>
+
+    <main class="flex-grow max-w-4xl mx-auto px-4 py-10 w-full">
+        <div class="bg-white p-8 rounded-3xl shadow-lg border border-slate-200">
+            <form onsubmit="gonderiKaydet(event)" id="gonderiFormu" class="space-y-8">
+                
+                <div class="bg-pink-50/50 p-5 rounded-2xl border border-pink-100">
+                    <h2 class="font-bold text-slate-800 mb-3 text-sm uppercase tracking-wider">Ne Paylaşıyorsunuz?</h2>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div onclick="turSec('Soru', this)" class="secim-btn active rounded-xl p-4 h-24">
+                            <i class="fa-solid fa-circle-question text-2xl"></i><span class="font-bold text-xs">Soru Sor</span>
+                        </div>
+                        <div onclick="turSec('Sohbet', this)" class="secim-btn rounded-xl p-4 h-24">
+                            <i class="fa-solid fa-comments text-2xl"></i><span class="font-bold text-xs">Sohbet</span>
+                        </div>
+                        <div onclick="turSec('Etkinlik', this)" class="secim-btn rounded-xl p-4 h-24">
+                            <i class="fa-solid fa-calendar-day text-2xl"></i><span class="font-bold text-xs">Etkinlik</span>
+                        </div>
+                        <div onclick="turSec('Yardım', this)" class="secim-btn rounded-xl p-4 h-24">
+                            <i class="fa-solid fa-hand-holding-heart text-2xl"></i><span class="font-bold text-xs">Yardım</span>
+                        </div>
+                    </div>
+                    <input type="hidden" id="gonderiTuru" value="Soru">
+                </div>
+
+                <div>
+                    <label class="text-sm font-bold text-slate-700 block mb-2">Kimler Görsün?</label>
+                    <div class="flex gap-4 mb-4">
+                        <label class="flex items-center gap-2 cursor-pointer bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl w-full hover:border-pink-400 transition has-[:checked]:border-pink-600 has-[:checked]:bg-pink-50">
+                            <input type="radio" name="hedef" value="genel" checked onchange="konumAcKapa()" class="accent-pink-600 w-4 h-4">
+                            <div>
+                                <span class="font-bold text-slate-800 text-sm block">Herkes (Genel)</span>
+                                <span class="text-xs text-slate-500">Tüm Avrupa'daki Türkler görebilir</span>
+                            </div>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl w-full hover:border-pink-400 transition has-[:checked]:border-pink-600 has-[:checked]:bg-pink-50">
+                            <input type="radio" name="hedef" value="yerel" onchange="konumAcKapa()" class="accent-pink-600 w-4 h-4">
+                            <div>
+                                <span class="font-bold text-slate-800 text-sm block">Şehrimdekiler (Yerel)</span>
+                                <span class="text-xs text-slate-500">Sadece seçilen bölgedekiler görür</span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div id="konumSecimiAlani" class="hidden bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs font-bold text-slate-400 uppercase block mb-1">Ülke</label>
+                                <select id="ulkeSecimi" onchange="ulkeDegisti()" class="w-full border-2 border-white rounded-lg p-2 bg-white text-sm outline-none focus:border-pink-500 cursor-pointer">
+                                    <option value="">Seçiniz...</option>
+                                    </select>
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-slate-400 uppercase block mb-1">Şehir</label>
+                                <select id="sehirSecimi" class="w-full border-2 border-white rounded-lg p-2 bg-white text-sm outline-none focus:border-pink-500 cursor-pointer opacity-50" disabled>
+                                    <option value="">Önce Ülke</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-sm font-bold text-slate-700 block mb-2">Başlık</label>
+                    <input type="text" id="baslik" required placeholder="Konu başlığı..." class="w-full border-2 border-slate-200 rounded-xl p-3 outline-none focus:border-pink-500 transition">
+                </div>
+
+                <div>
+                    <label class="text-sm font-bold text-slate-700 block mb-2">İçerik</label>
+                    <textarea id="icerik" rows="6" required placeholder="Aklınızdan geçenleri, sorunuzu veya duyurunuzu yazın..." class="w-full border-2 border-slate-200 rounded-xl p-3 outline-none focus:border-pink-500 resize-none transition"></textarea>
+                </div>
+                
+                <div class="pt-4 border-t border-slate-100">
+                    <button type="submit" id="gonderButton" class="bg-pink-600 text-white font-bold py-3.5 rounded-xl hover:bg-pink-700 transition shadow-lg w-full transform active:scale-95 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-paper-plane"></i> PAYLAŞ
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script src="config.js"></script>
+    <script src="genel_veriler.js"></script>
+    
+    <script>
+        // GLOBAL DEĞİŞKEN (sb) - Hata almamak için başlangıçta null
+        let sb = null;
+
+        // 1. BAŞLANGIÇ
+        window.onload = function() {
+            // Supabase'i burada başlatıyoruz
+            try { 
+                if (typeof initSupabase === 'function') sb = initSupabase(); 
+            } catch (e) {
+                console.warn("Supabase başlatılamadı:", e);
+            }
+
+            // Ülkeleri Doldur
+            if (typeof ulkeleriDoldur === 'function') {
+                ulkeleriDoldur('ulkeSecimi');
+            }
+        };
+
+        // 2. ÜLKE SEÇİMİ (sehirleriGetirOrtak KULLANILDI)
+        function ulkeDegisti() {
+            const ulkeKod = document.getElementById('ulkeSecimi').value;
+            // genel_veriler.js içindeki ORTAK fonksiyon
+            if (typeof sehirleriGetirOrtak === 'function') {
+                sehirleriGetirOrtak(ulkeKod, 'sehirSecimi');
+            }
+        }
+
+        // 3. TÜR SEÇİMİ
+        function turSec(tur, btn) {
+            document.querySelectorAll('.secim-btn').forEach(b => {
+                b.classList.remove('active');
+            });
+            btn.classList.add('active');
+            document.getElementById('gonderiTuru').value = tur;
+        }
+
+        // 4. KONUM ALANI AÇ/KAPA
+        function konumAcKapa() {
+            const hedef = document.querySelector('input[name="hedef"]:checked').value;
+            const alan = document.getElementById('konumSecimiAlani');
+            if(hedef === 'yerel') {
+                alan.classList.remove('hidden');
+                // Liste boşsa doldurmayı dene
+                if(document.getElementById('ulkeSecimi').options.length <= 1) {
+                    if (typeof ulkeleriDoldur === 'function') ulkeleriDoldur('ulkeSecimi');
+                }
+            } else {
+                alan.classList.add('hidden');
+            }
+        }
+
+        // 5. GÖNDERİ KAYDET (GÜVENLİ)
+        async function gonderiKaydet(e) {
+            e.preventDefault();
+            const btn = document.getElementById('gonderButton');
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Paylaşılıyor...';
+            btn.disabled = true;
+
+            const tur = document.getElementById('gonderiTuru').value;
+            const baslik = document.getElementById('baslik').value;
+            const icerik = document.getElementById('icerik').value;
+            const hedef = document.querySelector('input[name="hedef"]:checked').value;
+            
+            let ulke = "Genel";
+            let sehir = "Avrupa";
+
+            if (hedef === 'yerel') {
+                ulke = document.getElementById('ulkeSecimi').value;
+                sehir = document.getElementById('sehirSecimi').value;
+                if(!ulke || !sehir) {
+                    alert("Lütfen yerel paylaşım için Ülke ve Şehir seçin.");
+                    btn.innerHTML = 'PAYLAŞ';
+                    btn.disabled = false;
+                    return;
+                }
+            }
+
+            const yeniGonderi = {
+                baslik: baslik,
+                aciklama: icerik,
+                kategori: 'Topluluk',
+                altKategori: tur,
+                ulke: ulke,
+                konum: sehir,
+                fiyat: '0',
+                detaylar: { hedef: hedef }
+            };
+
+            // Supabase (sb) varsa dene, yoksa geç
+            if (sb) {
+                try {
+                    const { error } = await sb.from('ilanlar').insert([yeniGonderi]);
+                    if (error) console.error("Veritabanı hatası:", error);
+                } catch(err) {
+                    console.error("Bağlantı hatası:", err);
+                }
+            }
+
+            // LocalStorage (Her türlü kaydet)
+            const localData = JSON.parse(localStorage.getItem('posted_gonderiler') || '[]');
+            localData.unshift({ ...yeniGonderi, id: Date.now(), tarih: 'Şimdi', kullanici: 'Ben' });
+            localStorage.setItem('posted_gonderiler', JSON.stringify(localData));
+
+            setTimeout(() => {
+                alert("✅ Paylaşımınız yayınlandı!");
+                window.location.href = 'topluluk_vitrini.html';
+            }, 500);
+        }
+    </script>
+</body>
+</html>

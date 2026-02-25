@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Başvurularım | PlatformAvrupa</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="auth.js"></script>
+    <script src="utils.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%);
+            min-height: 100vh;
+        }
+        .glass-card { 
+            background: rgba(255,255,255,0.95); 
+            backdrop-filter: blur(20px); 
+            border-radius: 24px; 
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body class="pb-24 text-white">
+
+    <!-- Header -->
+    <nav class="bg-slate-900/95 backdrop-blur-xl sticky top-0 z-50 shadow-xl border-b border-slate-700/50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="saglik_turizmi.html" class="flex items-center gap-2 text-slate-300 hover:text-white transition font-bold">
+                <div class="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </div>
+            </a>
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-gradient-to-br from-pink-500 to-rose-600 rounded-2xl flex items-center justify-center text-white text-xl shadow-lg shadow-pink-500/30">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                </div>
+                <div>
+                    <h1 class="font-black text-xl text-white tracking-tight">Başvurularım</h1>
+                    <p class="text-xs text-slate-400">Sağlık Turizmi</p>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Başvurular Listesi -->
+    <div class="max-w-7xl mx-auto px-4 py-6">
+        <div id="leadsList" class="space-y-4">
+            <!-- Başvurular buraya yüklenecek -->
+        </div>
+        <div id="noLeads" class="hidden text-center py-12">
+            <i class="fa-solid fa-clipboard text-6xl text-slate-600 mb-4"></i>
+            <p class="text-slate-400 text-lg mb-4">Henüz başvurunuz bulunmuyor.</p>
+            <a href="saglik_turizmi.html" class="inline-block bg-gradient-to-r from-pink-500 to-rose-600 text-white px-6 py-3 rounded-xl font-bold hover:shadow-lg transition">
+                Yeni Başvuru Yap
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Sayfa yüklendiğinde
+        window.onload = async function() {
+            const user = await getCurrentUser();
+            if (!user) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Giriş Gerekli',
+                    text: 'Başvurularınızı görmek için giriş yapmalısınız.',
+                    confirmButtonText: 'Giriş Yap'
+                }).then((result) => {
+                    if (result.isConfirmed) window.location.href = 'login.html';
+                });
+                return;
+            }
+            await loadLeads();
+        };
+
+        // Başvuruları yükle
+        async function loadLeads() {
+            try {
+                const user = await getCurrentUser();
+                if (!user) return;
+
+                const { data, error } = await sb
+                    .from('health_leads')
+                    .select(`
+                        *,
+                        health_clinics:clinic_id(display_name, city)
+                    `)
+                    .eq('user_id', user.id)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                renderLeads(data || []);
+            } catch (error) {
+                console.error('Başvurular yüklenemedi:', error);
+                Swal.fire('Hata', 'Başvurular yüklenirken bir hata oluştu.', 'error');
+            }
+        }
+
+        // Başvuruları render et
+        function renderLeads(leads) {
+            const list = document.getElementById('leadsList');
+            const noLeads = document.getElementById('noLeads');
+            
+            if (!list) return;
+
+            if (leads.length === 0) {
+                list.classList.add('hidden');
+                noLeads.classList.remove('hidden');
+                return;
+            }
+
+            list.classList.remove('hidden');
+            noLeads.classList.add('hidden');
+
+            list.innerHTML = leads.map(lead => {
+                const statusConfig = getStatusConfig(lead.status);
+                const clinicName = lead.health_clinics?.display_name || 'Henüz atanmadı';
+                const categoryNames = {
+                    'sac_ekimi': 'Saç Ekimi',
+                    'dis': 'Diş Tedavisi',
+                    'estetik': 'Estetik Cerrahi',
+                    'erkek_cinsel': 'Erkek Cinsel Sağlık',
+                    'kadin_cinsel': 'Kadın Cinsel Sağlık',
+                    'tup_bebek': 'Tüp Bebek'
+                };
+                const categoryName = categoryNames[lead.treatment_category] || lead.treatment_category;
+                const whatsappLink = buildWhatsAppLink(lead.treatment_category, lead.reference_code);
+                
+                return `
+                    <div class="glass-card p-6 bg-slate-800/50 border border-slate-700">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="font-bold text-white text-lg mb-1">${sanitize(categoryName)}</h3>
+                                <p class="text-slate-400 text-sm">${sanitize(clinicName)}</p>
+                            </div>
+                            <span class="status-badge ${statusConfig.bg} ${statusConfig.text}">
+                                ${statusConfig.label}
+                            </span>
+                        </div>
+                        
+                        <div class="space-y-2 mb-4">
+                            <div class="flex items-center gap-2 text-sm">
+                                <i class="fa-solid fa-hashtag text-pink-400"></i>
+                                <span class="text-slate-300">Referans Kodu:</span>
+                                <span class="font-bold text-white">${sanitize(lead.reference_code)}</span>
+                            </div>
+                            ${lead.treatment_type ? `
+                                <div class="flex items-center gap-2 text-sm">
+                                    <i class="fa-solid fa-stethoscope text-pink-400"></i>
+                                    <span class="text-slate-300">Tedavi:</span>
+                                    <span class="text-white">${sanitize(lead.treatment_type)}</span>
+                                </div>
+                            ` : ''}
+                            ${lead.preferred_date ? `
+                                <div class="flex items-center gap-2 text-sm">
+                                    <i class="fa-solid fa-calendar text-pink-400"></i>
+                                    <span class="text-slate-300">Tercih Edilen Tarih:</span>
+                                    <span class="text-white">${new Date(lead.preferred_date).toLocaleDateString('tr-TR')}</span>
+                                </div>
+                            ` : ''}
+                            ${lead.clinic_quote ? `
+                                <div class="flex items-center gap-2 text-sm">
+                                    <i class="fa-solid fa-euro-sign text-green-400"></i>
+                                    <span class="text-slate-300">Teklif:</span>
+                                    <span class="font-bold text-green-400">€${lead.clinic_quote.toLocaleString()}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                        
+                        ${lead.admin_notes ? `
+                            <div class="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3 mb-4">
+                                <p class="text-xs font-bold text-blue-300 mb-1">Admin Notu:</p>
+                                <p class="text-sm text-blue-200">${sanitize(lead.admin_notes)}</p>
+                            </div>
+                        ` : ''}
+                        
+                        <div class="flex gap-2">
+                            <a href="${whatsappLink}" target="_blank" class="flex-1 bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-bold text-center transition">
+                                <i class="fa-brands fa-whatsapp mr-2"></i> WhatsApp ile İletişime Geç
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Durum konfigürasyonu
+        function getStatusConfig(status) {
+            const configs = {
+                'new': { label: 'Yeni', bg: 'bg-blue-500/20', text: 'text-blue-300' },
+                'contacted': { label: 'İletişime Geçildi', bg: 'bg-yellow-500/20', text: 'text-yellow-300' },
+                'quoted': { label: 'Teklif Verildi', bg: 'bg-purple-500/20', text: 'text-purple-300' },
+                'confirmed': { label: 'Onaylandı', bg: 'bg-green-500/20', text: 'text-green-300' },
+                'completed': { label: 'Tamamlandı', bg: 'bg-emerald-500/20', text: 'text-emerald-300' },
+                'cancelled': { label: 'İptal Edildi', bg: 'bg-red-500/20', text: 'text-red-300' }
+            };
+            return configs[status] || configs['new'];
+        }
+    </script>
+</body>
+</html>

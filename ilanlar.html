@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vitrin - PlatformAvrupa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }</style>
+</head>
+<body>
+
+    <nav class="bg-[#020617] text-white sticky top-0 z-50 shadow-xl border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 flex items-center justify-between h-20">
+            <a href="index.html" class="flex items-center gap-2 font-extrabold text-2xl">
+                <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center"><i class="fa-solid fa-paper-plane text-sm"></i></div>
+                Platform<span class="text-indigo-500">Avrupa</span>
+            </a>
+            <div class="flex items-center gap-4">
+                <a href="index.html" class="text-slate-400 hover:text-white text-sm font-bold">Ana Sayfa</a>
+                <a href="sohbet.html" class="text-slate-400 hover:text-white text-sm font-bold">Sohbet</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="bg-indigo-900 py-12 px-6 text-center text-white relative overflow-hidden">
+        <div class="relative z-10">
+            <h1 class="text-3xl font-bold mb-2">Avrupa Vitrini</h1>
+            <p class="text-indigo-200">En güncel ilanlar ve fırsatlar.</p>
+        </div>
+        <div class="absolute top-0 left-0 w-64 h-64 bg-indigo-600 rounded-full blur-3xl opacity-20 -translate-x-1/2 -translate-y-1/2"></div>
+        <div class="absolute bottom-0 right-0 w-64 h-64 bg-purple-600 rounded-full blur-3xl opacity-20 translate-x-1/2 translate-y-1/2"></div>
+    </div>
+
+    <main class="max-w-7xl mx-auto px-6 py-12">
+        
+        <div id="loading" class="text-center py-20">
+            <i class="fa-solid fa-circle-notch fa-spin text-4xl text-indigo-600"></i>
+            <p class="text-slate-500 mt-4">İlanlar yükleniyor...</p>
+        </div>
+
+        <div id="ilanGrid" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8 hidden">
+            </div>
+
+    </main>
+
+    <script>
+        const SUPABASE_URL = 'https://vhietrqljahdmloazgpp.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoaWV0cnFsamFoZG1sb2F6Z3BwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTk5MTcsImV4cCI6MjA4MDYzNTkxN30.sxpUrTnR40XuEBPUeQXj352xMziGr_lDqdA8H69ejBA';
+        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        window.onload = async function() {
+            const grid = document.getElementById('ilanGrid');
+            const loading = document.getElementById('loading');
+
+            // İlanları Çek
+            const { data, error } = await sb
+                .from('ilanlar')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            loading.classList.add('hidden');
+            grid.classList.remove('hidden');
+
+            if (!data || data.length === 0) {
+                grid.innerHTML = '<p class="text-center text-slate-500 col-span-full">Henüz hiç ilan yok.</p>';
+                return;
+            }
+
+            // İlanları Listele
+            data.forEach(ilan => {
+                const html = `
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-xl transition group h-full flex flex-col">
+                    <div class="h-48 overflow-hidden relative bg-slate-100">
+                        <img src="${ilan.image || 'https://via.placeholder.com/400x300?text=Resim+Yok'}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <div class="absolute top-3 left-3 bg-white/90 backdrop-blur text-xs font-bold px-2 py-1 rounded-md shadow-sm">
+                            ${ilan.category || 'Genel'}
+                        </div>
+                    </div>
+                    <div class="p-5 flex-1 flex flex-col">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-bold text-slate-900 line-clamp-1">${ilan.title}</h3>
+                            <span class="text-indigo-600 font-bold bg-indigo-50 px-2 py-1 rounded-md text-sm whitespace-nowrap">${ilan.price}</span>
+                        </div>
+                        <p class="text-xs text-slate-500 flex items-center gap-1 mb-4">
+                            <i class="fa-solid fa-location-dot"></i> ${ilan.city}
+                        </p>
+                        <button class="mt-auto w-full py-2 border border-indigo-600 text-indigo-600 font-bold rounded-xl hover:bg-indigo-600 hover:text-white transition text-sm">
+                            İncele
+                        </button>
+                    </div>
+                </div>`;
+                grid.insertAdjacentHTML('beforeend', html);
+            });
+        };
+    </script>
+</body>
+</html>

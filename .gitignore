@@ -1,0 +1,20 @@
+# Ortam ve gizlilik
+.env
+.env.local
+.env.*.local
+
+# IDE / editör
+.cursor/
+.vscode/
+*.swp
+*.swo
+*~
+
+# İşletim sistemi
+.DS_Store
+Thumbs.db
+
+# Geçici / build (bu proje statik, yine de)
+node_modules/
+dist/
+*.log

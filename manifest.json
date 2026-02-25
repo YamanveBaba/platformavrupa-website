@@ -1,0 +1,52 @@
+{
+  "name": "Platform Avrupa | Dijital Yol Arkadaşı",
+  "short_name": "PlatformAvrupa",
+  "description": "Avrupa'daki Türk diasporası için süper uygulama. İş ilanları, emlak, araç, sohbet ve daha fazlası.",
+  "start_url": "index.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#020617",
+  "theme_color": "#3b82f6",
+  "lang": "tr",
+  "categories": ["social", "lifestyle", "business"],
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "İlan Ver",
+      "short_name": "İlan",
+      "description": "Yeni ilan oluştur",
+      "url": "/ilan_giris.html",
+      "icons": [{ "src": "logo.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Sohbet",
+      "short_name": "Sohbet",
+      "description": "Topluluk sohbetine katıl",
+      "url": "/sohbet.html",
+      "icons": [{ "src": "logo.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "İlanlarım",
+      "short_name": "İlanlarım",
+      "description": "Verdiğim ilanları görüntüle",
+      "url": "/ilanlarim.html",
+      "icons": [{ "src": "logo.png", "sizes": "96x96" }]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}

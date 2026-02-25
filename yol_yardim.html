@@ -1,0 +1,1803 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Yol Yardım | PlatformAvrupa</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="auth.js"></script>
+    <script src="utils.js"></script>
+    <script src="genel_veriler.js" onerror="console.error('❌ genel_veriler.js yüklenemedi!')" onload="console.log('✅ genel_veriler.js yüklendi ve çalıştı')"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <style>
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: linear-gradient(180deg, #1e3a5f 0%, #0f172a 100%);
+            min-height: 100vh;
+        }
+        
+        .sos-button {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #ef4444, #dc2626);
+            box-shadow: 0 0 60px rgba(239, 68, 68, 0.5),
+                        0 20px 40px rgba(0, 0, 0, 0.3),
+                        inset 0 -10px 30px rgba(0, 0, 0, 0.2),
+                        inset 0 10px 30px rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            animation: pulse-sos 2s infinite;
+        }
+        
+        .sos-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 80px rgba(239, 68, 68, 0.7),
+                        0 25px 50px rgba(0, 0, 0, 0.4);
+        }
+        
+        .sos-button:active {
+            transform: scale(0.95);
+        }
+        
+        @keyframes pulse-sos {
+            0%, 100% { box-shadow: 0 0 60px rgba(239, 68, 68, 0.5); }
+            50% { box-shadow: 0 0 100px rgba(239, 68, 68, 0.8); }
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        
+        .glass-dark {
+            background: rgba(30, 41, 59, 0.9);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .problem-card {
+            transition: all 0.3s ease;
+        }
+        
+        .problem-card:hover {
+            transform: translateY(-4px);
+        }
+        
+        .problem-card.selected {
+            border-color: #3b82f6 !important;
+            background: rgba(59, 130, 246, 0.1);
+            transform: scale(1.02);
+        }
+        
+        .direction-btn {
+            transition: all 0.3s ease;
+        }
+        
+        .direction-btn.selected {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        .emergency-card {
+            transition: all 0.3s ease;
+        }
+        
+        .emergency-card:hover {
+            transform: translateX(5px);
+        }
+        
+        #map {
+            height: 200px;
+            border-radius: 16px;
+            z-index: 1;
+        }
+        
+        .tab-btn.active {
+            background: white;
+            color: #1e40af;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="pb-24">
+
+    <!-- Header -->
+    <nav class="bg-gradient-to-r from-red-600 to-red-700 sticky top-0 z-50 shadow-2xl">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="index.html" class="flex items-center gap-2 text-white/80 hover:text-white transition font-bold">
+                <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </div>
+            </a>
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center text-white text-xl">
+                    <i class="fa-solid fa-truck-medical"></i>
+                </div>
+                <div>
+                    <h1 class="font-black text-xl text-white tracking-tight">Yol Yardım</h1>
+                    <p class="text-xs text-red-100">Acil Durumlar için</p>
+                </div>
+            </div>
+            <a href="tel:112" 
+               title="Avrupa Acil Hattı (112) - Tüm AB ülkelerinde geçerli" 
+               class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-red-600 shadow-lg hover:scale-110 transition relative group">
+                <i class="fa-solid fa-phone"></i>
+                <span class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none z-50">
+                    112 - Acil Hattı
+                </span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Tab Menü -->
+    <div class="sticky top-16 z-40 bg-gradient-to-r from-red-600 to-red-700 px-4 pb-4">
+        <div class="flex gap-2 max-w-md mx-auto">
+            <button onclick="switchTab('sos')" id="tab-sos" class="tab-btn active flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-white/20 text-white transition">
+                <i class="fa-solid fa-triangle-exclamation mr-1"></i> SOS
+            </button>
+            <button onclick="switchTab('numbers')" id="tab-numbers" class="tab-btn flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-white/20 text-white transition">
+                <i class="fa-solid fa-phone mr-1"></i> Acil Numaralar
+            </button>
+            <button onclick="switchTab('services')" id="tab-services" class="tab-btn flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-white/20 text-white transition">
+                <i class="fa-solid fa-wrench mr-1"></i> Hizmetler
+            </button>
+        </div>
+    </div>
+
+    <!-- SOS Tab -->
+    <section id="section-sos" class="px-4 py-6 max-w-2xl mx-auto">
+        
+        <!-- SOS Butonu -->
+        <div class="text-center mb-8">
+            <button onclick="startSOS()" class="sos-button mx-auto flex flex-col items-center justify-center text-white">
+                <i class="fa-solid fa-triangle-exclamation text-5xl mb-2"></i>
+                <span class="font-black text-2xl">SOS</span>
+                <span class="text-sm opacity-80">Yardım İste</span>
+            </button>
+            <p class="text-white/60 text-sm mt-4">Acil durumda butona basın</p>
+        </div>
+
+        <!-- Konum Kartı -->
+        <div class="glass-card p-6 mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-location-dot text-blue-500"></i> Konumunuz
+                </h3>
+                <button onclick="refreshLocation()" class="text-blue-600 text-sm font-medium hover:text-blue-700">
+                    <i class="fa-solid fa-rotate mr-1"></i> Yenile
+                </button>
+            </div>
+            
+            <div id="map" class="mb-4"></div>
+            
+            <div id="locationInfo" class="bg-slate-50 rounded-xl p-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        <i class="fa-solid fa-spinner fa-spin text-blue-500"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm text-slate-500">Konum tespit ediliyor...</p>
+                        <p id="locationText" class="font-bold text-slate-800"></p>
+                    </div>
+                </div>
+            </div>
+            
+            <input type="hidden" id="currentLat">
+            <input type="hidden" id="currentLng">
+            <input type="hidden" id="currentCountry">
+        </div>
+
+        <!-- Sorun Tipi -->
+        <div class="glass-card p-6 mb-6">
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex-1">
+                    <h3 class="font-bold text-slate-800 mb-1 flex items-center gap-2">
+                        <i class="fa-solid fa-clipboard-list text-orange-500"></i> Ne Oldu?
+                    </h3>
+                    <p class="text-sm text-slate-500">Yaşadığınız sorunu seçin</p>
+                </div>
+                <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center cursor-help" 
+                     title="Yardım çağrınızın daha hızlı ve doğru yönlendirilmesi için sorun tipini seçin">
+                    <i class="fa-solid fa-info text-blue-500 text-xs"></i>
+                </div>
+            </div>
+            
+            <div id="problemTypes" class="grid grid-cols-2 gap-3">
+                <!-- Dinamik olarak doldurulacak -->
+            </div>
+            
+            <input type="hidden" id="selectedProblem">
+        </div>
+
+        <!-- Yön Seçimi -->
+        <div class="glass-card p-6 mb-6">
+            <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-compass text-purple-500"></i> Hangi Yöne Gidiyorsunuz?
+            </h3>
+            
+            <div class="grid grid-cols-3 gap-3">
+                <button onclick="selectDirection('turkiye')" class="direction-btn bg-white border-2 border-slate-200 rounded-xl p-4 text-center" data-direction="turkiye">
+                    <div class="text-3xl mb-2">🇹🇷</div>
+                    <span class="font-bold text-slate-700 text-sm">Türkiye Yönü</span>
+                </button>
+                <button onclick="selectDirection('avrupa')" class="direction-btn bg-white border-2 border-slate-200 rounded-xl p-4 text-center" data-direction="avrupa">
+                    <div class="text-3xl mb-2">🇪🇺</div>
+                    <span class="font-bold text-slate-700 text-sm">Avrupa Yönü</span>
+                </button>
+                <button onclick="selectDirection('bilinmiyor')" class="direction-btn bg-white border-2 border-slate-200 rounded-xl p-4 text-center selected" data-direction="bilinmiyor">
+                    <div class="text-3xl mb-2">❓</div>
+                    <span class="font-bold text-slate-700 text-sm">Bilmiyorum</span>
+                </button>
+            </div>
+            
+            <input type="hidden" id="selectedDirection" value="bilinmiyor">
+        </div>
+
+        <!-- Ek Bilgiler -->
+        <div class="glass-card p-6 mb-6">
+            <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-message text-emerald-500"></i> Ek Bilgiler (Opsiyonel)
+            </h3>
+            
+            <textarea id="sosDescription" rows="3" placeholder="Durumu kısaca açıklayabilirsiniz..." 
+                class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl p-4 text-slate-800 resize-none focus:border-blue-500 focus:outline-none"></textarea>
+            
+            <!-- Fotoğraf Ekleme -->
+            <div class="mt-4">
+                <label class="block text-sm text-slate-600 mb-2">Fotoğraf Ekle</label>
+                <div id="photoUpload" class="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center cursor-pointer hover:border-blue-400 transition" onclick="document.getElementById('photoInput').click()">
+                    <input type="file" id="photoInput" accept="image/*" capture="environment" class="hidden" onchange="handlePhotoSelect(event)">
+                    <div id="photoPlaceholder">
+                        <i class="fa-solid fa-camera text-3xl text-slate-400 mb-2"></i>
+                        <p class="text-sm text-slate-500">Fotoğraf eklemek için tıklayın</p>
+                    </div>
+                    <div id="photoPreview" class="hidden">
+                        <img id="previewImage" class="w-full max-h-40 object-contain rounded-lg">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Telefon Numarası -->
+        <div class="glass-card p-6 mb-6">
+            <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-phone text-green-500"></i> İletişim Numaranız
+            </h3>
+            
+            <div id="phoneSection">
+                <div id="existingPhone" class="hidden">
+                    <div class="bg-green-50 border-2 border-green-200 rounded-xl p-4 mb-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <i class="fa-solid fa-check-circle text-green-500 text-xl"></i>
+                                <div>
+                                    <p class="text-sm text-green-600">Kayıtlı Numara</p>
+                                    <p id="userPhone" class="font-bold text-green-800"></p>
+                                </div>
+                            </div>
+                            <button onclick="changePhone()" class="text-sm text-green-600 hover:text-green-700">Değiştir</button>
+                        </div>
+                    </div>
+                    <label class="flex items-center gap-2 text-sm text-slate-600">
+                        <input type="checkbox" id="confirmPhone" checked class="w-4 h-4 text-green-600">
+                        <span>Bu numarayı hala kullanıyorum</span>
+                    </label>
+                </div>
+                
+                <div id="newPhoneInput">
+                    <div class="flex gap-2">
+                        <select id="phoneCode" class="bg-slate-50 border-2 border-slate-200 rounded-xl px-3 py-3 text-slate-800 font-bold w-28">
+                            <!-- Dinamik olarak doldurulacak -->
+                        </select>
+                        <input type="tel" id="phoneNumber" placeholder="Telefon numarası" 
+                            class="flex-1 bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3 text-slate-800 focus:border-blue-500 focus:outline-none">
+                    </div>
+                    <p class="text-xs text-slate-500 mt-2">
+                        <i class="fa-solid fa-info-circle mr-1"></i>
+                        Yardım edecek kişiler bu numaradan ulaşacak
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gönder Butonu -->
+        <button onclick="submitSOS()" id="submitBtn" class="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-4 rounded-2xl font-bold text-lg shadow-xl shadow-red-500/30 transition flex items-center justify-center gap-2" disabled>
+            <i class="fa-solid fa-paper-plane"></i>
+            <span>Yardım Çağrısı Gönder</span>
+        </button>
+        
+        <p class="text-center text-white/60 text-sm mt-4">
+            <i class="fa-solid fa-users mr-1"></i>
+            30 km içindeki kullanıcılara ve admin'e bildirilecek
+        </p>
+    </section>
+
+    <!-- Acil Numaralar Tab -->
+    <section id="section-numbers" class="hidden px-4 py-6 max-w-2xl mx-auto">
+        
+        <!-- Ülke Seçimi -->
+        <div class="glass-card p-6 mb-6">
+            <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-globe text-blue-500"></i> Bulunduğunuz Ülke
+            </h3>
+            
+            <select id="emergencyCountry" onchange="loadEmergencyNumbers()" class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3 text-slate-800 font-bold focus:border-blue-500 focus:outline-none">
+                <!-- Dinamik olarak doldurulacak -->
+            </select>
+            
+            <div class="flex gap-2 mt-3">
+                <button onclick="detectCountryForNumbers()" class="flex-1 bg-blue-50 text-blue-600 py-2 rounded-xl font-medium text-sm hover:bg-blue-100 transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-location-crosshairs"></i> Konumdan Tespit Et
+                </button>
+                <button onclick="document.getElementById('emergencyCountry').focus()" class="bg-slate-50 text-slate-600 py-2 px-4 rounded-xl font-medium text-sm hover:bg-slate-100 transition" title="Manuel seçim için tıklayın">
+                    <i class="fa-solid fa-hand-pointer"></i>
+                </button>
+            </div>
+            <p class="text-xs text-slate-500 mt-2">
+                <i class="fa-solid fa-info-circle mr-1"></i>
+                Konum tespit edilemezse yukarıdaki listeden ülkenizi seçebilirsiniz.
+            </p>
+        </div>
+
+        <!-- Genel Acil -->
+        <div id="generalEmergency" class="glass-card p-6 mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-phone-volume text-red-500"></i> Genel Acil
+                </h3>
+                <span class="text-xs bg-red-100 text-red-600 px-3 py-1 rounded-full font-bold">7/24</span>
+            </div>
+            
+            <a href="tel:112" class="flex items-center justify-between bg-red-50 border-2 border-red-200 rounded-xl p-4 hover:bg-red-100 transition">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 bg-red-500 rounded-full flex items-center justify-center text-white text-2xl font-black">
+                        112
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-red-800">Avrupa Acil Hattı</h4>
+                        <p class="text-sm text-red-600">Tüm AB ülkelerinde geçerli</p>
+                    </div>
+                </div>
+                <i class="fa-solid fa-phone text-red-500 text-xl"></i>
+            </a>
+        </div>
+
+        <!-- Ülkeye Özel Numaralar -->
+        <div id="countryNumbers" class="space-y-4">
+            <!-- Dinamik olarak doldurulacak -->
+        </div>
+
+        <!-- Özel Notlar -->
+        <div id="countryNotes" class="glass-card p-6 mt-6 hidden">
+            <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-lightbulb text-amber-500"></i> Önemli Bilgiler
+            </h3>
+            <p id="notesText" class="text-slate-600 text-sm"></p>
+        </div>
+    </section>
+
+    <!-- Hizmetler Tab -->
+    <section id="section-services" class="hidden px-4 py-6 max-w-2xl mx-auto">
+        
+        <div class="glass-card p-6 mb-6">
+            <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-map-marker-alt text-purple-500"></i> Yakınımdaki Hizmetler
+            </h3>
+            
+            <button onclick="findNearbyServices()" class="w-full bg-purple-50 text-purple-600 py-3 rounded-xl font-bold hover:bg-purple-100 transition">
+                <i class="fa-solid fa-search-location mr-2"></i> Yakındaki Çekici/Tamircileri Bul
+            </button>
+        </div>
+
+        <!-- Hizmet Listesi -->
+        <div id="servicesList" class="space-y-4">
+            <div class="text-center py-8 text-white/60">
+                <i class="fa-solid fa-wrench text-4xl mb-3"></i>
+                <p>Konumunuzu paylaşarak yakındaki hizmetleri bulabilirsiniz</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-200 z-50 px-4 py-2 safe-area-inset-bottom">
+        <div class="max-w-lg mx-auto flex justify-center items-center py-3">
+            <a href="index.html" class="flex items-center gap-2 text-slate-600 hover:text-slate-800 transition font-medium">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span class="text-sm">Ana Sayfaya Dön</span>
+            </a>
+        </div>
+    </nav>
+
+    <script>
+        // --- GLOBAL DEĞİŞKENLER ---
+        let map;
+        let marker;
+        let currentLocation = { lat: null, lng: null, country: null, address: '' };
+        let selectedProblem = null;
+        let selectedDirection = 'bilinmiyor';
+        let photoFile = null;
+
+        // --- SAYFA YÜKLENDİĞİNDE ---
+        function initializePage() {
+            // Global scope kontrolü - tüm gerekli değişkenleri kontrol et
+            const requiredVars = ['sorunTipleri', 'lokasyonVeritabani', 'acilNumaralar'];
+            const missing = requiredVars.filter(v => typeof window[v] === 'undefined');
+            
+            if (missing.length > 0) {
+                console.warn('⚠️ Eksik değişkenler:', missing);
+                console.log('Mevcut global değişkenler:', Object.keys(window).filter(k => 
+                    k.includes('sorun') || k.includes('lokasyon') || k.includes('acil') || k.includes('bildirim')
+                ));
+                console.log('Script yükleme durumu:', {
+                    'genel_veriler.js': typeof sorunTipleri !== 'undefined' ? '✅ Yüklendi' : '❌ Yüklenmedi',
+                    'window.sorunTipleri': typeof window.sorunTipleri,
+                    'window.lokasyonVeritabani': typeof window.lokasyonVeritabani,
+                    'window.acilNumaralar': typeof window.acilNumaralar
+                });
+                
+                // Retry mekanizması - daha uzun bekleme (1 saniye), daha fazla deneme (10)
+                let retryCount = 0;
+                const maxRetries = 10;
+                const checkInterval = setInterval(() => {
+                    retryCount++;
+                    const stillMissing = requiredVars.filter(v => typeof window[v] === 'undefined');
+                    
+                    if (stillMissing.length === 0) {
+                        clearInterval(checkInterval);
+                        console.log('✅ genel_veriler.js yüklendi, sayfa başlatılıyor...');
+                        initializePage();
+                    } else if (retryCount >= maxRetries) {
+                        clearInterval(checkInterval);
+                        console.error('❌ genel_veriler.js yüklenemedi!', {
+                            deneme: retryCount,
+                            eksik: stillMissing
+                        });
+                        const locationInfo = document.getElementById('locationInfo');
+                        if (locationInfo) {
+                            locationInfo.innerHTML = `
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                                        <i class="fa-solid fa-exclamation-triangle text-red-500"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-red-600 font-medium">Script yükleme hatası</p>
+                                        <p class="text-xs text-slate-500">genel_veriler.js dosyası yüklenemedi</p>
+                                        <p class="text-xs text-slate-400 mt-1">Eksik: ${stillMissing.join(', ')}</p>
+                                        <button onclick="window.location.reload()" class="text-blue-600 text-sm font-medium mt-1 hover:underline">
+                                            <i class="fa-solid fa-rotate mr-1"></i>Sayfayı Yenile
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    } else {
+                        console.log(`⏳ Bekleniyor... (${retryCount}/${maxRetries})`);
+                    }
+                }, 1000); // 1 saniye bekle
+                return;
+            }
+            
+            console.log('✅ Tüm scriptler yüklendi:', requiredVars.map(v => `${v}: ${typeof window[v]}`));
+            
+            renderProblemTypes();
+            populatePhoneCodes();
+            populateCountrySelect();
+            initMap();
+            detectLocation();
+            checkUserPhone();
+            validateForm();
+        }
+        
+        // Script yükleme kontrolü ile başlat (en güvenli yöntem)
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializePage);
+        } else {
+            // DOMContentLoaded zaten geçti, direkt çalıştır
+            initializePage();
+        }
+
+        // --- TAB SİSTEMİ ---
+        function switchTab(tabName) {
+            // Tüm sekmeleri gizle
+            document.querySelectorAll('[id^="section-"]').forEach(s => s.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            
+            // Seçili sekmeyi göster
+            document.getElementById('section-' + tabName).classList.remove('hidden');
+            document.getElementById('tab-' + tabName).classList.add('active');
+        }
+
+        // --- HARİTA ---
+        function initMap() {
+            map = L.map('map').setView([48.8566, 9.3522], 5); // Avrupa merkezi
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
+        }
+
+        function updateMapMarker(lat, lng) {
+            if (marker) {
+                marker.setLatLng([lat, lng]);
+            } else {
+                marker = L.marker([lat, lng], {
+                    icon: L.divIcon({
+                        className: 'custom-marker',
+                        html: '<div style="background: #ef4444; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 10px rgba(0,0,0,0.3);"></div>',
+                        iconSize: [20, 20],
+                        iconAnchor: [10, 10]
+                    })
+                }).addTo(map);
+            }
+            map.setView([lat, lng], 13);
+        }
+
+        // --- KONUM TESPİTİ ---
+        async function detectLocation() {
+            // file:// protokolü kontrolü - Geolocation API çalışmaz
+            if (window.location.protocol === 'file:') {
+                console.warn('⚠️ file:// protokolü: GPS çalışmaz, manuel seçime yönlendiriliyor');
+                showLocationError('Dosya doğrudan açıldığı için GPS kullanılamıyor. Lütfen manuel olarak konum seçin.', true);
+                // Otomatik olarak manuel seçim modalını aç
+                setTimeout(() => {
+                    showManualLocationSelect();
+                }, 1000);
+                return;
+            }
+            
+            // HTTPS kontrolü (mobilde daha sıkı)
+            const isSecure = window.location.protocol === 'https:' || 
+                           window.location.hostname === 'localhost' || 
+                           window.location.hostname === '127.0.0.1' ||
+                           window.location.hostname === '';
+            
+            // Mobil tarayıcı tespiti
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+            
+            if (!isSecure && isMobile) {
+                console.warn('⚠️ HTTPS olmayan bağlantı (mobil): Konum özelliği çalışmayabilir');
+                // Mobilde HTTPS zorunluluğu daha sıkı, kullanıcıyı bilgilendir
+                if (isIOS) {
+                    showLocationError('iOS Safari\'de konum özelliği için HTTPS gerekli. Lütfen HTTPS üzerinden erişin veya manuel olarak ülke seçin.', true);
+                    return;
+                }
+            } else if (!isSecure) {
+                console.warn('⚠️ HTTPS olmayan bağlantı: Konum özelliği çalışmayabilir');
+                // Devam et, tarayıcı izin verirse çalışabilir
+            }
+            
+            if (!navigator.geolocation) {
+                showLocationError('Tarayıcınız konum desteği sunmuyor. Lütfen manuel olarak ülke seçin.', true);
+                return;
+            }
+            
+            // İzin durumunu kontrol et (mobil uyumlu)
+            try {
+                if (navigator.permissions && navigator.permissions.query) {
+                    const permission = await navigator.permissions.query({name: 'geolocation'});
+                    console.log('📍 İzin durumu:', permission.state);
+                    
+                    if (permission.state === 'denied') {
+                        showLocationError('Konum izni reddedilmiş. Lütfen tarayıcı ayarlarından izin verin veya manuel olarak ülke seçin.', true);
+                        // Otomatik manuel seçim öner
+                        setTimeout(() => {
+                            Swal.fire({
+                                icon: 'info',
+                                title: 'Manuel Konum Seçimi',
+                                text: 'Konum izni verilmedi. Manuel olarak ülke seçmek ister misiniz?',
+                                showCancelButton: true,
+                                confirmButtonText: 'Evet, Manuel Seç',
+                                cancelButtonText: 'Hayır',
+                                confirmButtonColor: '#10b981'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    showManualLocationSelect();
+                                }
+                            });
+                        }, 2000);
+                        return;
+                    }
+                    
+                    // İzin durumu değişikliklerini dinle (mobilde önemli)
+                    permission.onchange = () => {
+                        console.log('📍 İzin durumu değişti:', permission.state);
+                        if (permission.state === 'granted') {
+                            // İzin verildi, tekrar dene
+                            detectLocation();
+                        }
+                    };
+                    
+                    // 'prompt' durumunda izin isteyecek, 'granted' durumunda direkt çalışacak
+                } else {
+                    // Permissions API desteklenmiyorsa devam et (iOS Safari, eski tarayıcılar)
+                    console.log('ℹ️ Permissions API desteklenmiyor, direkt izin istenecek');
+                }
+            } catch (e) {
+                // Permissions API desteklenmiyorsa devam et (Chrome dışı tarayıcılar, iOS Safari)
+                console.log('ℹ️ Permissions API hatası, direkt izin istenecek:', e);
+            }
+            
+            // Loading göster
+            document.getElementById('locationInfo').innerHTML = `
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        <i class="fa-solid fa-spinner fa-spin text-blue-500"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm text-slate-500">Konum tespit ediliyor...</p>
+                        <p class="text-xs text-slate-400">Tarayıcı izin isteyebilir</p>
+                    </div>
+                </div>
+            `;
+            
+            console.log('📍 Konum tespiti başlatılıyor...');
+            
+            const options = {
+                enableHighAccuracy: false, // Mobilde daha hızlı (false = daha hızlı, true = daha doğru ama yavaş)
+                timeout: 20000, // 20 saniye timeout (mobilde daha uzun sürebilir)
+                maximumAge: 60000 // 1 dakika cache (daha önce alınan konumu kullan)
+            };
+            
+            console.log('📍 getCurrentPosition çağrılıyor, options:', options);
+            
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    console.log('✅ Konum başarıyla alındı:', position.coords);
+                    const { latitude, longitude } = position.coords;
+                    
+                    currentLocation.lat = latitude;
+                    currentLocation.lng = longitude;
+                    
+                    document.getElementById('currentLat').value = latitude;
+                    document.getElementById('currentLng').value = longitude;
+                    
+                    updateMapMarker(latitude, longitude);
+                    
+                    // Reverse geocoding
+                    try {
+                        const response = await fetch(
+                            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=tr`,
+                            { headers: { 'User-Agent': 'PlatformAvrupa/1.0' } }
+                        );
+                        const data = await response.json();
+                        
+                        const countryCode = data.address?.country_code?.toUpperCase();
+                        const city = data.address?.city || data.address?.town || data.address?.village || '';
+                        const road = data.address?.road || '';
+                        
+                        currentLocation.country = countryCode;
+                        currentLocation.address = `${road}, ${city}`;
+                        
+                        document.getElementById('currentCountry').value = countryCode;
+                        
+                        const countryData = lokasyonVeritabani[countryCode];
+                        const locationHtml = `
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                    <i class="fa-solid fa-check text-green-500"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-slate-500">Tespit Edildi</p>
+                                    <p class="font-bold text-slate-800">${road ? road + ', ' : ''}${city}</p>
+                                    <p class="text-xs text-slate-500">${countryData?.bayrak || ''} ${countryData?.isim || countryCode}</p>
+                                </div>
+                            </div>
+                        `;
+                        document.getElementById('locationInfo').innerHTML = locationHtml;
+                        
+                        // Acil numaralar için ülkeyi otomatik seç
+                        if (document.getElementById('emergencyCountry')) {
+                            document.getElementById('emergencyCountry').value = countryCode;
+                            loadEmergencyNumbers();
+                        }
+                        
+                    } catch (err) {
+                        console.error('Geocoding hatası:', err);
+                        document.getElementById('locationInfo').innerHTML = `
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <i class="fa-solid fa-map-pin text-blue-500"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-slate-500">Koordinatlar</p>
+                                    <p class="font-bold text-slate-800">${latitude.toFixed(5)}, ${longitude.toFixed(5)}</p>
+                                    <p class="text-xs text-slate-400">Adres bilgisi alınamadı</p>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    validateForm();
+                },
+                (error) => {
+                    let errorMessage = 'Konum tespit edilemedi.';
+                    let showManualOption = true;
+                    
+                    console.error('📍 Geolocation hatası:', {
+                        code: error.code,
+                        message: error.message,
+                        PERMISSION_DENIED: error.PERMISSION_DENIED,
+                        POSITION_UNAVAILABLE: error.POSITION_UNAVAILABLE,
+                        TIMEOUT: error.TIMEOUT
+                    });
+                    
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage = 'Konum izni reddedildi. Lütfen tarayıcı ayarlarından izin verin veya manuel olarak ülke seçin.';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage = 'Konum bilgisi alınamadı. GPS veya internet bağlantınızı kontrol edin.';
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage = 'Konum tespiti zaman aşımına uğradı (20 saniye). Lütfen tekrar deneyin veya manuel olarak ülke seçin.';
+                            break;
+                        default:
+                            errorMessage = `Bilinmeyen bir hata oluştu (Kod: ${error.code}).`;
+                            break;
+                    }
+                    
+                    showLocationError(errorMessage, showManualOption);
+                    
+                    // Mobilde veya izin reddedildiğinde otomatik manuel seçim öner
+                    if (error.code === error.PERMISSION_DENIED || error.code === error.TIMEOUT) {
+                        // 3 saniye sonra otomatik olarak manuel seçim modalını aç
+                        setTimeout(() => {
+                            // Kullanıcıya sor
+                            Swal.fire({
+                                icon: 'info',
+                                title: 'Manuel Konum Seçimi',
+                                text: 'Konum otomatik tespit edilemedi. Manuel olarak ülke seçmek ister misiniz?',
+                                showCancelButton: true,
+                                confirmButtonText: 'Evet, Manuel Seç',
+                                cancelButtonText: 'Hayır',
+                                confirmButtonColor: '#10b981'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    showManualLocationSelect();
+                                }
+                            });
+                        }, 3000);
+                    }
+                },
+                options
+            );
+        }
+
+        function refreshLocation() {
+            document.getElementById('locationInfo').innerHTML = `
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        <i class="fa-solid fa-spinner fa-spin text-blue-500"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm text-slate-500">Konum tespit ediliyor...</p>
+                    </div>
+                </div>
+            `;
+            detectLocation();
+        }
+
+        function showLocationError(message, showManualOption = false) {
+            let buttonsHtml = `
+                <button onclick="detectLocation()" class="text-blue-600 text-sm font-medium mt-2 mr-3 hover:text-blue-700">
+                    <i class="fa-solid fa-rotate mr-1"></i>Tekrar Dene
+                </button>
+            `;
+            
+            if (showManualOption) {
+                buttonsHtml += `
+                    <button onclick="showManualLocationSelect()" class="text-green-600 text-sm font-medium mt-2 hover:text-green-700">
+                        <i class="fa-solid fa-map-location-dot mr-1"></i>Manuel Seç
+                    </button>
+                `;
+            }
+            
+            document.getElementById('locationInfo').innerHTML = `
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-exclamation-triangle text-red-500"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm text-red-600 font-medium mb-2">${message}</p>
+                        <div class="flex flex-wrap gap-2">
+                            ${buttonsHtml}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Manuel konum seçimi
+        function showManualLocationSelect() {
+            Swal.fire({
+                title: 'Manuel Konum Seçimi',
+                html: `
+                    <div class="text-left space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Ülke Seçin*</label>
+                            <select id="manualCountry" class="w-full border rounded-lg px-3 py-2">
+                                <option value="">Ülke Seçin</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Şehir (Opsiyonel)</label>
+                            <select id="manualCity" class="w-full border rounded-lg px-3 py-2">
+                                <option value="">Önce ülke seçin</option>
+                            </select>
+                        </div>
+                        <p class="text-xs text-slate-500">
+                            <i class="fa-solid fa-info-circle mr-1"></i>
+                            Manuel seçimde mesafe hesaplamaları yapılamaz, ancak acil numaralar gösterilebilir.
+                        </p>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Seç',
+                cancelButtonText: 'İptal',
+                preConfirm: () => {
+                    const country = document.getElementById('manualCountry').value;
+                    if (!country) {
+                        Swal.showValidationMessage('Lütfen bir ülke seçin');
+                        return false;
+                    }
+                    return {
+                        country: country,
+                        city: document.getElementById('manualCity').value
+                    };
+                },
+                didOpen: () => {
+                    // Ülke dropdown'ını doldur
+                    const select = document.getElementById('manualCountry');
+                    const countries = Object.entries(lokasyonVeritabani).map(([code, data]) => ({
+                        code,
+                        name: data.isim,
+                        flag: data.bayrak
+                    })).sort((a, b) => a.name.localeCompare(b.name, 'tr'));
+                    
+                    countries.forEach(country => {
+                        const option = document.createElement('option');
+                        option.value = country.code;
+                        option.textContent = `${country.flag} ${country.name}`;
+                        select.appendChild(option);
+                    });
+                    
+                    // Ülke değiştiğinde şehirleri doldur
+                    select.addEventListener('change', function() {
+                        const citySelect = document.getElementById('manualCity');
+                        citySelect.innerHTML = '<option value="">Şehir Seçin (Opsiyonel)</option>';
+                        const code = this.value;
+                        if (code && lokasyonVeritabani[code]) {
+                            lokasyonVeritabani[code].sehirler.forEach(city => {
+                                const option = document.createElement('option');
+                                option.value = city;
+                                option.textContent = city;
+                                citySelect.appendChild(option);
+                            });
+                        }
+                    });
+                }
+            }).then((result) => {
+                if (result.isConfirmed && result.value) {
+                    const { country, city } = result.value;
+                    const countryData = lokasyonVeritabani[country];
+                    
+                    // Ülke merkez koordinatlarını kullan (yaklaşık)
+                    const countryCenters = {
+                        'DE': [51.1657, 10.4515], 'FR': [46.2276, 2.2137], 'IT': [41.8719, 12.5674],
+                        'ES': [40.4637, -3.7492], 'NL': [52.1326, 5.2913], 'BE': [50.5039, 4.4699],
+                        'AT': [47.5162, 14.5501], 'CH': [46.8182, 8.2275], 'SE': [60.1282, 18.6435],
+                        'NO': [60.4720, 8.4689], 'DK': [56.2639, 9.5018], 'FI': [61.9241, 25.7482],
+                        'PL': [51.9194, 19.1451], 'CZ': [49.8175, 15.4730], 'HU': [47.1625, 19.5033],
+                        'GR': [39.0742, 21.8243], 'PT': [39.3999, -8.2245], 'IE': [53.4129, -8.2439],
+                        'LU': [49.8153, 6.1296], 'IS': [64.9631, -19.0208], 'MT': [35.9375, 14.3754],
+                        'CY': [35.1264, 33.4299], 'BG': [42.7339, 25.4858], 'RO': [45.9432, 24.9668],
+                        'HR': [45.1000, 15.2000], 'SK': [48.6690, 19.6990], 'SI': [46.1512, 14.9955],
+                        'EE': [58.5953, 25.0136], 'LV': [56.8796, 24.6032], 'LT': [55.1694, 23.8813]
+                    };
+                    
+                    const coords = countryCenters[country] || [50.0, 10.0];
+                    currentLocation.lat = coords[0];
+                    currentLocation.lng = coords[1];
+                    currentLocation.country = country;
+                    currentLocation.address = city ? `${city}, ${countryData.isim}` : countryData.isim;
+                    
+                    document.getElementById('currentLat').value = coords[0];
+                    document.getElementById('currentLng').value = coords[1];
+                    document.getElementById('currentCountry').value = country;
+                    
+                    updateMapMarker(coords[0], coords[1]);
+                    
+                    document.getElementById('locationInfo').innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+                                <i class="fa-solid fa-map-pin text-yellow-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-slate-500">Manuel Seçildi</p>
+                                <p class="font-bold text-slate-800">${city || ''} ${city ? ', ' : ''}${countryData.isim}</p>
+                                <p class="text-xs text-slate-400">Yaklaşık konum (mesafe hesaplanamaz)</p>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Acil numaralar için ülkeyi seç
+                    if (document.getElementById('emergencyCountry')) {
+                        document.getElementById('emergencyCountry').value = country;
+                        loadEmergencyNumbers();
+                    }
+                    
+                    validateForm();
+                }
+            });
+        }
+
+        // --- SORUN TİPLERİ ---
+        function renderProblemTypes() {
+            const container = document.getElementById('problemTypes');
+            if (!container) {
+                console.warn('⚠️ problemTypes container bulunamadı');
+                return;
+            }
+            
+            // sorunTipleri tanımlı mı kontrol et
+            if (typeof sorunTipleri === 'undefined' || !sorunTipleri || !Array.isArray(sorunTipleri)) {
+                console.error('❌ sorunTipleri tanımlı değil! genel_veriler.js yüklendi mi kontrol edin.');
+                console.log('Mevcut global değişkenler:', {
+                    sorunTipleri: typeof sorunTipleri,
+                    lokasyonVeritabani: typeof lokasyonVeritabani,
+                    acilNumaralar: typeof acilNumaralar
+                });
+                container.innerHTML = `
+                    <div class="col-span-2 p-4 bg-red-50 border-2 border-red-200 rounded-xl">
+                        <p class="text-red-600 text-sm font-medium mb-2">
+                            <i class="fa-solid fa-exclamation-triangle mr-1"></i>
+                            Sorun tipleri yüklenemedi
+                        </p>
+                        <button onclick="window.location.reload()" class="text-blue-600 text-xs hover:underline">
+                            <i class="fa-solid fa-rotate mr-1"></i>Sayfayı Yenile
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            console.log('✅ sorunTipleri yüklendi, render ediliyor...', sorunTipleri.length, 'tip');
+            container.innerHTML = '';
+            
+            sorunTipleri.forEach(problem => {
+                const card = document.createElement('button');
+                card.type = 'button';
+                card.className = 'problem-card bg-white border-2 border-slate-200 rounded-xl p-4 text-left hover:border-blue-300 transition';
+                card.onclick = () => selectProblem(problem.id, card);
+                card.title = problem.isim + ' - Yardım çağrınız için bu sorun tipini seçin';
+                
+                card.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-${problem.renk}-100 rounded-full flex items-center justify-center">
+                            <i class="fa-solid ${problem.ikon} text-${problem.renk}-500"></i>
+                        </div>
+                        <span class="font-bold text-slate-700 text-sm">${problem.isim}</span>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        function selectProblem(problemId, element) {
+            document.querySelectorAll('.problem-card').forEach(c => c.classList.remove('selected'));
+            element.classList.add('selected');
+            selectedProblem = problemId;
+            document.getElementById('selectedProblem').value = problemId;
+            validateForm();
+        }
+
+        // --- YÖN SEÇİMİ ---
+        function selectDirection(direction) {
+            document.querySelectorAll('.direction-btn').forEach(b => b.classList.remove('selected'));
+            document.querySelector(`[data-direction="${direction}"]`).classList.add('selected');
+            selectedDirection = direction;
+            document.getElementById('selectedDirection').value = direction;
+        }
+
+        // --- TELEFON ---
+        function populatePhoneCodes() {
+            const select = document.getElementById('phoneCode');
+            if (!select) return;
+            
+            select.innerHTML = '';
+            
+            // Ülke kodlarını alfabetik sırala
+            const countries = Object.entries(lokasyonVeritabani).map(([code, data]) => ({
+                code,
+                name: data.isim,
+                flag: data.bayrak,
+                tel: data.tel
+            })).sort((a, b) => a.name.localeCompare(b.name, 'tr'));
+            
+            countries.forEach(country => {
+                const option = document.createElement('option');
+                option.value = country.tel;
+                option.textContent = `${country.flag} ${country.tel} ${country.name}`;
+                select.appendChild(option);
+            });
+            
+            // Varsayılan: Almanya
+            select.value = '+49';
+        }
+
+        function checkUserPhone() {
+            if (currentProfile && currentProfile.phone) {
+                document.getElementById('existingPhone').classList.remove('hidden');
+                document.getElementById('newPhoneInput').classList.add('hidden');
+                document.getElementById('userPhone').textContent = currentProfile.phone;
+            }
+        }
+
+        function changePhone() {
+            document.getElementById('existingPhone').classList.add('hidden');
+            document.getElementById('newPhoneInput').classList.remove('hidden');
+        }
+
+        // --- FOTOĞRAF ---
+        function handlePhotoSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            if (file.size > 5 * 1024 * 1024) {
+                Swal.fire('Hata', 'Fotoğraf 5MB\'dan küçük olmalı.', 'error');
+                return;
+            }
+            
+            photoFile = file;
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('previewImage').src = e.target.result;
+                document.getElementById('photoPlaceholder').classList.add('hidden');
+                document.getElementById('photoPreview').classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // --- ÜLKE SEÇİMİ (ACİL NUMARALAR) ---
+        function populateCountrySelect() {
+            const select = document.getElementById('emergencyCountry');
+            if (!select) return;
+            
+            select.innerHTML = '<option value="">Ülke Seçin</option>';
+            
+            Object.entries(acilNumaralar).forEach(([code, data]) => {
+                const countryData = lokasyonVeritabani[code];
+                const option = document.createElement('option');
+                option.value = code;
+                option.textContent = `${countryData?.bayrak || ''} ${data.ulke}`;
+                select.appendChild(option);
+            });
+        }
+
+        function detectCountryForNumbers() {
+            if (currentLocation.country) {
+                document.getElementById('emergencyCountry').value = currentLocation.country;
+                loadEmergencyNumbers();
+            } else {
+                // Konum yoksa önce konum iste
+                Swal.fire({
+                    title: 'Konum Tespiti',
+                    text: 'Ülkenizi otomatik tespit etmek için konum iznine ihtiyacımız var.',
+                    icon: 'info',
+                    showCancelButton: true,
+                    confirmButtonText: 'Konumu Bul',
+                    cancelButtonText: 'Manuel Seç',
+                    reverseButtons: true
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        detectLocation();
+                        // Konum alındıktan sonra otomatik seç
+                        setTimeout(() => {
+                            if (currentLocation.country && document.getElementById('emergencyCountry')) {
+                                document.getElementById('emergencyCountry').value = currentLocation.country;
+                                loadEmergencyNumbers();
+                            }
+                        }, 3000);
+                    } else if (result.dismiss === Swal.DismissReason.cancel) {
+                        // Manuel seçim için dropdown'ı göster
+                        document.getElementById('emergencyCountry').focus();
+                        Swal.fire({
+                            title: 'Ülke Seçin',
+                            text: 'Lütfen yukarıdaki dropdown\'dan ülkenizi seçin.',
+                            icon: 'info',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                    }
+                });
+            }
+        }
+
+        function loadEmergencyNumbers() {
+            const countryCode = document.getElementById('emergencyCountry').value;
+            const container = document.getElementById('countryNumbers');
+            const notesDiv = document.getElementById('countryNotes');
+            
+            if (!countryCode || !acilNumaralar[countryCode]) {
+                container.innerHTML = '<p class="text-center text-white/60 py-4">Ülke seçin</p>';
+                notesDiv.classList.add('hidden');
+                return;
+            }
+            
+            const data = acilNumaralar[countryCode];
+            const countryData = lokasyonVeritabani[countryCode];
+            
+            let html = '';
+            
+            // Polis
+            html += createEmergencyCard('Polis', data.polis, 'fa-user-shield', 'blue', 'Acil güvenlik');
+            
+            // Ambulans
+            html += createEmergencyCard('Ambulans', data.ambulans, 'fa-ambulance', 'red', 'Sağlık acil');
+            
+            // İtfaiye
+            html += createEmergencyCard('İtfaiye', data.yangin, 'fa-fire-extinguisher', 'orange', 'Yangın ihbar');
+            
+            // Yol Yardım
+            if (data.yolYardim && data.yolYardim.length > 0) {
+                html += '<h4 class="text-white font-bold mt-6 mb-3"><i class="fa-solid fa-car-burst mr-2"></i>Yol Yardım</h4>';
+                data.yolYardim.forEach(service => {
+                    html += createServiceCard(service.isim, service.tel, service.aciklama, service.turkce);
+                });
+            }
+            
+            // Konsolosluk
+            if (data.konsolosluk && data.konsolosluk.length > 0) {
+                html += '<h4 class="text-white font-bold mt-6 mb-3"><i class="fa-solid fa-building-flag mr-2"></i>Türk Temsilcilikleri</h4>';
+                data.konsolosluk.forEach(embassy => {
+                    html += createEmbassyCard(embassy.isim, embassy.tel, embassy.adres);
+                });
+            }
+            
+            container.innerHTML = html;
+            
+            // Özel notlar
+            if (data.ozelNotlar) {
+                document.getElementById('notesText').textContent = data.ozelNotlar;
+                notesDiv.classList.remove('hidden');
+            } else {
+                notesDiv.classList.add('hidden');
+            }
+        }
+
+        function createEmergencyCard(title, number, icon, color, subtitle) {
+            return `
+                <a href="tel:${number}" class="glass-card p-4 mb-3 block emergency-card">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-${color}-100 rounded-full flex items-center justify-center">
+                                <i class="fa-solid ${icon} text-${color}-500 text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-800">${title}</h4>
+                                <p class="text-sm text-slate-500">${subtitle}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-2xl font-black text-${color}-600">${number}</span>
+                            <i class="fa-solid fa-phone ml-2 text-${color}-500"></i>
+                        </div>
+                    </div>
+                </a>
+            `;
+        }
+
+        function createServiceCard(name, phone, description, isTurkish) {
+            return `
+                <a href="tel:${phone.replace(/\s/g, '')}" class="glass-card p-4 mb-3 block emergency-card">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h4 class="font-bold text-slate-800">${name}</h4>
+                                ${isTurkish ? '<span class="bg-green-100 text-green-600 text-xs px-2 py-0.5 rounded">🇹🇷 Türkçe</span>' : ''}
+                            </div>
+                            <p class="text-sm text-slate-500">${description}</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="font-bold text-blue-600">${phone}</span>
+                            <i class="fa-solid fa-phone ml-2 text-blue-500"></i>
+                        </div>
+                    </div>
+                </a>
+            `;
+        }
+
+        function createEmbassyCard(name, phone, address) {
+            return `
+                <a href="tel:${phone.replace(/\s/g, '')}" class="glass-card p-4 mb-3 block emergency-card">
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1">
+                            <h4 class="font-bold text-slate-800">${name}</h4>
+                            <p class="text-xs text-slate-500"><i class="fa-solid fa-location-dot mr-1"></i>${address}</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="font-bold text-purple-600 text-sm">${phone}</span>
+                            <i class="fa-solid fa-phone ml-2 text-purple-500"></i>
+                        </div>
+                    </div>
+                </a>
+            `;
+        }
+
+        // --- HİZMETLER ---
+        async function findNearbyServices() {
+            // Konum yoksa önce konum iste veya ülke seçimi yaptır
+            if (!currentLocation.lat || !currentLocation.country) {
+                const result = await Swal.fire({
+                    title: 'Konum Gerekli',
+                    html: `
+                        <p class="mb-4">Yakındaki hizmetleri bulmak için konum bilginize ihtiyacımız var.</p>
+                        <p class="text-sm text-slate-500 mb-4">Alternatif olarak ülke seçimi yaparak o ülkedeki tüm hizmetleri görebilirsiniz.</p>
+                    `,
+                    icon: 'info',
+                    showCancelButton: true,
+                    confirmButtonText: '<i class="fa-solid fa-location-crosshairs mr-1"></i> Konumu Bul',
+                    cancelButtonText: '<i class="fa-solid fa-globe mr-1"></i> Ülke Seç',
+                    reverseButtons: true
+                });
+                
+                if (result.isConfirmed) {
+                    await detectLocation();
+                    // Konum alındıktan sonra tekrar dene
+                    if (currentLocation.lat && currentLocation.country) {
+                        findNearbyServices();
+                    }
+                    return;
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    // Ülke seçimi modalı
+                    const countryResult = await Swal.fire({
+                        title: 'Ülke Seçin',
+                        html: `
+                            <select id="serviceCountry" class="w-full border rounded-lg px-3 py-2">
+                                <option value="">Ülke Seçin</option>
+                            </select>
+                        `,
+                        showCancelButton: true,
+                        confirmButtonText: 'Ara',
+                        cancelButtonText: 'İptal',
+                        preConfirm: () => {
+                            const country = document.getElementById('serviceCountry').value;
+                            if (!country) {
+                                Swal.showValidationMessage('Lütfen bir ülke seçin');
+                                return false;
+                            }
+                            return country;
+                        },
+                        didOpen: () => {
+                            const select = document.getElementById('serviceCountry');
+                            const countries = Object.entries(lokasyonVeritabani).map(([code, data]) => ({
+                                code,
+                                name: data.isim,
+                                flag: data.bayrak
+                            })).sort((a, b) => a.name.localeCompare(b.name, 'tr'));
+                            
+                            countries.forEach(country => {
+                                const option = document.createElement('option');
+                                option.value = country.code;
+                                option.textContent = `${country.flag} ${country.name}`;
+                                select.appendChild(option);
+                            });
+                        }
+                    });
+                    
+                    if (countryResult.isConfirmed) {
+                        currentLocation.country = countryResult.value;
+                        // Devam et
+                    } else {
+                        return;
+                    }
+                } else {
+                    return;
+                }
+            }
+            
+            const container = document.getElementById('servicesList');
+            container.innerHTML = '<div class="text-center py-8 text-white/60"><i class="fa-solid fa-spinner fa-spin text-3xl"></i><p class="mt-2">Aranıyor...</p></div>';
+            
+            try {
+                const { data, error } = await sb
+                    .from('services')
+                    .select('*')
+                    .eq('country', currentLocation.country);
+                
+                if (error) throw error;
+                
+                if (!data || data.length === 0) {
+                    container.innerHTML = '<div class="text-center py-8 text-white/60"><i class="fa-solid fa-search text-3xl mb-2"></i><p>Bu bölgede kayıtlı hizmet bulunamadı.</p></div>';
+                    return;
+                }
+                
+                container.innerHTML = '';
+                data.forEach(service => {
+                    const card = document.createElement('a');
+                    card.href = `tel:${service.phone}`;
+                    card.className = 'glass-card p-4 block emergency-card';
+                    
+                    const typeIcon = service.type === 'Çekici' ? 'fa-truck-pickup' : 'fa-wrench';
+                    const typeColor = service.type === 'Çekici' ? 'yellow' : 'blue';
+                    
+                    card.innerHTML = `
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 bg-${typeColor}-100 rounded-full flex items-center justify-center">
+                                    <i class="fa-solid ${typeIcon} text-${typeColor}-500 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-800">${service.name}</h4>
+                                    <p class="text-sm text-slate-500">${service.type} • ${service.city || service.country}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="font-bold text-green-600">${service.phone}</span>
+                                <i class="fa-solid fa-phone ml-2 text-green-500"></i>
+                            </div>
+                        </div>
+                    `;
+                    
+                    container.appendChild(card);
+                });
+                
+            } catch (err) {
+                console.error('Hizmet arama hatası:', err);
+                container.innerHTML = '<div class="text-center py-8 text-white/60"><i class="fa-solid fa-exclamation-triangle text-3xl mb-2"></i><p>Bir hata oluştu.</p></div>';
+            }
+        }
+
+        // --- FORM VALİDASYONU ---
+        function validateForm() {
+            const hasLocation = currentLocation.lat && currentLocation.lng;
+            const hasProblem = selectedProblem;
+            const hasPhone = (currentProfile && currentProfile.phone) || document.getElementById('phoneNumber').value;
+            
+            const isValid = hasLocation && hasProblem && hasPhone;
+            document.getElementById('submitBtn').disabled = !isValid;
+        }
+
+        // Input değişikliklerini dinle
+        document.addEventListener('DOMContentLoaded', () => {
+            const phoneInput = document.getElementById('phoneNumber');
+            if (phoneInput) {
+                phoneInput.addEventListener('input', validateForm);
+            }
+        });
+
+        // --- SOS BAŞLAT ---
+        function startSOS() {
+            // Konum kontrolü
+            if (!currentLocation.lat || !currentLocation.lng) {
+                Swal.fire({
+                    title: 'Konum Gerekli',
+                    html: `
+                        <div class="text-left">
+                            <p class="mb-4">SOS göndermek için konum bilginize ihtiyacımız var. Bu sayede:</p>
+                            <ul class="text-sm text-slate-600 space-y-2 mb-4">
+                                <li>✓ Yakındaki kullanıcılara bildirim gönderebiliriz</li>
+                                <li>✓ Doğru acil numaraları gösterebiliriz</li>
+                                <li>✓ Yardım edecek kişiler size daha hızlı ulaşabilir</li>
+                            </ul>
+                            <p class="text-sm text-slate-500">Konum izni vermek istemiyorsanız manuel seçim yapabilirsiniz.</p>
+                        </div>
+                    `,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: '<i class="fa-solid fa-location-crosshairs mr-1"></i> Konumu Bul',
+                    cancelButtonText: '<i class="fa-solid fa-map-location-dot mr-1"></i> Manuel Seç',
+                    reverseButtons: true
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        detectLocation();
+                        // Konum alındıktan sonra formu göster
+                        setTimeout(() => {
+                            if (currentLocation.lat) {
+                                document.getElementById('problemTypes').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
+                        }, 2000);
+                    } else if (result.dismiss === Swal.DismissReason.cancel) {
+                        showManualLocationSelect();
+                    }
+                });
+                return;
+            }
+            
+            // Form alanlarına scroll
+            document.getElementById('problemTypes').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            Swal.fire({
+                title: 'Yardım mı gerekiyor?',
+                text: 'Aşağıdaki formu doldurup yardım çağrısı gönderebilirsiniz.',
+                icon: 'info',
+                confirmButtonText: 'Anladım',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+
+        // --- SOS GÖNDER ---
+        async function submitSOS() {
+            if (!currentUser && !currentLocation.lat) {
+                Swal.fire('Hata', 'Konum bilgisi gerekli.', 'error');
+                return;
+            }
+            
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Gönderiliyor...';
+            
+            try {
+                // Telefon numarasını al
+                let phone = '';
+                if (currentProfile && currentProfile.phone && document.getElementById('confirmPhone')?.checked) {
+                    phone = currentProfile.phone;
+                } else {
+                    const code = document.getElementById('phoneCode').value;
+                    const number = document.getElementById('phoneNumber').value;
+                    phone = code + number;
+                }
+                
+                if (!phone || phone.length < 8) {
+                    throw new Error('Geçerli bir telefon numarası girin.');
+                }
+                
+                // Fotoğraf yükle (varsa)
+                let imageUrl = null;
+                if (photoFile) {
+                    const fileExt = photoFile.name.split('.').pop();
+                    const fileName = `sos/${Date.now()}.${fileExt}`;
+                    
+                    const { data: uploadData, error: uploadError } = await sb.storage
+                        .from('public')
+                        .upload(fileName, photoFile);
+                    
+                    if (!uploadError) {
+                        const { data: urlData } = sb.storage.from('public').getPublicUrl(fileName);
+                        imageUrl = urlData?.publicUrl;
+                    }
+                }
+                
+                // SOS kaydı oluştur
+                const problemData = (typeof sorunTipleri !== 'undefined' && sorunTipleri) 
+                    ? sorunTipleri.find(p => p.id === selectedProblem) 
+                    : null;
+                
+                const sosData = {
+                    user_id: currentUser?.id || null,
+                    user_name: currentProfile?.full_name || currentUser?.email || 'Anonim',
+                    phone: phone,
+                    issue_type: problemData?.isim || selectedProblem,
+                    description: document.getElementById('sosDescription').value || null,
+                    lat: currentLocation.lat,
+                    lng: currentLocation.lng,
+                    location_text: currentLocation.address || `${currentLocation.lat}, ${currentLocation.lng}`,
+                    country_code: currentLocation.country,
+                    direction: selectedDirection,
+                    image_url: imageUrl,
+                    status: 'active'
+                };
+                
+                const { data: sosRecord, error: sosError } = await sb
+                    .from('sos_alerts')
+                    .insert(sosData)
+                    .select()
+                    .single();
+                
+                if (sosError) throw sosError;
+                
+                // Yakındaki kullanıcıları bul ve bildirim gönder
+                await notifyNearbyUsers(sosRecord);
+                
+                // Başarı mesajı
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Yardım Çağrısı Gönderildi!',
+                    html: `
+                        <p class="mb-4">Yakındaki kullanıcılar ve admin bilgilendirildi.</p>
+                        <div class="bg-blue-50 p-4 rounded-lg text-left text-sm">
+                            <p><strong>Acil durumda:</strong></p>
+                            <p>🚨 <a href="tel:112" class="text-blue-600 font-bold">112</a> numarasını arayın</p>
+                        </div>
+                    `,
+                    confirmButtonText: 'Tamam'
+                }).then(() => {
+                    window.location.reload();
+                });
+                
+            } catch (err) {
+                console.error('SOS gönderim hatası:', err);
+                Swal.fire('Hata', err.message || 'Bir hata oluştu.', 'error');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Yardım Çağrısı Gönder';
+            }
+        }
+
+        // --- YAKIN KULLANICILARA BİLDİRİM ---
+        async function notifyNearbyUsers(sosRecord) {
+            try {
+                // Yakındaki kullanıcıları bul (30km)
+                const { data: nearbyUsers, error } = await sb.rpc('find_nearby_users', {
+                    target_lat: sosRecord.lat,
+                    target_lng: sosRecord.lng,
+                    radius_km: 30
+                });
+                
+                if (error) {
+                    console.log('Yakın kullanıcı bulunamadı veya fonksiyon mevcut değil:', error);
+                    return;
+                }
+                
+                if (nearbyUsers && nearbyUsers.length > 0) {
+                    // Bildirim sayısını güncelle
+                    await sb
+                        .from('sos_alerts')
+                        .update({ helpers_notified: nearbyUsers.length })
+                        .eq('id', sosRecord.id);
+                    
+                    console.log(`${nearbyUsers.length} yakın kullanıcı bilgilendirildi.`);
+                }
+                
+            } catch (err) {
+                console.error('Bildirim hatası:', err);
+            }
+        }
+
+        // --- KULLANICI KONUMUNU KAYDET (Yardım için müsait) ---
+        async function updateUserLocation() {
+            if (!currentUser) return;
+            if (!currentLocation.lat || !currentLocation.lng) return;
+            
+            try {
+                const { error } = await sb
+                    .from('user_locations')
+                    .upsert({
+                        user_id: currentUser.id,
+                        lat: currentLocation.lat,
+                        lng: currentLocation.lng,
+                        last_updated: new Date().toISOString(),
+                        is_available_for_help: true
+                    }, {
+                        onConflict: 'user_id'
+                    });
+                
+                if (error) {
+                    console.error('Konum kaydetme hatası:', error);
+                } else {
+                    console.log('Kullanıcı konumu güncellendi');
+                }
+            } catch (err) {
+                console.error('Konum güncelleme hatası:', err);
+            }
+        }
+
+        // --- AKTİF SOS ALARMLARINI KONTROL ET ---
+        async function checkActiveSOSAlerts() {
+            if (!currentUser || !currentLocation.lat) return;
+            
+            try {
+                // Yakınımdaki aktif SOS'ları bul
+                const { data: alerts, error } = await sb
+                    .from('sos_alerts')
+                    .select('*')
+                    .eq('status', 'active')
+                    .neq('user_id', currentUser.id); // Kendiminkini hariç tut
+                
+                if (error) throw error;
+                
+                if (!alerts || alerts.length === 0) return;
+                
+                // Mesafeyi hesapla ve 30km içindekileri göster
+                const nearbyAlerts = alerts.filter(alert => {
+                    if (!alert.lat || !alert.lng) return false;
+                    const distance = calculateDistance(
+                        currentLocation.lat, currentLocation.lng,
+                        alert.lat, alert.lng
+                    );
+                    alert.distance = distance;
+                    return distance <= 30;
+                }).sort((a, b) => a.distance - b.distance);
+                
+                if (nearbyAlerts.length > 0) {
+                    showSOSNotification(nearbyAlerts[0]);
+                }
+                
+            } catch (err) {
+                console.error('SOS kontrol hatası:', err);
+            }
+        }
+
+        // --- MESAFE HESAPLA (Haversine) ---
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Dünya yarıçapı (km)
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = 
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        // --- SOS BİLDİRİMİ GÖSTER ---
+        function showSOSNotification(alert) {
+            const distanceText = alert.distance < 1 
+                ? `${Math.round(alert.distance * 1000)}m` 
+                : `${alert.distance.toFixed(1)}km`;
+            
+            Swal.fire({
+                title: '🚨 Yakınında Yardım Çağrısı!',
+                html: `
+                    <div class="text-left">
+                        <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-4 rounded">
+                            <p class="font-bold text-red-800">${alert.issue_type}</p>
+                            <p class="text-sm text-red-600">${alert.user_name || 'Anonim'}</p>
+                        </div>
+                        <div class="flex items-center gap-2 mb-3">
+                            <i class="fa-solid fa-location-dot text-blue-500"></i>
+                            <span class="text-slate-600">${alert.location_text || 'Konum bilgisi'}</span>
+                        </div>
+                        <div class="flex items-center gap-2 mb-3">
+                            <i class="fa-solid fa-route text-green-500"></i>
+                            <span class="font-bold text-green-600">${distanceText} uzaklıkta</span>
+                        </div>
+                        ${alert.description ? `<p class="text-sm text-slate-500 italic">"${alert.description}"</p>` : ''}
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: '<i class="fa-solid fa-hand-holding-heart"></i> Yardım Et',
+                cancelButtonText: 'Şimdi Değil',
+                confirmButtonColor: '#16a34a',
+                cancelButtonColor: '#64748b'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    showHelpOfferModal(alert);
+                }
+            });
+        }
+
+        // --- YARDIM TEKLİFİ MODALI ---
+        function showHelpOfferModal(alert) {
+            Swal.fire({
+                title: 'Yardım Teklifi',
+                html: `
+                    <div class="text-left space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Adınız</label>
+                            <input type="text" id="helperName" value="${currentProfile?.full_name || ''}" 
+                                class="w-full border rounded-lg px-3 py-2" placeholder="Adınız">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Telefon Numaranız</label>
+                            <input type="tel" id="helperPhone" value="${currentProfile?.phone || ''}" 
+                                class="w-full border rounded-lg px-3 py-2" placeholder="+49 123 456 7890">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Mesajınız (Opsiyonel)</label>
+                            <textarea id="helperMessage" rows="2" 
+                                class="w-full border rounded-lg px-3 py-2" placeholder="Nasıl yardımcı olabileceğinizi belirtin..."></textarea>
+                        </div>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Yardım Teklifini Gönder',
+                cancelButtonText: 'İptal',
+                confirmButtonColor: '#16a34a',
+                preConfirm: async () => {
+                    const name = document.getElementById('helperName').value;
+                    const phone = document.getElementById('helperPhone').value;
+                    const message = document.getElementById('helperMessage').value;
+                    
+                    if (!name || !phone) {
+                        Swal.showValidationMessage('Ad ve telefon zorunlu');
+                        return false;
+                    }
+                    
+                    return { name, phone, message };
+                }
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    await submitHelpOffer(alert, result.value);
+                }
+            });
+        }
+
+        // --- YARDIM TEKLİFİ GÖNDER ---
+        async function submitHelpOffer(alert, helperData) {
+            try {
+                const { error } = await sb.from('help_responses').insert({
+                    sos_alert_id: alert.id,
+                    helper_user_id: currentUser?.id || null,
+                    helper_name: helperData.name,
+                    helper_phone: helperData.phone,
+                    helper_message: helperData.message || null,
+                    distance_km: alert.distance,
+                    status: 'offered'
+                });
+                
+                if (error) throw error;
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Teşekkürler!',
+                    html: `
+                        <p>Yardım teklifiniz gönderildi.</p>
+                        <p class="text-sm text-slate-500 mt-2">Mağdur kişi sizinle iletişime geçecektir.</p>
+                        <div class="mt-4 bg-blue-50 p-3 rounded-lg">
+                            <a href="tel:${alert.phone}" class="text-blue-600 font-bold">
+                                <i class="fa-solid fa-phone mr-1"></i> Hemen Ara: ${alert.phone}
+                            </a>
+                        </div>
+                    `,
+                    confirmButtonText: 'Tamam'
+                });
+                
+            } catch (err) {
+                console.error('Yardım teklifi hatası:', err);
+                Swal.fire('Hata', 'Yardım teklifi gönderilemedi.', 'error');
+            }
+        }
+
+        // --- REALTIME SOS DİNLEYİCİ ---
+        function subscribeToSOSAlerts() {
+            if (!sb) return;
+            
+            sb.channel('sos_alerts_channel')
+                .on('postgres_changes', { 
+                    event: 'INSERT', 
+                    schema: 'public', 
+                    table: 'sos_alerts' 
+                }, (payload) => {
+                    console.log('Yeni SOS:', payload);
+                    if (currentLocation.lat && currentUser) {
+                        const alert = payload.new;
+                        if (alert.user_id !== currentUser.id && alert.lat && alert.lng) {
+                            const distance = calculateDistance(
+                                currentLocation.lat, currentLocation.lng,
+                                alert.lat, alert.lng
+                            );
+                            if (distance <= 30) {
+                                alert.distance = distance;
+                                showSOSNotification(alert);
+                            }
+                        }
+                    }
+                })
+                .subscribe();
+        }
+
+        // Sayfa yüklendiğinde başlat
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Auth kontrolü
+            if (typeof initAuth === 'function') {
+                await initAuth();
+            }
+            
+            // 5 saniye sonra konumu kaydet ve SOS kontrol et
+            setTimeout(() => {
+                if (currentUser && currentLocation.lat) {
+                    updateUserLocation();
+                    checkActiveSOSAlerts();
+                    subscribeToSOSAlerts();
+                }
+            }, 5000);
+        });
+    </script>
+</body>
+</html>

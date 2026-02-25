@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+
+<html lang="tr">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Emlak Vitrini | PlatformAvrupa</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+   
+
+    <style>
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+       
+
+        body { font-family: 'Inter', sans-serif; background-color: #F5F5F7; color: #1D1D1F; }
+
+
+
+        @media (min-width: 1024px) {
+
+            body { height: 100vh; overflow: hidden; }
+
+            #main-container { height: calc(100vh - 64px); }
+
+        }
+
+
+
+        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid #e2e8f0; }
+
+        .filter-title { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: #64748b; margin-bottom: 0.5rem; letter-spacing: 0.05em; }
+
+       
+
+        .segment-wrapper { background-color: #f1f5f9; padding: 4px; border-radius: 12px; display: flex; gap: 4px; }
+
+        .segment-btn { flex: 1; padding: 8px; text-align: center; border-radius: 8px; font-size: 13px; font-weight: 600; color: #64748b; transition: all 0.2s; cursor: pointer; }
+
+        .segment-btn.active { background: white; color: #2563eb; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+
+
+        .type-btn { background: white; border: 1px solid #e2e8f0; color: #64748b; padding: 10px; border-radius: 12px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-align: center; }
+
+        .type-btn:hover { border-color: #bfdbfe; color: #2563eb; }
+
+        .type-btn.active { background: #eff6ff; color: #2563eb; border-color: #3b82f6; box-shadow: 0 0 0 1px #3b82f6; }
+
+
+
+        .modern-select, .modern-input { width: 100%; background-color: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px; font-size: 14px; font-weight: 500; color: #334155; outline: none; transition: border-color 0.2s; }
+
+        .modern-select:focus, .modern-input:focus { border-color: #3b82f6; }
+
+
+
+        #map { height: 100%; width: 100%; border-radius: 16px; z-index: 0; min-height: 400px; }
+
+        .map-price-tag { background: #2563eb; color: white; padding: 4px 8px; border-radius: 6px; font-weight: bold; font-size: 12px; border: 2px solid white; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
+
+       
+
+        .view-toggle { display: flex; background: #f1f5f9; border-radius: 99px; padding: 3px; }
+
+        .view-btn { padding: 6px 14px; border-radius: 99px; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 6px; color: #64748b; transition: all 0.2s; }
+
+        .view-btn.active { background: white; color: #2563EB; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+
+       
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+
+    </style>
+
+</head>
+
+<body class="flex flex-col min-h-screen lg:h-screen">
+
+
+
+    <nav class="glass sticky top-0 z-50 px-4 h-16 flex justify-between items-center shadow-sm flex-shrink-0">
+
+        <a href="index.html" class="flex items-center gap-2 text-slate-700 hover:text-blue-600 transition font-bold">
+
+            <div class="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center"><i class="fa-solid fa-arrow-left"></i></div>
+
+            <span class="hidden sm:inline">Ana Sayfa</span>
+
+        </a>
+
+       
+
+        <div class="absolute left-1/2 transform -translate-x-1/2 hidden md:block">
+
+            <h1 class="font-extrabold text-lg tracking-tight text-slate-700 uppercase">EMLAK VİTRİNİ</h1>
+
+        </div>
+
+       
+
+        <div class="flex items-center gap-3">
+
+            <div class="view-toggle">
+
+                <button onclick="setView('liste')" id="btnListe" class="view-btn active"><i class="fa-solid fa-list"></i> Liste</button>
+
+                <button onclick="setView('harita')" id="btnHarita" class="view-btn"><i class="fa-solid fa-map"></i> Harita</button>
+
+            </div>
+
+            <a href="ilan_giris.html" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-xs font-bold shadow transition flex items-center gap-2">
+
+                <i class="fa-solid fa-plus"></i> <span class="hidden sm:inline">İlan Ver</span>
+
+            </a>
+
+        </div>
+
+    </nav>
+
+    <!-- Mobil Filtre Butonu -->
+    <div class="lg:hidden fixed bottom-20 right-4 z-40">
+        <button onclick="toggleMobileFilters()" class="bg-blue-600 hover:bg-blue-700 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center">
+            <i class="fa-solid fa-sliders text-xl"></i>
+        </button>
+    </div>
+
+    <div id="main-container" class="block lg:flex lg:gap-6 lg:p-6 bg-slate-50 flex-1 lg:overflow-hidden">
+
+        <!-- Overlay -->
+        <div id="filterOverlay" class="hidden fixed inset-0 bg-black/50 z-40 lg:hidden" onclick="toggleMobileFilters()"></div>
+
+        <div id="filterPanel" class="fixed lg:static w-full lg:w-[360px] bg-white lg:rounded-2xl lg:border border-gray-200 lg:shadow-sm flex flex-col mb-4 lg:mb-0 lg:h-full flex-shrink-0 transform translate-y-full lg:translate-y-0 transition-transform duration-300 bottom-0 left-0 right-0 z-50 lg:z-auto rounded-t-3xl max-h-[85vh] lg:max-h-full">
+
+            <div class="lg:hidden flex items-center justify-between p-4 border-b border-gray-200 bg-blue-50">
+                <h3 class="font-bold text-lg text-blue-900">Filtreler</h3>
+                <button onclick="toggleMobileFilters()" class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+
+            <div class="p-5 space-y-6 lg:overflow-y-auto lg:flex-1 overflow-y-auto">
+
+                <div>
+
+                    <h3 class="filter-title">İşlem Türü</h3>
+
+                    <div class="segment-wrapper">
+
+                        <button onclick="setFilter('islem', 'Satılık', this)" class="segment-btn active">Satılık</button>
+
+                        <button onclick="setFilter('islem', 'Kiralık', this)" class="segment-btn">Kiralık</button>
+
+                        <button onclick="setFilter('islem', 'Devren', this)" class="segment-btn">Devren</button>
+
+                    </div>
+
+                </div>
+
+                <div>
+
+                    <h3 class="filter-title">Konut Tipi</h3>
+
+                    <div class="grid grid-cols-2 gap-2">
+
+                        <button onclick="setFilter('tip', 'Hepsi', this)" class="type-btn active col-span-2">Tümü</button>
+
+                        <button onclick="setFilter('tip', 'Daire', this)" class="type-btn">Daire</button>
+
+                        <button onclick="setFilter('tip', 'Müstakil', this)" class="type-btn">Müstakil</button>
+
+                        <button onclick="setFilter('tip', 'Villa', this)" class="type-btn">Villa</button>
+
+                        <button onclick="setFilter('tip', 'İşyeri', this)" class="type-btn">İşyeri</button>
+
+                        <button onclick="setFilter('tip', 'Arsa', this)" class="type-btn">Arsa</button>
+
+                        <button onclick="setFilter('tip', 'Depo', this)" class="type-btn">Depo</button>
+
+                    </div>
+
+                </div>
+
+                <div>
+
+                    <h3 class="filter-title">Konum</h3>
+
+                    <div class="space-y-3">
+
+                        <select id="ulkeSelect" onchange="ulkeSecildi()" class="modern-select">
+
+                            <option value="">Tüm Ülkeler</option>
+
+                        </select>
+
+                        <select id="sehirSelect" onchange="sehirSecildi()" class="modern-select opacity-50 cursor-not-allowed" disabled>
+
+                            <option value="">Şehir Seç</option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+                <div>
+
+                    <h3 class="filter-title">Fiyat Aralığı (€)</h3>
+
+                    <div class="flex items-center gap-2">
+
+                        <input type="number" id="minFiyat" oninput="filtrele()" placeholder="Min" class="modern-input text-center">
+
+                        <span class="text-slate-300">-</span>
+
+                        <input type="number" id="maxFiyat" oninput="filtrele()" placeholder="Max" class="modern-input text-center">
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="p-4 border-t border-gray-100 bg-gray-50 lg:rounded-b-2xl">
+
+                <div class="flex justify-between items-center text-xs text-gray-500">
+
+                    <span><strong id="ilanSayisi" class="text-slate-800">0</strong> ilan listeleniyor</span>
+
+                    <button onclick="filtreleriSifirla()" class="text-blue-600 hover:underline">Temizle</button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="flex-1 relative px-4 lg:px-0 pb-10 lg:pb-0 lg:h-full lg:overflow-hidden">
+
+            <div id="listView" class="h-full lg:overflow-y-auto grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5 content-start no-scrollbar"></div>
+
+            <div id="mapView" class="hidden h-[500px] lg:h-full w-full rounded-2xl overflow-hidden shadow-sm border border-gray-200 relative bg-white">
+
+                <div id="map"></div>
+
+            </div>
+
+        </div>
+
+
+
+    </div>
+
+
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script src="genel_veriler.js"></script>
+
+
+
+    <script>
+
+        const SUPABASE_URL = 'https://vhietrqljahdmloazgpp.supabase.co';
+
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoaWV0cnFsamFoZG1sb2F6Z3BwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTk5MTcsImV4cCI6MjA4MDYzNTkxN30.sxpUrTnR40XuEBPUeQXj352xMziGr_lDqdA8H69ejBA';
+
+        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+
+
+        let map = null;
+
+        let markers = [];
+
+        let tumIlanlar = [];
+
+        let filters = { islem: 'Satılık', tip: 'Hepsi', country: '', city: '', min: 0, max: 9999999 };
+
+
+
+        window.onload = function() {
+
+            initMap();
+
+            // genel_veriler.js dosyasından ülkeleri çeker
+
+            if (typeof ulkeleriDoldur === 'function') ulkeleriDoldur('ulkeSelect');
+
+            veriCek();
+
+        };
+
+
+
+        function initMap() {
+
+            if(document.getElementById('map') && !map) {
+
+                map = L.map('map').setView([48.0, 10.0], 5);
+
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+
+            }
+
+        }
+
+
+
+        function setView(view) {
+
+            const listDiv = document.getElementById('listView');
+
+            const mapDiv = document.getElementById('mapView');
+
+            const btnList = document.getElementById('btnListe');
+
+            const btnMap = document.getElementById('btnHarita');
+
+
+
+            if(view === 'harita') {
+
+                listDiv.classList.add('hidden');
+
+                mapDiv.classList.remove('hidden');
+
+                btnMap.classList.add('active');
+
+                btnList.classList.remove('active');
+
+                setTimeout(() => { map.invalidateSize(); }, 200);
+
+            } else {
+
+                listDiv.classList.remove('hidden');
+
+                mapDiv.classList.add('hidden');
+
+                btnList.classList.add('active');
+
+                btnMap.classList.remove('active');
+
+            }
+
+        }
+
+
+
+        // --- AKILLI ZOOM (API ile) ---
+
+        function akilliZoom(yerAdi, zoomSeviyesi) {
+
+            if(!map || !yerAdi) return;
+
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${yerAdi}&addressdetails=1&limit=1`)
+
+                .then(r => r.json())
+
+                .then(d => {
+
+                    if(d && d.length > 0) {
+
+                        const lat = parseFloat(d[0].lat);
+
+                        const lon = parseFloat(d[0].lon);
+
+                        map.flyTo([lat, lon], zoomSeviyesi, { duration: 1.5 });
+
+                    }
+
+                }).catch(e => console.log("Harita hatası:", e));
+
+        }
+
+
+
+        function ulkeSecildi() {
+
+            const code = document.getElementById('ulkeSelect').value;
+
+            filters.country = code;
+
+           
+
+            // genel_veriler.js'den şehirleri doldur
+
+            if (typeof sehirleriGetirOrtak === 'function') sehirleriGetirOrtak(code, 'sehirSelect');
+
+           
+
+            const sehirSelect = document.getElementById('sehirSelect');
+
+            if(code) {
+
+                // genel_veriler.js'den ülke ismini alıp zoom yapıyoruz
+
+                if (typeof lokasyonVeritabani !== 'undefined' && lokasyonVeritabani[code]) {
+
+                    akilliZoom(lokasyonVeritabani[code].isim, 6);
+
+                }
+
+                sehirSelect.disabled = false;
+
+                sehirSelect.classList.remove('opacity-50', 'cursor-not-allowed');
+
+            } else {
+
+                sehirSelect.disabled = true;
+
+                sehirSelect.classList.add('opacity-50', 'cursor-not-allowed');
+
+                map.setView([48.0, 10.0], 5);
+
+            }
+
+            filters.city = "";
+
+            filtrele();
+
+        }
+
+
+
+        function sehirSecildi() {
+
+            const sehir = document.getElementById('sehirSelect').value;
+
+            filters.city = sehir;
+
+           
+
+            if(sehir) {
+
+                const ulkeKod = document.getElementById('ulkeSelect').value;
+
+                let tamAdres = sehir;
+
+                if (typeof lokasyonVeritabani !== 'undefined' && lokasyonVeritabani[ulkeKod]) {
+
+                    tamAdres += ", " + lokasyonVeritabani[ulkeKod].isim;
+
+                }
+
+                akilliZoom(tamAdres, 12);
+
+            }
+
+            filtrele();
+
+        }
+
+
+
+        async function veriCek() {
+
+            const listDiv = document.getElementById('listView');
+
+            listDiv.innerHTML = '<div class="col-span-full text-center py-20 opacity-50"><i class="fa-solid fa-circle-notch fa-spin text-3xl"></i></div>';
+
+           
+
+            tumIlanlar = [];
+
+
+
+            if(sb) {
+
+                try {
+
+                    // SADECE DB'DEN ÇEKİYORUZ - "Emlak" kategorisi
+
+                    const { data, error } = await sb.from('ilanlar').select('*').eq('category', 'Emlak').order('created_at', { ascending: false });
+
+
+
+                    if (!error && data) {
+
+                        tumIlanlar = data.map(i => ({
+
+                            id: i.id,
+
+                            islem: i.sub_category || 'Kiralık',
+
+                            tip: 'Daire', // İlerde DB'ye eklenebilir
+
+                            baslik: i.title,
+
+                            fiyat: i.price,
+
+                            fiyatSayi: parseInt(i.price.replace(/[^0-9]/g, '')) || 0,
+
+                            konum: i.city,
+
+                            ulke: i.country || '', // DB'de country varsa kullan
+
+                            oda: '2+1', // Varsayılan
+
+                            resim: i.image,
+
+                            lat: 48.0 + (Math.random() * 5), // Harita boş kalmasın diye geçici random
+
+                            lon: 10.0 + (Math.random() * 5)
+
+                        }));
+
+                    }
+
+                } catch (err) { console.error(err); }
+
+            }
+
+
+
+            filtrele();
+
+        }
+
+
+
+        function setFilter(type, value, btn) {
+
+            if(type === 'islem') {
+
+                document.querySelectorAll('.segment-btn').forEach(b => b.classList.remove('active'));
+
+                filters.islem = value;
+
+            } else if (type === 'tip') {
+
+                document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+
+                filters.tip = value;
+
+            }
+
+            if(btn) btn.classList.add('active');
+
+            filtrele();
+
+        }
+
+
+
+        function filtrele() {
+
+            filters.min = document.getElementById('minFiyat').value;
+
+            filters.max = document.getElementById('maxFiyat').value;
+
+
+
+            const suzulen = tumIlanlar.filter(ilan => {
+
+                const sehirUyumu = (filters.city === "") || (ilan.konum === filters.city);
+
+                // Ülke filtrelemesi (DB'de country sütunu yoksa pas geçebiliriz, ama kodda filters.country var)
+
+                // Şimdilik sadece şehir üzerinden gidiyoruz.
+
+               
+
+                let fiyatUyumu = true;
+
+                if(filters.min && ilan.fiyatSayi < filters.min) fiyatUyumu = false;
+
+                if(filters.max && ilan.fiyatSayi > filters.max) fiyatUyumu = false;
+
+
+
+                return sehirUyumu && fiyatUyumu;
+
+            });
+
+
+
+            document.getElementById('ilanSayisi').innerText = suzulen.length;
+
+            renderList(suzulen);
+
+            renderMap(suzulen);
+
+        }
+
+
+
+        function filtreleriSifirla() {
+
+            window.location.reload();
+
+        }
+
+
+
+        function renderList(data) {
+
+            const container = document.getElementById('listView');
+
+            container.innerHTML = "";
+
+
+
+            if(data.length === 0) {
+
+                container.innerHTML = `
+
+                    <div class="col-span-full flex flex-col items-center justify-center text-center py-20 opacity-60">
+
+                        <div class="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mb-4 text-2xl text-slate-400">
+
+                            <i class="fa-solid fa-search"></i>
+
+                        </div>
+
+                        <h3 class="font-bold text-slate-700">Sonuç Bulunamadı</h3>
+
+                        <p class="text-sm text-slate-500 mt-1">Filtreleri değiştirerek tekrar deneyin.</p>
+
+                    </div>`;
+
+                return;
+
+            }
+
+
+
+            data.forEach(item => {
+
+                let renk = "bg-blue-600";
+
+                if(item.islem === "Satılık") renk = "bg-green-600";
+
+                if(item.islem === "Devren") renk = "bg-purple-600";
+
+
+
+                let imgHTML = `<div class="w-full h-full bg-slate-100 flex items-center justify-center text-slate-400"><i class="fa-solid fa-image text-3xl opacity-50"></i></div>`;
+
+                if(item.resim && item.resim.startsWith('http')) {
+
+                    imgHTML = `<img src="${item.resim}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">`;
+
+                }
+
+
+
+                container.innerHTML += `
+
+                <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 hover:shadow-md transition cursor-pointer group">
+
+                    <div class="relative h-44 mb-3 rounded-xl overflow-hidden bg-slate-100">
+
+                        ${imgHTML}
+
+                        <span class="absolute top-2 right-2 ${renk} text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm uppercase tracking-wide">${item.islem}</span>
+
+                        <div class="absolute bottom-2 left-2 bg-white/95 backdrop-blur px-2 py-1 rounded-lg text-slate-900 font-extrabold shadow-sm text-sm border border-slate-100">
+
+                            ${item.fiyat}
+
+                        </div>
+
+                    </div>
+
+                    <h3 class="font-bold text-slate-800 text-base mb-1 line-clamp-1 group-hover:text-blue-600 transition">${item.baslik}</h3>
+
+                    <div class="flex items-center gap-2 text-xs text-slate-500 font-medium mb-3">
+
+                        <span class="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded border border-slate-100"><i class="fa-solid fa-house text-slate-400"></i> ${item.tip}</span>
+
+                        <span class="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded border border-slate-100"><i class="fa-solid fa-bed text-slate-400"></i> ${item.oda}</span>
+
+                    </div>
+
+                    <div class="flex justify-between items-center pt-3 border-t border-slate-50 text-xs text-slate-400">
+
+                         <span class="flex items-center gap-1"><i class="fa-solid fa-location-dot"></i> ${item.konum}</span>
+
+                    </div>
+
+                </div>`;
+
+            });
+
+        }
+
+
+
+        function renderMap(data) {
+
+            if(!map) return;
+
+            markers.forEach(m => map.removeLayer(m));
+
+            markers = [];
+
+           
+
+            if(data.length > 0) {
+
+                const bounds = L.latLngBounds();
+
+                data.forEach(item => {
+
+                    if(item.lat && item.lon) {
+
+                        const iconHtml = `<div class="map-price-tag">${item.fiyat}</div>`;
+
+                        const icon = L.divIcon({ className: '', html: iconHtml, iconSize: [80, 30], iconAnchor: [40, 30] });
+
+                       
+
+                        const marker = L.marker([item.lat, item.lon], {icon: icon}).addTo(map);
+
+                        marker.bindPopup(`<b>${item.baslik}</b><br>${item.konum}`);
+
+                        markers.push(marker);
+
+                        bounds.extend([item.lat, item.lon]);
+
+                    }
+
+                });
+
+               
+
+                if(!document.getElementById('mapView').classList.contains('hidden')) {
+
+                    map.fitBounds(bounds.pad(0.1));
+
+                }
+
+            }
+
+        }
+        
+        // Mobil Filtre Toggle
+        function toggleMobileFilters() {
+            const panel = document.getElementById('filterPanel');
+            const overlay = document.getElementById('filterOverlay');
+            const isOpen = !panel.classList.contains('translate-y-full');
+            
+            if (isOpen) {
+                panel.classList.add('translate-y-full');
+                overlay.classList.add('hidden');
+                document.body.style.overflow = '';
+            } else {
+                panel.classList.remove('translate-y-full');
+                overlay.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sıla Yolu - PlatformAvrupa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="config.js"></script>
+    <script src="auth.js"></script>
+    <script src="utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="genel_veriler.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #1e40af 0%, #7c3aed 100%); }
+        .border-card { background: white; border-radius: 20px; overflow: hidden; transition: all 0.3s; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .border-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
+        .density-low { background: #10b981; }
+        .density-medium { background: #f59e0b; }
+        .density-high { background: #ef4444; }
+        .pulse-animation { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- Header -->
+    <nav class="bg-white/95 backdrop-blur sticky top-0 z-50 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
+            <a href="index.html" class="flex items-center gap-2 text-slate-800 hover:text-blue-600 transition font-bold">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span class="hidden sm:inline">Ana Sayfa</span>
+            </a>
+            
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-flag-checkered text-2xl text-blue-600"></i>
+                <h1 class="font-bold text-xl text-slate-800">Sıla Yolu</h1>
+            </div>
+            
+            <button onclick="openRouteCalculator()" class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg flex items-center gap-2">
+                <i class="fa-solid fa-route"></i>
+                <span class="hidden sm:inline">Rota Hesapla</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <div class="bg-white/10 backdrop-blur border-b border-white/20 py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-6">
+                <h2 class="text-3xl md:text-4xl font-black text-white mb-2">Sıla Yolu Rehberi</h2>
+                <p class="text-blue-100 text-lg">Gümrük kapıları ve yol bildirimleri</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab Menü -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
+            <button onclick="switchTab('gates')" id="tab-gates" class="tab-btn bg-white text-blue-600 px-6 py-3 rounded-full font-bold text-sm shadow-lg whitespace-nowrap">
+                <i class="fa-solid fa-flag-checkered mr-2"></i>Gümrük Kapıları
+            </button>
+            <button onclick="switchTab('live')" id="tab-live" class="tab-btn bg-white/20 text-white px-6 py-3 rounded-full font-bold text-sm whitespace-nowrap hover:bg-white/30 transition">
+                <i class="fa-solid fa-map-location-dot mr-2"></i>Canlı Bildirimler
+            </button>
+            <button onclick="switchTab('routes')" id="tab-routes" class="tab-btn bg-white/20 text-white px-6 py-3 rounded-full font-bold text-sm whitespace-nowrap hover:bg-white/30 transition">
+                <i class="fa-solid fa-route mr-2"></i>Alternatif Rotalar
+            </button>
+            <button onclick="switchTab('info')" id="tab-info" class="tab-btn bg-white/20 text-white px-6 py-3 rounded-full font-bold text-sm whitespace-nowrap hover:bg-white/30 transition">
+                <i class="fa-solid fa-info-circle mr-2"></i>Önemli Bilgiler
+            </button>
+        </div>
+
+        <!-- Gümrük Kapıları -->
+        <div id="content-gates" class="">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="gatesList">
+                <!-- Dinamik olarak doldurulacak -->
+            </div>
+        </div>
+
+        <!-- Canlı Bildirimler (Waze Benzeri) -->
+        <div id="content-live" class="hidden">
+            <!-- Bildirim Yap Butonu -->
+            <div class="flex flex-col sm:flex-row gap-4 mb-6">
+                <button onclick="openReportModal()" class="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-4 px-6 rounded-xl font-bold text-lg shadow-xl flex items-center justify-center gap-3 transition">
+                    <i class="fa-solid fa-plus-circle text-2xl"></i>
+                    <span>Bildirim Yap</span>
+                </button>
+                <button onclick="refreshLiveReports()" class="bg-white/20 hover:bg-white/30 text-white py-4 px-6 rounded-xl font-bold flex items-center justify-center gap-2 transition">
+                    <i class="fa-solid fa-rotate"></i>
+                    <span>Yenile</span>
+                </button>
+            </div>
+
+            <!-- Harita -->
+            <div class="border-card p-4 mb-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-map-location-dot text-purple-600"></i>
+                        Canlı Yol Bildirimleri Haritası
+                    </h3>
+                    <div class="flex gap-2">
+                        <button onclick="centerMapToUser()" class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded-lg text-sm font-bold transition">
+                            <i class="fa-solid fa-location-crosshairs mr-1"></i> Konumum
+                        </button>
+                    </div>
+                </div>
+                <div id="liveReportsMap" style="height: 400px; border-radius: 12px; z-index: 1;"></div>
+                
+                <!-- Harita Altı Açıklamalar -->
+                <div class="flex flex-wrap gap-2 mt-4 text-xs">
+                    <span class="flex items-center gap-1 bg-red-100 text-red-700 px-2 py-1 rounded"><i class="fa-solid fa-camera"></i> Radar</span>
+                    <span class="flex items-center gap-1 bg-orange-100 text-orange-700 px-2 py-1 rounded"><i class="fa-solid fa-car-crash"></i> Kaza</span>
+                    <span class="flex items-center gap-1 bg-blue-100 text-blue-700 px-2 py-1 rounded"><i class="fa-solid fa-user-shield"></i> Polis</span>
+                    <span class="flex items-center gap-1 bg-yellow-100 text-yellow-700 px-2 py-1 rounded"><i class="fa-solid fa-road-barrier"></i> Çalışma</span>
+                    <span class="flex items-center gap-1 bg-purple-100 text-purple-700 px-2 py-1 rounded"><i class="fa-solid fa-traffic-light"></i> Trafik</span>
+                    <span class="flex items-center gap-1 bg-pink-100 text-pink-700 px-2 py-1 rounded"><i class="fa-solid fa-money-bill"></i> Rüşvet</span>
+                </div>
+            </div>
+
+            <!-- Bildirim Listesi -->
+            <div class="border-card p-6">
+                <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-list text-purple-600"></i>
+                    Son Bildirimler
+                    <span id="reportCount" class="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full ml-2">0</span>
+                </h3>
+                <div id="liveReportsList" class="space-y-3 max-h-96 overflow-y-auto">
+                    <div class="text-center py-8 text-slate-400">
+                        <i class="fa-solid fa-spinner fa-spin text-3xl mb-3"></i>
+                        <p>Bildirimler yükleniyor...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alternatif Rotalar -->
+        <div id="content-routes" class="hidden">
+            <div class="border-card p-6 mb-6">
+                <h3 class="font-bold text-xl text-slate-800 mb-4">Rota Hesaplayıcı</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <!-- Başlangıç -->
+                    <div>
+                        <label class="text-xs font-bold text-slate-600 mb-2 block">Başlangıç Ülkesi</label>
+                        <select id="routeStartCountry" onchange="sehirleriGetir(this.value, 'routeStartCity')" class="w-full border-2 border-slate-300 rounded-lg px-3 py-2 text-sm mb-3">
+                            <option value="">Ülke Seçiniz...</option>
+                        </select>
+                        <label class="text-xs font-bold text-slate-600 mb-2 block">Başlangıç Şehri</label>
+                        <select id="routeStartCity" disabled class="w-full border-2 border-slate-300 rounded-lg px-3 py-2 text-sm opacity-50 cursor-not-allowed">
+                            <option value="">Önce ülke seçin...</option>
+                        </select>
+                    </div>
+
+                    <!-- Varış -->
+                    <div>
+                        <label class="text-xs font-bold text-slate-600 mb-2 block">Varış Ülkesi</label>
+                        <select id="routeEndCountry" onchange="sehirleriGetir(this.value, 'routeEndCity')" class="w-full border-2 border-slate-300 rounded-lg px-3 py-2 text-sm mb-3">
+                            <option value="">Ülke Seçiniz...</option>
+                        </select>
+                        <label class="text-xs font-bold text-slate-600 mb-2 block">Varış Şehri</label>
+                        <select id="routeEndCity" disabled class="w-full border-2 border-slate-300 rounded-lg px-3 py-2 text-sm opacity-50 cursor-not-allowed">
+                            <option value="">Önce ülke seçin...</option>
+                        </select>
+                    </div>
+                </div>
+                <button onclick="calculateRoute()" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg font-bold text-lg">
+                    <i class="fa-solid fa-route mr-2"></i>Rotayı Hesapla
+                </button>
+                <div id="routeResults" class="hidden mt-4">
+                    <!-- Sonuçlar buraya gelecek -->
+                </div>
+            </div>
+
+            <!-- Hazır Rotalar -->
+            <h3 class="font-bold text-white text-xl mb-4">Popüler Güzergahlar</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="popularRoutes"></div>
+        </div>
+
+        <!-- Önemli Bilgiler -->
+        <div id="content-info" class="hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Genel Bilgiler -->
+                <div class="border-card p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                            <i class="fa-solid fa-passport text-blue-600 text-xl"></i>
+                        </div>
+                        <h3 class="font-bold text-lg text-slate-800">Gerekli Evraklar</h3>
+                    </div>
+                    <ul class="space-y-2 text-sm text-slate-600">
+                        <li><i class="fa-solid fa-check-circle text-green-600 mr-2"></i>Pasaport (en az 6 ay geçerli)</li>
+                        <li><i class="fa-solid fa-check-circle text-green-600 mr-2"></i>Vize (gerekiyorsa)</li>
+                        <li><i class="fa-solid fa-check-circle text-green-600 mr-2"></i>Araç Ruhsatı</li>
+                        <li><i class="fa-solid fa-check-circle text-green-600 mr-2"></i>Yeşil Kart (Sigorta)</li>
+                        <li><i class="fa-solid fa-check-circle text-green-600 mr-2"></i>Ehliyet (uluslararası)</li>
+                    </ul>
+                </div>
+
+                <!-- Gümrük Kuralları -->
+                <div class="border-card p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                            <i class="fa-solid fa-ban text-red-600 text-xl"></i>
+                        </div>
+                        <h3 class="font-bold text-lg text-slate-800">Gümrük Sınırları</h3>
+                    </div>
+                    <ul class="space-y-2 text-sm text-slate-600">
+                        <li><i class="fa-solid fa-cigarette text-orange-600 mr-2"></i>Sigara: 600 adet</li>
+                        <li><i class="fa-solid fa-wine-bottle text-purple-600 mr-2"></i>Alkol: 1 litre</li>
+                        <li><i class="fa-solid fa-coins text-yellow-600 mr-2"></i>Para: 10,000€ üzeri beyan</li>
+                        <li><i class="fa-solid fa-mobile text-blue-600 mr-2"></i>Elektronik: Beyan gerekebilir</li>
+                        <li><i class="fa-solid fa-box text-slate-600 mr-2"></i>Kişisel eşya: Sınırsız</li>
+                    </ul>
+                </div>
+
+                <!-- İpuçları -->
+                <div class="border-card p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                            <i class="fa-solid fa-lightbulb text-green-600 text-xl"></i>
+                        </div>
+                        <h3 class="font-bold text-lg text-slate-800">Yol İpuçları</h3>
+                    </div>
+                    <ul class="space-y-2 text-sm text-slate-600">
+                        <li><i class="fa-solid fa-clock text-blue-600 mr-2"></i>En az 2 saat erken yola çık</li>
+                        <li><i class="fa-solid fa-gas-pump text-orange-600 mr-2"></i>Araç kontrolü yaptır</li>
+                        <li><i class="fa-solid fa-mobile text-purple-600 mr-2"></i>Roaming paketi al</li>
+                        <li><i class="fa-solid fa-wallet text-green-600 mr-2"></i>Nakit para bulundur</li>
+                        <li><i class="fa-solid fa-utensils text-red-600 mr-2"></i>Yiyecek-içecek hazırla</li>
+                    </ul>
+                </div>
+
+                <!-- Acil Durum -->
+                <div class="border-card p-6 border-2 border-red-200">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                            <i class="fa-solid fa-phone text-red-600 text-xl"></i>
+                        </div>
+                        <h3 class="font-bold text-lg text-slate-800">Acil Telefonlar</h3>
+                    </div>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between items-center p-3 bg-red-50 rounded-lg">
+                            <span class="font-bold text-slate-700">Polis (TR)</span>
+                            <a href="tel:155" class="text-red-600 font-bold">155</a>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-red-50 rounded-lg">
+                            <span class="font-bold text-slate-700">Ambulans (TR)</span>
+                            <a href="tel:112" class="text-red-600 font-bold">112</a>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                            <span class="font-bold text-slate-700">Dışişleri (TR)</span>
+                            <a href="tel:+903124552850" class="text-blue-600 font-bold text-xs">+90 312 455 28 50</a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // ⚠️ ÖNEMLİ NOT: Bu veriler SİMÜLASYON amaçlıdır
+        // Gerçek yoğunluk verileri için entegre edilecek kaynaklar:
+        // 1. Türk Gümrük İdaresi API (https://www.gtb.gov.tr)
+        // 2. Bulgaristan Sınır Polisi API
+        // 3. Kullanıcı raporları (crowdsourcing)
+        
+        // Kameralar için entegre edilecek kaynaklar:
+        // 1. Karayolları Trafik Kameraları (KGM)
+        // 2. Bulgaristan Yol Ajansı Kameraları
+        // 3. Yunanistan Otoyol Kameraları
+        
+        const borderGates = [
+            {
+                name: 'Kapıkule',
+                country: 'Bulgaristan',
+                density: 'medium',
+                waitTime: '45-60 dk',
+                status: 'open',
+                lastUpdate: '5 dk önce'
+            },
+            {
+                name: 'İpsala',
+                country: 'Yunanistan',
+                density: 'low',
+                waitTime: '15-30 dk',
+                status: 'open',
+                lastUpdate: '3 dk önce'
+            },
+            {
+                name: 'Hamzabeyli',
+                country: 'Bulgaristan',
+                density: 'high',
+                waitTime: '90+ dk',
+                status: 'open',
+                lastUpdate: '10 dk önce'
+            },
+            {
+                name: 'Pazarkule',
+                country: 'Yunanistan',
+                density: 'low',
+                waitTime: '20-30 dk',
+                status: 'open',
+                lastUpdate: '7 dk önce'
+            },
+            {
+                name: 'Dereköy',
+                country: 'Bulgaristan',
+                density: 'medium',
+                waitTime: '40-50 dk',
+                status: 'open',
+                lastUpdate: '2 dk önce'
+            },
+            {
+                name: 'Çıldır',
+                country: 'Gürcistan',
+                density: 'low',
+                waitTime: '10-20 dk',
+                status: 'open',
+                lastUpdate: '15 dk önce'
+            }
+        ];
+
+        // Popüler rotalar
+        const popularRoutes = [
+            { from: 'Berlin', to: 'İstanbul', distance: '2,100 km', time: '22 saat', via: 'Kapıkule' },
+            { from: 'München', to: 'Ankara', distance: '2,400 km', time: '25 saat', via: 'Kapıkule' },
+            { from: 'Frankfurt', to: 'İzmir', distance: '2,650 km', time: '27 saat', via: 'İpsala' },
+            { from: 'Wien', to: 'İstanbul', distance: '1,650 km', time: '18 saat', via: 'Kapıkule' }
+        ];
+
+        window.onload = function() {
+            loadGates();
+            loadPopularRoutes();
+            
+            // Rota dropdown'larını doldur
+            ulkeleriDoldur('routeStartCountry');
+            ulkeleriDoldur('routeEndCountry');
+            
+            // Her 2 dakikada bir güncelle (gerçek zamanlı simülasyon)
+            setInterval(updateGateDensity, 120000);
+        };
+
+        function loadGates() {
+            const container = document.getElementById('gatesList');
+            container.innerHTML = '';
+
+            borderGates.forEach((gate, index) => {
+                const densityClass = `density-${gate.density}`;
+                const densityText = gate.density === 'low' ? 'Düşük' : gate.density === 'medium' ? 'Orta' : 'Yüksek';
+                const densityIcon = gate.density === 'low' ? '🟢' : gate.density === 'medium' ? '🟡' : '🔴';
+
+                const card = `
+                    <div class="border-card cursor-pointer" onclick="showGateDetail('${gate.name}')">
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 class="font-bold text-lg text-slate-800">${gate.name}</h3>
+                                    <p class="text-sm text-slate-600"><i class="fa-solid fa-flag mr-1"></i>${gate.country}</p>
+                                </div>
+                                <span class="${densityClass} text-white px-3 py-1 rounded-full text-xs font-bold">
+                                    ${densityIcon} ${densityText}
+                                </span>
+                            </div>
+
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                                    <span class="text-xs text-slate-600"><i class="fa-solid fa-clock mr-2"></i>Bekleme Süresi</span>
+                                    <span class="font-bold text-slate-800">${gate.waitTime}</span>
+                                </div>
+
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs ${gate.status === 'open' ? 'text-green-600' : 'text-red-600'} font-bold">
+                                        <i class="fa-solid fa-circle mr-1 pulse-animation"></i>
+                                        ${gate.status === 'open' ? 'Açık' : 'Kapalı'}
+                                    </span>
+                                </div>
+
+                                <div class="text-xs text-slate-400 text-right">
+                                    <i class="fa-solid fa-clock mr-1"></i>Güncelleme: ${gate.lastUpdate}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-slate-50 px-6 py-3 flex justify-between items-center border-t">
+                            <button class="text-blue-600 font-bold text-sm hover:text-blue-700 transition">
+                                Detaylar <i class="fa-solid fa-arrow-right ml-1"></i>
+                            </button>
+                            <button onclick="event.stopPropagation(); openGoogleMaps('${gate.name}')" class="text-green-600 font-bold text-sm hover:text-green-700 transition">
+                                <i class="fa-solid fa-map-marked-alt mr-1"></i>Harita
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += card;
+            });
+        }
+
+        function loadPopularRoutes() {
+            const container = document.getElementById('popularRoutes');
+            popularRoutes.forEach(route => {
+                const card = `
+                    <div class="border-card p-4">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="flex-1">
+                                <div class="font-bold text-slate-800">${route.from}</div>
+                                <div class="text-xs text-slate-600">${route.distance} • ${route.time}</div>
+                            </div>
+                            <i class="fa-solid fa-arrow-right text-blue-600 text-xl"></i>
+                            <div class="flex-1 text-right">
+                                <div class="font-bold text-slate-800">${route.to}</div>
+                                <div class="text-xs text-slate-600">Via ${route.via}</div>
+                            </div>
+                        </div>
+                        <button onclick="openGoogleMapsRoute('${route.from}', '${route.to}')" class="w-full bg-green-600 text-white py-2 rounded-lg text-sm font-bold hover:bg-green-700 transition">
+                            <i class="fa-solid fa-map mr-2"></i>Google Maps'te Aç
+                        </button>
+                    </div>
+                `;
+                container.innerHTML += card;
+            });
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-white', 'text-blue-600', 'shadow-lg');
+                btn.classList.add('bg-white/20', 'text-white');
+            });
+            
+            document.getElementById(`tab-${tab}`).classList.remove('bg-white/20', 'text-white');
+            document.getElementById(`tab-${tab}`).classList.add('bg-white', 'text-blue-600', 'shadow-lg');
+            
+            ['gates', 'live', 'routes', 'info'].forEach(t => {
+                const el = document.getElementById(`content-${t}`);
+                if (el) el.classList.add('hidden');
+            });
+            document.getElementById(`content-${tab}`).classList.remove('hidden');
+            
+            // Canlı Bildirimler tabı açıldığında haritayı yükle
+            if (tab === 'live') {
+                initLiveReportsMap();
+                loadLiveReports();
+            }
+        }
+
+        function showGateDetail(gateName) {
+            const gate = borderGates.find(g => g.name === gateName);
+            Swal.fire({
+                title: gate.name + ' Gümrük Kapısı',
+                html: `
+                    <div class="text-left">
+                        <p class="mb-2"><strong>Ülke:</strong> ${gate.country}</p>
+                        <p class="mb-2"><strong>Durum:</strong> <span class="text-green-600 font-bold">${gate.status === 'open' ? 'Açık' : 'Kapalı'}</span></p>
+                        <p class="mb-2"><strong>Yoğunluk:</strong> ${gate.density === 'low' ? '🟢 Düşük' : gate.density === 'medium' ? '🟡 Orta' : '🔴 Yüksek'}</p>
+                        <p class="mb-2"><strong>Bekleme Süresi:</strong> ${gate.waitTime}</p>
+                    </div>
+                `,
+                confirmButtonText: 'Tamam',
+                confirmButtonColor: '#2563eb'
+            });
+        }
+
+        function openGoogleMaps(gateName) {
+            const searchQuery = encodeURIComponent(gateName + ' gümrük kapısı');
+            window.open(`https://www.google.com/maps/search/${searchQuery}`, '_blank');
+        }
+
+        function openGoogleMapsRoute(from, to) {
+            window.open(`https://www.google.com/maps/dir/${encodeURIComponent(from)}/${encodeURIComponent(to)}`, '_blank');
+        }
+
+        function calculateRoute() {
+            const startCity = document.getElementById('routeStartCity').value;
+            const endCity = document.getElementById('routeEndCity').value;
+            
+            if (!startCity || !endCity) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Eksik Bilgi',
+                    text: 'Lütfen başlangıç ve varış şehirlerini seçin',
+                    confirmButtonColor: '#2563eb'
+                });
+                return;
+            }
+            
+            // Google Maps'te aç
+            window.open(`https://www.google.com/maps/dir/${encodeURIComponent(startCity)}/${encodeURIComponent(endCity)}`, '_blank');
+        }
+
+        function openRouteCalculator() {
+            switchTab('routes');
+        }
+
+        // Yoğunluk güncelleme (simülasyon)
+        function updateGateDensity() {
+            // Gerçek zamanlı API entegrasyonu buraya eklenebilir
+            console.log('Gümrük yoğunlukları güncellendi');
+        }
+
+        // ==========================================
+        // CANLI BİLDİRİMLER (WAZE BENZERİ) SİSTEMİ
+        // ==========================================
+        
+        let liveReportsMap = null;
+        let reportMarkers = [];
+        let userMarker = null;
+        let userLocation = { lat: null, lng: null };
+        
+        // Haritayı başlat
+        function initLiveReportsMap() {
+            if (liveReportsMap) return; // Zaten başlatıldıysa
+            
+            liveReportsMap = L.map('liveReportsMap').setView([45.0, 20.0], 5); // Balkanlar merkezi
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+            }).addTo(liveReportsMap);
+            
+            // Kullanıcı konumunu al
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        userLocation.lat = position.coords.latitude;
+                        userLocation.lng = position.coords.longitude;
+                        
+                        // Kullanıcı konumu marker'ı
+                        userMarker = L.marker([userLocation.lat, userLocation.lng], {
+                            icon: L.divIcon({
+                                className: 'user-marker',
+                                html: '<div style="background: #3b82f6; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px rgba(59,130,246,0.5);"></div>',
+                                iconSize: [16, 16],
+                                iconAnchor: [8, 8]
+                            })
+                        }).addTo(liveReportsMap);
+                        
+                        userMarker.bindPopup('📍 Konumunuz');
+                        console.log('✅ Kullanıcı konumu alındı:', userLocation);
+                    },
+                    (error) => {
+                        console.warn('⚠️ Konum alınamadı:', error);
+                        // Sessizce devam et, kullanıcı manuel seçebilir
+                    },
+                    {
+                        enableHighAccuracy: false, // Mobilde daha hızlı
+                        timeout: 20000, // 20 saniye timeout
+                        maximumAge: 60000 // 1 dakika cache
+                    }
+                );
+            }
+        }
+        
+        // Bildirimleri yükle
+        async function loadLiveReports() {
+            const listContainer = document.getElementById('liveReportsList');
+            const countBadge = document.getElementById('reportCount');
+            
+            try {
+                const { data, error } = await sb
+                    .from('road_reports')
+                    .select('*')
+                    .eq('is_active', true)
+                    .order('created_at', { ascending: false })
+                    .limit(50);
+                
+                if (error) throw error;
+                
+                // Eski markerları temizle
+                reportMarkers.forEach(m => liveReportsMap.removeLayer(m));
+                reportMarkers = [];
+                
+                if (!data || data.length === 0) {
+                    listContainer.innerHTML = `
+                        <div class="text-center py-8 text-slate-400">
+                            <i class="fa-solid fa-road text-4xl mb-3"></i>
+                            <p>Henüz bildirim yok. İlk bildirimi siz yapın!</p>
+                        </div>
+                    `;
+                    countBadge.textContent = '0';
+                    return;
+                }
+                
+                countBadge.textContent = data.length;
+                listContainer.innerHTML = '';
+                
+                data.forEach(report => {
+                    // Haritaya marker ekle
+                    if (report.lat && report.lng && report.lat !== 0) {
+                        addReportMarker(report);
+                    }
+                    
+                    // Listeye ekle
+                    listContainer.innerHTML += createReportCard(report);
+                });
+                
+            } catch (err) {
+                console.error('Bildirim yükleme hatası:', err);
+                listContainer.innerHTML = '<div class="text-center py-4 text-red-500">Yüklenirken hata oluştu.</div>';
+            }
+        }
+        
+        // Marker ekle
+        function addReportMarker(report) {
+            const tur = typeof bildirimTurleri !== 'undefined' 
+                ? bildirimTurleri.find(t => t.id === report.report_type) 
+                : null;
+            
+            const color = tur?.renk || '#8b5cf6';
+            const icon = tur?.ikon || 'fa-circle-exclamation';
+            const emoji = tur?.emoji || '📍';
+            
+            const marker = L.marker([report.lat, report.lng], {
+                icon: L.divIcon({
+                    className: 'report-marker',
+                    html: `<div style="background: ${color}; width: 32px; height: 32px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; font-size: 14px;">${emoji}</div>`,
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 16]
+                })
+            }).addTo(liveReportsMap);
+            
+            // Popup içeriği
+            const timeAgo = getTimeAgo(new Date(report.created_at));
+            marker.bindPopup(`
+                <div style="min-width: 200px;">
+                    <div style="font-weight: bold; color: ${color}; margin-bottom: 8px;">
+                        ${emoji} ${tur?.isim || report.report_type}
+                    </div>
+                    <p style="margin-bottom: 8px; color: #333;">${report.description || 'Açıklama yok'}</p>
+                    <p style="font-size: 12px; color: #666;"><i class="fa-solid fa-clock"></i> ${timeAgo}</p>
+                    <p style="font-size: 12px; color: #666;"><i class="fa-solid fa-user"></i> ${report.user_name || 'Anonim'}</p>
+                    ${report.verified_count > 0 ? `<p style="font-size: 12px; color: #22c55e;"><i class="fa-solid fa-check-circle"></i> ${report.verified_count} kişi doğruladı</p>` : ''}
+                    <div style="margin-top: 12px; display: flex; gap: 8px;">
+                        <a href="https://www.google.com/maps/dir/?api=1&destination=${report.lat},${report.lng}" target="_blank" 
+                           style="background: #4285f4; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 12px;">
+                            <i class="fa-brands fa-google"></i> Google
+                        </a>
+                        <a href="https://waze.com/ul?ll=${report.lat},${report.lng}&navigate=yes" target="_blank"
+                           style="background: #33ccff; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 12px;">
+                            <i class="fa-solid fa-diamond-turn-right"></i> Waze
+                        </a>
+                    </div>
+                </div>
+            `);
+            
+            reportMarkers.push(marker);
+        }
+        
+        // Bildirim kartı oluştur
+        function createReportCard(report) {
+            const tur = typeof bildirimTurleri !== 'undefined' 
+                ? bildirimTurleri.find(t => t.id === report.report_type) 
+                : null;
+            
+            const color = tur?.renk || '#8b5cf6';
+            const icon = tur?.ikon || 'fa-circle-exclamation';
+            const emoji = tur?.emoji || '📍';
+            const timeAgo = getTimeAgo(new Date(report.created_at));
+            
+            return `
+                <div class="bg-white border border-slate-200 rounded-xl p-4 hover:shadow-md transition cursor-pointer" onclick="focusOnReport(${report.lat}, ${report.lng})">
+                    <div class="flex items-start gap-3">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center text-white text-lg" style="background: ${color}">
+                            ${emoji}
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between mb-1">
+                                <h4 class="font-bold text-slate-800">${tur?.isim || report.report_type}</h4>
+                                <span class="text-xs text-slate-400">${timeAgo}</span>
+                            </div>
+                            <p class="text-sm text-slate-600 mb-2">${report.description || 'Açıklama yok'}</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-slate-400">
+                                    <i class="fa-solid fa-user mr-1"></i>${report.user_name || 'Anonim'}
+                                </span>
+                                <div class="flex items-center gap-2">
+                                    ${report.verified_count > 0 ? `<span class="text-xs text-green-600"><i class="fa-solid fa-check-circle mr-1"></i>${report.verified_count}</span>` : ''}
+                                    <button onclick="event.stopPropagation(); verifyReport(${report.id})" class="text-xs text-blue-600 hover:text-blue-700">
+                                        <i class="fa-solid fa-thumbs-up mr-1"></i>Ben de gördüm
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Zaman farkını hesapla
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diff = Math.floor((now - date) / 1000);
+            
+            if (diff < 60) return 'Az önce';
+            if (diff < 3600) return Math.floor(diff / 60) + ' dk önce';
+            if (diff < 86400) return Math.floor(diff / 3600) + ' saat önce';
+            return Math.floor(diff / 86400) + ' gün önce';
+        }
+        
+        // Haritada rapora odaklan
+        function focusOnReport(lat, lng) {
+            if (liveReportsMap && lat && lng) {
+                liveReportsMap.setView([lat, lng], 12);
+            }
+        }
+        
+        // Kullanıcı konumuna odaklan
+        function centerMapToUser() {
+            if (userLocation.lat && liveReportsMap) {
+                liveReportsMap.setView([userLocation.lat, userLocation.lng], 10);
+            } else {
+                Swal.fire('Bilgi', 'Konumunuz henüz tespit edilemedi.', 'info');
+            }
+        }
+        
+        // Bildirimi doğrula
+        async function verifyReport(reportId) {
+            try {
+                // verify_road_report fonksiyonunu çağır
+                const { error } = await sb.rpc('verify_road_report', { report_id: reportId });
+                
+                if (error) throw error;
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Teşekkürler!',
+                    text: 'Doğrulamanız kaydedildi.',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+                
+                loadLiveReports();
+                
+            } catch (err) {
+                console.error('Doğrulama hatası:', err);
+            }
+        }
+        
+        // Yenile
+        function refreshLiveReports() {
+            loadLiveReports();
+            Swal.fire({
+                icon: 'success',
+                title: 'Yenilendi',
+                timer: 1000,
+                showConfirmButton: false
+            });
+        }
+        
+        // Bildirim yapma modalı
+        async function openReportModal() {
+            // Önce konum al
+            Swal.fire({
+                title: 'Konum Tespit Ediliyor...',
+                html: '<i class="fa-solid fa-location-crosshairs fa-spin text-4xl text-purple-500"></i>',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(
+                            async (position) => {
+                                Swal.close();
+                                showReportModalWithLocation(position.coords.latitude, position.coords.longitude);
+                            },
+                            (error) => {
+                                Swal.close();
+                                console.error('📍 Konum hatası:', error);
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: 'Konum Alınamadı',
+                                    text: 'Konum izni verilmedi veya GPS çalışmıyor. Lütfen tarayıcı ayarlarından konum izni verin.',
+                                    confirmButtonText: 'Tamam',
+                                    confirmButtonColor: '#8b5cf6'
+                                });
+                            },
+                            { 
+                                enableHighAccuracy: false, // Mobilde daha hızlı
+                                timeout: 20000, // 20 saniye timeout
+                                maximumAge: 60000 // 1 dakika cache
+                            }
+                        );
+                    } else {
+                        Swal.close();
+                        Swal.fire('Hata', 'Tarayıcınız konum servisini desteklemiyor.', 'error');
+                    }
+                }
+            });
+        }
+        
+        async function showReportModalWithLocation(lat, lng) {
+            // Adres al
+            let address = '';
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=tr`);
+                const data = await res.json();
+                address = data.display_name || '';
+            } catch(e) {}
+            
+            // Bildirim türleri
+            let typeOptions = '';
+            if (typeof bildirimTurleri !== 'undefined') {
+                bildirimTurleri.forEach(t => {
+                    typeOptions += `<option value="${t.id}">${t.emoji} ${t.isim}</option>`;
+                });
+            }
+            
+            const { value: formValues } = await Swal.fire({
+                title: '<i class="fa-solid fa-bullhorn text-purple-500 mr-2"></i> Yol Bildirimi',
+                html: `
+                    <p class="text-sm text-green-600 mb-4"><i class="fa-solid fa-check-circle mr-1"></i> ${address.substring(0, 60)}...</p>
+                    <select id="swal-type" class="swal2-input" style="margin-bottom: 10px;">
+                        ${typeOptions}
+                    </select>
+                    <input id="swal-desc" class="swal2-input" placeholder="Detay (Örn: Gizli radar, dikkat!)">
+                `,
+                showCancelButton: true,
+                confirmButtonText: '<i class="fa-solid fa-paper-plane mr-1"></i> Bildir',
+                cancelButtonText: 'İptal',
+                confirmButtonColor: '#8b5cf6',
+                focusConfirm: false,
+                preConfirm: () => {
+                    const type = document.getElementById('swal-type').value;
+                    const desc = document.getElementById('swal-desc').value;
+                    if (!desc) {
+                        Swal.showValidationMessage('Lütfen bir açıklama girin');
+                        return false;
+                    }
+                    return { type, desc };
+                }
+            });
+
+            if (formValues) {
+                try {
+                    let expiresAt = null;
+                    if (typeof hesaplaGecerlilik === 'function') {
+                        expiresAt = hesaplaGecerlilik(formValues.type);
+                    }
+                    
+                    await sb.from('road_reports').insert([{
+                        report_type: formValues.type, 
+                        description: formValues.desc, 
+                        lat: lat, 
+                        lng: lng,
+                        address: address,
+                        expires_at: expiresAt ? expiresAt.toISOString() : null,
+                        is_active: true,
+                        user_id: currentUser?.id || null,
+                        user_name: currentProfile?.full_name || currentUser?.email || 'Misafir'
+                    }]);
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Bildiriminiz Kaydedildi!',
+                        text: 'Diğer yolcular artık bu uyarıyı görebilir.',
+                        confirmButtonColor: '#8b5cf6'
+                    });
+                    
+                    loadLiveReports();
+                    
+                } catch (err) {
+                    console.error('Bildirim hatası:', err);
+                    Swal.fire('Hata', 'Bildirim kaydedilemedi.', 'error');
+                }
+            }
+        }
+    </script>
+
+</body>
+</html>

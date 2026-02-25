@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Döviz & Altın - PlatformAvrupa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="config.js"></script>
+    <script src="auth.js"></script>
+    <script src="utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="genel_veriler.js"></script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); }
+        .gold-gradient { background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%); }
+        .card { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .price-up { color: #22c55e; }
+        .price-down { color: #ef4444; }
+        .shimmer { animation: shimmer 2s infinite; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); background-size: 200% 100%; }
+        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+        .gold-card:hover { transform: translateY(-4px); box-shadow: 0 10px 40px rgba(245, 158, 11, 0.2); }
+        .currency-row:hover { background: rgba(255,255,255,0.05); }
+    </style>
+</head>
+<body class="min-h-screen text-white">
+
+    <!-- Header -->
+    <nav class="bg-black/30 backdrop-blur-xl sticky top-0 z-50 border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
+            <a href="index.html" class="flex items-center gap-2 text-white hover:text-yellow-400 transition font-bold">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span class="hidden sm:inline">Ana Sayfa</span>
+            </a>
+            
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-coins text-2xl text-yellow-400"></i>
+                <h1 class="font-bold text-xl">Döviz & Altın</h1>
+            </div>
+            
+            <button onclick="loadAllPrices()" class="bg-yellow-500 hover:bg-yellow-400 text-black px-4 py-2 rounded-full text-sm font-bold shadow-lg flex items-center gap-2 transition">
+                <i class="fa-solid fa-rotate"></i>
+                <span class="hidden sm:inline">Yenile</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="gold-gradient py-8 sm:py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <!-- EUR/TRY -->
+                <div class="bg-black/20 backdrop-blur rounded-2xl p-4 text-center">
+                    <p class="text-white/70 text-xs mb-1">🇪🇺 EUR/TRY</p>
+                    <p id="heroEur" class="text-2xl sm:text-3xl font-black">--</p>
+                    <p id="heroEurChange" class="text-sm mt-1">--</p>
+                </div>
+                <!-- USD/TRY -->
+                <div class="bg-black/20 backdrop-blur rounded-2xl p-4 text-center">
+                    <p class="text-white/70 text-xs mb-1">🇺🇸 USD/TRY</p>
+                    <p id="heroUsd" class="text-2xl sm:text-3xl font-black">--</p>
+                    <p id="heroUsdChange" class="text-sm mt-1">--</p>
+                </div>
+                <!-- Gram Altın -->
+                <div class="bg-black/20 backdrop-blur rounded-2xl p-4 text-center">
+                    <p class="text-white/70 text-xs mb-1">🥇 Gram Altın</p>
+                    <p id="heroGold" class="text-2xl sm:text-3xl font-black">--</p>
+                    <p id="heroGoldChange" class="text-sm mt-1">--</p>
+                </div>
+                <!-- GBP/TRY -->
+                <div class="bg-black/20 backdrop-blur rounded-2xl p-4 text-center">
+                    <p class="text-white/70 text-xs mb-1">🇬🇧 GBP/TRY</p>
+                    <p id="heroGbp" class="text-2xl sm:text-3xl font-black">--</p>
+                    <p id="heroGbpChange" class="text-sm mt-1">--</p>
+                </div>
+            </div>
+            <p id="lastUpdate" class="text-center text-white/60 text-xs mt-4">Son güncelleme: --</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Tab Menu -->
+        <div class="flex gap-2 mb-8 overflow-x-auto pb-2">
+            <button onclick="switchTab('gold')" id="tab-gold" class="tab-btn bg-yellow-500 text-black px-6 py-3 rounded-full font-bold text-sm whitespace-nowrap transition">
+                <i class="fa-solid fa-coins mr-2"></i>Altın Fiyatları
+            </button>
+            <button onclick="switchTab('currency')" id="tab-currency" class="tab-btn bg-white/10 text-white px-6 py-3 rounded-full font-bold text-sm whitespace-nowrap hover:bg-white/20 transition">
+                <i class="fa-solid fa-money-bill-wave mr-2"></i>Döviz Kurları
+            </button>
+            <button onclick="switchTab('converter')" id="tab-converter" class="tab-btn bg-white/10 text-white px-6 py-3 rounded-full font-bold text-sm whitespace-nowrap hover:bg-white/20 transition">
+                <i class="fa-solid fa-calculator mr-2"></i>Çevirici
+            </button>
+        </div>
+
+        <!-- Altın Fiyatları -->
+        <div id="content-gold">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="goldGrid">
+                <!-- Dinamik olarak doldurulacak -->
+            </div>
+        </div>
+
+        <!-- Döviz Kurları -->
+        <div id="content-currency" class="hidden">
+            <!-- Filtre -->
+            <div class="card rounded-2xl p-4 mb-6">
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <div class="flex-1">
+                        <input type="text" id="currencySearch" onkeyup="filterCurrencies()" placeholder="Para birimi ara..." class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-white/50 outline-none focus:border-yellow-500">
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="filterByType('all')" class="filter-btn bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-sm font-bold transition active">Tümü</button>
+                        <button onclick="filterByType('main')" class="filter-btn bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-sm font-bold transition">Ana</button>
+                        <button onclick="filterByType('europe')" class="filter-btn bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-sm font-bold transition">Avrupa</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Döviz Tablosu -->
+            <div class="card rounded-2xl overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-white/5 border-b border-white/10">
+                            <tr>
+                                <th class="text-left px-4 py-3 text-xs font-bold text-white/70">Para Birimi</th>
+                                <th class="text-right px-4 py-3 text-xs font-bold text-white/70">1 TL</th>
+                                <th class="text-right px-4 py-3 text-xs font-bold text-white/70">= TL</th>
+                                <th class="text-right px-4 py-3 text-xs font-bold text-white/70">Değişim</th>
+                                <th class="text-center px-4 py-3 text-xs font-bold text-white/70">Grafik</th>
+                            </tr>
+                        </thead>
+                        <tbody id="currencyTable">
+                            <!-- Dinamik olarak doldurulacak -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Para Çevirici -->
+        <div id="content-converter" class="hidden">
+            <div class="card rounded-2xl p-6 max-w-xl mx-auto">
+                <h3 class="font-bold text-xl text-center mb-6"><i class="fa-solid fa-calculator text-yellow-400 mr-2"></i>Para Çevirici</h3>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-xs text-white/70 mb-1 block">Miktar</label>
+                        <input type="number" id="convertAmount" value="100" class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white text-xl font-bold outline-none focus:border-yellow-500">
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-xs text-white/70 mb-1 block">Kaynak</label>
+                            <select id="convertFrom" class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white outline-none focus:border-yellow-500">
+                                <option value="EUR">🇪🇺 EUR</option>
+                                <option value="USD">🇺🇸 USD</option>
+                                <option value="GBP">🇬🇧 GBP</option>
+                                <option value="TRY">🇹🇷 TRY</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-xs text-white/70 mb-1 block">Hedef</label>
+                            <select id="convertTo" class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white outline-none focus:border-yellow-500">
+                                <option value="TRY">🇹🇷 TRY</option>
+                                <option value="EUR">🇪🇺 EUR</option>
+                                <option value="USD">🇺🇸 USD</option>
+                                <option value="GBP">🇬🇧 GBP</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button onclick="convertCurrency()" class="w-full bg-yellow-500 hover:bg-yellow-400 text-black py-4 rounded-xl font-bold text-lg transition">
+                        <i class="fa-solid fa-arrows-rotate mr-2"></i>Çevir
+                    </button>
+                    
+                    <div id="convertResult" class="hidden bg-white/10 rounded-xl p-6 text-center">
+                        <p class="text-white/70 text-sm mb-2">Sonuç</p>
+                        <p id="convertResultValue" class="text-3xl font-black text-yellow-400">--</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grafik Modal -->
+    <div id="chartModal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+        <div class="card rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="chartTitle" class="font-bold text-xl">30 Günlük Grafik</h3>
+                <button onclick="closeChartModal()" class="text-white/50 hover:text-white">
+                    <i class="fa-solid fa-times text-xl"></i>
+                </button>
+            </div>
+            <canvas id="priceChart" height="300"></canvas>
+            <p id="chartInfo" class="text-center text-white/50 text-xs mt-4">Son 30 günlük fiyat değişimi</p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/10 py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-white/50 text-sm">Veriler <a href="https://www.exchangerate-api.com" target="_blank" class="text-yellow-400 hover:underline">ExchangeRate-API</a> ve <a href="https://www.frankfurter.app" target="_blank" class="text-yellow-400 hover:underline">Frankfurter</a>'dan alınmaktadır.</p>
+            <p class="text-white/30 text-xs mt-2">Fiyatlar bilgi amaçlıdır, yatırım tavsiyesi değildir.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Global değişkenler
+        let exchangeRates = {};
+        let goldPrices = {};
+        let priceChart = null;
+        const CACHE_DURATION_MINUTES = 10; // Cache süresi: 10 dakika
+        
+        // ========== CACHE YÖNETİMİ ==========
+        
+        // Cache'den altın fiyatlarını oku
+        function getCachedGoldPrices() {
+            try {
+                const cached = localStorage.getItem('gold_prices_cache');
+                if (!cached) return null;
+                
+                const data = JSON.parse(cached);
+                return data;
+            } catch (e) {
+                console.warn('Cache okuma hatası:', e);
+                return null;
+            }
+        }
+        
+        // Altın fiyatlarını cache'e yaz
+        function setCachedGoldPrices(prices, source) {
+            try {
+                const cacheData = {
+                    prices: prices,
+                    timestamp: Date.now(),
+                    source: source || 'unknown'
+                };
+                localStorage.setItem('gold_prices_cache', JSON.stringify(cacheData));
+                console.log('✅ Altın fiyatları cache\'e kaydedildi');
+            } catch (e) {
+                console.warn('Cache yazma hatası:', e);
+            }
+        }
+        
+        // Cache geçerliliğini kontrol et
+        function isCacheValid(cache, maxAgeMinutes) {
+            if (!cache || !cache.timestamp) return false;
+            
+            const age = Date.now() - cache.timestamp;
+            const maxAge = maxAgeMinutes * 60 * 1000; // dakika -> milisaniye
+            
+            return age < maxAge;
+        }
+        
+        // Geçmiş fiyat kaydet (30 günlük)
+        function saveHistoricalPrice(goldType, price) {
+            try {
+                const historyKey = 'gold_prices_history';
+                let history = {};
+                
+                // Mevcut geçmişi oku
+                const cached = localStorage.getItem(historyKey);
+                if (cached) {
+                    history = JSON.parse(cached);
+                }
+                
+                // Bu altın türü için geçmiş yoksa oluştur
+                if (!history[goldType]) {
+                    history[goldType] = [];
+                }
+                
+                // Bugünün tarihi
+                const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+                
+                // Bugünün kaydı var mı kontrol et
+                const todayIndex = history[goldType].findIndex(h => h.date === today);
+                
+                if (todayIndex >= 0) {
+                    // Bugünün kaydı varsa güncelle
+                    history[goldType][todayIndex].price = price;
+                    history[goldType][todayIndex].timestamp = Date.now();
+                } else {
+                    // Yeni kayıt ekle
+                    history[goldType].push({
+                        date: today,
+                        price: price,
+                        timestamp: Date.now()
+                    });
+                }
+                
+                // 30 günden eski kayıtları sil
+                history[goldType] = history[goldType]
+                    .filter(h => {
+                        const recordDate = new Date(h.date);
+                        const daysAgo = (Date.now() - recordDate.getTime()) / (1000 * 60 * 60 * 24);
+                        return daysAgo <= 30;
+                    })
+                    .sort((a, b) => new Date(a.date) - new Date(b.date)); // Tarihe göre sırala
+                
+                // Cache'e kaydet
+                localStorage.setItem(historyKey, JSON.stringify(history));
+            } catch (e) {
+                console.warn('Geçmiş fiyat kaydetme hatası:', e);
+            }
+        }
+        
+        // 30 günlük geçmiş fiyatları al
+        function getHistoricalPrices(goldType) {
+            try {
+                const cached = localStorage.getItem('gold_prices_history');
+                if (!cached) return [];
+                
+                const history = JSON.parse(cached);
+                return history[goldType] || [];
+            } catch (e) {
+                console.warn('Geçmiş fiyat okuma hatası:', e);
+                return [];
+            }
+        }
+        
+        // Sayfa yüklendiğinde
+        window.onload = async function() {
+            // genel_veriler.js yüklenmesini bekle
+            await waitForGenelVeriler();
+            await loadAllPrices();
+            
+            // Her 10 dakikada bir otomatik cache güncelle (sessiz - kullanıcıya bildirim yok)
+            setInterval(async () => {
+                console.log('🔄 Otomatik cache güncelleme başlatılıyor (10 dakika)...');
+                try {
+                    await calculateGoldPrices();
+                    // UI'ı sessizce güncelle
+                    updateHeroSection();
+                    renderGoldGrid();
+                    document.getElementById('lastUpdate').textContent = 
+                        'Son güncelleme: ' + new Date().toLocaleTimeString('tr-TR') + ' (Otomatik)';
+                } catch (error) {
+                    console.warn('Otomatik güncelleme hatası:', error);
+                }
+            }, 10 * 60 * 1000); // 10 dakika
+        };
+        
+        // genel_veriler.js yüklenmesini bekle
+        function waitForGenelVeriler() {
+            return new Promise((resolve) => {
+                if (typeof altinTurleri !== 'undefined' && typeof paraBirimleri !== 'undefined') {
+                    resolve();
+                    return;
+                }
+                
+                let retryCount = 0;
+                const maxRetries = 20;
+                const checkInterval = setInterval(() => {
+                    retryCount++;
+                    if (typeof altinTurleri !== 'undefined' && typeof paraBirimleri !== 'undefined') {
+                        clearInterval(checkInterval);
+                        console.log('✅ genel_veriler.js yüklendi');
+                        resolve();
+                    } else if (retryCount >= maxRetries) {
+                        clearInterval(checkInterval);
+                        console.warn('⚠️ genel_veriler.js yüklenemedi, devam ediliyor...');
+                        resolve();
+                    }
+                }, 100);
+            });
+        }
+        
+        // Tüm fiyatları yükle (cache mekanizması ile optimize edilmiş)
+        async function loadAllPrices() {
+            showLoading();
+            
+            try {
+                // Döviz kurlarını çek (hızlı)
+                await loadExchangeRates();
+                
+                // Döviz kurları yüklendi, UI'ı güncelle (kullanıcı hemen görsün)
+                updateHeroSection();
+                renderCurrencyTable();
+                
+                // Altın fiyatları: Önce cache'den kontrol et
+                const cached = getCachedGoldPrices();
+                
+                if (cached && isCacheValid(cached, CACHE_DURATION_MINUTES)) {
+                    // Cache geçerli, cache'den göster (anında)
+                    console.log('✅ Cache\'den altın fiyatları yüklendi');
+                    goldPrices = cached.prices;
+                    goldPrices._changes = {};
+                    
+                    // UI'ı güncelle
+                    updateHeroSection();
+                    renderGoldGrid();
+                    hideLoading();
+                    
+                    // Son güncelleme zamanı
+                    const cacheDate = new Date(cached.timestamp);
+                    document.getElementById('lastUpdate').textContent = 
+                        'Son güncelleme: ' + cacheDate.toLocaleTimeString('tr-TR') + ' (Cache)';
+                    
+                    // Arka planda yeni veri çek (cache'i güncelle)
+                    calculateGoldPrices().then(() => {
+                        // Yeni veri geldi, UI'ı güncelle
+                        updateHeroSection();
+                        renderGoldGrid();
+                        document.getElementById('lastUpdate').textContent = 
+                            'Son güncelleme: ' + new Date().toLocaleTimeString('tr-TR');
+                    }).catch(error => {
+                        console.error('Altın fiyat güncelleme hatası:', error);
+                    });
+                } else {
+                    // Cache yok veya geçersiz, yeni veri çek
+                    console.log('🔄 Cache geçersiz veya yok, yeni veri çekiliyor...');
+                    await calculateGoldPrices();
+                    
+                    // UI'ı güncelle
+                    updateHeroSection();
+                    renderGoldGrid();
+                    hideLoading();
+                    
+                    // Son güncelleme zamanı
+                    document.getElementById('lastUpdate').textContent = 
+                        'Son güncelleme: ' + new Date().toLocaleTimeString('tr-TR');
+                }
+                    
+            } catch (error) {
+                console.error('Fiyat yükleme hatası:', error);
+                hideLoading();
+            }
+        }
+        
+        // Döviz kurlarını çek
+        async function loadExchangeRates() {
+            try {
+                // ExchangeRate-API'den TRY bazlı kurları çek
+                const response = await fetch('https://api.exchangerate-api.com/v4/latest/TRY');
+                const data = await response.json();
+                
+                console.log('📊 ExchangeRate-API ham veri:', {
+                    base: data.base,
+                    'USD (ham)': data.rates?.USD,
+                    'EUR (ham)': data.rates?.EUR
+                });
+                
+                // Kurları ters çevir (1 birim = ? TRY)
+                exchangeRates = {};
+                for (const [currency, rate] of Object.entries(data.rates)) {
+                    exchangeRates[currency] = 1 / rate;
+                }
+                exchangeRates['TRY'] = 1;
+                
+                console.log('📊 Hesaplanan kurlar:', {
+                    'USD/TRY': exchangeRates['USD']?.toFixed(2),
+                    'EUR/TRY': exchangeRates['EUR']?.toFixed(2)
+                });
+                
+                // Dünkü kurları çekmek için Frankfurter API
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                const yesterdayStr = yesterday.toISOString().split('T')[0];
+                
+                try {
+                    const histResponse = await fetch(`https://api.frankfurter.app/${yesterdayStr}?from=TRY`);
+                    const histData = await histResponse.json();
+                    
+                    exchangeRates._yesterday = {};
+                    for (const [currency, rate] of Object.entries(histData.rates)) {
+                        exchangeRates._yesterday[currency] = 1 / rate;
+                    }
+                } catch (e) {
+                    console.log('Tarihsel veri alınamadı');
+                }
+                
+            } catch (error) {
+                console.error('Döviz kuru hatası:', error);
+                throw error;
+            }
+        }
+        
+        // Altın fiyatlarını çek - Paralel denemeler ile hızlı yükleme
+        async function fetchGoldPrices() {
+            console.log('🔄 Altın fiyatları çekiliyor (paralel)...');
+            
+            const targetUrl = 'https://anlikaltinfiyatlari.com/';
+            
+            // Tüm kaynakları PARALEL deneyelim - ilk başarılı sonucu kullan
+            const corsProxies = [
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
+                `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
+                `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`
+            ];
+            
+            // Helper: Tek bir proxy'yi dene
+            const tryProxy = async (proxyUrl, index) => {
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 saniye timeout (daha hızlı)
+                    
+                    const response = await fetch(proxyUrl, {
+                        method: 'GET',
+                        cache: 'no-cache',
+                        signal: controller.signal
+                    });
+                    
+                    clearTimeout(timeoutId);
+                    
+                    if (response.ok) {
+                        const html = await response.text();
+                        const prices = parseGoldPricesFromHTML(html);
+                        
+                        if (prices && prices.gram && prices.gram > 0) {
+                            console.log(`✅ Proxy ${index + 1} başarılı - ${Object.keys(prices).length} fiyat bulundu`);
+                            return {
+                                prices: prices,
+                                source: 'anlikaltinfiyatlari.com',
+                                needsCalculation: false
+                            };
+                        }
+                    }
+                } catch (e) {
+                    // Sessizce ignore et (paralel denemelerde)
+                }
+                return null;
+            };
+            
+            // Helper: FreeGoldAPI'yi dene
+            const tryFreeGoldAPI = async () => {
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 saniye
+                    
+                    const response = await fetch('https://freegoldapi.com/data/latest.json', {
+                        cache: 'no-cache',
+                        signal: controller.signal
+                    });
+                    
+                    clearTimeout(timeoutId);
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.price && data.price > 1000 && data.price < 5000) {
+                            console.log(`✅ FreeGoldAPI başarılı: ${data.price.toFixed(2)} USD`);
+                            return {
+                                ons: data.price,
+                                prices: null,
+                                source: 'freegoldapi',
+                                needsCalculation: true
+                            };
+                        }
+                    }
+                } catch (e) {
+                    // Sessizce ignore et
+                }
+                return null;
+            };
+            
+            // TÜM KAYNAKLARI PARALEL DENE - İlk başarılı sonucu kullan
+            console.log('   📡 Tüm kaynaklar paralel deneniyor...');
+            const allPromises = [
+                ...corsProxies.map((proxy, i) => tryProxy(proxy, i)),
+                tryFreeGoldAPI()
+            ];
+            
+            // Promise.race ile ilk başarılı sonucu al
+            const results = await Promise.allSettled(allPromises);
+            
+            for (const result of results) {
+                if (result.status === 'fulfilled' && result.value) {
+                    return result.value;
+                }
+            }
+            
+            // Hiçbiri başarılı olmadıysa tahmini fiyat kullan
+            const usdTry = exchangeRates['USD'];
+            if (usdTry && usdTry > 0) {
+                console.log('⚠️ Tüm kaynaklar başarısız, tahmini fiyat kullanılıyor');
+                return {
+                    ons: 2800,
+                    prices: null,
+                    source: 'estimated',
+                    needsCalculation: true
+                };
+            }
+            
+            console.error('❌ Tüm kaynaklardan altın fiyatı alınamadı');
+            return null;
+        }
+        
+        // HTML'den altın fiyatlarını parse et
+        function parseGoldPricesFromHTML(html) {
+            const prices = {};
+            
+            // Helper: Fiyat çıkarma
+            const extractPrice = (pattern, min, max) => {
+                const match = html.match(pattern);
+                if (match) {
+                    const priceStr = (match[1] || match[2] || match[0]).replace(/[^\d.,]/g, '').replace(',', '.');
+                    const price = parseFloat(priceStr);
+                    if (!isNaN(price) && price >= min && price <= max) {
+                        return price;
+                    }
+                }
+                return null;
+            };
+            
+            // Gram Altın
+            const gram = extractPrice(/Gram\s+Altın[^>]*>[\s\S]{0,2000}?<td[^>]*>[\s\S]{0,200}?(\d{3,5}[.,]\d{2,4})/i, 1000, 100000) ||
+                          extractPrice(/Gram\s+Altın[^>]*>[\s\S]{0,1000}?(\d{3,5}[.,]\d{2,4})/i, 1000, 100000);
+            if (gram) prices.gram = gram;
+            
+            // Çeyrek Altın
+            const ceyrek = extractPrice(/Çeyrek\s+Altın[^>]*>[\s\S]{0,2000}?<td[^>]*>[\s\S]{0,200}?(\d{4,6}[.,]\d{2,4})/i, 5000, 200000) ||
+                          extractPrice(/Çeyrek\s+Altın[^>]*>[\s\S]{0,1000}?(\d{4,6}[.,]\d{2,4})/i, 5000, 200000);
+            if (ceyrek) prices.ceyrek = ceyrek;
+            
+            // Yarım Altın
+            const yarim = extractPrice(/Yarım\s+Altın[^>]*>[\s\S]{0,2000}?<td[^>]*>[\s\S]{0,200}?(\d{4,6}[.,]\d{2,4})/i, 10000, 500000) ||
+                         extractPrice(/Yarım\s+Altın[^>]*>[\s\S]{0,1000}?(\d{4,6}[.,]\d{2,4})/i, 10000, 500000);
+            if (yarim) prices.yarim = yarim;
+            
+            // Tam Altın
+            const tam = extractPrice(/Tam\s+Altın[^>]*>[\s\S]{0,2000}?<td[^>]*>[\s\S]{0,200}?(\d{4,6}[.,]\d{2,4})/i, 20000, 1000000) ||
+                       extractPrice(/Tam\s+Altın[^>]*>[\s\S]{0,1000}?(\d{4,6}[.,]\d{2,4})/i, 20000, 1000000);
+            if (tam) prices.tam = tam;
+            
+            // Cumhuriyet Altını
+            const cumhuriyet = extractPrice(/Cumhuriyet\s+Altını[^>]*>[\s\S]{0,2000}?<td[^>]*>[\s\S]{0,200}?(\d{4,6}[.,]\d{2,4})/i, 20000, 1000000) ||
+                              extractPrice(/Cumhuriyet\s+Altını[^>]*>[\s\S]{0,1000}?(\d{4,6}[.,]\d{2,4})/i, 20000, 1000000);
+            if (cumhuriyet) prices.cumhuriyet = cumhuriyet;
+            
+            // Ata Altın
+            const ata = extractPrice(/Ata\s+Altın[^>]*>[\s\S]{0,2000}?<td[^>]*>[\s\S]{0,200}?(\d{4,6}[.,]\d{2,4})/i, 20000, 1000000) ||
+                       extractPrice(/ATA\s+ALTIN[^>]*>[\s\S]{0,1000}?(\d{4,6}[.,]\d{2,4})/i, 20000, 1000000);
+            if (ata) prices.ata = ata;
+            
+            // Gremse Altın
+            const gremse = extractPrice(/Gremse\s+Altın[^>]*>[\s\S]{0,2000}?<td[^>]*>[\s\S]{0,200}?(\d{5,7}[.,]\d{2,4})/i, 50000, 2000000) ||
+                          extractPrice(/Gremse\s+Altın[^>]*>[\s\S]{0,1000}?(\d{5,7}[.,]\d{2,4})/i, 50000, 2000000);
+            if (gremse) prices.gremse = gremse;
+            
+            // Reşat Altın
+            const resat = extractPrice(/Reşat\s+Altın[^>]*>[\s\S]{0,2000}?<td[^>]*>[\s\S]{0,200}?(\d{4,6}[.,]\d{2,4})/i, 20000, 1000000) ||
+                         extractPrice(/Reşat\s+Altın[^>]*>[\s\S]{0,1000}?(\d{4,6}[.,]\d{2,4})/i, 20000, 1000000);
+            if (resat) prices.resat = resat;
+            
+            // 14 Ayar Altın
+            const ayar14 = extractPrice(/14\s+Ayar\s+Altın[^>]*>[\s\S]{0,2000}?<td[^>]*>[\s\S]{0,200}?(\d{3,5}[.,]\d{2,4})/i, 1000, 100000) ||
+                          extractPrice(/14\s+Ayar\s+Altın[^>]*>[\s\S]{0,1000}?(\d{3,5}[.,]\d{2,4})/i, 1000, 100000);
+            if (ayar14) prices.bilezik14 = ayar14;
+            
+            // 18 Ayar Altın
+            const ayar18 = extractPrice(/18\s+Ayar\s+Altın[^>]*>[\s\S]{0,2000}?<td[^>]*>[\s\S]{0,200}?(\d{3,5}[.,]\d{2,4})/i, 1000, 100000) ||
+                          extractPrice(/18\s+Ayar\s+Altın[^>]*>[\s\S]{0,1000}?(\d{3,5}[.,]\d{2,4})/i, 1000, 100000);
+            if (ayar18) prices.bilezik18 = ayar18;
+            
+            // 22 Ayar Altın
+            const ayar22 = extractPrice(/22\s+Ayar\s+Altın[^>]*>[\s\S]{0,2000}?<td[^>]*>[\s\S]{0,200}?(\d{3,5}[.,]\d{2,4})/i, 1000, 100000) ||
+                          extractPrice(/22\s+Ayar\s+Altın[^>]*>[\s\S]{0,1000}?(\d{3,5}[.,]\d{2,4})/i, 1000, 100000);
+            if (ayar22) prices.bilezik22 = ayar22;
+            
+            return prices;
+        }
+        
+        // ChatGPT formüllerini kullanarak altın fiyatlarını hesapla (fallback için)
+        function calculateFromOnsUSD(onsUsd, usdTry) {
+            if (!onsUsd || !usdTry || onsUsd <= 0 || usdTry <= 0) {
+                console.error('❌ Geçersiz parametreler: onsUsd=' + onsUsd + ', usdTry=' + usdTry);
+                return null;
+            }
+            
+            console.log('🧮 ChatGPT formülleri ile hesaplama başlıyor (fallback)...');
+            console.log(`   Ons (USD): ${onsUsd.toFixed(2)}`);
+            console.log(`   USD/TRY: ${usdTry.toFixed(2)}`);
+            
+            // 1. Ons_TL = Ons_USD × USDTRY
+            const onsTl = onsUsd * usdTry;
+            console.log(`   Ons (TL): ${onsTl.toFixed(2)}`);
+            
+            // 2. Gram_Spot = Ons_TL / 31.1035
+            const gramSpot = onsTl / 31.1035;
+            console.log(`   Gram Spot: ${gramSpot.toFixed(2)}`);
+            
+            // 3. Gram_Serbest = Gram_Spot × 1.033 (%3.3 prim)
+            const gramSerbest = gramSpot * 1.033;
+            console.log(`   Gram Serbest: ${gramSerbest.toFixed(2)}`);
+            
+            // 4. Diğer türler = Gram_Serbest × [Çarpan]
+            const calculatedPrices = {
+                gram: gramSerbest,
+                ceyrek: gramSerbest * 1.635,
+                yarim: gramSerbest * 3.27,
+                tam: gramSerbest * 6.54,
+                cumhuriyet: gramSerbest * 6.72,
+                ata: gramSerbest * 7.216,
+                ikibuçuk: gramSerbest * 16.35,
+                beşli: gramSerbest * 32.7,
+                gremse: gramSerbest * 16.35,
+                bilezik22: gramSerbest * 0.916,
+                bilezik18: gramSerbest * 0.75,
+                bilezik14: gramSerbest * 0.585
+            };
+            
+            console.log('✅ Hesaplama tamamlandı (fallback):', {
+                gram: calculatedPrices.gram.toFixed(2),
+                ceyrek: calculatedPrices.ceyrek.toFixed(2),
+                tam: calculatedPrices.tam.toFixed(2)
+            });
+            
+            return calculatedPrices;
+        }
+        
+        // Altın fiyatlarını çek ve işle
+        async function calculateGoldPrices() {
+            console.log('🔄 Altın fiyatları çekiliyor...');
+            
+            // 1. Edge Function'dan altın fiyatlarını çek
+            const goldData = await fetchGoldPrices();
+            
+            if (!goldData) {
+                console.error('❌ Altın fiyatları alınamadı');
+                goldPrices = {};
+                goldPrices._changes = {};
+                
+                // Kullanıcıya bilgi göster
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Fiyatlar Yüklenemedi',
+                    text: 'Altın fiyatları şu anda alınamıyor. Lütfen daha sonra tekrar deneyin.',
+                    confirmButtonText: 'Tamam',
+                    confirmButtonColor: '#f59e0b'
+                });
+                return;
+            }
+            
+            // 2. Direkt fiyatlar varsa kullan (anlikaltinfiyatlari.com'dan)
+            if (goldData.prices && typeof goldData.prices === 'object' && !goldData.needsCalculation) {
+                console.log('✅ Direkt altın fiyatları kullanılıyor (anlikaltinfiyatlari.com)');
+                goldPrices = goldData.prices;
+                goldPrices._changes = {}; // Değişim oranları şimdilik boş
+                
+                // Cache'e kaydet
+                setCachedGoldPrices(goldPrices, goldData.source || 'anlikaltinfiyatlari.com');
+                
+                // Her altın türü için geçmişe ekle
+                Object.keys(goldPrices).forEach(goldType => {
+                    if (goldType !== '_changes' && goldPrices[goldType] > 0) {
+                        saveHistoricalPrice(goldType, goldPrices[goldType]);
+                    }
+                });
+                
+                console.log('📊 Final fiyatlar:', {
+                    'Gram Altın': goldPrices.gram?.toFixed(2) + ' TL',
+                    'Çeyrek Altın': goldPrices.ceyrek?.toFixed(2) + ' TL',
+                    'Tam Altın': goldPrices.tam?.toFixed(2) + ' TL'
+                });
+                return;
+            }
+            
+            // 3. Ons fiyatı var ama hesaplama gerekli (fallback: Metals API, FreeGoldAPI, TCMB)
+            if (goldData.ons && goldData.needsCalculation) {
+                console.log('⚠️ Ons fiyatı var, formül ile hesaplama yapılıyor...');
+                
+                const usdTry = exchangeRates['USD'];
+                if (!usdTry || usdTry <= 0) {
+                    console.error('❌ USD/TRY kuru alınamadı');
+                    goldPrices = {};
+                    goldPrices._changes = {};
+                    return;
+                }
+                
+                const calculatedPrices = calculateFromOnsUSD(goldData.ons, usdTry);
+                
+                if (!calculatedPrices) {
+                    console.error('❌ Altın fiyatları hesaplanamadı');
+                    goldPrices = {};
+                    goldPrices._changes = {};
+                    return;
+                }
+                
+                goldPrices = calculatedPrices;
+                goldPrices._changes = {};
+                
+                // Cache'e kaydet
+                setCachedGoldPrices(goldPrices, goldData.source || 'calculated');
+                
+                // Her altın türü için geçmişe ekle
+                Object.keys(goldPrices).forEach(goldType => {
+                    if (goldType !== '_changes' && goldPrices[goldType] > 0) {
+                        saveHistoricalPrice(goldType, goldPrices[goldType]);
+                    }
+                });
+                
+                console.log('✅ Altın fiyatları formül ile hesaplandı');
+                console.log('📊 Final fiyatlar:', {
+                    'Gram Altın': goldPrices.gram?.toFixed(2) + ' TL',
+                    'Çeyrek Altın': goldPrices.ceyrek?.toFixed(2) + ' TL',
+                    'Tam Altın': goldPrices.tam?.toFixed(2) + ' TL'
+                });
+                return;
+            }
+            
+            // 4. Hiçbir veri yok
+            console.error('❌ Geçersiz veri formatı');
+            goldPrices = {};
+            goldPrices._changes = {};
+        }
+        
+        // Hero bölümünü güncelle
+        function updateHeroSection() {
+            const eur = exchangeRates['EUR'] || 0;
+            const usd = exchangeRates['USD'] || 0;
+            const gbp = exchangeRates['GBP'] || 0;
+            const gram = goldPrices.gram || 0;
+            
+            document.getElementById('heroEur').textContent = eur.toFixed(2) + ' ₺';
+            document.getElementById('heroUsd').textContent = usd.toFixed(2) + ' ₺';
+            document.getElementById('heroGbp').textContent = gbp.toFixed(2) + ' ₺';
+            document.getElementById('heroGold').textContent = gram.toFixed(0) + ' ₺';
+            
+            // Değişim oranları
+            const eurYesterday = exchangeRates._yesterday?.['EUR'];
+            const usdYesterday = exchangeRates._yesterday?.['USD'];
+            const gbpYesterday = exchangeRates._yesterday?.['GBP'];
+            
+            if (eurYesterday) {
+                const eurChange = ((eur - eurYesterday) / eurYesterday * 100);
+                document.getElementById('heroEurChange').innerHTML = formatChange(eurChange);
+            }
+            if (usdYesterday) {
+                const usdChange = ((usd - usdYesterday) / usdYesterday * 100);
+                document.getElementById('heroUsdChange').innerHTML = formatChange(usdChange);
+            }
+            if (gbpYesterday) {
+                const gbpChange = ((gbp - gbpYesterday) / gbpYesterday * 100);
+                document.getElementById('heroGbpChange').innerHTML = formatChange(gbpChange);
+            }
+            
+            const goldChange = goldPrices._changes?.gram || 0;
+            document.getElementById('heroGoldChange').innerHTML = formatChange(goldChange);
+        }
+        
+        // Değişim formatla
+        function formatChange(change) {
+            const isUp = change >= 0;
+            const icon = isUp ? 'fa-arrow-up' : 'fa-arrow-down';
+            const colorClass = isUp ? 'price-up' : 'price-down';
+            return `<span class="${colorClass}"><i class="fa-solid ${icon} mr-1"></i>${Math.abs(change).toFixed(2)}%</span>`;
+        }
+        
+        // Altın grid'ini render et (ChatGPT formülleri ile hesaplanan fiyatlar)
+        function renderGoldGrid() {
+            const grid = document.getElementById('goldGrid');
+            grid.innerHTML = '';
+            
+            // ChatGPT formüllerine göre altın türleri listesi
+            const altinTurleriListesi = [
+                { id: "gram", isim: "Gram Altın", agirlik: "1.000", ikon: "fa-coins", renk: "#fbbf24" },
+                { id: "ceyrek", isim: "Çeyrek Altın", agirlik: "1.635", ikon: "fa-circle", renk: "#f59e0b" },
+                { id: "yarim", isim: "Yarım Altın", agirlik: "3.27", ikon: "fa-circle-half-stroke", renk: "#d97706" },
+                { id: "tam", isim: "Tam Altın (Ziynet)", agirlik: "6.54", ikon: "fa-star", renk: "#b45309" },
+                { id: "cumhuriyet", isim: "Cumhuriyet Altını", agirlik: "6.72", ikon: "fa-star-half-stroke", renk: "#92400e" },
+                { id: "ata", isim: "Ata Altın (Tam Ata)", agirlik: "7.216", ikon: "fa-crown", renk: "#78350f" },
+                { id: "ikibuçuk", isim: "İkibuçuk Altın", agirlik: "16.35", ikon: "fa-coins", renk: "#92400e" },
+                { id: "beşli", isim: "Beşli Altın", agirlik: "32.7", ikon: "fa-coins", renk: "#78350f" },
+                { id: "gremse", isim: "Gremse Altın", agirlik: "16.35", ikon: "fa-coins", renk: "#92400e" },
+                { id: "bilezik22", isim: "22 Ayar Bilezik (gr)", agirlik: "1.000", ikon: "fa-ring", renk: "#fcd34d", ayar: 22 },
+                { id: "bilezik18", isim: "18 Ayar Bilezik (gr)", agirlik: "1.000", ikon: "fa-ring", renk: "#fde68a", ayar: 18 },
+                { id: "bilezik14", isim: "14 Ayar Bilezik (gr)", agirlik: "1.000", ikon: "fa-ring", renk: "#fef3c7", ayar: 14 }
+            ];
+            
+            // Eğer altın fiyatları yoksa, yükleniyor mesajı göster
+            if (!goldPrices || Object.keys(goldPrices).length === 0 || !goldPrices.gram) {
+                grid.innerHTML = '<p class="text-center text-white/50 col-span-full py-8">Altın fiyatları yükleniyor...</p>';
+                return;
+            }
+            
+            altinTurleriListesi.forEach(altin => {
+                // Özel karakterler için ID düzeltmesi (ikibuçuk -> ikibuçuk, beşli -> beşli)
+                let fiyatKey = altin.id;
+                if (altin.id === "ikibuçuk") {
+                    fiyatKey = "ikibuçuk";
+                } else if (altin.id === "beşli") {
+                    fiyatKey = "beşli";
+                }
+                
+                const fiyat = goldPrices[fiyatKey] || 0;
+                const degisim = goldPrices._changes?.[fiyatKey] || 0;
+                const isUp = degisim >= 0;
+                
+                // Fiyat 0 ise gösterme
+                if (fiyat === 0) return;
+                
+                grid.innerHTML += `
+                    <div class="card rounded-2xl p-5 gold-card transition cursor-pointer" onclick="showGoldChart('${altin.id}')">
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="w-12 h-12 rounded-full flex items-center justify-center text-xl" style="background: ${altin.renk}20; color: ${altin.renk}">
+                                <i class="fa-solid ${altin.ikon}"></i>
+                            </div>
+                            <span class="${isUp ? 'price-up' : 'price-down'} text-sm font-bold">
+                                <i class="fa-solid ${isUp ? 'fa-arrow-up' : 'fa-arrow-down'} mr-1"></i>${Math.abs(degisim).toFixed(2)}%
+                            </span>
+                        </div>
+                        <h4 class="font-bold text-white mb-1">${altin.isim}</h4>
+                        <p class="text-2xl font-black" style="color: ${altin.renk}">${fiyat.toFixed(0)} ₺</p>
+                        <p class="text-xs text-white/50 mt-2">
+                            ${altin.agirlik} gr ${altin.ayar ? '(' + altin.ayar + ' ayar)' : ''}
+                        </p>
+                        <p class="text-xs text-yellow-400/70 mt-3 flex items-center gap-1.5 hover:text-yellow-400 transition-colors">
+                            <i class="fa-solid fa-chart-line text-xs"></i>
+                            <span>30 günlük grafik için tıklayın</span>
+                        </p>
+                    </div>
+                `;
+            });
+        }
+        
+        // Döviz tablosunu render et
+        function renderCurrencyTable() {
+            const tbody = document.getElementById('currencyTable');
+            tbody.innerHTML = '';
+            
+            if (typeof paraBirimleri === 'undefined') {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-white/50">Veri yüklenemedi.</td></tr>';
+                return;
+            }
+            
+            paraBirimleri.forEach(para => {
+                if (para.kod === 'TRY') return; // TRY'yi atla
+                
+                const rate = exchangeRates[para.kod] || 0;
+                const inverse = rate > 0 ? 1 / rate : 0;
+                const yesterdayRate = exchangeRates._yesterday?.[para.kod];
+                let change = 0;
+                if (yesterdayRate) {
+                    change = ((rate - yesterdayRate) / yesterdayRate * 100);
+                }
+                
+                const isUp = change >= 0;
+                const mainClass = para.ana ? 'bg-yellow-500/10' : '';
+                
+                tbody.innerHTML += `
+                    <tr class="currency-row border-b border-white/5 transition ${mainClass}" data-type="${para.ana ? 'main' : 'other'}" data-name="${para.isim.toLowerCase()}">
+                        <td class="px-4 py-4">
+                            <div class="flex items-center gap-3">
+                                <span class="text-2xl">${para.bayrak}</span>
+                                <div>
+                                    <p class="font-bold text-white">${para.kod}</p>
+                                    <p class="text-xs text-white/50">${para.isim}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="text-right px-4 py-4 text-white/70 text-sm">${inverse.toFixed(4)}</td>
+                        <td class="text-right px-4 py-4 font-bold text-white text-lg">${rate.toFixed(2)} ₺</td>
+                        <td class="text-right px-4 py-4">
+                            <span class="${isUp ? 'price-up' : 'price-down'} text-sm font-bold">
+                                <i class="fa-solid ${isUp ? 'fa-arrow-up' : 'fa-arrow-down'} mr-1"></i>${Math.abs(change).toFixed(2)}%
+                            </span>
+                        </td>
+                        <td class="text-center px-4 py-4">
+                            <button onclick="showCurrencyChart('${para.kod}')" class="bg-white/10 hover:bg-white/20 px-3 py-1 rounded text-xs transition">
+                                <i class="fa-solid fa-chart-line"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+        
+        // Tab değiştir
+        function switchTab(tab) {
+            // Tab butonlarını güncelle
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-yellow-500', 'text-black');
+                btn.classList.add('bg-white/10', 'text-white');
+            });
+            document.getElementById(`tab-${tab}`).classList.remove('bg-white/10', 'text-white');
+            document.getElementById(`tab-${tab}`).classList.add('bg-yellow-500', 'text-black');
+            
+            // İçerikleri güncelle
+            ['gold', 'currency', 'converter'].forEach(t => {
+                document.getElementById(`content-${t}`).classList.add('hidden');
+            });
+            document.getElementById(`content-${tab}`).classList.remove('hidden');
+        }
+        
+        // Döviz filtrele
+        function filterCurrencies() {
+            const search = document.getElementById('currencySearch').value.toLowerCase();
+            document.querySelectorAll('.currency-row').forEach(row => {
+                const name = row.dataset.name;
+                row.style.display = name.includes(search) ? '' : 'none';
+            });
+        }
+        
+        function filterByType(type) {
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('bg-yellow-500', 'text-black'));
+            event.target.classList.add('bg-yellow-500', 'text-black');
+            
+            document.querySelectorAll('.currency-row').forEach(row => {
+                if (type === 'all') {
+                    row.style.display = '';
+                } else if (type === 'main') {
+                    row.style.display = row.dataset.type === 'main' ? '' : 'none';
+                } else if (type === 'europe') {
+                    const europeCoins = ['EUR', 'GBP', 'CHF', 'SEK', 'NOK', 'DKK', 'PLN', 'CZK', 'HUF', 'RON', 'BGN'];
+                    const kod = row.querySelector('p.font-bold')?.textContent;
+                    row.style.display = europeCoins.includes(kod) ? '' : 'none';
+                }
+            });
+        }
+        
+        // Para çevir
+        function convertCurrency() {
+            const amount = parseFloat(document.getElementById('convertAmount').value) || 0;
+            const from = document.getElementById('convertFrom').value;
+            const to = document.getElementById('convertTo').value;
+            
+            const fromRate = exchangeRates[from] || 1;
+            const toRate = exchangeRates[to] || 1;
+            
+            // Önce TRY'ye çevir, sonra hedefe
+            const inTry = amount * fromRate;
+            const result = inTry / toRate;
+            
+            const toInfo = paraBirimleri?.find(p => p.kod === to);
+            
+            document.getElementById('convertResult').classList.remove('hidden');
+            document.getElementById('convertResultValue').textContent = 
+                `${result.toFixed(2)} ${toInfo?.sembol || to}`;
+        }
+        
+        // Grafik göster
+        async function showCurrencyChart(currency) {
+            const modal = document.getElementById('chartModal');
+            const title = document.getElementById('chartTitle');
+            const info = document.getElementById('chartInfo');
+            
+            const paraInfo = paraBirimleri?.find(p => p.kod === currency);
+            title.innerHTML = `${paraInfo?.bayrak || ''} ${currency}/TRY - 30 Günlük Grafik`;
+            info.textContent = 'Veri yükleniyor...';
+            
+            modal.classList.remove('hidden');
+            
+            try {
+                // Son 30 günlük veri çek
+                const endDate = new Date().toISOString().split('T')[0];
+                const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+                
+                const response = await fetch(`https://api.frankfurter.app/${startDate}..${endDate}?from=TRY&to=${currency}`);
+                const data = await response.json();
+                
+                const labels = Object.keys(data.rates);
+                const values = Object.values(data.rates).map(r => 1 / r[currency]);
+                
+                renderChart(labels, values, `${currency}/TRY`);
+                info.textContent = `${startDate} - ${endDate} arası günlük kapanış fiyatları`;
+                
+            } catch (error) {
+                console.error('Grafik hatası:', error);
+                info.textContent = 'Grafik verisi yüklenemedi.';
+            }
+        }
+        
+        function showGoldChart(goldType) {
+            const modal = document.getElementById('chartModal');
+            const title = document.getElementById('chartTitle');
+            const info = document.getElementById('chartInfo');
+            
+            const altinInfo = altinTurleri?.find(a => a.id === goldType);
+            title.innerHTML = `🥇 ${altinInfo?.isim || goldType} - 30 Günlük Grafik`;
+            
+            modal.classList.remove('hidden');
+            
+            // Simüle edilmiş 30 günlük altın verisi (önceki format)
+            const labels = [];
+            const values = [];
+            const basePrice = goldPrices[goldType] || 2500;
+            
+            for (let i = 29; i >= 0; i--) {
+                const date = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
+                labels.push(date.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit' }));
+                
+                // Rastgele dalgalanma ekle
+                const variation = (Math.random() - 0.5) * basePrice * 0.05;
+                values.push(basePrice + variation - (i * basePrice * 0.001));
+            }
+            
+            renderChart(labels, values, `${altinInfo?.isim || goldType} (₺)`);
+            info.textContent = 'Not: Altın grafikleri simülasyon verisidir.';
+        }
+        
+        function renderChart(labels, values, label) {
+            const ctx = document.getElementById('priceChart').getContext('2d');
+            
+            if (priceChart) {
+                priceChart.destroy();
+            }
+            
+            const isUp = values[values.length - 1] >= values[0];
+            const color = isUp ? '#22c55e' : '#ef4444';
+            
+            priceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: label,
+                        data: values,
+                        borderColor: color,
+                        backgroundColor: color + '20',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 2,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: 'rgba(255,255,255,0.7)' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: 'rgba(255,255,255,0.7)', maxTicksLimit: 10 }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function closeChartModal() {
+            document.getElementById('chartModal').classList.add('hidden');
+        }
+        
+        // Yükleniyor göstergesi
+        function showLoading() {
+            const grid = document.getElementById('goldGrid');
+            if (grid) {
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <i class="fa-solid fa-spinner fa-spin text-4xl text-yellow-400 mb-4"></i>
+                        <p class="text-white/70">Fiyatlar yükleniyor...</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Loading'i kaldır
+        function hideLoading() {
+            // Loading zaten renderGoldGrid() ile kaldırılacak
+            // Bu fonksiyon sadece erken kaldırmak için
+        }
+    </script>
+
+</body>
+</html>

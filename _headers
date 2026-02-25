@@ -1,0 +1,43 @@
+# Netlify Cache Kontrol Dosyası
+# Bu dosya tarayıcı cache sorunlarını önler
+
+# Tüm HTML dosyaları için - her zaman sunucudan yeniden çek
+/*.html
+  Cache-Control: no-cache, no-store, must-revalidate
+  Pragma: no-cache
+  Expires: 0
+
+# Ana sayfa
+/
+  Cache-Control: no-cache, no-store, must-revalidate
+
+# JavaScript dosyaları - kısa cache süresi
+/*.js
+  Cache-Control: public, max-age=3600
+
+# CSS dosyaları - kısa cache süresi
+/*.css
+  Cache-Control: public, max-age=3600
+
+# Resimler - uzun cache süresi (değişmezler genelde)
+/*.png
+  Cache-Control: public, max-age=86400
+
+/*.jpg
+  Cache-Control: public, max-age=86400
+
+/*.jpeg
+  Cache-Control: public, max-age=86400
+
+/*.webp
+  Cache-Control: public, max-age=86400
+
+/*.ico
+  Cache-Control: public, max-age=86400
+
+# Fontlar
+/*.woff
+  Cache-Control: public, max-age=604800
+
+/*.woff2
+  Cache-Control: public, max-age=604800

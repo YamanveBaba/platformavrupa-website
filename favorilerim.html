@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Favorilerim - PlatformAvrupa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="utils.js"></script>
+    <script src="auth.js"></script>
+    <script src="favorites.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }</style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-white shadow-lg">
+                    <i class="fa-solid fa-earth-europe text-sm"></i>
+                </div>
+                <span class="font-bold text-lg text-slate-900">Platform<span class="text-blue-600">Avrupa</span></span>
+            </a>
+            <div class="flex items-center gap-4">
+                <a href="profil.html" class="text-sm font-medium text-slate-500 hover:text-slate-900 transition">
+                    <i class="fa-regular fa-user mr-1"></i> Profilim
+                </a>
+                <a href="index.html" class="text-sm font-medium text-slate-500 hover:text-slate-900 transition">
+                    <i class="fa-solid fa-house mr-1"></i> Ana Sayfa
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-5xl mx-auto px-4 py-12">
+        
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-900">
+                    <i class="fa-solid fa-heart text-red-500 mr-2"></i> Favorilerim
+                </h1>
+                <p class="text-slate-500 text-sm mt-1" id="favoriSayisi">Yükleniyor...</p>
+            </div>
+            <a href="ilanlar.html" class="bg-slate-900 hover:bg-slate-800 text-white font-bold py-2 px-4 rounded-lg text-sm transition flex items-center gap-2">
+                <i class="fa-solid fa-magnifying-glass"></i> İlanlara Göz At
+            </a>
+        </div>
+
+        <div id="favoriContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="col-span-full text-center py-16">
+                <i class="fa-solid fa-spinner fa-spin text-3xl text-slate-300 mb-4"></i>
+                <p class="text-slate-500">Favorileriniz yükleniyor...</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Kullanıcı kontrolü
+            const user = await getCurrentUser();
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            await favorileriYukle();
+        });
+
+        async function favorileriYukle() {
+            const container = document.getElementById('favoriContainer');
+            const sayiEl = document.getElementById('favoriSayisi');
+            
+            try {
+                const ilanlar = await favoriIlanlariGetir();
+                
+                // Sayıyı güncelle
+                sayiEl.textContent = `${ilanlar.length} ilan favorilerinizde`;
+                
+                if (ilanlar.length === 0) {
+                    container.innerHTML = `
+                        <div class="col-span-full">
+                            <div class="bg-white rounded-3xl p-16 text-center border-2 border-dashed border-slate-200">
+                                <div class="w-24 h-24 bg-red-50 rounded-full flex items-center justify-center text-5xl text-red-200 mx-auto mb-6">
+                                    <i class="fa-regular fa-heart"></i>
+                                </div>
+                                <h3 class="text-xl font-bold text-slate-900 mb-2">Henüz Favori Yok</h3>
+                                <p class="text-slate-500 max-w-sm mx-auto mb-8">Beğendiğiniz ilanlara kalp ikonuna tıklayarak favorilerinize ekleyebilirsiniz.</p>
+                                <a href="ilanlar.html" class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition">
+                                    <i class="fa-solid fa-magnifying-glass"></i> İlanlara Göz At
+                                </a>
+                            </div>
+                        </div>`;
+                    return;
+                }
+                
+                container.innerHTML = '';
+                
+                ilanlar.forEach(ilan => {
+                    const safeTitle = sanitize(ilan.baslik || ilan.title || 'İlan');
+                    const safeCategory = sanitize(ilan.kategori || ilan.category || '');
+                    const safePrice = sanitize(ilan.fiyat || ilan.price || '');
+                    const safeCity = sanitize(ilan.konum || ilan.city || '');
+                    const image = ilan.resim || ilan.image || 'https://via.placeholder.com/400x300?text=Resim+Yok';
+                    
+                    const card = document.createElement('div');
+                    card.className = 'bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200 hover:shadow-lg transition group';
+                    card.innerHTML = `
+                        <div class="relative h-48 overflow-hidden bg-slate-100">
+                            <img src="${sanitizeURL(image)}" alt="${safeTitle}" class="w-full h-full object-cover group-hover:scale-105 transition" loading="lazy">
+                            <div class="absolute top-3 right-3">
+                                ${favoriButonHTML(ilan.id, true, 'md')}
+                            </div>
+                        </div>
+                        <a href="ilan_detay.html?id=${sanitize(ilan.id)}" class="block p-4">
+                            <h3 class="font-bold text-slate-900 mb-1 line-clamp-1 group-hover:text-blue-600 transition">${safeTitle}</h3>
+                            <p class="text-sm text-slate-500 mb-2">${safeCategory} • ${safeCity}</p>
+                            <p class="font-bold text-lg text-blue-600">${safePrice}</p>
+                        </a>`;
+                    
+                    container.appendChild(card);
+                });
+                
+            } catch (err) {
+                console.error('Favoriler yüklenemedi:', err);
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-16 text-red-500">
+                        <i class="fa-solid fa-exclamation-triangle text-3xl mb-4"></i>
+                        <p>Favorileriniz yüklenirken bir hata oluştu.</p>
+                    </div>`;
+            }
+        }
+
+        // Favori çıkarıldığında sayfayı yenile
+        const originalFavoriToggle = window.favoriToggle;
+        window.favoriToggle = async function(ilanId, buttonElement) {
+            const result = await originalFavoriToggle(ilanId, buttonElement);
+            // Eğer favoriden çıkarıldıysa (result = false)
+            if (!result) {
+                // Kartı kaldır
+                const btn = document.querySelector(`[data-ilan-id="${ilanId}"]`);
+                if (btn) {
+                    const card = btn.closest('.bg-white');
+                    if (card) {
+                        card.style.transition = 'all 0.3s ease';
+                        card.style.opacity = '0';
+                        card.style.transform = 'scale(0.9)';
+                        setTimeout(() => {
+                            card.remove();
+                            // Sayıyı güncelle
+                            const container = document.getElementById('favoriContainer');
+                            const kalan = container.querySelectorAll('.bg-white.rounded-2xl').length;
+                            document.getElementById('favoriSayisi').textContent = `${kalan} ilan favorilerinizde`;
+                            
+                            // Eğer hiç kalmadıysa boş mesajı göster
+                            if (kalan === 0) {
+                                favorileriYukle();
+                            }
+                        }, 300);
+                    }
+                }
+            }
+            return result;
+        };
+    </script>
+</body>
+</html>

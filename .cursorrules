@@ -1,0 +1,45 @@
+# 🚀 PLATFORM AVRUPA - PROJECT MASTER CONTEXT (V3.0 - FINAL)
+
+> **YAPAY ZEKA MODELİNE TALİMAT:** Bu dosya, "Platform Avrupa" projesinin "Kutsal Kitabı"dır. Kod üretirken bu dosyayı hafızana al. Proje, basit bir web sitesi gibi görünse de, arkasında **Yüksek Ölçeklenebilir Serverless Mimari** vardır.
+
+---
+
+## 1. PROJE KİMLİĞİ VE VİZYONU
+* **Proje Adı:** Platform Avrupa
+* **Web:** www.platformavrupa.com
+* **Misyon:** Avrupa'da yaşayan Türk diasporası için "Süper Uygulama".
+* **Kritik Hedef:** Web (PWA) ile başlandı, nihai hedef **Native Mobil Uygulama**.
+* **Kitle:** Avrupa'da yerleşik, çalışma izni olan Türkler.
+
+---
+
+## 2. TEKNİK ALTYAPI
+* **Backend:** **Supabase** (PostgreSQL).
+* **Frontend:** HTML5, Vanilla JS, Tailwind CSS. (Derleme gerektirmeyen yapı).
+* **Harita:** Google Maps JS API & Distance Matrix.
+* **Hosting:** Netlify.
+
+---
+
+## 3. VERİTABANI KURALLARI (SUPABASE)
+Kod yazarken bu tablo yapısına sadık kal:
+
+1.  **`services` (Rehber):**
+    * `id`, `name`, `category` ('tamirci', 'cekici'...), `lat`, `lng`, `is_verified`, `phone`.
+2.  **`listings` (Pazar Yeri):**
+    * `title`, `price`, `category`, `status`, `image_url`.
+
+---
+
+## 4. KODLAMA KURALLARI (DİKKAT!)
+1.  **Mobil First:** Yazdığın her kod mobilde (telefonda) kusursuz görünmeli.
+2.  **Asla Bozma:** Mevcut çalışan fonksiyonlara dokunma, sadece üzerine ekle.
+3.  **Sadelik:** Karmaşık frameworkler kurma. CDN kullan (`<script src="...">`).
+4.  **Backend Vizyonu:** İstemci tarafında (client-side) çalışıyoruz ama veritabanı sorgularını optimize et.
+
+---
+
+## 5. YOL HARİTASI
+* **[TAMAMLANDI]** Admin Paneli, Hizmet Rehberi.
+* **[ŞİMDİ]** Güvenlik (RLS), Mobil Uyumluluk Kontrolü.
+* **[SIRADA]** Waze Modeli (Anlık Bildirimler) ve Native Mobil Dönüşüm.

@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kategori | Platform Akademi</title>
+    <meta name="description" content="Kategori bazlı eğitim videoları">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: white; }
+        
+        .glass-header { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.05); }
+        
+        .series-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.3s ease;
+        }
+        .series-card:hover {
+            border-color: rgba(139, 92, 246, 0.5);
+        }
+        .series-card.active {
+            border-color: #8b5cf6;
+            background: rgba(139, 92, 246, 0.1);
+        }
+        
+        .video-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.3s ease;
+        }
+        .video-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(139, 92, 246, 0.5);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+        .video-card:hover .play-btn {
+            transform: scale(1.1);
+            background: #8b5cf6;
+        }
+        
+        .skeleton { 
+            background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%); 
+            background-size: 200% 100%; 
+            animation: shimmer 1.5s infinite; 
+        }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        
+        .progress-bar { height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #8b5cf6, #3b82f6); transition: width 0.3s; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- NAVBAR -->
+    <nav class="glass-header sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <a href="akademi.html" class="flex items-center gap-3 group">
+                    <div class="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center text-white group-hover:bg-purple-600 transition">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </div>
+                    <span class="font-bold text-lg">Platform <span class="text-purple-400">Akademi</span></span>
+                </a>
+                
+                <div class="flex items-center gap-3">
+                    <div class="relative hidden sm:block">
+                        <input type="text" id="searchInput" placeholder="Bu kategoride ara..." 
+                               class="bg-white/5 border border-white/10 rounded-xl px-4 py-2 pl-10 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-purple-500 w-56 transition"
+                               oninput="searchVideos(this.value)">
+                        <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- KATEGORİ HEADER -->
+    <section id="categoryHeader" class="py-12 px-4 relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br opacity-20" id="headerGradient"></div>
+        <div class="max-w-7xl mx-auto relative z-10">
+            <div class="flex items-center gap-4 mb-4">
+                <div id="categoryIcon" class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl skeleton">
+                    <i class="fa-solid fa-book"></i>
+                </div>
+                <div>
+                    <h1 id="categoryName" class="text-3xl font-extrabold">Yükleniyor...</h1>
+                    <p id="categoryDesc" class="text-slate-400 mt-1"></p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-6 text-sm text-slate-400 mt-4">
+                <span id="videoCount"><i class="fa-solid fa-play-circle mr-1"></i> -- video</span>
+                <span id="seriesCount"><i class="fa-solid fa-layer-group mr-1"></i> -- seri</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- İÇERİK -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            
+            <!-- SOL PANEL - SERİLER -->
+            <aside class="lg:col-span-1">
+                <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-layer-group text-purple-400"></i> Video Serileri
+                </h3>
+                
+                <div id="seriesList" class="space-y-2">
+                    <div class="h-16 rounded-xl skeleton"></div>
+                    <div class="h-16 rounded-xl skeleton"></div>
+                    <div class="h-16 rounded-xl skeleton"></div>
+                </div>
+                
+                <!-- Filtre -->
+                <div class="mt-8">
+                    <h4 class="text-sm font-bold text-slate-400 mb-3 uppercase tracking-wider">Sırala</h4>
+                    <div class="space-y-2">
+                        <label class="flex items-center gap-2 cursor-pointer text-sm text-slate-300 hover:text-white transition">
+                            <input type="radio" name="sort" value="newest" checked onchange="sortVideos(this.value)" class="text-purple-500">
+                            En Yeni
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer text-sm text-slate-300 hover:text-white transition">
+                            <input type="radio" name="sort" value="popular" onchange="sortVideos(this.value)" class="text-purple-500">
+                            En Popüler
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer text-sm text-slate-300 hover:text-white transition">
+                            <input type="radio" name="sort" value="series" onchange="sortVideos(this.value)" class="text-purple-500">
+                            Seri Sırası
+                        </label>
+                    </div>
+                </div>
+            </aside>
+            
+            <!-- SAĞ PANEL - VİDEOLAR -->
+            <section class="lg:col-span-3">
+                <!-- Aktif Seri Banner -->
+                <div id="activeSeries" class="hidden bg-gradient-to-r from-purple-900/50 to-blue-900/50 rounded-2xl p-6 mb-6 border border-purple-500/30">
+                    <div class="flex items-center justify-between flex-wrap gap-4">
+                        <div>
+                            <span class="text-purple-300 text-xs font-bold uppercase tracking-wider">Seri</span>
+                            <h3 id="activeSeriesName" class="text-xl font-bold text-white"></h3>
+                            <p id="activeSeriesDesc" class="text-slate-400 text-sm mt-1"></p>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="text-right">
+                                <span class="text-slate-400 text-xs">İlerleme</span>
+                                <p id="seriesProgress" class="text-white font-bold">0 / 0</p>
+                            </div>
+                            <button onclick="clearSeriesFilter()" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg text-sm transition">
+                                <i class="fa-solid fa-xmark mr-1"></i> Filtreyi Kaldır
+                            </button>
+                        </div>
+                    </div>
+                    <div class="progress-bar mt-4">
+                        <div id="seriesProgressBar" class="progress-bar-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+                
+                <!-- Video Grid -->
+                <div id="videoGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                    <div class="h-64 rounded-2xl skeleton"></div>
+                    <div class="h-64 rounded-2xl skeleton"></div>
+                    <div class="h-64 rounded-2xl skeleton"></div>
+                    <div class="h-64 rounded-2xl skeleton"></div>
+                    <div class="h-64 rounded-2xl skeleton"></div>
+                    <div class="h-64 rounded-2xl skeleton"></div>
+                </div>
+                
+                <!-- Empty State -->
+                <div id="noVideos" class="hidden text-center py-16">
+                    <div class="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl text-slate-500">
+                        <i class="fa-solid fa-video-slash"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">Bu Kategoride Video Yok</h3>
+                    <p class="text-slate-400">Çok yakında yeni videolar eklenecek.</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-white/5 py-8 text-center text-slate-500 text-sm mt-auto">
+        <p>&copy; 2026 Platform Avrupa Akademi</p>
+    </footer>
+
+    <!-- VİDEO MODAL -->
+    <div id="videoModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/95 backdrop-blur-md">
+        <div class="relative w-full max-w-5xl mx-4">
+            <button onclick="closeVideoModal()" class="absolute -top-12 right-0 text-white hover:text-red-400 font-bold flex items-center gap-2 transition">
+                <i class="fa-solid fa-xmark text-xl"></i> Kapat
+            </button>
+            <div class="aspect-video w-full bg-black rounded-2xl overflow-hidden shadow-2xl">
+                <iframe id="youtubePlayer" class="w-full h-full" src="" frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen></iframe>
+            </div>
+            
+            <!-- Video Bilgileri -->
+            <div class="mt-4 flex flex-col md:flex-row gap-4">
+                <div class="flex-grow">
+                    <h3 id="videoTitle" class="text-xl font-bold text-white"></h3>
+                    <p id="videoDescription" class="text-slate-400 text-sm mt-2"></p>
+                </div>
+                
+                <!-- Seri Navigasyonu -->
+                <div id="seriesNav" class="hidden flex-shrink-0 flex items-center gap-3">
+                    <button id="prevVideo" onclick="playPreviousVideo()" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fa-solid fa-chevron-left mr-1"></i> Önceki
+                    </button>
+                    <span id="videoPosition" class="text-slate-400 text-sm">1 / 5</span>
+                    <button id="nextVideo" onclick="playNextVideo()" class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed">
+                        Sonraki <i class="fa-solid fa-chevron-right ml-1"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Aksiyon Butonları -->
+            <div class="mt-4 flex items-center gap-4">
+                <button onclick="likeVideo()" id="likeBtn" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg text-sm transition flex items-center gap-2">
+                    <i class="fa-regular fa-heart"></i> <span id="likeCount">0</span>
+                </button>
+                <button onclick="reportProblem()" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg text-sm transition flex items-center gap-2">
+                    <i class="fa-solid fa-flag"></i> Sorun Bildir
+                </button>
+                <button onclick="shareVideo()" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg text-sm transition flex items-center gap-2">
+                    <i class="fa-solid fa-share-nodes"></i> Paylaş
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="utils.js"></script>
+    <script>
+        let category = null;
+        let allSeries = [];
+        let allVideos = [];
+        let filteredVideos = [];
+        let currentVideoIndex = 0;
+        let currentSeriesId = null;
+        let currentSort = 'newest';
+
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', async function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const slug = urlParams.get('slug');
+            
+            if (!slug) {
+                window.location.href = 'akademi.html';
+                return;
+            }
+            
+            await loadCategory(slug);
+        });
+
+        // Kategori yükle
+        async function loadCategory(slug) {
+            try {
+                // Kategori bilgisi
+                const { data: catData, error: catError } = await sb
+                    .from('academy_categories')
+                    .select('*')
+                    .eq('slug', slug)
+                    .single();
+                
+                if (catError || !catData) {
+                    window.location.href = 'akademi.html';
+                    return;
+                }
+                
+                category = catData;
+                renderCategoryHeader();
+                
+                // Serileri yükle
+                const { data: seriesData } = await sb
+                    .from('academy_series')
+                    .select('*')
+                    .eq('category_id', category.id)
+                    .eq('is_active', true)
+                    .order('sort_order');
+                
+                allSeries = seriesData || [];
+                renderSeries();
+                
+                // Videoları yükle
+                const { data: videoData } = await sb
+                    .from('academy_videos')
+                    .select('*, academy_series(name)')
+                    .eq('category_id', category.id)
+                    .eq('is_active', true)
+                    .order('created_at', { ascending: false });
+                
+                allVideos = videoData || [];
+                filteredVideos = [...allVideos];
+                
+                // İstatistikleri güncelle
+                document.getElementById('videoCount').innerHTML = `<i class="fa-solid fa-play-circle mr-1"></i> ${allVideos.length} video`;
+                document.getElementById('seriesCount').innerHTML = `<i class="fa-solid fa-layer-group mr-1"></i> ${allSeries.length} seri`;
+                
+                renderVideos();
+                
+                // Sayfa başlığını güncelle
+                document.title = `${category.name} | Platform Akademi`;
+                
+            } catch (err) {
+                console.error('Kategori yükleme hatası:', err);
+            }
+        }
+
+        // Kategori header render
+        function renderCategoryHeader() {
+            const iconEl = document.getElementById('categoryIcon');
+            const nameEl = document.getElementById('categoryName');
+            const descEl = document.getElementById('categoryDesc');
+            const gradient = document.getElementById('headerGradient');
+            
+            iconEl.className = `w-16 h-16 rounded-2xl flex items-center justify-center text-3xl`;
+            iconEl.style.backgroundColor = `${category.color}20`;
+            iconEl.style.color = category.color;
+            iconEl.innerHTML = `<i class="fa-solid ${category.icon}"></i>`;
+            
+            nameEl.textContent = category.name;
+            descEl.textContent = category.description || '';
+            
+            gradient.style.background = `linear-gradient(135deg, ${category.color}40, transparent)`;
+        }
+
+        // Serileri render et
+        function renderSeries() {
+            const container = document.getElementById('seriesList');
+            
+            if (allSeries.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-slate-400">
+                        <i class="fa-solid fa-folder-open text-2xl mb-2"></i>
+                        <p class="text-sm">Bu kategoride seri yok</p>
+                    </div>`;
+                return;
+            }
+            
+            // "Tümü" seçeneği
+            container.innerHTML = `
+                <button onclick="filterBySeries(null)" class="series-card w-full text-left rounded-xl p-4 ${!currentSeriesId ? 'active' : ''}">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center text-slate-400">
+                            <i class="fa-solid fa-grip"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-white text-sm">Tüm Videolar</h4>
+                            <span class="text-xs text-slate-400">${allVideos.length} video</span>
+                        </div>
+                    </div>
+                </button>
+            `;
+            
+            // Seriler
+            allSeries.forEach(series => {
+                container.innerHTML += `
+                    <button onclick="filterBySeries('${series.id}')" class="series-card w-full text-left rounded-xl p-4 ${currentSeriesId === series.id ? 'active' : ''}">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: ${category.color}20; color: ${category.color}">
+                                <i class="fa-solid fa-list-ol"></i>
+                            </div>
+                            <div class="flex-grow min-w-0">
+                                <h4 class="font-bold text-white text-sm truncate">${sanitize(series.name)}</h4>
+                                <span class="text-xs text-slate-400">${series.video_count || 0} video</span>
+                            </div>
+                        </div>
+                    </button>
+                `;
+            });
+        }
+
+        // Seriye göre filtrele
+        function filterBySeries(seriesId) {
+            currentSeriesId = seriesId;
+            
+            if (seriesId) {
+                filteredVideos = allVideos.filter(v => v.series_id === seriesId);
+                const series = allSeries.find(s => s.id === seriesId);
+                
+                if (series) {
+                    document.getElementById('activeSeries').classList.remove('hidden');
+                    document.getElementById('activeSeriesName').textContent = series.name;
+                    document.getElementById('activeSeriesDesc').textContent = series.description || '';
+                    document.getElementById('seriesProgress').textContent = `0 / ${filteredVideos.length}`;
+                }
+            } else {
+                filteredVideos = [...allVideos];
+                document.getElementById('activeSeries').classList.add('hidden');
+            }
+            
+            // Seri sırasına göre sırala
+            if (seriesId) {
+                filteredVideos.sort((a, b) => (a.series_order || 0) - (b.series_order || 0));
+            }
+            
+            renderSeries();
+            renderVideos();
+        }
+
+        // Filtreyi kaldır
+        function clearSeriesFilter() {
+            filterBySeries(null);
+        }
+
+        // Videoları sırala
+        function sortVideos(sortType) {
+            currentSort = sortType;
+            
+            switch(sortType) {
+                case 'newest':
+                    filteredVideos.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                    break;
+                case 'popular':
+                    filteredVideos.sort((a, b) => (b.view_count || 0) - (a.view_count || 0));
+                    break;
+                case 'series':
+                    filteredVideos.sort((a, b) => (a.series_order || 0) - (b.series_order || 0));
+                    break;
+            }
+            
+            renderVideos();
+        }
+
+        // Videoları render et
+        function renderVideos() {
+            const container = document.getElementById('videoGrid');
+            const noVideos = document.getElementById('noVideos');
+            
+            if (filteredVideos.length === 0) {
+                container.innerHTML = '';
+                noVideos.classList.remove('hidden');
+                return;
+            }
+            
+            noVideos.classList.add('hidden');
+            
+            container.innerHTML = filteredVideos.map((video, index) => `
+                <div onclick="playVideo(${index})" class="video-card rounded-2xl overflow-hidden cursor-pointer group">
+                    <div class="relative aspect-video">
+                        <img src="${video.thumbnail_url || `https://img.youtube.com/vi/${video.youtube_id}/mqdefault.jpg`}" 
+                             class="w-full h-full object-cover" loading="lazy">
+                        <div class="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                            <div class="play-btn w-12 h-12 bg-white/20 backdrop-blur rounded-full flex items-center justify-center text-white transition">
+                                <i class="fa-solid fa-play ml-1"></i>
+                            </div>
+                        </div>
+                        <span class="absolute bottom-2 right-2 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded backdrop-blur-sm">
+                            ${formatDuration(video.duration_seconds)}
+                        </span>
+                        ${video.series_id ? `<span class="absolute top-2 left-2 bg-purple-600/90 text-white text-xs font-bold px-2 py-1 rounded">#${video.series_order || ''}</span>` : ''}
+                        ${video.is_featured ? '<span class="absolute top-2 right-2 bg-orange-500 text-white text-xs px-2 py-1 rounded"><i class="fa-solid fa-star"></i></span>' : ''}
+                    </div>
+                    <div class="p-4">
+                        <h4 class="font-bold text-white line-clamp-2 group-hover:text-purple-400 transition">${sanitize(video.title)}</h4>
+                        ${video.academy_series ? `<span class="text-xs text-purple-400 mt-1 block">${video.academy_series.name}</span>` : ''}
+                        <div class="flex items-center gap-3 mt-2 text-xs text-slate-500">
+                            <span><i class="fa-solid fa-eye mr-1"></i>${video.view_count || 0}</span>
+                            <span><i class="fa-solid fa-heart mr-1"></i>${video.like_count || 0}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Video oynat
+        async function playVideo(index) {
+            currentVideoIndex = index;
+            const video = filteredVideos[index];
+            
+            const modal = document.getElementById('videoModal');
+            const player = document.getElementById('youtubePlayer');
+            
+            player.src = `https://www.youtube.com/embed/${video.youtube_id}?autoplay=1&rel=0`;
+            document.getElementById('videoTitle').textContent = video.title;
+            document.getElementById('videoDescription').textContent = video.description || '';
+            document.getElementById('likeCount').textContent = video.like_count || 0;
+            
+            // Seri navigasyonu
+            const seriesNav = document.getElementById('seriesNav');
+            if (video.series_id) {
+                seriesNav.classList.remove('hidden');
+                document.getElementById('videoPosition').textContent = `${index + 1} / ${filteredVideos.length}`;
+                document.getElementById('prevVideo').disabled = index === 0;
+                document.getElementById('nextVideo').disabled = index === filteredVideos.length - 1;
+            } else {
+                seriesNav.classList.add('hidden');
+            }
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            // İzlenme kaydı
+            trackVideoView(video);
+        }
+
+        // Önceki video
+        function playPreviousVideo() {
+            if (currentVideoIndex > 0) {
+                playVideo(currentVideoIndex - 1);
+            }
+        }
+
+        // Sonraki video
+        function playNextVideo() {
+            if (currentVideoIndex < filteredVideos.length - 1) {
+                playVideo(currentVideoIndex + 1);
+            }
+        }
+
+        // Video modalını kapat
+        function closeVideoModal() {
+            const modal = document.getElementById('videoModal');
+            const player = document.getElementById('youtubePlayer');
+            
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            player.src = '';
+        }
+
+        // İzlenme takibi
+        async function trackVideoView(video) {
+            if (!sb) return;
+            
+            try {
+                await sb.rpc('increment_video_view', { vid: video.id });
+                
+                const user = await getCurrentUser();
+                await sb.from('academy_views').insert({
+                    video_id: video.id,
+                    user_id: user?.id || null,
+                    session_id: getSessionId()
+                });
+            } catch (err) {
+                console.error('İzlenme takip hatası:', err);
+            }
+        }
+
+        // Beğen
+        async function likeVideo() {
+            const video = filteredVideos[currentVideoIndex];
+            if (!sb || !video) return;
+            
+            try {
+                await sb.rpc('increment_video_like', { vid: video.id });
+                
+                const countEl = document.getElementById('likeCount');
+                countEl.textContent = parseInt(countEl.textContent) + 1;
+                
+                document.getElementById('likeBtn').innerHTML = `<i class="fa-solid fa-heart text-red-500"></i> ${countEl.textContent}`;
+            } catch (err) {
+                console.error('Beğeni hatası:', err);
+            }
+        }
+
+        // Sorun bildir
+        async function reportProblem() {
+            const user = await getCurrentUser();
+            if (!user) {
+                Swal.fire('Giriş Yapın', 'Sorun bildirmek için giriş yapmalısınız.', 'info');
+                return;
+            }
+            
+            const video = filteredVideos[currentVideoIndex];
+            
+            const { value: description } = await Swal.fire({
+                title: 'Sorun Bildir',
+                input: 'textarea',
+                inputPlaceholder: 'Yaşadığınız sorunu açıklayın...',
+                showCancelButton: true,
+                confirmButtonText: 'Gönder',
+                cancelButtonText: 'İptal',
+                confirmButtonColor: '#8b5cf6',
+                customClass: { popup: 'bg-slate-800 text-white', input: 'bg-slate-700 text-white border-slate-600' }
+            });
+            
+            if (description) {
+                await sb.from('academy_requests').insert({
+                    user_id: user.id,
+                    video_id: video.id,
+                    category_id: category.id,
+                    request_type: 'problem_report',
+                    title: `Sorun: ${video.title}`,
+                    description: description
+                });
+                
+                Swal.fire('Teşekkürler', 'Sorun bildiriminiz alındı.', 'success');
+            }
+        }
+
+        // Paylaş
+        function shareVideo() {
+            const video = filteredVideos[currentVideoIndex];
+            const url = `${window.location.origin}/akademi_video.html?id=${video.id}`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: video.title,
+                    text: `${video.title} - Platform Akademi`,
+                    url: url
+                });
+            } else {
+                navigator.clipboard.writeText(url);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Link Kopyalandı!',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            }
+        }
+
+        // Video ara
+        function searchVideos(query) {
+            if (!query || query.length < 2) {
+                filteredVideos = currentSeriesId 
+                    ? allVideos.filter(v => v.series_id === currentSeriesId)
+                    : [...allVideos];
+            } else {
+                const searchVideos = currentSeriesId 
+                    ? allVideos.filter(v => v.series_id === currentSeriesId)
+                    : allVideos;
+                    
+                filteredVideos = searchVideos.filter(v => 
+                    v.title.toLowerCase().includes(query.toLowerCase()) ||
+                    (v.description && v.description.toLowerCase().includes(query.toLowerCase()))
+                );
+            }
+            
+            sortVideos(currentSort);
+        }
+
+        // Süre formatla
+        function formatDuration(seconds) {
+            if (!seconds) return '00:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Session ID
+        function getSessionId() {
+            let sessionId = localStorage.getItem('academy_session_id');
+            if (!sessionId) {
+                sessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('academy_session_id', sessionId);
+            }
+            return sessionId;
+        }
+
+        // ESC ile kapat
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeVideoModal();
+            if (e.key === 'ArrowRight') playNextVideo();
+            if (e.key === 'ArrowLeft') playPreviousVideo();
+        });
+    </script>
+</body>
+</html>

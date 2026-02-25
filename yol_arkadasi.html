@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yol Arkadaşı - PlatformAvrupa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="config.js"></script>
+    <script src="auth.js"></script>
+    <script src="utils.js"></script>
+    <script src="genel_veriler.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .trip-card { background: white; border-radius: 20px; overflow: hidden; transition: all 0.3s; cursor: pointer; }
+        .trip-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
+        .verified-badge { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; }
+        .trust-level { display: inline-flex; align-items: center; gap: 3px; font-size: 12px; font-weight: bold; }
+        .trust-level.high { color: #10b981; }
+        .trust-level.medium { color: #f59e0b; }
+        .trust-level.low { color: #ef4444; }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- Header -->
+    <nav class="bg-white/95 backdrop-blur sticky top-0 z-50 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
+            <a href="index.html" class="flex items-center gap-2 text-slate-800 hover:text-purple-600 transition font-bold">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span class="hidden sm:inline">Ana Sayfa</span>
+            </a>
+            
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-car-side text-2xl text-purple-600"></i>
+                <h1 class="font-bold text-xl text-slate-800">Yol Arkadaşı</h1>
+            </div>
+            
+            <a href="yol_ilan_ver.html" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg flex items-center gap-2">
+                <i class="fa-solid fa-plus"></i>
+                <span class="hidden sm:inline">İlan Ver</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="bg-white/10 backdrop-blur border-b border-white/20 py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-6">
+                <h2 class="text-3xl md:text-4xl font-black text-white mb-2">Güvenli Yolculuk, Keyifli Sohbet</h2>
+                <p class="text-purple-100 text-lg">Avrupa'da binlerce gurbetçi ile yolculuk paylaş</p>
+            </div>
+
+            <!-- Filtreler -->
+            <div class="bg-white rounded-2xl p-4 shadow-2xl max-w-4xl mx-auto">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3">
+                    <!-- Nereden Ülke -->
+                    <div>
+                        <label class="text-xs font-bold text-slate-600 mb-1 block">Nereden Ülke</label>
+                        <select id="filterFromCountry" onchange="updateFromCities()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            <option value="">Tüm Ülkeler</option>
+                        </select>
+                    </div>
+                    <!-- Nereden Şehir -->
+                    <div>
+                        <label class="text-xs font-bold text-slate-600 mb-1 block">Nereden Şehir</label>
+                        <select id="filterFromCity" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            <option value="">Tüm Şehirler</option>
+                        </select>
+                    </div>
+                    <!-- Nereye Ülke -->
+                    <div>
+                        <label class="text-xs font-bold text-slate-600 mb-1 block">Nereye Ülke</label>
+                        <select id="filterToCountry" onchange="updateToCities()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            <option value="">Tüm Ülkeler</option>
+                        </select>
+                    </div>
+                    <!-- Ok İşareti -->
+                    <div class="flex items-center justify-center pt-6">
+                        <i class="fa-solid fa-arrow-right text-purple-600 text-xl"></i>
+                    </div>
+                    <!-- Nereye Şehir -->
+                    <div>
+                        <label class="text-xs font-bold text-slate-600 mb-1 block">Nereye Şehir</label>
+                        <select id="filterToCity" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            <option value="">Tüm Şehirler</option>
+                        </select>
+                    </div>
+                    <!-- Tarih + Ara Butonu -->
+                    <div>
+                        <label class="text-xs font-bold text-slate-600 mb-1 block">Tarih</label>
+                        <input type="date" id="filterDate" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 mb-2">
+                        <button onclick="applyFilters()" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-2 rounded-lg font-bold hover:shadow-lg transition text-xs">
+                            <i class="fa-solid fa-search mr-1"></i>Ara
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Yolculuk Listesi -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+        <div class="mb-6">
+            <h3 class="text-2xl font-bold text-white">Yaklaşan Yolculuklar</h3>
+        </div>
+
+        <div id="tripsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Yükleniyor -->
+            <div class="col-span-full text-center py-20">
+                <i class="fa-solid fa-spinner fa-spin text-5xl text-white mb-4"></i>
+                <p class="text-white text-lg">Yolculuklar yükleniyor...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detay Modal -->
+    <div id="detailModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden items-center justify-center p-2 md:p-4">
+        <div class="bg-white rounded-2xl md:rounded-3xl max-w-2xl w-full max-h-[95vh] md:max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div class="sticky top-0 bg-gradient-to-r from-purple-600 to-indigo-600 p-6 flex justify-between items-start">
+                <div>
+                    <h3 class="text-2xl font-bold text-white mb-1" id="modalTitle">Yolculuk Detayı</h3>
+                    <p class="text-purple-100 text-sm" id="modalRoute"></p>
+                </div>
+                <button onclick="closeModal()" class="text-white hover:bg-white/20 w-8 h-8 rounded-full flex items-center justify-center transition">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            <div id="modalContent" class="p-6">
+                <!-- Dinamik içerik -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allTrips = [];
+
+        // Sayfa yüklendiğinde
+        window.onload = async function() {
+            initCountryDropdowns();
+            await loadTrips();
+        };
+
+        // Ülke dropdown'larını doldur
+        function initCountryDropdowns() {
+            const fromCountry = document.getElementById('filterFromCountry');
+            const toCountry = document.getElementById('filterToCountry');
+            
+            // Ülkeleri alfabetik sırala
+            const countries = Object.keys(lokasyonVeritabani).map(code => ({
+                code,
+                name: lokasyonVeritabani[code].isim,
+                flag: lokasyonVeritabani[code].bayrak
+            })).sort((a, b) => a.name.localeCompare(b.name, 'tr'));
+
+            countries.forEach(country => {
+                const option1 = document.createElement('option');
+                option1.value = country.code;
+                option1.textContent = `${country.flag} ${country.name}`;
+                fromCountry.appendChild(option1);
+
+                const option2 = document.createElement('option');
+                option2.value = country.code;
+                option2.textContent = `${country.flag} ${country.name}`;
+                toCountry.appendChild(option2);
+            });
+        }
+
+        // Nereden ülke değiştiğinde şehirleri güncelle
+        function updateFromCities() {
+            const countryCode = document.getElementById('filterFromCountry').value;
+            const citySelect = document.getElementById('filterFromCity');
+            
+            citySelect.innerHTML = '<option value="">Tüm Şehirler</option>';
+            
+            if (countryCode && lokasyonVeritabani[countryCode]) {
+                const cities = lokasyonVeritabani[countryCode].sehirler;
+                cities.forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city;
+                    option.textContent = city;
+                    citySelect.appendChild(option);
+                });
+            }
+        }
+
+        // Nereye ülke değiştiğinde şehirleri güncelle
+        function updateToCities() {
+            const countryCode = document.getElementById('filterToCountry').value;
+            const citySelect = document.getElementById('filterToCity');
+            
+            citySelect.innerHTML = '<option value="">Tüm Şehirler</option>';
+            
+            if (countryCode && lokasyonVeritabani[countryCode]) {
+                const cities = lokasyonVeritabani[countryCode].sehirler;
+                cities.forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city;
+                    option.textContent = city;
+                    citySelect.appendChild(option);
+                });
+            }
+        }
+
+        // Yolculukları yükle
+        async function loadTrips() {
+            try {
+                const { data, error } = await sb
+                    .from('trips')
+                    .select('*')
+                    .order('travel_date', { ascending: true });
+
+                if (error) throw error;
+
+                allTrips = data || [];
+                renderTrips(allTrips);
+            } catch (error) {
+                console.error('Yolculuklar yüklenemedi:', error);
+                document.getElementById('tripsList').innerHTML = `
+                    <div class="col-span-full text-center py-20">
+                        <i class="fa-solid fa-exclamation-triangle text-5xl text-red-400 mb-4"></i>
+                        <p class="text-white text-lg">Yolculuklar yüklenemedi</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Yolculukları render et
+        function renderTrips(trips) {
+            const container = document.getElementById('tripsList');
+            
+            if (!trips || trips.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-20">
+                        <i class="fa-solid fa-car-side text-6xl text-white/30 mb-4"></i>
+                        <h3 class="text-2xl font-bold text-white mb-2">Henüz Yolculuk Yok</h3>
+                        <p class="text-purple-100 mb-6">İlk yolculuk ilanını siz verin!</p>
+                        <a href="yol_ilan_ver.html" class="inline-block bg-white text-purple-600 px-6 py-3 rounded-full font-bold hover:shadow-xl transition">
+                            <i class="fa-solid fa-plus mr-2"></i>İlan Ver
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '';
+            trips.forEach(trip => {
+                const tripCard = createTripCard(trip);
+                container.innerHTML += tripCard;
+            });
+        }
+
+        // Yolculuk kartı oluştur
+        function createTripCard(trip) {
+            const trustLevel = getTrustLevel(trip);
+            const cargoIcon = trip.is_cargo_allowed ? '<span class="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full"><i class="fa-solid fa-box mr-1"></i>Kargo Alır</span>' : '';
+            
+            return `
+                <div class="trip-card" onclick="showTripDetail('${trip.id}')">
+                    <div class="p-6">
+                        <!-- Sürücü Bilgisi -->
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                                    ${sanitize(trip.driver_name).substring(0, 2).toUpperCase()}
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <h4 class="font-bold text-slate-800">${sanitize(trip.driver_name)}</h4>
+                                        <span class="verified-badge"><i class="fa-solid fa-check"></i></span>
+                                    </div>
+                                    <div class="${trustLevel.class}">${trustLevel.icon} ${trustLevel.text}</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-2xl font-black text-purple-600">${trip.price}€</div>
+                                <div class="text-xs text-slate-500">kişi başı</div>
+                            </div>
+                        </div>
+
+                        <!-- Rota -->
+                        <div class="bg-slate-50 rounded-xl p-4 mb-3">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1">
+                                    <div class="text-xs text-slate-500 mb-1">Nereden</div>
+                                    <div class="font-bold text-slate-800">${sanitize(trip.from_city)}</div>
+                                </div>
+                                <div class="flex-shrink-0 px-4">
+                                    <i class="fa-solid fa-arrow-right text-purple-500 text-xl"></i>
+                                </div>
+                                <div class="flex-1 text-right">
+                                    <div class="text-xs text-slate-500 mb-1">Nereye</div>
+                                    <div class="font-bold text-slate-800">${sanitize(trip.to_city)}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Detaylar -->
+                        <div class="flex items-center justify-between text-xs text-slate-600">
+                            <div class="flex items-center gap-4">
+                                <span><i class="fa-solid fa-calendar text-purple-500 mr-1"></i>${trip.travel_date}</span>
+                                <span><i class="fa-solid fa-chair text-purple-500 mr-1"></i>${trip.seats_available} Koltuk</span>
+                            </div>
+                            ${cargoIcon}
+                        </div>
+                    </div>
+
+                    <!-- Hızlı Aksiyon -->
+                    <div class="bg-slate-50 px-6 py-3 flex items-center justify-between border-t">
+                        <div class="text-xs text-slate-500">
+                            <i class="fa-solid fa-star text-yellow-500 mr-1"></i>
+                            <span class="font-bold">${trip.avg_rating ? trip.avg_rating.toFixed(1) : 'Yeni'}</span> (${trip.total_ratings || 0} değerlendirme)
+                        </div>
+                        <button class="text-purple-600 font-bold text-sm hover:text-purple-700 transition">
+                            Detayları Gör <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Güven seviyesi hesapla (Gelecekte DB'den gelecek)
+        function getTrustLevel(trip) {
+            // Basit örnek - gerçekte profil doğrulama, yorum sayısı, tamamlanan yolculuk vs. bakılacak
+            const score = Math.random();
+            if (score > 0.7) return { class: 'trust-level high', icon: '<i class="fa-solid fa-shield-check"></i>', text: 'Yüksek Güven' };
+            if (score > 0.4) return { class: 'trust-level medium', icon: '<i class="fa-solid fa-shield"></i>', text: 'Orta Güven' };
+            return { class: 'trust-level low', icon: '<i class="fa-solid fa-shield-exclamation"></i>', text: 'Yeni Üye' };
+        }
+
+        // Filtrele
+        function applyFilters() {
+            const fromCity = document.getElementById('filterFromCity').value;
+            const toCity = document.getElementById('filterToCity').value;
+            const date = document.getElementById('filterDate').value;
+
+            const filtered = allTrips.filter(trip => {
+                const matchFrom = !fromCity || trip.from_city === fromCity;
+                const matchTo = !toCity || trip.to_city === toCity;
+                // Tarih filtresi: seçilen tarih veya sonrası
+                const matchDate = !date || trip.travel_date >= date;
+                return matchFrom && matchTo && matchDate;
+            });
+
+            renderTrips(filtered);
+        }
+
+
+        // Detay göster
+        function showTripDetail(tripId) {
+            // tripId string ise UUID'ye çevir, number ise direkt kullan
+            const trip = allTrips.find(t => {
+                if (typeof tripId === 'string' && typeof t.id === 'string') {
+                    return t.id === tripId;
+                } else if (typeof tripId === 'string' && typeof t.id === 'number') {
+                    return t.id.toString() === tripId;
+                } else {
+                    return t.id === tripId;
+                }
+            });
+            
+            if (!trip) {
+                console.error('Yolculuk bulunamadı:', tripId);
+                return;
+            }
+
+            document.getElementById('modalTitle').textContent = `${trip.from_city} → ${trip.to_city}`;
+            document.getElementById('modalRoute').textContent = `${trip.travel_date} tarihinde`;
+
+            const content = `
+                <div class="space-y-6">
+                    <!-- Sürücü Detayı -->
+                    <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-xl">
+                        <div class="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white font-bold text-2xl shadow-lg">
+                            ${sanitize(trip.driver_name).substring(0, 2).toUpperCase()}
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-lg text-slate-800">${sanitize(trip.driver_name)}</h4>
+                            <div class="text-sm text-slate-600">
+                                <i class="fa-solid fa-star text-yellow-500 mr-1"></i>${trip.avg_rating ? trip.avg_rating.toFixed(1) : 'Yeni'} • ${trip.total_ratings || 0} değerlendirme
+                            </div>
+                            <div class="text-xs text-green-600 font-bold mt-1">
+                                <i class="fa-solid fa-shield-check mr-1"></i>Doğrulanmış Profil
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Yolculuk Detayları -->
+                    <div>
+                        <h5 class="font-bold text-slate-800 mb-3">Yolculuk Bilgileri</h5>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="p-3 bg-slate-50 rounded-lg">
+                                <div class="text-xs text-slate-500 mb-1">Tarih</div>
+                                <div class="font-bold text-slate-800">${trip.travel_date}</div>
+                            </div>
+                            <div class="p-3 bg-slate-50 rounded-lg">
+                                <div class="text-xs text-slate-500 mb-1">Saat (Tahmini)</div>
+                                <div class="font-bold text-slate-800">08:00</div>
+                            </div>
+                            <div class="p-3 bg-slate-50 rounded-lg">
+                                <div class="text-xs text-slate-500 mb-1">Boş Koltuk</div>
+                                <div class="font-bold text-slate-800">${trip.seats_available}</div>
+                            </div>
+                            <div class="p-3 bg-slate-50 rounded-lg">
+                                <div class="text-xs text-slate-500 mb-1">Fiyat</div>
+                                <div class="font-bold text-purple-600 text-xl">${trip.price}€</div>
+                            </div>
+                        </div>
+                    </div>
+
+                        <!-- Özellikler -->
+                    <div>
+                        <h5 class="font-bold text-slate-800 mb-3">Yolculuk Özellikleri</h5>
+                        <div class="flex flex-wrap gap-2">
+                            ${trip.is_cargo_allowed ? '<span class="bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm font-bold"><i class="fa-solid fa-box mr-1"></i>Kargo Kabul Eder</span>' : ''}
+                            ${trip.no_smoking ? '<span class="bg-red-50 text-red-700 px-3 py-1 rounded-full text-sm font-bold"><i class="fa-solid fa-smoking-ban mr-1"></i>Sigara İçilmez</span>' : ''}
+                            ${trip.music_allowed ? '<span class="bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-sm font-bold"><i class="fa-solid fa-music mr-1"></i>Müzik OK</span>' : ''}
+                            ${trip.pets_allowed ? '<span class="bg-orange-50 text-orange-700 px-3 py-1 rounded-full text-sm font-bold"><i class="fa-solid fa-paw mr-1"></i>Evcil Hayvan OK</span>' : ''}
+                            ${trip.car_brand && trip.car_model ? `<span class="bg-slate-50 text-slate-700 px-3 py-1 rounded-full text-sm font-bold"><i class="fa-solid fa-car mr-1"></i>${trip.car_brand} ${trip.car_model}</span>` : ''}
+                        </div>
+                    </div>
+                    
+                    ${trip.stops ? `
+                    <div>
+                        <h5 class="font-bold text-slate-800 mb-3">Ara Duraklar</h5>
+                        <div class="flex flex-wrap gap-2">
+                            ${Array.isArray(trip.stops) ? trip.stops.map(stop => {
+                                const [city, code] = stop.split(',');
+                                return `<span class="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-sm">${city}</span>`;
+                            }).join('') : ''}
+                        </div>
+                    </div>
+                    ` : ''}
+                    
+                    ${trip.notes ? `
+                    <div>
+                        <h5 class="font-bold text-slate-800 mb-3">Notlar</h5>
+                        <p class="text-sm text-slate-600 bg-slate-50 p-3 rounded-lg">${sanitize(trip.notes)}</p>
+                    </div>
+                    ` : ''}
+
+                    <!-- İletişim -->
+                    <div class="bg-purple-50 border border-purple-200 rounded-xl p-4">
+                        <div class="flex items-center gap-2 text-purple-800 mb-2">
+                            <i class="fa-solid fa-info-circle"></i>
+                            <span class="font-bold text-sm">Rezervasyon Nasıl Yapılır?</span>
+                        </div>
+                        <p class="text-xs text-purple-700 mb-3">
+                            Sürücü ile iletişime geçmek için giriş yapmalısınız. Rezervasyon onaylandıktan sonra iletişim bilgileri paylaşılacaktır.
+                        </p>
+                        <button onclick="requestSeat('${trip.id}')" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 rounded-xl font-bold hover:shadow-lg transition">
+                            <i class="fa-solid fa-check-circle mr-2"></i>Rezervasyon Talebi Gönder
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('modalContent').innerHTML = content;
+            document.getElementById('detailModal').classList.remove('hidden');
+            document.getElementById('detailModal').classList.add('flex');
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').classList.add('hidden');
+            document.getElementById('detailModal').classList.remove('flex');
+        }
+
+        // Rezervasyon talebi
+        async function requestSeat(tripId) {
+            try {
+                // Kullanıcı kontrolü
+                const user = await getCurrentUser();
+                if (!user) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Giriş Gerekli',
+                        text: 'Rezervasyon yapmak için giriş yapmalısınız.',
+                        confirmButtonText: 'Giriş Yap',
+                        showCancelButton: true
+                    }).then((result) => {
+                        if (result.isConfirmed) window.location.href = 'login.html';
+                    });
+                    return;
+                }
+
+                // Loading göster
+                Swal.fire({
+                    title: 'Yükleniyor...',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+
+                // Profil bilgilerini Supabase'den çek
+                const { data: profile, error: profileError } = await sb
+                    .from('profiles')
+                    .select('real_name, phone')
+                    .eq('user_id', user.id)
+                    .single();
+
+                if (profileError || !profile) {
+                    Swal.close();
+                    Swal.fire('Hata', 'Profil bilgileriniz alınamadı. Lütfen profilinizi tamamlayın.', 'error');
+                    return;
+                }
+
+                // Koltuk sayısı sor
+                const { value: seatsRequested } = await Swal.fire({
+                    title: 'Kaç Koltuk İstiyorsunuz?',
+                    input: 'select',
+                    inputOptions: {
+                        '1': '1 Koltuk',
+                        '2': '2 Koltuk',
+                        '3': '3 Koltuk',
+                        '4': '4 Koltuk'
+                    },
+                    inputPlaceholder: 'Koltuk sayısı seçin',
+                    showCancelButton: true,
+                    inputValidator: (value) => {
+                        if (!value) return 'Koltuk sayısı seçmelisiniz!';
+                    }
+                });
+
+                if (!seatsRequested) {
+                    Swal.close();
+                    return;
+                }
+
+                // Rezervasyon kaydı oluştur
+                const { data, error } = await sb.from('trip_reservations').insert([{
+                    trip_id: tripId,
+                    passenger_id: user.id,
+                    passenger_name: profile.real_name || user.email.split('@')[0],
+                    passenger_phone: profile.phone || 'Belirtilmemiş',
+                    seats_requested: parseInt(seatsRequested),
+                    status: 'pending',
+                    message: null
+                }]).select();
+
+                if (error) {
+                    console.error('Rezervasyon hatası:', error);
+                    Swal.close();
+                    Swal.fire('Hata', 'Rezervasyon kaydedilemedi: ' + error.message, 'error');
+                    return;
+                }
+
+                // Sürücünün iletişim bilgisini göster
+                const trip = allTrips.find(t => {
+                    if (typeof tripId === 'string' && typeof t.id === 'string') {
+                        return t.id === tripId;
+                    } else if (typeof tripId === 'string' && typeof t.id === 'number') {
+                        return t.id.toString() === tripId;
+                    } else {
+                        return t.id == tripId;
+                    }
+                });
+
+                Swal.close();
+                
+                if (trip && trip.phone) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Rezervasyon Talebiniz Gönderildi!',
+                        html: `
+                            <p class="text-slate-600 mb-4">Sürücü ile iletişime geçebilirsiniz:</p>
+                            <div class="bg-green-50 p-4 rounded-lg">
+                                <p class="text-lg font-bold text-green-800">📞 ${sanitize(trip.phone)}</p>
+                                <p class="text-sm text-green-600 mt-2">Sürücü: ${sanitize(trip.driver_name)}</p>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-4">Rezervasyonunuz admin panelinde görüntülenecektir.</p>
+                        `,
+                        confirmButtonText: 'Tamam'
+                    });
+                } else {
+                    Swal.fire('Başarılı!', 'Rezervasyon talebiniz gönderildi. Admin panelinde görüntülenecek.', 'success');
+                }
+
+                closeModal();
+            } catch (error) {
+                console.error('Rezervasyon hatası:', error);
+                Swal.close();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Bir Hata Oluştu',
+                    text: error.message,
+                    footer: 'Lütfen daha sonra tekrar deneyin veya destek ile iletişime geçin.'
+                });
+            }
+        }
+    </script>
+
+</body>
+</html>

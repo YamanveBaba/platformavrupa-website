@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Av. Zeynep Demir - Profil</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        .glass-header { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); border-bottom: 1px solid #e2e8f0; }
+        
+        .expert-tag { background: #eef2ff; color: #4338ca; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; border: 1px solid #c7d2fe; }
+        
+        .article-card { transition: all 0.3s ease; border: 1px solid #f1f5f9; }
+        .article-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.05); border-color: #cbd5e1; }
+    </style>
+</head>
+<body class="text-slate-800 flex flex-col min-h-screen">
+
+    <nav class="glass-header sticky top-0 z-50 px-6 py-4 shadow-sm">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <a href="hukuk_vitrini.html" class="flex items-center gap-2 text-slate-600 hover:text-indigo-900 transition font-bold">
+                <div class="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center"><i class="fa-solid fa-arrow-left"></i></div>
+                <span>Geri Dön</span>
+            </a>
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Avukat Profili</span>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow max-w-5xl mx-auto px-4 py-10 w-full">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <aside class="lg:col-span-1">
+                <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm sticky top-24 text-center">
+                    
+                    <div class="relative w-32 h-32 mx-auto mb-4">
+                        <img src="https://randomuser.me/api/portraits/women/44.jpg" class="w-full h-full object-cover rounded-full border-4 border-slate-50 shadow-md">
+                        <div class="absolute bottom-0 right-0 bg-green-500 w-6 h-6 rounded-full border-4 border-white" title="Müsait"></div>
+                    </div>
+
+                    <h1 class="text-2xl font-extrabold text-slate-900 mb-1">Av. Zeynep Demir</h1>
+                    <p class="text-sm text-slate-500 mb-3">İstanbul Barosu • Sicil: 12345</p>
+                    
+                    <div class="flex justify-center gap-2 mb-6">
+                        <span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-3 py-1 rounded-full flex items-center gap-1 border border-blue-100">
+                            <i class="fa-solid fa-check-circle"></i> DOĞRULANMIŞ
+                        </span>
+                        <div class="flex text-yellow-400 text-xs items-center gap-1 bg-yellow-50 px-2 py-1 rounded-full border border-yellow-100">
+                            <i class="fa-solid fa-star"></i> 4.9 (42)
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <button onclick="window.location.href='ilan_hukuk.html?konu=Genel'" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-indigo-200 transition flex items-center justify-center gap-2">
+                            <i class="fa-regular fa-calendar-check"></i> Randevu Al
+                        </button>
+                        <button class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-green-200 transition flex items-center justify-center gap-2">
+                            <i class="fa-brands fa-whatsapp text-xl"></i> WhatsApp
+                        </button>
+                        <button class="w-full bg-white border-2 border-slate-200 hover:border-slate-400 text-slate-600 font-bold py-3 rounded-xl transition">
+                            <i class="fa-solid fa-phone mr-2"></i> Ara
+                        </button>
+                    </div>
+
+                    <div class="mt-8 pt-6 border-t border-slate-100 text-left">
+                        <h4 class="text-xs font-extrabold text-slate-400 uppercase mb-3">Diller</h4>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="text-xs font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded">Türkçe (Anadil)</span>
+                            <span class="text-xs font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded">İngilizce (C1)</span>
+                            <span class="text-xs font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded">Felemenkçe (B2)</span>
+                        </div>
+                    </div>
+
+                </div>
+            </aside>
+
+            <div class="lg:col-span-2 space-y-8">
+                
+                <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
+                    <h2 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-user-tie text-indigo-500"></i> Hakkımda
+                    </h2>
+                    <div class="text-slate-600 text-sm leading-loose space-y-4 text-justify">
+                        <p>Merhaba, ben Avukat Zeynep Demir. 2010 yılında İstanbul Üniversitesi Hukuk Fakültesi'nden mezun oldum. Özellikle <strong>Uluslararası Aile Hukuku</strong> ve <strong>Miras Hukuku</strong> alanlarında uzmanlaştım.</p>
+                        <p>Son 5 yıldır Belçika ve Hollanda'da yaşayan Türk vatandaşlarımızın Türkiye'deki hukuki süreçlerini (Tanıma/Tenfiz, Miras İntikali, Emeklilik) takip ediyorum. Amacım, gurbetçilerimizin Türkiye'ye gelmek zorunda kalmadan hukuki sorunlarını güvenle çözmelerini sağlamaktır.</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
+                    <h2 class="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+                        <i class="fa-solid fa-briefcase text-indigo-500"></i> Uzmanlık Alanları
+                    </h2>
+                    <div class="flex flex-wrap gap-3">
+                        <span class="expert-tag">Miras Hukuku</span>
+                        <span class="expert-tag">Boşanma & Velayet</span>
+                        <span class="expert-tag">Tanıma ve Tenfiz</span>
+                        <span class="expert-tag">Yabancılar Hukuku</span>
+                        <span class="expert-tag">Gayrimenkul & Tapu</span>
+                        <span class="expert-tag">SGK & Emeklilik</span>
+                        <span class="expert-tag">Tazminat Hukuku</span>
+                    </div>
+                </div>
+
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+                        <i class="fa-solid fa-pen-nib text-indigo-500"></i> Son Makaleler
+                    </h2>
+                    <div class="space-y-4">
+                        
+                        <div class="article-card bg-white p-5 rounded-2xl cursor-pointer group">
+                            <h3 class="font-bold text-slate-800 text-lg mb-2 group-hover:text-indigo-600 transition">Yurtdışı Boşanma Kararlarının Türkiye'de Tanınması</h3>
+                            <p class="text-slate-500 text-sm line-clamp-2">Avrupa mahkemelerinden alınan boşanma kararları Türkiye'de doğrudan geçerli değildir. Tanıma ve tenfiz davası açılması gerekmektedir...</p>
+                            <div class="mt-3 text-xs text-slate-400 font-bold">12 Kasım 2024 • 5 dk okuma</div>
+                        </div>
+
+                        <div class="article-card bg-white p-5 rounded-2xl cursor-pointer group">
+                            <h3 class="font-bold text-slate-800 text-lg mb-2 group-hover:text-indigo-600 transition">Gurbetçiler İçin Türkiye'den Emeklilik Şartları</h3>
+                            <p class="text-slate-500 text-sm line-clamp-2">Yurtdışı borçlanması yaparak Türkiye'den emekli olmak isteyen vatandaşlarımızın bilmesi gereken yeni SGK düzenlemeleri...</p>
+                            <div class="mt-3 text-xs text-slate-400 font-bold">28 Ekim 2024 • 7 dk okuma</div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <div class="bg-white border-t border-slate-200 py-8 text-center text-xs text-slate-400">
+        &copy; 2025 GurbetBağı Hukuk. Tüm hakları saklıdır.
+    </div>
+
+</body>
+</html>

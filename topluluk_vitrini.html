@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sohbet Akışı</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f0f2f5; }
+        
+        /* Paylaşım Kutusu */
+        .create-box { background: white; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); margin-bottom: 20px; overflow: hidden; }
+        
+        /* Gönderi Kartı */
+        .post-card { background: white; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); margin-bottom: 16px; transition: all 0.2s; }
+        
+        /* Aksiyon Butonları */
+        .action-btn { 
+            flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; 
+            padding: 8px; border-radius: 8px; color: #65676b; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s; select-user: none;
+        }
+        .action-btn:hover { background-color: #f0f2f5; }
+        
+        /* Beğenilince */
+        .action-btn.liked { color: #1d4ed8; } 
+        .action-btn.liked i { animation: pop 0.3s ease; }
+
+        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+        /* Yorum Alanı */
+        .comment-section { background-color: #f0f2f5; margin: 0 -16px -16px -16px; padding: 12px; display: none; }
+        .comment-section.active { display: block; animation: slideDown 0.2s ease-out; }
+        
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Resim Önizleme */
+        #onizlemeAlani img { max-height: 300px; width: 100%; object-fit: cover; border-radius: 8px; margin-top: 10px; }
+    </style>
+</head>
+<body class="text-slate-800 flex flex-col min-h-screen">
+
+    <nav class="bg-white sticky top-0 z-50 px-4 py-3 shadow-sm border-b border-gray-200 flex justify-between items-center h-16">
+        
+        <div class="w-12 flex justify-start">
+            <a href="index.html" class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-600 hover:bg-slate-200 transition">
+                <i class="fa-solid fa-arrow-left"></i>
+            </a>
+        </div>
+
+        <div class="flex-1 text-center">
+            <span class="font-extrabold text-2xl text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-pink-600 tracking-tight">SOHBET</span>
+        </div>
+        
+        <div class="w-12 flex justify-end">
+            <div class="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center text-slate-500 border border-slate-300">
+                <i class="fa-solid fa-user"></i>
+            </div>
+        </div>
+    </nav>
+
+    <main class="w-full max-w-[600px] mx-auto pt-6 px-4 pb-20">
+        
+        <div class="create-box p-4">
+            <div class="flex gap-3 mb-3">
+                <div class="w-10 h-10 bg-slate-200 rounded-full flex-shrink-0 flex items-center justify-center text-slate-500">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+                <textarea id="paylasimMetni" rows="2" placeholder="Ne düşünüyorsun?" class="w-full bg-slate-100 hover:bg-slate-50 focus:bg-white border-transparent focus:border-blue-500 rounded-xl px-4 py-2 resize-none outline-none transition"></textarea>
+            </div>
+            
+            <div id="onizlemeAlani" class="relative hidden mb-3">
+                <button onclick="resmiKaldir()" class="absolute top-2 right-2 bg-slate-800/70 text-white w-8 h-8 rounded-full hover:bg-red-600 transition"><i class="fa-solid fa-xmark"></i></button>
+                <img id="secilenResim" src="">
+            </div>
+
+            <div class="border-t border-gray-100 pt-3 flex justify-between items-center">
+                <div class="flex gap-2">
+                    <input type="file" id="resimInput" accept="image/*" class="hidden" onchange="resimSecildi(event)">
+                    <button onclick="document.getElementById('resimInput').click()" class="flex items-center gap-2 text-slate-500 hover:bg-slate-100 px-3 py-2 rounded-lg transition text-sm font-bold">
+                        <i class="fa-solid fa-image text-green-500 text-lg"></i> Fotoğraf
+                    </button>
+                </div>
+                <button onclick="paylas()" id="paylasBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-bold text-sm transition shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
+                    Paylaş
+                </button>
+            </div>
+        </div>
+
+        <div id="akisAlani" class="space-y-4"></div>
+
+    </main>
+
+    <script src="config.js"></script>
+    <script>
+        // Supabase Bağlantısı
+        let sb = null;
+        try { if (typeof initSupabase === 'function') sb = initSupabase(); } catch (e) {}
+
+        let secilenResimBase64 = null;
+
+        window.onload = function() {
+            akisYukle();
+        };
+
+        // --- 1. PAYLAŞIM FONKSİYONLARI ---
+        function resimSecildi(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    secilenResimBase64 = e.target.result;
+                    document.getElementById('secilenResim').src = secilenResimBase64;
+                    document.getElementById('onizlemeAlani').classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function resmiKaldir() {
+            document.getElementById('resimInput').value = "";
+            secilenResimBase64 = null;
+            document.getElementById('onizlemeAlani').classList.add('hidden');
+        }
+
+        async function paylas() {
+            const metin = document.getElementById('paylasimMetni').value.trim();
+            const btn = document.getElementById('paylasBtn');
+
+            if (!metin && !secilenResimBase64) {
+                alert("Lütfen bir şeyler yazın.");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "Paylaşılıyor...";
+
+            const yeniGonderi = {
+                aciklama: metin,
+                baslik: "Kullanıcı Gönderisi",
+                kategori: 'Topluluk',
+                altKategori: 'Sohbet',
+                resim: secilenResimBase64,
+                fiyat: '0',
+                konum: 'Avrupa',
+                tarih: new Date()
+            };
+
+            // Veritabanı Kaydı
+            if (sb) {
+                try {
+                    const { error } = await sb.from('ilanlar').insert([{ ...yeniGonderi, resim: null }]); 
+                } catch (err) {}
+            }
+
+            // Yerel Kayıt
+            const localData = JSON.parse(localStorage.getItem('facebook_feed') || '[]');
+            localData.unshift({ 
+                ...yeniGonderi, 
+                id: Date.now(), 
+                kullanici: 'Ben', 
+                begeni: 0,
+                yorumlar: []
+            });
+            localStorage.setItem('facebook_feed', JSON.stringify(localData));
+
+            document.getElementById('paylasimMetni').value = "";
+            resmiKaldir();
+            btn.disabled = false;
+            btn.innerText = "Paylaş";
+            akisYukle();
+        }
+
+        // --- 2. ETKİLEŞİM FONKSİYONLARI ---
+        
+        function begen(btn, id) {
+            btn.classList.toggle('liked');
+            const icon = btn.querySelector('i');
+            const span = btn.querySelector('span');
+            
+            // Güvenli sayı çevirme
+            let sayi = parseInt(span.innerText);
+            if(isNaN(sayi)) sayi = 0;
+
+            if (btn.classList.contains('liked')) {
+                icon.classList.remove('fa-regular');
+                icon.classList.add('fa-solid');
+                sayi++;
+                btn.style.color = "#1d4ed8";
+            } else {
+                icon.classList.add('fa-regular');
+                icon.classList.remove('fa-solid');
+                sayi = Math.max(0, sayi - 1);
+                btn.style.color = "#65676b";
+            }
+            span.innerText = sayi;
+        }
+
+        function yorumAlaniniAc(id) {
+            const alan = document.getElementById(`yorum-alani-${id}`);
+            alan.classList.toggle('active');
+            if (alan.classList.contains('active')) {
+                document.getElementById(`yorum-input-${id}`).focus();
+            }
+        }
+
+        function yorumGonder(id) {
+            const input = document.getElementById(`yorum-input-${id}`);
+            const liste = document.getElementById(`yorum-listesi-${id}`);
+            const metin = input.value.trim();
+
+            if (!metin) return;
+
+            const html = `
+            <div class="flex gap-2 mb-2 animate-pulse">
+                <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">B</div>
+                <div class="bg-gray-100 rounded-2xl px-3 py-2">
+                    <p class="text-xs font-bold text-slate-800">Ben</p>
+                    <p class="text-sm text-slate-700">${metin}</p>
+                </div>
+            </div>`;
+            
+            liste.insertAdjacentHTML('beforeend', html);
+            input.value = "";
+        }
+
+        function paylasButonu(baslik) {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'GurbetBağı Sohbet',
+                    text: baslik,
+                    url: window.location.href,
+                });
+            } else {
+                alert("Link kopyalandı!");
+            }
+        }
+
+        // --- 3. AKIŞI YÜKLE ---
+        async function akisYukle() {
+            const alan = document.getElementById('akisAlani');
+            alan.innerHTML = "";
+
+            const localData = JSON.parse(localStorage.getItem('facebook_feed') || '[]');
+            
+            let supabaseData = [];
+            if(sb) {
+                try {
+                    const { data } = await sb.from('ilanlar').select('*').eq('kategori', 'Topluluk').order('created_at', { ascending: false });
+                    if(data) supabaseData = data;
+                } catch(e) {}
+            }
+
+            const formattedSupabase = supabaseData.map(d => ({
+                id: d.id,
+                kullanici: 'Misafir Kullanıcı',
+                aciklama: d.aciklama,
+                resim: d.resim,
+                tarih: new Date(d.created_at),
+                begeni: Math.floor(Math.random() * 20),
+                yorumlar: []
+            }));
+
+            const tumVeri = [...localData, ...formattedSupabase].sort((a, b) => new Date(b.tarih) - new Date(a.tarih));
+
+            if (tumVeri.length === 0) {
+                alan.innerHTML = `<div class="text-center py-10 text-gray-400">Henüz sohbet yok. İlk sen yaz!</div>`;
+                return;
+            }
+
+            tumVeri.forEach(g => {
+                const tarihStr = new Date(g.tarih).toLocaleDateString('tr-TR');
+                
+                let resimHtml = "";
+                if (g.resim) {
+                    resimHtml = `<div class="mt-3 -mx-4 cursor-pointer"><img src="${g.resim}" class="w-full object-cover max-h-[500px]"></div>`;
+                }
+
+                const html = `
+                <div class="post-card p-4">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold cursor-pointer">
+                            ${g.kullanici.charAt(0)}
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-900 text-sm leading-tight cursor-pointer hover:underline">${g.kullanici}</h4>
+                            <span class="text-xs text-gray-400">${tarihStr} • <i class="fa-solid fa-earth-americas"></i></span>
+                        </div>
+                        <button class="ml-auto text-gray-400 hover:bg-gray-100 w-8 h-8 rounded-full"><i class="fa-solid fa-ellipsis"></i></button>
+                    </div>
+
+                    <div class="text-slate-800 text-sm leading-relaxed whitespace-pre-wrap">${g.aciklama}</div>
+
+                    ${resimHtml}
+
+                    <div class="flex justify-between items-center py-2 mt-2 border-b border-gray-100 text-xs text-gray-500">
+                        <div class="flex items-center gap-1">
+                            <div class="bg-blue-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-[8px]"><i class="fa-solid fa-thumbs-up"></i></div>
+                            <span id="begeni-sayi-${g.id}">${g.begeni || 0}</span>
+                        </div>
+                        <div>Yorumlar</div>
+                    </div>
+
+                    <div class="flex justify-between pt-1 mt-1 gap-1">
+                        <div class="action-btn" onclick="begen(this, '${g.id}')">
+                            <i class="fa-regular fa-thumbs-up text-lg"></i> <span class="hidden sm:inline">Beğen</span>
+                        </div>
+                        <div class="action-btn" onclick="yorumAlaniniAc('${g.id}')">
+                            <i class="fa-regular fa-comment text-lg"></i> <span class="hidden sm:inline">Yorum Yap</span>
+                        </div>
+                        <div class="action-btn" onclick="paylasButonu('${g.aciklama ? g.aciklama.substring(0, 30) : ''}...')">
+                            <i class="fa-solid fa-share text-lg"></i> <span class="hidden sm:inline">Paylaş</span>
+                        </div>
+                    </div>
+
+                    <div id="yorum-alani-${g.id}" class="comment-section border-t border-gray-100 mt-2 pt-3">
+                        <div id="yorum-listesi-${g.id}" class="mb-3 space-y-2">
+                            </div>
+                        <div class="flex gap-2">
+                            <div class="w-8 h-8 bg-slate-200 rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center text-slate-500">
+                                <i class="fa-solid fa-user"></i>
+                            </div>
+                            <div class="flex-1 relative">
+                                <input type="text" id="yorum-input-${g.id}" placeholder="Yorum yaz..." class="w-full bg-gray-100 rounded-2xl px-4 py-2 text-sm outline-none focus:bg-gray-200 pr-10">
+                                <button onclick="yorumGonder('${g.id}')" class="absolute right-2 top-1/2 -translate-y-1/2 text-blue-600 hover:text-blue-800">
+                                    <i class="fa-solid fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>`;
+                alan.innerHTML += html;
+            });
+        }
+    </script>
+</body>
+</html>

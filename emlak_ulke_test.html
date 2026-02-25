@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emlak İlanı - TEST BAĞIMSIZ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        .secim-btn.active { background-color: #eff6ff; border-color: #2563eb; color: #1e40af; }
+        .secim-btn { border: 2px solid #e2e8f0; cursor: pointer; transition: all 0.2s; }
+        .modern-select { border: 2px solid #e2e8f0; border-radius: 12px; padding: 10px; }
+    </style>
+</head>
+<body class="text-slate-800 flex flex-col min-h-screen">
+
+    <nav class="bg-white/90 backdrop-blur border-b border-slate-200 sticky top-0 z-50 px-4 py-4 shadow-sm">
+        <div class="max-w-4xl mx-auto"><span class="font-extrabold text-lg text-blue-600">TEST SAYFASI - ÜLKE DOLDURMA</span></div>
+    </nav>
+
+    <main class="flex-grow max-w-4xl mx-auto px-4 py-10 w-full">
+        <div class="bg-white p-8 rounded-3xl shadow-lg border border-slate-200">
+            <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-location-dot text-blue-500"></i> Konum Bilgileri (HATA KONTROL)</h3>
+            
+            <div class="mb-4">
+                <label class="text-xs font-bold text-slate-500 block mb-1">Ülke</label>
+                <select id="ulkeSecimi" onchange="ulkeDegisti()" class="modern-select w-full bg-white text-lg font-bold text-slate-800 outline-none cursor-pointer focus:border-blue-500">
+                    <option value="">Ülke Seçiniz...</option>
+                </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="text-xs font-bold text-slate-500 block mb-1">Şehir</label>
+                    <select id="sehirSecimi" class="modern-select bg-slate-100 w-full text-lg text-slate-600 font-semibold outline-none disabled:opacity-50" disabled>
+                        <option value="">Önce Ülke Seçin</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="mt-8 text-sm text-slate-500 border-t pt-4">
+                Eğer bu sayfada ülkeler listeleniyorsa, sorun <span class="font-bold">genel_veriler.js</span> dosyanızın <span class="font-bold">diğer dosyalar tarafından yüklenememesinden</span> kaynaklanıyordur.
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        
+        // 1. VERİ TABANI (HARİCİ BAĞLANTI YOK)
+        const lokasyonVeritabani = {
+            "TR": { 
+                isim: "Türkiye", bayrak: "🇹🇷", sehirler: ["İstanbul", "Ankara", "İzmir", "Antalya", "Bursa", "Adana", "Konya", "Gaziantep", "Şanlıurfa", "Mersin"]
+            },
+            "DE": { 
+                isim: "Almanya", bayrak: "🇩🇪", sehirler: ["Berlin", "Hamburg", "Münih", "Köln", "Frankfurt", "Stuttgart", "Düsseldorf"]
+            },
+            "BE": { 
+                isim: "Belçika", bayrak: "🇧🇪", sehirler: ["Brüksel", "Gent", "Antwerpen", "Liège", "Brugge"]
+            },
+            "NL": { 
+                isim: "Hollanda", bayrak: "🇳🇱", sehirler: ["Amsterdam", "Rotterdam", "Den Haag", "Utrecht", "Eindhoven"]
+            },
+            "FR": { 
+                isim: "Fransa", bayrak: "🇫🇷", sehirler: ["Paris", "Marsilya", "Lyon", "Toulouse", "Nice", "Nantes"]
+            },
+            "AT": { 
+                isim: "Avusturya", bayrak: "🇦🇹", sehirler: ["Viyana", "Graz", "Linz", "Salzburg", "Innsbruck"]
+            }
+        };
+
+        // 2. ÜLKE DOLDURMA FONKSİYONU
+        function ulkeleriDoldur(selectId) {
+            const select = document.getElementById(selectId);
+            if (!select) return;
+            
+            select.innerHTML = '<option value="">Ülke Seçiniz...</option>';
+            const siraliKodlar = Object.keys(lokasyonVeritabani).sort((a, b) => 
+                lokasyonVeritabani[a].isim.localeCompare(lokasyonVeritabani[b].isim, 'tr')
+            );
+
+            siraliKodlar.forEach(kod => {
+                const ulke = lokasyonVeritabani[kod];
+                let opt = document.createElement('option');
+                opt.value = kod;
+                opt.text = `${ulke.bayrak} ${ulke.isim}`;
+                select.add(opt);
+            });
+        }
+
+        // 3. ŞEHİR DOLDURMA FONKSİYONU
+        function sehirleriGetirOrtak(ulkeKod, sehirSelectId) {
+            const sehirSelect = document.getElementById(sehirSelectId);
+            if (!sehirSelect) return;
+
+            sehirSelect.innerHTML = '<option value="">Şehir Seçiniz...</option>';
+            
+            if (ulkeKod && lokasyonVeritabani[ulkeKod]) {
+                const sehirler = lokasyonVeritabani[ulkeKod].sehirler.sort((a, b) => a.localeCompare(b, 'tr'));
+                
+                sehirler.forEach(sehir => {
+                    let opt = document.createElement('option');
+                    opt.value = sehir;
+                    opt.text = sehir;
+                    sehirSelect.add(opt);
+                });
+                
+                sehirSelect.disabled = false;
+                sehirSelect.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else {
+                sehirSelect.disabled = true;
+                sehirSelect.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+        }
+        
+        // 4. BAŞLANGIÇ
+        window.onload = function() {
+            ulkeleriDoldur('ulkeSecimi');
+        };
+        
+        function ulkeDegisti() {
+            const ulkeKod = document.getElementById('ulkeSecimi').value;
+            sehirleriGetirOrtak(ulkeKod, 'sehirSecimi');
+        }
+    </script>
+</body>
+</html>
