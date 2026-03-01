@@ -2,8 +2,13 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Şifremi Unuttum</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="utils.js"></script>
+    <script src="auth.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; }</style>
@@ -22,10 +27,11 @@
         <form onsubmit="sifirla(event)" class="space-y-6">
             <div class="text-left">
                 <label class="text-xs font-bold text-slate-500 uppercase ml-1 block mb-1">E-Posta</label>
-                <input type="email" required placeholder="ornek@mail.com" class="w-full border-2 border-slate-200 rounded-xl p-3 outline-none focus:border-blue-500 transition">
+                <input type="email" id="resetEmail" required placeholder="ornek@mail.com" class="w-full border-2 border-slate-200 rounded-xl p-3 outline-none focus:border-blue-500 transition">
             </div>
 
-            <button type="submit" class="w-full bg-slate-900 text-white font-bold py-3.5 rounded-xl hover:bg-slate-800 transition shadow-lg">
+            <p id="resetMsg" class="text-sm text-center hidden"></p>
+            <button type="submit" id="resetBtn" class="w-full bg-slate-900 text-white font-bold py-3.5 rounded-xl hover:bg-slate-800 transition shadow-lg">
                 Bağlantı Gönder
             </button>
         </form>
@@ -38,19 +44,34 @@
     </div>
 
     <script>
-        function sifirla(e) {
+        async function sifirla(e) {
             e.preventDefault();
-            const btn = e.target.querySelector('button');
-            const originalText = btn.innerText;
+            const btn = document.getElementById('resetBtn');
+            const msgEl = document.getElementById('resetMsg');
+            const email = document.getElementById('resetEmail').value.trim();
+            if (!email) return;
+
             btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Gönderiliyor...';
             btn.disabled = true;
+            msgEl.classList.add('hidden');
+            msgEl.textContent = '';
 
-            setTimeout(() => {
-                alert("Sıfırlama bağlantısı e-posta adresinize gönderildi!");
-                btn.innerText = "Gönderildi ✔";
+            const result = typeof resetPassword === 'function' ? await resetPassword(email) : { success: false, error: 'Auth yüklenemedi.' };
+
+            if (result.success) {
+                msgEl.textContent = 'Şifre sıfırlama bağlantısı e-posta adresinize gönderildi. Gelen kutusu ve spam klasörünü kontrol edin.';
+                msgEl.className = 'text-sm text-center text-green-600';
+                msgEl.classList.remove('hidden');
+                btn.innerText = 'Gönderildi ✔';
                 btn.classList.replace('bg-slate-900', 'bg-green-600');
                 btn.classList.replace('hover:bg-slate-800', 'hover:bg-green-700');
-            }, 1500);
+            } else {
+                msgEl.textContent = result.error || 'Bir hata oluştu. Lütfen tekrar deneyin.';
+                msgEl.className = 'text-sm text-center text-red-600';
+                msgEl.classList.remove('hidden');
+                btn.innerHTML = 'Bağlantı Gönder';
+                btn.disabled = false;
+            }
         }
     </script>
 </body>

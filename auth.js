@@ -45,8 +45,6 @@ async function initAuth() {
             
             if (profile) {
                 currentProfile = profile;
-                
-                // localStorage'ı güncelle (geriye uyumluluk için)
                 localStorage.setItem('isLoggedIn', 'true');
                 localStorage.setItem('userEmail', profile.email || '');
                 localStorage.setItem('userName', profile.full_name || '');
@@ -55,6 +53,13 @@ async function initAuth() {
                 localStorage.setItem('userCountry', profile.country || '');
                 localStorage.setItem('userPhone', profile.phone || '');
                 localStorage.setItem('userLocation', profile.city || '');
+            } else {
+                currentProfile = null;
+                // Oturum var ama profil yok (örn. OAuth sonrası henüz oluşmadı) - yine de giriş yapılmış kabul et
+                const name = session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email || 'Kullanıcı';
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('userEmail', session.user.email || '');
+                localStorage.setItem('userName', name);
             }
         } else {
             // Session yok - temizle
@@ -90,11 +95,15 @@ async function handleAuthChange(event, session) {
             .eq('id', session.user.id)
             .single();
         
-        // Google ile giriş yapıldıysa ve profil yoksa oluştur
-        if (!profile && session.user.app_metadata?.provider === 'google') {
-            const fullName = session.user.user_metadata?.full_name || 
-                           session.user.user_metadata?.name || 
-                           session.user.email.split('@')[0];
+        const provider = session.user.app_metadata?.provider;
+        // Google veya Facebook ile giriş yapıldıysa ve profil yoksa oluştur
+        if (!profile && (provider === 'google' || provider === 'facebook')) {
+            const fullName = session.user.user_metadata?.full_name ||
+                           session.user.user_metadata?.name ||
+                           (session.user.user_metadata?.given_name && session.user.user_metadata?.family_name
+                               ? session.user.user_metadata.given_name + ' ' + session.user.user_metadata.family_name
+                               : null) ||
+                           (session.user.email ? session.user.email.split('@')[0] : 'Kullanıcı');
             
             const { data: newProfile } = await sb.from('profiles').insert([{
                 id: session.user.id,
@@ -103,21 +112,21 @@ async function handleAuthChange(event, session) {
                 real_name: fullName,
                 phone_verified: false,
                 verified_at: new Date().toISOString(),
-                verification_method: 'google',
+                verification_method: provider,
                 role: 'user',
                 status: 'active'
             }]).select().single();
             
             profile = newProfile;
-        } else if (profile && session.user.app_metadata?.provider === 'google') {
-            // Google ile giriş yapıldıysa verification_method'u güncelle
-            if (!profile.verification_method || profile.verification_method !== 'google') {
+        } else if (profile && (provider === 'google' || provider === 'facebook')) {
+            // OAuth ile giriş yapıldıysa verification_method'u güncelle
+            if (!profile.verification_method || profile.verification_method !== provider) {
                 await sb.from('profiles').update({
-                    verification_method: 'google',
+                    verification_method: provider,
                     verified_at: new Date().toISOString()
                 }).eq('id', session.user.id);
                 
-                profile.verification_method = 'google';
+                profile.verification_method = provider;
                 profile.verified_at = new Date().toISOString();
             }
         }
@@ -135,17 +144,19 @@ async function handleAuthChange(event, session) {
 
 /**
  * UI'daki auth alanlarını günceller
+ * Oturum varsa (currentUser) profil gelmemiş olsa bile "giriş yapılmış" gösterilir (Google/Facebook sonrası ziyaretçi görünmez).
  */
 function updateAuthUI() {
     const authButtons = document.getElementById('authButtons');
     if (!authButtons) return;
     
-    if (currentProfile) {
-        const displayName = currentProfile.full_name || 'Kullanıcı';
-        const initials = displayName.substring(0, 2).toUpperCase();
-        const avatarUrl = currentProfile.avatar_url || 
-            `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=4f46e5&color=fff`;
-        
+    const displayName = currentProfile
+        ? (currentProfile.full_name || 'Kullanıcı')
+        : (currentUser ? (currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || currentUser.email || 'Kullanıcı') : null);
+    const avatarUrl = currentProfile?.avatar_url ||
+        (displayName ? `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=4f46e5&color=fff` : '');
+
+    if (currentUser || currentProfile) {
         authButtons.innerHTML = `
             <div class="flex items-center gap-3">
                 <a href="profil.html" class="flex items-center gap-2 hover:opacity-80 transition">

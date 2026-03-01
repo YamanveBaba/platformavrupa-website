@@ -213,9 +213,36 @@
         let exchangeRates = {};
         let goldPrices = {};
         let priceChart = null;
-        const CACHE_DURATION_MINUTES = 10; // Cache süresi: 10 dakika
+        const CACHE_DURATION_MINUTES = 30; // Cache süresi: 30 dakika (yarım saatte bir taze veri)
         
         // ========== CACHE YÖNETİMİ ==========
+        
+        // Cache'den döviz kurlarını oku (anında göstermek için)
+        function getCachedExchangeRates() {
+            try {
+                const cached = localStorage.getItem('doviz_rates_cache');
+                if (!cached) return null;
+                const data = JSON.parse(cached);
+                return data;
+            } catch (e) {
+                console.warn('Döviz cache okuma hatası:', e);
+                return null;
+            }
+        }
+        
+        // Döviz kurlarını cache'e yaz
+        function setCachedExchangeRates(rates) {
+            try {
+                const cacheData = {
+                    rates: rates,
+                    timestamp: Date.now()
+                };
+                localStorage.setItem('doviz_rates_cache', JSON.stringify(cacheData));
+                console.log('✅ Döviz kurları cache\'e kaydedildi');
+            } catch (e) {
+                console.warn('Döviz cache yazma hatası:', e);
+            }
+        }
         
         // Cache'den altın fiyatlarını oku
         function getCachedGoldPrices() {
@@ -328,20 +355,15 @@
             await waitForGenelVeriler();
             await loadAllPrices();
             
-            // Her 10 dakikada bir otomatik cache güncelle (sessiz - kullanıcıya bildirim yok)
+            // Her 30 dakikada bir otomatik cache güncelle (döviz + altın, sessiz)
             setInterval(async () => {
-                console.log('🔄 Otomatik cache güncelleme başlatılıyor (10 dakika)...');
+                console.log('🔄 Otomatik cache güncelleme (30 dk)...');
                 try {
-                    await calculateGoldPrices();
-                    // UI'ı sessizce güncelle
-                    updateHeroSection();
-                    renderGoldGrid();
-                    document.getElementById('lastUpdate').textContent = 
-                        'Son güncelleme: ' + new Date().toLocaleTimeString('tr-TR') + ' (Otomatik)';
+                    await refreshPricesInBackground();
                 } catch (error) {
                     console.warn('Otomatik güncelleme hatası:', error);
                 }
-            }, 10 * 60 * 1000); // 10 dakika
+            }, CACHE_DURATION_MINUTES * 60 * 1000);
         };
         
         // genel_veriler.js yüklenmesini bekle
@@ -369,65 +391,89 @@
             });
         }
         
-        // Tüm fiyatları yükle (cache mekanizması ile optimize edilmiş)
+        // Tüm fiyatları yükle: Önce cache varsa anında göster, arka planda yenile (yarım saatte bir)
         async function loadAllPrices() {
-            showLoading();
+            const cachedRates = getCachedExchangeRates();
+            const cachedGold = getCachedGoldPrices();
+            const ratesValid = cachedRates && isCacheValid(cachedRates, CACHE_DURATION_MINUTES);
+            const goldValid = cachedGold && isCacheValid(cachedGold, CACHE_DURATION_MINUTES);
             
+            // Her iki cache de geçerliyse: anında göster, yükleniyor gösterme
+            if (ratesValid && goldValid) {
+                console.log('✅ Cache\'den anında gösterim (döviz + altın)');
+                exchangeRates = cachedRates.rates || cachedRates;
+                goldPrices = (cachedGold.prices || cachedGold) || {};
+                if (!goldPrices._changes) goldPrices._changes = {};
+                updateHeroSection();
+                renderCurrencyTable();
+                renderGoldGrid();
+                const cacheDate = new Date(cachedGold.timestamp || cachedRates.timestamp);
+                document.getElementById('lastUpdate').textContent = 
+                    'Son güncelleme: ' + cacheDate.toLocaleTimeString('tr-TR') + ' (Cache – arka planda güncelleniyor)';
+                refreshPricesInBackground();
+                return;
+            }
+            
+            // Cache yok veya eski: yükleniyor göster, sırayla çek
+            showLoading();
             try {
-                // Döviz kurlarını çek (hızlı)
                 await loadExchangeRates();
-                
-                // Döviz kurları yüklendi, UI'ı güncelle (kullanıcı hemen görsün)
+                setCachedExchangeRates(exchangeRates);
                 updateHeroSection();
                 renderCurrencyTable();
                 
-                // Altın fiyatları: Önce cache'den kontrol et
                 const cached = getCachedGoldPrices();
-                
                 if (cached && isCacheValid(cached, CACHE_DURATION_MINUTES)) {
-                    // Cache geçerli, cache'den göster (anında)
-                    console.log('✅ Cache\'den altın fiyatları yüklendi');
                     goldPrices = cached.prices;
-                    goldPrices._changes = {};
-                    
-                    // UI'ı güncelle
+                    goldPrices._changes = goldPrices._changes || {};
                     updateHeroSection();
                     renderGoldGrid();
-                    hideLoading();
-                    
-                    // Son güncelleme zamanı
-                    const cacheDate = new Date(cached.timestamp);
                     document.getElementById('lastUpdate').textContent = 
-                        'Son güncelleme: ' + cacheDate.toLocaleTimeString('tr-TR') + ' (Cache)';
-                    
-                    // Arka planda yeni veri çek (cache'i güncelle)
+                        'Son güncelleme: ' + new Date(cached.timestamp).toLocaleTimeString('tr-TR') + ' (Cache)';
                     calculateGoldPrices().then(() => {
-                        // Yeni veri geldi, UI'ı güncelle
                         updateHeroSection();
                         renderGoldGrid();
                         document.getElementById('lastUpdate').textContent = 
                             'Son güncelleme: ' + new Date().toLocaleTimeString('tr-TR');
-                    }).catch(error => {
-                        console.error('Altın fiyat güncelleme hatası:', error);
-                    });
-                } else {
-                    // Cache yok veya geçersiz, yeni veri çek
-                    console.log('🔄 Cache geçersiz veya yok, yeni veri çekiliyor...');
-                    await calculateGoldPrices();
-                    
-                    // UI'ı güncelle
-                    updateHeroSection();
-                    renderGoldGrid();
-                    hideLoading();
-                    
-                    // Son güncelleme zamanı
-                    document.getElementById('lastUpdate').textContent = 
-                        'Son güncelleme: ' + new Date().toLocaleTimeString('tr-TR');
+                    }).catch(() => {});
+                    return;
                 }
-                    
+                
+                await calculateGoldPrices();
+                updateHeroSection();
+                renderGoldGrid();
+                document.getElementById('lastUpdate').textContent = 
+                    'Son güncelleme: ' + new Date().toLocaleTimeString('tr-TR');
             } catch (error) {
                 console.error('Fiyat yükleme hatası:', error);
-                hideLoading();
+                // Hata olsa bile cache varsa göster
+                if (ratesValid && cachedRates) {
+                    exchangeRates = cachedRates.rates || cachedRates;
+                    updateHeroSection();
+                    renderCurrencyTable();
+                }
+                if (goldValid && cachedGold) {
+                    goldPrices = cachedGold.prices || cachedGold;
+                    goldPrices._changes = goldPrices._changes || {};
+                    renderGoldGrid();
+                }
+            }
+        }
+        
+        // Arka planda döviz + altın güncelle (cache varsa sayfa açıldığında çağrılır)
+        async function refreshPricesInBackground() {
+            try {
+                await loadExchangeRates();
+                setCachedExchangeRates(exchangeRates);
+                updateHeroSection();
+                renderCurrencyTable();
+                await calculateGoldPrices();
+                updateHeroSection();
+                renderGoldGrid();
+                document.getElementById('lastUpdate').textContent = 
+                    'Son güncelleme: ' + new Date().toLocaleTimeString('tr-TR');
+            } catch (e) {
+                console.warn('Arka plan güncelleme hatası:', e);
             }
         }
         
@@ -473,6 +519,7 @@
                     console.log('Tarihsel veri alınamadı');
                 }
                 
+                setCachedExchangeRates(exchangeRates);
             } catch (error) {
                 console.error('Döviz kuru hatası:', error);
                 throw error;

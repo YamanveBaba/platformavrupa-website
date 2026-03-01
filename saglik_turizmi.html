@@ -179,7 +179,7 @@
                 <p class="text-xs text-slate-400">İmplant, Veneer, Estetik</p>
             </div>
             <div class="category-card rounded-2xl p-6 text-center cursor-pointer" data-category="estetik" onclick="openCategoryDetail('estetik', this)">
-                <i class="fa-solid fa-sparkles text-4xl text-purple-400 mb-3"></i>
+                <i class="fa-solid fa-star text-4xl text-purple-400 mb-3"></i>
                 <h4 class="font-bold text-white mb-2">Estetik Cerrahi</h4>
                 <p class="text-xs text-slate-400">Rinoplasti, Meme, Vücut</p>
             </div>
@@ -203,6 +203,7 @@
 
     <!-- Klinik Kartları -->
     <div class="max-w-7xl mx-auto px-4 mb-8">
+        <p id="clinicsCategoryTitle" class="text-slate-400 text-sm mb-4 hidden"></p>
         <div id="clinicsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <!-- Klinikler buraya yüklenecek -->
         </div>
@@ -259,8 +260,8 @@
             <div id="categoryDetailContent" class="space-y-4 text-slate-300">
                 <!-- Kategori ayrıntıları buraya yüklenecek -->
             </div>
-            <button id="categoryDetailShowClinicsBtn" onclick="closeCategoryDetailModal(); applyCategoryAndScroll()" class="w-full mt-6 bg-gradient-to-r from-pink-500 to-rose-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-pink-500/30 hover:shadow-pink-500/50 transition">
-                <i class="fa-solid fa-hospital mr-2"></i> Bu Kategorideki Klinikleri Gör
+            <button id="categoryDetailShowClinicsBtn" onclick="closeCategoryDetailModal(); openConsultationFromCategory()" class="w-full mt-6 bg-gradient-to-r from-pink-500 to-rose-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-pink-500/30 hover:shadow-pink-500/50 transition">
+                <i class="fa-brands fa-whatsapp mr-2"></i> Ücretsiz Danışmanlık Al
             </button>
         </div>
     </div>
@@ -360,12 +361,24 @@
                 
                 <div>
                     <label class="block text-sm font-bold text-slate-300 mb-2">Tercih Edilen Tarih</label>
-                    <input type="date" id="preferredDate" name="preferredDate" min="" class="w-full bg-slate-800 text-white rounded-lg px-4 py-3 border border-slate-700 focus:border-pink-500 focus:outline-none">
+                    <div class="relative w-full bg-slate-800 rounded-lg border border-slate-700">
+                        <div onclick="var el=document.getElementById('preferredDate'); (el.showPicker&&el.showPicker())||el.click();" class="w-full py-3 px-4 flex items-center justify-between cursor-pointer" role="button" tabindex="0">
+                            <span id="preferredDateLabel" class="text-slate-400">Tarih seçmek için tıklayın</span>
+                            <i class="fa-solid fa-calendar-days text-pink-400"></i>
+                        </div>
+                        <input type="date" id="preferredDate" name="preferredDate" min="" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" aria-hidden="true">
+                    </div>
                 </div>
                 
                 <div>
                     <label class="block text-sm font-bold text-slate-300 mb-2">Öncesi Fotoğraflar (Opsiyonel)</label>
-                    <input type="file" id="photos" name="photos" multiple accept="image/*" class="w-full bg-slate-800 text-white rounded-lg px-4 py-3 border border-slate-700 focus:border-pink-500 focus:outline-none">
+                    <div class="relative">
+                        <input type="file" id="photos" name="photos" multiple accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                        <div class="w-full bg-slate-800 text-white rounded-lg px-4 py-3 border border-slate-700 flex items-center justify-between pointer-events-none">
+                            <span id="photosLabel" class="text-slate-400">Dosya seçin</span>
+                            <i class="fa-solid fa-paperclip text-pink-400"></i>
+                        </div>
+                    </div>
                     <p class="text-xs text-slate-400 mt-1">Saç, diş veya estetik için öncesi fotoğraflarınızı yükleyebilirsiniz</p>
                 </div>
                 
@@ -391,6 +404,28 @@
             populateCountryDropdown();
             populatePhoneCodeDropdowns();
             setMinDate();
+            // Tarih seçildiğinde etiketi güncelle
+            const preferredDate = document.getElementById('preferredDate');
+            const preferredDateLabel = document.getElementById('preferredDateLabel');
+            if (preferredDate && preferredDateLabel) {
+                preferredDate.addEventListener('change', function() {
+                    if (this.value) {
+                        const d = new Date(this.value + 'T00:00:00');
+                        preferredDateLabel.textContent = d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+                    } else {
+                        preferredDateLabel.textContent = 'Tarih seçmek için tıklayın';
+                    }
+                });
+            }
+            // Dosya seçildiğinde etiketi güncelle (Türkçe)
+            const photosInput = document.getElementById('photos');
+            const photosLabel = document.getElementById('photosLabel');
+            if (photosInput && photosLabel) {
+                photosInput.addEventListener('change', function() {
+                    const n = this.files.length;
+                    photosLabel.textContent = n === 0 ? 'Dosya seçin' : (n === 1 ? '1 dosya seçildi' : n + ' dosya seçildi');
+                });
+            }
         };
 
         // Minimum tarihi bugün yap
@@ -610,54 +645,54 @@
             }).join('');
         }
 
-        // Kategori ayrıntı verileri (Hizmet Kategorilerimiz tıklanınca gösterilir)
+        // Kategori ayrıntı verileri (halk dilinde; teknik terimler parantez içinde)
         const categoryDetailData = {
             sac_ekimi: {
                 title: 'Saç Ekimi',
                 icon: 'fa-solid fa-scissors',
                 iconColor: 'text-pink-400',
-                description: 'Türkiye, saç ekiminde dünya liderlerinden biri. FUE, DHI ve Sapphire teknikleriyle doğal sonuçlar, Avrupa\'ya kıyasla %50-70 daha uygun fiyatlarla sunuluyor.',
-                procedures: ['FUE (Follicular Unit Extraction)', 'DHI (Direct Hair Implantation)', 'Sapphire FUE', 'Sakal ve bıyık ekimi', 'Kadın saç ekimi'],
+                description: 'Türkiye saç ekiminde dünya liderlerinden biri. Saç köklerini tek tek alıp seyrek bölgeye nakletme yöntemleriyle doğal sonuçlar alıyorsunuz; Avrupa\'ya göre %50-70 daha uygun fiyatlarla.',
+                procedures: ['Saç kökü nakli (FUE)', 'Kalemle saç ekimi (DHI)', 'Safir uçlu saç ekimi (Sapphire FUE)', 'Sakal ve bıyık ekimi', 'Kadın saç ekimi'],
                 notes: 'İşlem 1-2 gün sürer. 6-12 ay içinde kalıcı sonuçlar görülür. Kliniğimiz transfer ve konaklama desteği sunar.'
             },
             dis: {
                 title: 'Diş Tedavisi',
                 icon: 'fa-solid fa-tooth',
                 iconColor: 'text-blue-400',
-                description: 'İmplant, veneer, Hollywood smile ve genel diş tedavileri Türkiye\'de çok daha uygun fiyatlarla, modern kliniklerde yapılıyor.',
-                procedures: ['Diş implantı (tek / çoklu)', 'Veneer / Kaplama', 'Hollywood smile', 'Zirkonyum kron', 'Kanal tedavisi', 'Diş beyazlatma'],
-                notes: 'İmplantlar tek seferde veya iki aşamada uygulanabilir. Fiyatlar Avrupa\'nın yaklaşık yarısı kadar.'
+                description: 'Eksik dişe vida (implant), diş kaplama, gülüş tasarımı ve genel diş tedavileri Türkiye\'de modern kliniklerde, çok daha uygun fiyatlarla yapılıyor.',
+                procedures: ['Eksik dişe vida ile yeni diş (implant)', 'Diş yüzeyine yapışan ince kaplama (veneer)', 'Gülüş tasarımı (Hollywood smile)', 'Seramik diş kaplama (zirkonyum)', 'Sinir tedavisi (kanal tedavisi)', 'Diş beyazlatma'],
+                notes: 'Vida ile diş tedavisi tek seferde veya iki aşamada yapılabilir. Fiyatlar Avrupa\'nın yaklaşık yarısı kadar.'
             },
             estetik: {
                 title: 'Estetik Cerrahi',
-                icon: 'fa-solid fa-sparkles',
+                icon: 'fa-solid fa-star',
                 iconColor: 'text-purple-400',
-                description: 'Rinoplasti, meme estetiği, karın germe, liposuction ve yüz gençleştirme gibi işlemlerde Türkiye deneyimli cerrahlar ve uygun maliyetler sunuyor.',
-                procedures: ['Rinoplasti (burun estetiği)', 'Meme büyütme / küçültme', 'Karın germe', 'Liposuction', 'Yüz germe', 'Göz kapağı estetiği', 'Botoks / dolgu'],
-                notes: 'JCI akreditasyonlu hastaneler ve uzman cerrahlarla çalışıyoruz. Konaklama ve transfer dahil paketler mevcuttur.'
+                description: 'Burun estetiği, meme estetiği, karın germe, yağ aldırma ve yüz gençleştirme gibi işlemlerde Türkiye deneyimli cerrahlar ve uygun maliyetler sunuyor.',
+                procedures: ['Burun estetiği (rinoplasti)', 'Meme büyütme veya küçültme', 'Karın germe', 'Yağ aldırma (liposuction)', 'Yüz germe', 'Göz kapağı estetiği', 'Kırışıklık ve dolgu (botoks / dolgu)'],
+                notes: 'Uluslararası kalite belgeli (JCI) hastaneler ve uzman cerrahlarla çalışıyoruz. Konaklama ve transfer dahil paketler mevcuttur.'
             },
             erkek_cinsel: {
                 title: 'Erkek Cinsel Sağlık',
                 icon: 'fa-solid fa-mars',
                 iconColor: 'text-indigo-400',
-                description: 'Erken boşalma, erektil disfonksiyon ve ilgili tedavilerde gizlilik ve kalite ön planda. Türkiye\'deki partner kliniklerimizle hizmet veriyoruz.',
-                procedures: ['Erken boşalma tedavisi', 'Erektil disfonksiyon (ED)', 'Penil implant', 'PRP ve benzeri tedaviler', 'Hormon / check-up'],
-                notes: 'Tüm süreç gizlilik içinde yürütülür. Önce online danışmanlık, sonra gerekirse yüz yüze muayene planlanır.'
+                description: 'Erken boşalma, sertleşme sorunu ve benzeri konularda gizlilik ve kalite ön planda. Türkiye\'deki partner kliniklerimizle hizmet veriyoruz.',
+                procedures: ['Erken boşalma tedavisi', 'Sertleşme sorunu tedavisi (erektil disfonksiyon)', 'Penis protezi (penil implant)', 'Kan ve PRP ile tedavi seçenekleri', 'Hormon ve genel kontrol'],
+                notes: 'Tüm süreç gizlilik içinde yürütülür. Önce online danışmanlık, gerekirse yüz yüze muayene planlanır.'
             },
             kadin_cinsel: {
                 title: 'Kadın Cinsel Sağlık',
                 icon: 'fa-solid fa-venus',
                 iconColor: 'text-rose-400',
-                description: 'Vajinismus, vajinal estetik ve cinsel sağlık tedavileri Türkiye\'de kadın hastalıkları ve üroloji uzmanları tarafından güvenle uygulanıyor.',
-                procedures: ['Vajinismus tedavisi', 'Vajinal estetik (labioplasti vb.)', 'Lazer tedavileri', 'Pelvik taban rehabilitasyonu', 'Cinsel terapi desteği'],
+                description: 'Cinsel birleşme sırasında ağrı (vajinismus), vajina bölgesi estetiği ve cinsel sağlık tedavileri Türkiye\'de kadın hastalıkları ve üroloji uzmanları tarafından güvenle uygulanıyor.',
+                procedures: ['Cinsel birleşmede ağrı tedavisi (vajinismus)', 'Vajina bölgesi estetiği (labioplasti vb.)', 'Lazer ile tedaviler', 'Pelvik taban güçlendirme', 'Cinsel terapi desteği'],
                 notes: 'Kadın dostu klinikler ve bayan danışmanlarımızla iletişim kurabilirsiniz. Gizlilik esastır.'
             },
             tup_bebek: {
                 title: 'Tüp Bebek',
                 icon: 'fa-solid fa-baby',
                 iconColor: 'text-amber-400',
-                description: 'IVF, mikroenjeksiyon ve embriyo transferi dahil tüp bebek tedavileri Türkiye\'de yüksek başarı oranları ve uygun fiyatlarla sunuluyor.',
-                procedures: ['IVF (In vitro fertilizasyon)', 'ICSI (Mikroenjeksiyon)', 'Embriyo dondurma', 'PGT (Genetik tarama)', 'Donör programları', 'Taşıyıcı annelik (yasal çerçevede)'],
+                description: 'Yumurta ve sperm laboratuvarda birleştirilip embriyo oluşturma (tüp bebek) tedavileri Türkiye\'de yüksek başarı oranları ve uygun fiyatlarla sunuluyor.',
+                procedures: ['Tüp bebek tedavisi (IVF)', 'Mikroenjeksiyon ile döllenme (ICSI)', 'Embriyo dondurma', 'Embriyoda genetik tarama (PGT)', 'Yumurta / sperm donörü programları', 'Taşıyıcı annelik (yasal çerçevede)'],
                 notes: 'Tedavi süreci 2-3 hafta sürebilir. Transfer, konaklama ve çeviri desteği paketlerimiz mevcuttur.'
             }
         };
@@ -696,9 +731,31 @@
             filterByCategory(category, card || undefined);
         }
 
+        // Kategori modalındaki "Ücretsiz Danışmanlık Al" ile formu aç (seçili kategoriyle)
+        function openConsultationFromCategory() {
+            const btn = document.getElementById('categoryDetailShowClinicsBtn');
+            const category = btn ? btn.getAttribute('data-category') : null;
+            closeCategoryDetailModal();
+            if (category) {
+                const sel = document.getElementById('treatmentCategory');
+                if (sel) {
+                    sel.value = category;
+                    updateTreatmentTypes();
+                }
+            }
+            openConsultationForm();
+        }
+
         // Kategoriye göre filtrele
         function filterByCategory(category, element) {
             console.log('Kategori seçildi:', category, element);
+            
+            // Klinikler bölümüne "Bu kategorideki klinikler" başlığını yaz
+            const titleEl = document.getElementById('clinicsCategoryTitle');
+            if (titleEl && categoryDetailData[category]) {
+                titleEl.textContent = categoryDetailData[category].title + ' kategorisindeki klinikler aşağıda listeleniyor.';
+                titleEl.classList.remove('hidden');
+            }
             
             // Önceki aktif kategoriyi kaldır
             document.querySelectorAll('.category-card').forEach(card => {
