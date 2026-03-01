@@ -104,7 +104,8 @@
                 <div id="videoContainer" class="video-container skeleton">
                     <iframe id="youtubePlayer" src="" frameborder="0" 
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                            allowfullscreen></iframe>
+                            allowfullscreen
+                            referrerpolicy="strict-origin-when-cross-origin"></iframe>
                 </div>
                 
                 <!-- Video Bilgileri -->
@@ -262,7 +263,7 @@
             const v = currentVideo;
             
             // Player
-            document.getElementById('youtubePlayer').src = `https://www.youtube.com/embed/${v.youtube_id}?autoplay=0&rel=0`;
+            document.getElementById('youtubePlayer').src = `https://www.youtube-nocookie.com/embed/${v.youtube_id}?autoplay=0&rel=0`;
             document.getElementById('videoContainer').classList.remove('skeleton');
             
             // Başlık ve meta

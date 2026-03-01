@@ -220,7 +220,8 @@
             <div class="aspect-video w-full bg-black rounded-2xl overflow-hidden shadow-2xl relative">
                 <iframe id="youtubePlayer" class="w-full h-full" src="" frameborder="0" 
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                        allowfullscreen></iframe>
+                        allowfullscreen
+                        referrerpolicy="strict-origin-when-cross-origin"></iframe>
                 <!-- YouTube "Daha fazla video" tıklanmasını engellemek için alt overlay -->
                 <div class="absolute bottom-0 left-0 right-0 h-[28%] min-h-[70px] pointer-events-auto bg-gradient-to-t from-black/95 to-transparent rounded-b-2xl flex items-end justify-center pb-2">
                     <p class="text-slate-500 text-xs">Öneriler için kategorilere gidin</p>
@@ -430,7 +431,7 @@
             const titleEl = document.getElementById('videoTitle');
             const descEl = document.getElementById('videoDescription');
             
-            player.src = `https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0`;
+            player.src = `https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=1&rel=0`;
             titleEl.textContent = title;
             descEl.textContent = description;
             
