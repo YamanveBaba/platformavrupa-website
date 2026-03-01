@@ -164,11 +164,8 @@
                     </div>
                 </div>
                 
-                <!-- Video Grid -->
-                <div id="videoGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                    <div class="h-64 rounded-2xl skeleton"></div>
-                    <div class="h-64 rounded-2xl skeleton"></div>
-                    <div class="h-64 rounded-2xl skeleton"></div>
+                <!-- Video accordion (seri bazlı açılır/kapanır) -->
+                <div id="videoGrid" class="space-y-3">
                     <div class="h-64 rounded-2xl skeleton"></div>
                     <div class="h-64 rounded-2xl skeleton"></div>
                     <div class="h-64 rounded-2xl skeleton"></div>
@@ -244,9 +241,12 @@
         let allSeries = [];
         let allVideos = [];
         let filteredVideos = [];
+        let flatVideoList = [];
+        let expandedSeriesSet = new Set();
         let currentVideoIndex = 0;
         let currentSeriesId = null;
         let currentSort = 'newest';
+        const SERI_YOK_KEY = 'none';
 
         // Sayfa yüklendiğinde
         document.addEventListener('DOMContentLoaded', async function() {
@@ -431,7 +431,18 @@
             renderVideos();
         }
 
-        // Videoları render et
+        // Seri accordion bölümünü aç/kapa (kullanıcı sayfası)
+        function toggleSeriesSectionPublic(key) {
+            const content = document.getElementById('series-videos-public-' + key);
+            const chevron = document.querySelector('[data-series-toggle-public="' + key + '"]');
+            if (!content || !chevron) return;
+            const isHidden = content.classList.contains('hidden');
+            content.classList.toggle('hidden', !isHidden);
+            chevron.classList.toggle('rotate-180', !isHidden);
+            if (isHidden) expandedSeriesSet.add(key); else expandedSeriesSet.delete(key);
+        }
+
+        // Videoları seri bazlı accordion olarak render et
         function renderVideos() {
             const container = document.getElementById('videoGrid');
             const noVideos = document.getElementById('noVideos');
@@ -439,43 +450,100 @@
             if (filteredVideos.length === 0) {
                 container.innerHTML = '';
                 noVideos.classList.remove('hidden');
+                flatVideoList = [];
                 return;
             }
             
             noVideos.classList.add('hidden');
             
-            container.innerHTML = filteredVideos.map((video, index) => `
-                <div onclick="playVideo(${index})" class="video-card rounded-2xl overflow-hidden cursor-pointer group">
-                    <div class="relative aspect-video">
-                        <img src="${video.thumbnail_url || `https://img.youtube.com/vi/${video.youtube_id}/mqdefault.jpg`}" 
-                             class="w-full h-full object-cover" loading="lazy">
-                        <div class="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
-                            <div class="play-btn w-12 h-12 bg-white/20 backdrop-blur rounded-full flex items-center justify-center text-white transition">
-                                <i class="fa-solid fa-play ml-1"></i>
+            const sortVids = (arr) => {
+                const a = [...arr];
+                switch (currentSort) {
+                    case 'newest': a.sort((x, y) => new Date(y.created_at) - new Date(x.created_at)); break;
+                    case 'popular': a.sort((x, y) => (y.view_count || 0) - (x.view_count || 0)); break;
+                    case 'series': a.sort((x, y) => (x.series_order || 0) - (y.series_order || 0)); break;
+                }
+                return a;
+            };
+            
+            const groups = [];
+            if (currentSeriesId) {
+                const series = allSeries.find(s => s.id === currentSeriesId);
+                const vids = sortVids(filteredVideos);
+                groups.push({ key: currentSeriesId, name: series ? series.name : '', videos: vids });
+            } else {
+                const bySeries = new Map();
+                filteredVideos.forEach(v => {
+                    const key = v.series_id || SERI_YOK_KEY;
+                    if (!bySeries.has(key)) bySeries.set(key, []);
+                    bySeries.get(key).push(v);
+                });
+                const orderedKeys = allSeries.map(s => s.id).filter(id => bySeries.has(id));
+                if (bySeries.has(SERI_YOK_KEY)) orderedKeys.push(SERI_YOK_KEY);
+                orderedKeys.forEach(key => {
+                    const vids = sortVids(bySeries.get(key));
+                    const name = key === SERI_YOK_KEY ? 'Diğer videolar' : (allSeries.find(s => s.id === key)?.name || 'Seri');
+                    groups.push({ key, name, videos: vids });
+                });
+            }
+            
+            flatVideoList = groups.flatMap(g => g.videos);
+            if (groups.length === 1) expandedSeriesSet = new Set([groups[0].key]);
+            else if (groups.length > 0 && expandedSeriesSet.size === 0) expandedSeriesSet.add(groups[0].key);
+            
+            let flatIndex = 0;
+            let html = '';
+            groups.forEach((grp, idx) => {
+                const isOpen = expandedSeriesSet.has(grp.key);
+                const key = (typeof grp.key === 'string' ? grp.key : grp.key).toString();
+                html += `
+                <div class="series-card rounded-xl overflow-hidden border border-white/10">
+                    <button type="button" onclick="toggleSeriesSectionPublic('${key}')" class="w-full flex items-center justify-between gap-4 p-4 text-left hover:bg-white/5 transition min-h-[44px]">
+                        <span class="font-bold text-white">${sanitize(grp.name)}</span>
+                        <span class="text-slate-400 text-sm">${grp.videos.length} video</span>
+                        <i data-series-toggle-public="${key}" class="fa-solid fa-chevron-down text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}"></i>
+                    </button>
+                    <div id="series-videos-public-${key}" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 p-4 border-t border-white/10 ${isOpen ? '' : 'hidden'}">
+                        ${grp.videos.map((video, i) => {
+                            const currentFlat = flatIndex++;
+                            return `
+                        <div onclick="playVideo(${currentFlat})" class="video-card rounded-2xl overflow-hidden cursor-pointer group">
+                            <div class="relative aspect-video">
+                                <img src="${video.thumbnail_url || `https://img.youtube.com/vi/${video.youtube_id}/mqdefault.jpg`}" 
+                                     class="w-full h-full object-cover" loading="lazy">
+                                <div class="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                                    <div class="play-btn w-12 h-12 bg-white/20 backdrop-blur rounded-full flex items-center justify-center text-white transition">
+                                        <i class="fa-solid fa-play ml-1"></i>
+                                    </div>
+                                </div>
+                                <span class="absolute bottom-2 right-2 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded backdrop-blur-sm">
+                                    ${formatDuration(video.duration_seconds)}
+                                </span>
+                                ${video.series_id ? `<span class="absolute top-2 left-2 bg-purple-600/90 text-white text-xs font-bold px-2 py-1 rounded">#${video.series_order || ''}</span>` : ''}
+                                ${video.is_featured ? '<span class="absolute top-2 right-2 bg-orange-500 text-white text-xs px-2 py-1 rounded"><i class="fa-solid fa-star"></i></span>' : ''}
                             </div>
-                        </div>
-                        <span class="absolute bottom-2 right-2 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded backdrop-blur-sm">
-                            ${formatDuration(video.duration_seconds)}
-                        </span>
-                        ${video.series_id ? `<span class="absolute top-2 left-2 bg-purple-600/90 text-white text-xs font-bold px-2 py-1 rounded">#${video.series_order || ''}</span>` : ''}
-                        ${video.is_featured ? '<span class="absolute top-2 right-2 bg-orange-500 text-white text-xs px-2 py-1 rounded"><i class="fa-solid fa-star"></i></span>' : ''}
+                            <div class="p-4">
+                                <h4 class="font-bold text-white line-clamp-2 group-hover:text-purple-400 transition">${sanitize(video.title)}</h4>
+                                ${video.academy_series ? `<span class="text-xs text-purple-400 mt-1 block">${video.academy_series.name}</span>` : ''}
+                                <div class="flex items-center gap-3 mt-2 text-xs text-slate-500">
+                                    <span><i class="fa-solid fa-eye mr-1"></i>${video.view_count || 0}</span>
+                                    <span><i class="fa-solid fa-heart mr-1"></i>${video.like_count || 0}</span>
+                                </div>
+                            </div>
+                        </div>`;
+                        }).join('')}
                     </div>
-                    <div class="p-4">
-                        <h4 class="font-bold text-white line-clamp-2 group-hover:text-purple-400 transition">${sanitize(video.title)}</h4>
-                        ${video.academy_series ? `<span class="text-xs text-purple-400 mt-1 block">${video.academy_series.name}</span>` : ''}
-                        <div class="flex items-center gap-3 mt-2 text-xs text-slate-500">
-                            <span><i class="fa-solid fa-eye mr-1"></i>${video.view_count || 0}</span>
-                            <span><i class="fa-solid fa-heart mr-1"></i>${video.like_count || 0}</span>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
+                </div>`;
+            });
+            container.innerHTML = html;
         }
 
-        // Video oynat
+        // Video oynat (index flatVideoList içindeki sıraya göre)
         async function playVideo(index) {
             currentVideoIndex = index;
-            const video = filteredVideos[index];
+            const list = flatVideoList.length ? flatVideoList : filteredVideos;
+            const video = list[index];
+            if (!video) return;
             
             const modal = document.getElementById('videoModal');
             const player = document.getElementById('youtubePlayer');
@@ -487,11 +555,11 @@
             
             // Seri navigasyonu
             const seriesNav = document.getElementById('seriesNav');
-            if (video.series_id) {
+            if (video.series_id && list.length > 1) {
                 seriesNav.classList.remove('hidden');
-                document.getElementById('videoPosition').textContent = `${index + 1} / ${filteredVideos.length}`;
+                document.getElementById('videoPosition').textContent = `${index + 1} / ${list.length}`;
                 document.getElementById('prevVideo').disabled = index === 0;
-                document.getElementById('nextVideo').disabled = index === filteredVideos.length - 1;
+                document.getElementById('nextVideo').disabled = index === list.length - 1;
             } else {
                 seriesNav.classList.add('hidden');
             }
@@ -505,14 +573,16 @@
 
         // Önceki video
         function playPreviousVideo() {
-            if (currentVideoIndex > 0) {
+            const list = flatVideoList.length ? flatVideoList : filteredVideos;
+            if (currentVideoIndex > 0 && list.length) {
                 playVideo(currentVideoIndex - 1);
             }
         }
 
         // Sonraki video
         function playNextVideo() {
-            if (currentVideoIndex < filteredVideos.length - 1) {
+            const list = flatVideoList.length ? flatVideoList : filteredVideos;
+            if (currentVideoIndex < list.length - 1) {
                 playVideo(currentVideoIndex + 1);
             }
         }
@@ -547,7 +617,8 @@
 
         // Beğen
         async function likeVideo() {
-            const video = filteredVideos[currentVideoIndex];
+            const list = flatVideoList.length ? flatVideoList : filteredVideos;
+            const video = list[currentVideoIndex];
             if (!sb || !video) return;
             
             try {
@@ -570,7 +641,9 @@
                 return;
             }
             
-            const video = filteredVideos[currentVideoIndex];
+            const list = flatVideoList.length ? flatVideoList : filteredVideos;
+            const video = list[currentVideoIndex];
+            if (!video) return;
             
             const { value: description } = await Swal.fire({
                 title: 'Sorun Bildir',
@@ -599,7 +672,8 @@
 
         // Paylaş
         function shareVideo() {
-            const video = filteredVideos[currentVideoIndex];
+            const list = flatVideoList.length ? flatVideoList : filteredVideos;
+            const video = list[currentVideoIndex];
             const url = `${window.location.origin}/akademi_video.html?id=${video.id}`;
             
             if (navigator.share) {

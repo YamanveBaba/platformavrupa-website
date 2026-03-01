@@ -669,8 +669,8 @@
                             <i class="fa-solid fa-plus mr-1"></i> Yeni Video
                         </button>
                     </div>
-                    <div id="academyVideoList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <p class="text-slate-400 col-span-full text-center py-8">Yükleniyor...</p>
+                    <div id="academyVideoList" class="space-y-3">
+                        <p class="text-slate-400 text-center py-8">Yükleniyor...</p>
                     </div>
                 </div>
 
@@ -1663,14 +1663,46 @@
             document.getElementById(`academy-tab-${tab}`).classList.remove('hidden');
         }
 
+        function toggleSeriesSection(key) {
+            const content = document.getElementById('series-videos-' + key);
+            const chevron = document.querySelector('[data-series-toggle="' + key + '"]');
+            if (!content || !chevron) return;
+            const isHidden = content.classList.contains('hidden');
+            content.classList.toggle('hidden', !isHidden);
+            chevron.classList.toggle('rotate-180', !isHidden);
+        }
+
         function renderAcademyVideos() {
             const div = document.getElementById('academyVideoList');
             if (academyVideos.length === 0) {
-                div.innerHTML = '<p class="text-slate-400 col-span-full text-center py-8">Henüz video eklenmemiş.</p>';
+                div.innerHTML = '<p class="text-slate-400 text-center py-8">Henüz video eklenmemiş.</p>';
                 return;
             }
-            
-            div.innerHTML = academyVideos.map(v => `
+            const SERI_YOK_KEY = 'none';
+            const bySeries = new Map();
+            academyVideos.forEach(v => {
+                const key = v.series_id || SERI_YOK_KEY;
+                if (!bySeries.has(key)) bySeries.set(key, []);
+                bySeries.get(key).push(v);
+            });
+            const orderedKeys = academySeries.map(s => s.id).filter(id => bySeries.has(id));
+            if (bySeries.has(SERI_YOK_KEY)) orderedKeys.push(SERI_YOK_KEY);
+            let html = '';
+            orderedKeys.forEach((key, idx) => {
+                let videos = bySeries.get(key);
+                videos = key === SERI_YOK_KEY ? videos : [...videos].sort((a, b) => (a.series_order || 0) - (b.series_order || 0));
+                const isFirst = idx === 0;
+                const label = key === SERI_YOK_KEY ? 'Seri Yok' : (academySeries.find(s => s.id === key)?.name || 'Seri');
+                const count = videos.length;
+                html += `
+                <div class="glass-panel rounded-xl overflow-hidden">
+                    <button type="button" onclick="toggleSeriesSection('${key}')" class="w-full flex items-center justify-between gap-4 p-4 text-left hover:bg-white/5 transition min-h-[44px]">
+                        <span class="font-bold text-white">${sanitize(label)}</span>
+                        <span class="text-slate-400 text-sm">${count} video</span>
+                        <i data-series-toggle="${key}" class="fa-solid fa-chevron-down text-slate-400 transition-transform ${isFirst ? 'rotate-180' : ''}"></i>
+                    </button>
+                    <div id="series-videos-${key}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4 border-t border-white/10 ${isFirst ? '' : 'hidden'}">
+                        ${videos.map(v => `
                 <div class="glass-panel rounded-xl overflow-hidden group">
                     <div class="relative aspect-video">
                         <img src="${v.thumbnail_url || `https://img.youtube.com/vi/${v.youtube_id}/mqdefault.jpg`}" class="w-full h-full object-cover">
@@ -1698,7 +1730,11 @@
                         </div>
                     </div>
                 </div>
-            `).join('');
+                        `).join('')}
+                    </div>
+                </div>`;
+            });
+            div.innerHTML = html;
         }
 
         function renderAcademyCategories() {
