@@ -55,6 +55,45 @@
         
         .progress-bar { height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
         .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #8b5cf6, #3b82f6); transition: width 0.3s; }
+        
+        /* YouTube tarzı oynatma listesi kartı */
+        .playlist-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.3s ease;
+        }
+        .playlist-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(139, 92, 246, 0.5);
+            box-shadow: 0 12px 28px rgba(0,0,0,0.35);
+        }
+        /* Stacked thumbnail efekti (oynatma listesi hissi) */
+        .playlist-thumb-wrap {
+            position: relative;
+            overflow: visible;
+        }
+        .playlist-thumb-wrap .playlist-thumb-stack {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-size: cover;
+            background-position: center;
+            border-radius: inherit;
+            z-index: 0;
+        }
+        .playlist-thumb-wrap .playlist-thumb-stack:nth-child(1) {
+            transform: translate(6px, 6px);
+            opacity: 0.6;
+            filter: brightness(0.6);
+        }
+        .playlist-thumb-wrap .playlist-thumb-stack:nth-child(2) {
+            transform: translate(12px, 12px);
+            opacity: 0.4;
+            filter: brightness(0.4);
+        }
+        .playlist-thumb-wrap .playlist-thumb-wrap-img {
+            position: relative;
+            z-index: 1;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -105,81 +144,88 @@
 
     <!-- İÇERİK -->
     <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            
-            <!-- SOL PANEL - SERİLER -->
-            <aside class="lg:col-span-1">
-                <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                    <i class="fa-solid fa-layer-group text-purple-400"></i> Video Serileri
-                </h3>
-                
-                <div id="seriesList" class="space-y-2">
-                    <div class="h-16 rounded-xl skeleton"></div>
-                    <div class="h-16 rounded-xl skeleton"></div>
-                    <div class="h-16 rounded-xl skeleton"></div>
-                </div>
-                
-                <!-- Filtre -->
-                <div class="mt-8">
-                    <h4 class="text-sm font-bold text-slate-400 mb-3 uppercase tracking-wider">Sırala</h4>
-                    <div class="space-y-2">
-                        <label class="flex items-center gap-2 cursor-pointer text-sm text-slate-300 hover:text-white transition">
-                            <input type="radio" name="sort" value="newest" checked onchange="sortVideos(this.value)" class="text-purple-500">
-                            En Yeni
-                        </label>
-                        <label class="flex items-center gap-2 cursor-pointer text-sm text-slate-300 hover:text-white transition">
-                            <input type="radio" name="sort" value="popular" onchange="sortVideos(this.value)" class="text-purple-500">
-                            En Popüler
-                        </label>
-                        <label class="flex items-center gap-2 cursor-pointer text-sm text-slate-300 hover:text-white transition">
-                            <input type="radio" name="sort" value="series" onchange="sortVideos(this.value)" class="text-purple-500">
-                            Seri Sırası
-                        </label>
+        <!-- Sırala (tam genişlik) -->
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <h4 class="text-sm font-bold text-slate-400 uppercase tracking-wider">Sırala</h4>
+            <div class="flex items-center gap-4">
+                <label class="flex items-center gap-2 cursor-pointer text-sm text-slate-300 hover:text-white transition">
+                    <input type="radio" name="sort" value="newest" checked onchange="sortVideos(this.value)" class="text-purple-500">
+                    En Yeni
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer text-sm text-slate-300 hover:text-white transition">
+                    <input type="radio" name="sort" value="popular" onchange="sortVideos(this.value)" class="text-purple-500">
+                    En Popüler
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer text-sm text-slate-300 hover:text-white transition">
+                    <input type="radio" name="sort" value="series" onchange="sortVideos(this.value)" class="text-purple-500">
+                    Seri Sırası
+                </label>
+            </div>
+        </div>
+
+        <!-- Seri seçiliyken: Serilere dön + Banner + Video grid -->
+        <div id="seriesDetailView" class="hidden">
+            <button type="button" onclick="clearSeriesFilter()" class="flex items-center gap-2 text-slate-400 hover:text-white mb-4 transition text-sm">
+                <i class="fa-solid fa-arrow-left"></i> Serilere dön
+            </button>
+            <div id="activeSeries" class="bg-gradient-to-r from-purple-900/50 to-blue-900/50 rounded-2xl p-6 mb-6 border border-purple-500/30">
+                <div class="flex items-center justify-between flex-wrap gap-4">
+                    <div>
+                        <span class="text-purple-300 text-xs font-bold uppercase tracking-wider">Seri</span>
+                        <h3 id="activeSeriesName" class="text-xl font-bold text-white"></h3>
+                        <p id="activeSeriesDesc" class="text-slate-400 text-sm mt-1"></p>
                     </div>
-                </div>
-            </aside>
-            
-            <!-- SAĞ PANEL - VİDEOLAR -->
-            <section class="lg:col-span-3">
-                <!-- Aktif Seri Banner -->
-                <div id="activeSeries" class="hidden bg-gradient-to-r from-purple-900/50 to-blue-900/50 rounded-2xl p-6 mb-6 border border-purple-500/30">
-                    <div class="flex items-center justify-between flex-wrap gap-4">
-                        <div>
-                            <span class="text-purple-300 text-xs font-bold uppercase tracking-wider">Seri</span>
-                            <h3 id="activeSeriesName" class="text-xl font-bold text-white"></h3>
-                            <p id="activeSeriesDesc" class="text-slate-400 text-sm mt-1"></p>
+                    <div class="flex items-center gap-4">
+                        <div class="text-right">
+                            <span class="text-slate-400 text-xs">İlerleme</span>
+                            <p id="seriesProgress" class="text-white font-bold">0 / 0</p>
                         </div>
-                        <div class="flex items-center gap-4">
-                            <div class="text-right">
-                                <span class="text-slate-400 text-xs">İlerleme</span>
-                                <p id="seriesProgress" class="text-white font-bold">0 / 0</p>
-                            </div>
-                            <button onclick="clearSeriesFilter()" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg text-sm transition">
-                                <i class="fa-solid fa-xmark mr-1"></i> Filtreyi Kaldır
-                            </button>
-                        </div>
-                    </div>
-                    <div class="progress-bar mt-4">
-                        <div id="seriesProgressBar" class="progress-bar-fill" style="width: 0%"></div>
+                        <button onclick="clearSeriesFilter()" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg text-sm transition">
+                            <i class="fa-solid fa-xmark mr-1"></i> Filtreyi Kaldır
+                        </button>
                     </div>
                 </div>
-                
-                <!-- Video accordion (seri bazlı açılır/kapanır) -->
-                <div id="videoGrid" class="space-y-3">
-                    <div class="h-64 rounded-2xl skeleton"></div>
-                    <div class="h-64 rounded-2xl skeleton"></div>
-                    <div class="h-64 rounded-2xl skeleton"></div>
+                <div class="progress-bar mt-4">
+                    <div id="seriesProgressBar" class="progress-bar-fill" style="width: 0%"></div>
                 </div>
-                
-                <!-- Empty State -->
-                <div id="noVideos" class="hidden text-center py-16">
-                    <div class="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl text-slate-500">
-                        <i class="fa-solid fa-video-slash"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-2">Bu Kategoride Video Yok</h3>
-                    <p class="text-slate-400">Çok yakında yeni videolar eklenecek.</p>
+            </div>
+            <div id="videoGrid" class="space-y-3"></div>
+        </div>
+
+        <!-- Seri seçili değilken: Oynatma listeleri grid + Tekli videolar -->
+        <div id="playlistOverview">
+            <!-- Seriler (YouTube oynatma listesi tarzı kartlar) -->
+            <section id="seriesPlaylistSection" class="mb-10">
+                <h2 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-layer-group text-purple-400"></i> Oynatma listeleri
+                </h2>
+                <div id="seriesPlaylistGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <!-- Seri kartları JS ile doldurulacak -->
+                </div>
+                <div id="noSeriesMsg" class="hidden text-center py-8 text-slate-400">
+                    <i class="fa-solid fa-folder-open text-2xl mb-2 block"></i>
+                    Bu kategoride seri yok.
                 </div>
             </section>
+            <!-- Tekli videolar -->
+            <section id="standaloneVideosSection">
+                <h2 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-video text-purple-400"></i> Tekli videolar
+                </h2>
+                <div id="standaloneVideosGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6"></div>
+                <div id="noStandaloneMsg" class="hidden text-center py-8 text-slate-400">
+                    Seri dışı video yok.
+                </div>
+            </section>
+        </div>
+
+        <!-- Empty State (tüm kategori boş) -->
+        <div id="noVideos" class="hidden text-center py-16">
+            <div class="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl text-slate-500">
+                <i class="fa-solid fa-video-slash"></i>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-2">Bu Kategoride Video Yok</h3>
+            <p class="text-slate-400">Çok yakında yeni videolar eklenecek.</p>
         </div>
     </main>
 
@@ -246,7 +292,16 @@
         let currentVideoIndex = 0;
         let currentSeriesId = null;
         let currentSort = 'newest';
+        let standaloneVideoList = [];
         const SERI_YOK_KEY = 'none';
+
+        // Serideki ilk videoyu bul (thumbnail için; series_order 1 veya en küçük)
+        function getFirstVideoForSeries(seriesId) {
+            const inSeries = allVideos.filter(v => v.series_id === seriesId);
+            if (inSeries.length === 0) return null;
+            const sorted = [...inSeries].sort((a, b) => (a.series_order || 0) - (b.series_order || 0));
+            return sorted[0];
+        }
 
         // Sayfa yüklendiğinde
         document.addEventListener('DOMContentLoaded', async function() {
@@ -288,7 +343,6 @@
                     .order('sort_order');
                 
                 allSeries = seriesData || [];
-                renderSeries();
                 
                 // Videoları yükle
                 const { data: videoData } = await sb
@@ -305,7 +359,18 @@
                 document.getElementById('videoCount').innerHTML = `<i class="fa-solid fa-play-circle mr-1"></i> ${allVideos.length} video`;
                 document.getElementById('seriesCount').innerHTML = `<i class="fa-solid fa-layer-group mr-1"></i> ${allSeries.length} seri`;
                 
-                renderVideos();
+                // Görünüm: seri seçili değilse oynatma listeleri + tekli videolar
+                document.getElementById('noVideos').classList.add('hidden');
+                if (allVideos.length === 0) {
+                    document.getElementById('playlistOverview').classList.add('hidden');
+                    document.getElementById('seriesDetailView').classList.add('hidden');
+                    document.getElementById('noVideos').classList.remove('hidden');
+                } else {
+                    document.getElementById('playlistOverview').classList.remove('hidden');
+                    document.getElementById('seriesDetailView').classList.add('hidden');
+                    renderSeriesPlaylistGrid();
+                    renderStandaloneVideos();
+                }
                 
                 // Sayfa başlığını güncelle
                 document.title = `${category.name} | Platform Akademi`;
@@ -333,78 +398,127 @@
             gradient.style.background = `linear-gradient(135deg, ${category.color}40, transparent)`;
         }
 
-        // Serileri render et
-        function renderSeries() {
-            const container = document.getElementById('seriesList');
+        // YouTube tarzı oynatma listesi kartları (seriler grid)
+        function renderSeriesPlaylistGrid() {
+            const grid = document.getElementById('seriesPlaylistGrid');
+            const noMsg = document.getElementById('noSeriesMsg');
+            if (!grid) return;
             
             if (allSeries.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-8 text-slate-400">
-                        <i class="fa-solid fa-folder-open text-2xl mb-2"></i>
-                        <p class="text-sm">Bu kategoride seri yok</p>
-                    </div>`;
+                grid.innerHTML = '';
+                if (noMsg) noMsg.classList.remove('hidden');
                 return;
             }
+            if (noMsg) noMsg.classList.add('hidden');
             
-            // "Tümü" seçeneği
-            container.innerHTML = `
-                <button onclick="filterBySeries(null)" class="series-card w-full text-left rounded-xl p-4 ${!currentSeriesId ? 'active' : ''}">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center text-slate-400">
-                            <i class="fa-solid fa-grip"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-white text-sm">Tüm Videolar</h4>
-                            <span class="text-xs text-slate-400">${allVideos.length} video</span>
-                        </div>
+            grid.innerHTML = allSeries.map(series => {
+                const firstVideo = getFirstVideoForSeries(series.id);
+                const thumbUrl = firstVideo
+                    ? (firstVideo.thumbnail_url || `https://img.youtube.com/vi/${firstVideo.youtube_id}/mqdefault.jpg`)
+                    : 'https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg';
+                const count = allVideos.filter(v => v.series_id === series.id).length;
+                return `
+                <div class="playlist-card rounded-2xl overflow-hidden cursor-pointer" onclick="filterBySeries('${series.id}')">
+                    <div class="playlist-thumb-wrap relative aspect-video rounded-t-2xl overflow-hidden bg-slate-800">
+                        <div class="playlist-thumb-stack rounded-t-2xl" style="background-image: url('${thumbUrl}')"></div>
+                        <div class="playlist-thumb-stack rounded-t-2xl" style="background-image: url('${thumbUrl}')"></div>
+                        <img src="${thumbUrl}" alt="" class="playlist-thumb-wrap-img w-full h-full object-cover block rounded-t-2xl" loading="lazy">
+                        <span class="absolute bottom-2 right-2 z-10 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded backdrop-blur-sm">
+                            ${count} video
+                        </span>
                     </div>
-                </button>
-            `;
-            
-            // Seriler
-            allSeries.forEach(series => {
-                container.innerHTML += `
-                    <button onclick="filterBySeries('${series.id}')" class="series-card w-full text-left rounded-xl p-4 ${currentSeriesId === series.id ? 'active' : ''}">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: ${category.color}20; color: ${category.color}">
-                                <i class="fa-solid fa-list-ol"></i>
-                            </div>
-                            <div class="flex-grow min-w-0">
-                                <h4 class="font-bold text-white text-sm truncate">${sanitize(series.name)}</h4>
-                                <span class="text-xs text-slate-400">${series.video_count || 0} video</span>
-                            </div>
-                        </div>
-                    </button>
-                `;
-            });
+                    <div class="p-4">
+                        <h3 class="font-bold text-white line-clamp-2 mb-1">${sanitize(series.name)}</h3>
+                        <span class="text-sm text-purple-400 hover:underline">Seriyi görüntüle</span>
+                    </div>
+                </div>`;
+            }).join('');
         }
 
-        // Seriye göre filtrele
+        // Tekli videolar bölümü (seriye ait olmayan)
+        function renderStandaloneVideos() {
+            const grid = document.getElementById('standaloneVideosGrid');
+            const noMsg = document.getElementById('noStandaloneMsg');
+            if (!grid) return;
+            
+            const standalone = allVideos.filter(v => !v.series_id);
+            const sortVids = (arr) => {
+                const a = [...arr];
+                switch (currentSort) {
+                    case 'newest': a.sort((x, y) => new Date(y.created_at) - new Date(x.created_at)); break;
+                    case 'popular': a.sort((x, y) => (y.view_count || 0) - (x.view_count || 0)); break;
+                    default: break;
+                }
+                return a;
+            };
+            standaloneVideoList = sortVids(standalone);
+            
+            if (standaloneVideoList.length === 0) {
+                grid.innerHTML = '';
+                if (noMsg) noMsg.classList.remove('hidden');
+                return;
+            }
+            if (noMsg) noMsg.classList.add('hidden');
+            
+            grid.innerHTML = standaloneVideoList.map((video, i) => `
+                <div onclick="playStandaloneVideo(${i})" class="video-card rounded-2xl overflow-hidden cursor-pointer group">
+                    <div class="relative aspect-video">
+                        <img src="${video.thumbnail_url || `https://img.youtube.com/vi/${video.youtube_id}/mqdefault.jpg`}" 
+                             class="w-full h-full object-cover" loading="lazy">
+                        <div class="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                            <div class="play-btn w-12 h-12 bg-white/20 backdrop-blur rounded-full flex items-center justify-center text-white transition">
+                                <i class="fa-solid fa-play ml-1"></i>
+                            </div>
+                        </div>
+                        <span class="absolute bottom-2 right-2 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded backdrop-blur-sm">
+                            ${formatDuration(video.duration_seconds)}
+                        </span>
+                        ${video.is_featured ? '<span class="absolute top-2 right-2 bg-orange-500 text-white text-xs px-2 py-1 rounded"><i class="fa-solid fa-star"></i></span>' : ''}
+                    </div>
+                    <div class="p-4">
+                        <h4 class="font-bold text-white line-clamp-2 group-hover:text-purple-400 transition">${sanitize(video.title)}</h4>
+                        <div class="flex items-center gap-3 mt-2 text-xs text-slate-500">
+                            <span><i class="fa-solid fa-eye mr-1"></i>${video.view_count || 0}</span>
+                            <span><i class="fa-solid fa-heart mr-1"></i>${video.like_count || 0}</span>
+                        </div>
+                    </div>
+                </div>`).join('');
+        }
+
+        // Tekli videodan oynat (modal; flatVideoList = standaloneVideoList kullanılır)
+        function playStandaloneVideo(index) {
+            flatVideoList = standaloneVideoList;
+            currentVideoIndex = index;
+            playVideo(index);
+        }
+
+        // Seriye göre filtrele (Seriyi görüntüle tıklanınca veya Serilere dön)
         function filterBySeries(seriesId) {
             currentSeriesId = seriesId;
+            const playlistOverview = document.getElementById('playlistOverview');
+            const seriesDetailView = document.getElementById('seriesDetailView');
             
             if (seriesId) {
                 filteredVideos = allVideos.filter(v => v.series_id === seriesId);
+                filteredVideos.sort((a, b) => (a.series_order || 0) - (b.series_order || 0));
                 const series = allSeries.find(s => s.id === seriesId);
                 
+                if (playlistOverview) playlistOverview.classList.add('hidden');
+                if (seriesDetailView) seriesDetailView.classList.remove('hidden');
+                
                 if (series) {
-                    document.getElementById('activeSeries').classList.remove('hidden');
                     document.getElementById('activeSeriesName').textContent = series.name;
                     document.getElementById('activeSeriesDesc').textContent = series.description || '';
                     document.getElementById('seriesProgress').textContent = `0 / ${filteredVideos.length}`;
                 }
+                renderVideos();
             } else {
                 filteredVideos = [...allVideos];
-                document.getElementById('activeSeries').classList.add('hidden');
+                if (playlistOverview) playlistOverview.classList.remove('hidden');
+                if (seriesDetailView) seriesDetailView.classList.add('hidden');
+                renderSeriesPlaylistGrid();
+                renderStandaloneVideos();
             }
-            
-            // Seri sırasına göre sırala
-            if (seriesId) {
-                filteredVideos.sort((a, b) => (a.series_order || 0) - (b.series_order || 0));
-            }
-            
-            renderSeries();
-            renderVideos();
         }
 
         // Filtreyi kaldır
@@ -428,7 +542,11 @@
                     break;
             }
             
-            renderVideos();
+            if (currentSeriesId) {
+                renderVideos();
+            } else {
+                renderStandaloneVideos();
+            }
         }
 
         // Seri accordion bölümünü aç/kapa (kullanıcı sayfası)
