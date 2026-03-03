@@ -254,8 +254,8 @@
                         allowfullscreen
                         referrerpolicy="strict-origin-when-cross-origin"></iframe>
                 <!-- YouTube "Daha fazla video" alanını kapatmak için overlay + sitede kalan öneriler -->
-                <div id="videoOverlay" class="absolute bottom-0 left-0 right-0 h-[32%] min-h-[80px] pointer-events-auto bg-gradient-to-t from-black/98 via-black/90 to-transparent flex flex-col justify-end rounded-b-2xl">
-                    <div class="px-3 pb-2 pt-4">
+                <div id="videoOverlay" class="absolute bottom-0 left-0 right-0 h-[32%] min-h-[80px] pointer-events-none bg-gradient-to-t from-black/98 via-black/90 to-transparent flex flex-col justify-end rounded-b-2xl">
+                    <div class="px-3 pb-2 pt-4 pointer-events-auto">
                         <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Önerilen videolar</p>
                         <div id="modalRecommendedVideos" class="flex gap-2 overflow-x-auto pb-1 scrollbar-thin" style="scrollbar-width: thin;">
                             <!-- JS ile doldurulacak -->
