@@ -27,7 +27,7 @@
         <form onsubmit="sifirla(event)" class="space-y-6">
             <div class="text-left">
                 <label class="text-xs font-bold text-slate-500 uppercase ml-1 block mb-1">E-Posta</label>
-                <input type="email" id="resetEmail" required placeholder="ornek@mail.com" class="w-full border-2 border-slate-200 rounded-xl p-3 outline-none focus:border-blue-500 transition">
+                <input type="email" id="resetEmail" required placeholder="ornek@mail.com" autocomplete="email" class="w-full border-2 border-slate-200 rounded-xl p-3 outline-none focus:border-blue-500 transition">
             </div>
 
             <p id="resetMsg" class="text-sm text-center hidden"></p>
@@ -50,6 +50,13 @@
             const msgEl = document.getElementById('resetMsg');
             const email = document.getElementById('resetEmail').value.trim();
             if (!email) return;
+
+            if (typeof isValidEmail === 'function' && !isValidEmail(email)) {
+                msgEl.textContent = 'Lütfen geçerli bir e-posta adresi girin.';
+                msgEl.className = 'text-sm text-center text-red-600';
+                msgEl.classList.remove('hidden');
+                return;
+            }
 
             btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Gönderiliyor...';
             btn.disabled = true;

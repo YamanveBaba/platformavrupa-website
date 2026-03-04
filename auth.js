@@ -236,6 +236,29 @@ async function signInWithGoogle() {
 }
 
 /**
+ * Facebook ile giriş yapar
+ * @returns {Promise<{success: boolean, error?: string}>}
+ */
+async function signInWithFacebook() {
+    if (!sb) return { success: false, error: 'Bağlantı hatası' };
+    
+    try {
+        const { data, error } = await sb.auth.signInWithOAuth({
+            provider: 'facebook',
+            options: {
+                redirectTo: window.location.origin + '/index.html'
+            }
+        });
+        
+        if (error) throw error;
+        
+        return { success: true };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
+/**
  * Yeni kullanıcı kaydı yapar
  * @param {string} email 
  * @param {string} password 
@@ -436,6 +459,7 @@ window.currentProfile = currentProfile;
 window.initAuth = initAuth;
 window.signInWithEmail = signInWithEmail;
 window.signInWithGoogle = signInWithGoogle;
+window.signInWithFacebook = signInWithFacebook;
 window.signUp = signUp;
 window.signOut = signOut;
 window.resetPassword = resetPassword;

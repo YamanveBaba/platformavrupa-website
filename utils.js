@@ -158,7 +158,7 @@ function createElement(tag, attrs = {}, text = '') {
 /**
  * Tarih formatlama
  * @param {string|Date} date - Tarih
- * @param {string} format - Format tipi ('short', 'long', 'time', 'datetime')
+ * @param {string} format - Format tipi ('short', 'long', 'time', 'datetime', 'chartShort', 'weekdayShort')
  * @returns {string}
  */
 function formatDate(date, format = 'short') {
@@ -171,10 +171,12 @@ function formatDate(date, format = 'short') {
         short: { day: '2-digit', month: '2-digit', year: 'numeric' },
         long: { day: 'numeric', month: 'long', year: 'numeric' },
         time: { hour: '2-digit', minute: '2-digit' },
-        datetime: { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }
+        datetime: { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' },
+        chartShort: { day: 'numeric', month: 'short' },
+        weekdayShort: { weekday: 'short', day: 'numeric' }
     };
     
-    return d.toLocaleString('tr-TR', options[format] || options.short);
+    return d.toLocaleString('tr-TR', options[format] || options.long);
 }
 
 /**

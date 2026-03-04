@@ -8,6 +8,7 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
     <script src="utils.js"></script>
+    <script src="auth.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>body { font-family: 'Inter', sans-serif; background-color: #020617; color: white; }</style>
@@ -23,11 +24,11 @@
         <div class="space-y-4">
             <div>
                 <label class="block text-xs font-bold text-slate-400 mb-1">E-POSTA</label>
-                <input type="email" id="email" class="w-full bg-slate-900/50 border border-white/10 rounded-lg p-3 text-white outline-none focus:border-indigo-500 transition">
+                <input type="email" id="email" autocomplete="email" class="w-full bg-slate-900/50 border border-white/10 rounded-lg p-3 text-white outline-none focus:border-indigo-500 transition">
             </div>
             <div>
                 <label class="block text-xs font-bold text-slate-400 mb-1">ŞİFRE</label>
-                <input type="password" id="password" class="w-full bg-slate-900/50 border border-white/10 rounded-lg p-3 text-white outline-none focus:border-indigo-500 transition">
+                <input type="password" id="password" autocomplete="current-password" class="w-full bg-slate-900/50 border border-white/10 rounded-lg p-3 text-white outline-none focus:border-indigo-500 transition">
             </div>
             <button onclick="girisYap()" id="loginBtn" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-lg transition shadow-lg shadow-indigo-500/20">
                 Giriş Yap
@@ -60,8 +61,6 @@
     </div>
 
     <script>
-        // Supabase bağlantısı config.js'den geliyor
-
         async function girisYap() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
@@ -74,91 +73,78 @@
                 return;
             }
 
+            if (typeof isValidEmail === 'function' && !isValidEmail(email)) {
+                err.innerText = "Geçerli bir e-posta adresi girin.";
+                err.classList.remove('hidden');
+                return;
+            }
+
+            if (password.length < 6) {
+                err.innerText = "Şifre en az 6 karakter olmalıdır.";
+                err.classList.remove('hidden');
+                return;
+            }
+
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Kontrol ediliyor...';
             btn.disabled = true;
             err.classList.add('hidden');
 
-            // 1. Giriş İşlemi
-            const { data, error } = await sb.auth.signInWithPassword({ email, password });
+            // 1. Giriş İşlemi (merkezi auth.js üzerinden)
+            const result = typeof signInWithEmail === 'function'
+                ? await signInWithEmail(email, password)
+                : { success: false, error: 'Giriş sistemi yüklenemedi.' };
 
-            if (error) {
-                err.innerText = "Hatalı e-posta veya şifre.";
+            if (!result.success) {
+                err.innerText = result.error || "Hatalı e-posta veya şifre.";
                 err.classList.remove('hidden');
                 btn.innerText = "Giriş Yap";
                 btn.disabled = false;
                 return;
             }
 
-            // 2. Profil Verilerini Çek
-            const { data: profile } = await sb
-                .from('profiles')
-                .select('*')
-                .eq('id', data.user.id)
-                .single();
-
-            if (profile) {
-                // 3. HAFIZAYA KAYDET
-                localStorage.setItem('isLoggedIn', 'true');
-                localStorage.setItem('userEmail', email);
-                localStorage.setItem('userName', profile.full_name || 'Kullanıcı');
-                localStorage.setItem('userRealName', profile.real_name || profile.full_name);
-                localStorage.setItem('userPhone', profile.phone || '');
-                localStorage.setItem('userCity', profile.city || '');
-                localStorage.setItem('userCountry', profile.country || '');
-                localStorage.setItem('userLocation', profile.city || '');
-
-                btn.innerHTML = '<i class="fa-solid fa-check mr-2"></i> Giriş Başarılı!';
-                
-                // Yönlendirme kontrolü
-                const redirectUrl = localStorage.getItem('authRedirect');
-                localStorage.removeItem('authRedirect');
-                
-                setTimeout(() => { 
-                    window.location.href = redirectUrl || 'index.html'; 
-                }, 500);
-            } else {
-                err.innerText = "Profil verisi alınamadı.";
-                err.classList.remove('hidden');
-                btn.innerText = "Giriş Yap";
-                btn.disabled = false;
+            // 2. Mevcut oturumu ve profili tazele (localStorage dahil)
+            if (typeof initAuth === 'function') {
+                await initAuth();
             }
+
+            btn.innerHTML = '<i class="fa-solid fa-check mr-2"></i> Giriş Başarılı!';
+            
+            // Yönlendirme kontrolü
+            const redirectUrl = localStorage.getItem('authRedirect');
+            localStorage.removeItem('authRedirect');
+            
+            setTimeout(() => { 
+                window.location.href = redirectUrl || 'index.html'; 
+            }, 500);
         }
         
         // Google ile giriş
         async function googleIleGiris() {
-            try {
-                const { error } = await sb.auth.signInWithOAuth({
-                    provider: 'google',
-                    options: {
-                        redirectTo: window.location.origin + '/index.html'
-                    }
-                });
-                if (error) {
-                    console.error('Google giriş hatası:', error);
-                    document.getElementById('errorMsg').innerText = 'Google giriş başarısız.';
-                    document.getElementById('errorMsg').classList.remove('hidden');
-                }
-            } catch (e) {
-                console.error(e);
+            const err = document.getElementById('errorMsg');
+            err.classList.add('hidden');
+            const result = typeof signInWithGoogle === 'function'
+                ? await signInWithGoogle()
+                : { success: false, error: 'Google giriş sistemi yüklenemedi.' };
+
+            if (!result.success) {
+                console.error('Google giriş hatası:', result.error);
+                err.innerText = 'Google ile giriş başarısız. Lütfen tekrar deneyin.';
+                err.classList.remove('hidden');
             }
         }
 
         // Facebook ile giriş
         async function facebookIleGiris() {
-            try {
-                const { error } = await sb.auth.signInWithOAuth({
-                    provider: 'facebook',
-                    options: {
-                        redirectTo: window.location.origin + '/index.html'
-                    }
-                });
-                if (error) {
-                    console.error('Facebook giriş hatası:', error);
-                    document.getElementById('errorMsg').innerText = 'Facebook giriş başarısız.';
-                    document.getElementById('errorMsg').classList.remove('hidden');
-                }
-            } catch (e) {
-                console.error(e);
+            const err = document.getElementById('errorMsg');
+            err.classList.add('hidden');
+            const result = typeof signInWithFacebook === 'function'
+                ? await signInWithFacebook()
+                : { success: false, error: 'Facebook giriş sistemi yüklenemedi.' };
+
+            if (!result.success) {
+                console.error('Facebook giriş hatası:', result.error);
+                err.innerText = 'Facebook ile giriş başarısız. Lütfen tekrar deneyin.';
+                err.classList.remove('hidden');
             }
         }
     </script>

@@ -258,6 +258,7 @@
         function createTripCard(trip) {
             const trustLevel = getTrustLevel(trip);
             const cargoIcon = trip.is_cargo_allowed ? '<span class="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full"><i class="fa-solid fa-box mr-1"></i>Kargo Alır</span>' : '';
+            const formattedDate = formatDate(trip.travel_date, 'long');
             
             return `
                 <div class="trip-card" onclick="showTripDetail('${trip.id}')">
@@ -302,7 +303,7 @@
                         <!-- Detaylar -->
                         <div class="flex items-center justify-between text-xs text-slate-600">
                             <div class="flex items-center gap-4">
-                                <span><i class="fa-solid fa-calendar text-purple-500 mr-1"></i>${trip.travel_date}</span>
+                                <span><i class="fa-solid fa-calendar text-purple-500 mr-1"></i>${formattedDate}</span>
                                 <span><i class="fa-solid fa-chair text-purple-500 mr-1"></i>${trip.seats_available} Koltuk</span>
                             </div>
                             ${cargoIcon}
@@ -482,7 +483,10 @@
                         confirmButtonText: 'Giriş Yap',
                         showCancelButton: true
                     }).then((result) => {
-                        if (result.isConfirmed) window.location.href = 'login.html';
+                        if (result.isConfirmed) {
+                            localStorage.setItem('authRedirect', window.location.href);
+                            window.location.href = 'login.html';
+                        }
                     });
                     return;
                 }

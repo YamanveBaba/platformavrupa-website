@@ -272,7 +272,7 @@
             }
 
             tumVeri.forEach(g => {
-                const tarihStr = new Date(g.tarih).toLocaleDateString('tr-TR');
+                const tarihStr = formatDate(g.tarih, 'long');
                 
                 let resimHtml = "";
                 if (g.resim) {

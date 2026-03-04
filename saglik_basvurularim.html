@@ -82,7 +82,10 @@
                     text: 'Başvurularınızı görmek için giriş yapmalısınız.',
                     confirmButtonText: 'Giriş Yap'
                 }).then((result) => {
-                    if (result.isConfirmed) window.location.href = 'login.html';
+                    if (result.isConfirmed) {
+                        localStorage.setItem('authRedirect', window.location.href);
+                        window.location.href = 'login.html';
+                    }
                 });
                 return;
             }
@@ -172,7 +175,7 @@
                                 <div class="flex items-center gap-2 text-sm">
                                     <i class="fa-solid fa-calendar text-pink-400"></i>
                                     <span class="text-slate-300">Tercih Edilen Tarih:</span>
-                                    <span class="text-white">${new Date(lead.preferred_date).toLocaleDateString('tr-TR')}</span>
+                                    <span class="text-white">${formatDate(lead.preferred_date, 'long')}</span>
                                 </div>
                             ` : ''}
                             ${lead.clinic_quote ? `

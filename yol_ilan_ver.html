@@ -580,6 +580,7 @@
                     cancelButtonText: 'İptal'
                 }).then((result) => {
                     if (result.isConfirmed) {
+                        localStorage.setItem('authRedirect', window.location.href);
                         window.location.href = 'login.html';
                     }
                 });

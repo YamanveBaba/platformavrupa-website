@@ -1127,7 +1127,7 @@
             
             for (let i = 29; i >= 0; i--) {
                 const date = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
-                labels.push(date.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit' }));
+                labels.push(formatDate(date, 'chartShort'));
                 
                 // Rastgele dalgalanma ekle
                 const variation = (Math.random() - 0.5) * basePrice * 0.05;

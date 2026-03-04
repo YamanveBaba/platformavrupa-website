@@ -305,7 +305,7 @@
                 .select('id, title, youtube_id, thumbnail_url, duration_seconds, series_order')
                 .eq('series_id', seriesId)
                 .eq('is_active', true)
-                .order('series_order');
+                .order('series_order', { ascending: false });
             
             if (videos && videos.length > 1) {
                 seriesVideos = videos;
@@ -524,8 +524,7 @@
 
         function formatDate(dateStr) {
             if (!dateStr) return '--';
-            const date = new Date(dateStr);
-            return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+            return window.formatDate ? window.formatDate(dateStr, 'long') : new Date(dateStr).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
         }
 
         function getSessionId() {

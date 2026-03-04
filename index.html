@@ -427,22 +427,25 @@
             modal.classList.add('active');
             body.innerHTML = '<div class="text-center py-10"><i class="fa-solid fa-spinner fa-spin text-3xl text-indigo-500"></i><p class="mt-4 text-slate-400">Yükleniyor...</p></div>';
 
-            if (type === 'trip') {
+                if (type === 'trip') {
                 title.innerHTML = '<i class="fa-solid fa-car-side text-blue-400 mr-2"></i> Yol Arkadaşı İlanları';
                 const { data } = await sb.from('trips').select('*').order('created_at', {ascending: false});
                 if(!data || data.length === 0) { body.innerHTML = '<p class="text-center text-slate-500">Henüz ilan yok.</p>'; return; }
                 // XSS KORUMASI: Tüm kullanıcı verilerini sanitize et
-                body.innerHTML = '<div class="grid gap-3">' + data.map(t => `
+                body.innerHTML = '<div class="grid gap-3">' + data.map(t => {
+                        const formattedDate = formatDate(t.travel_date, 'long');
+                        return `
                     <div class="bg-white/5 p-4 rounded-xl border border-white/5 flex justify-between items-center">
                         <div>
                             <div class="text-white font-bold">${sanitize(t.from_city)} <i class="fa-solid fa-arrow-right text-xs mx-1 text-slate-500"></i> ${sanitize(t.to_city)}</div>
-                            <div class="text-xs text-slate-400 mt-1">${sanitize(t.travel_date)} • ${sanitize(t.driver_name)}</div>
+                            <div class="text-xs text-slate-400 mt-1">${formattedDate} • ${sanitize(t.driver_name)}</div>
                         </div>
                         <div class="text-right">
                             <div class="text-emerald-400 font-bold">${sanitize(t.price)}€</div>
                             <div class="text-xs text-slate-500">${sanitize(t.seats_available)} Koltuk</div>
                         </div>
-                    </div>`).join('') + '</div>';
+                    </div>`;
+                    }).join('') + '</div>';
             
             } else if (type === 'cargo') {
                 title.innerHTML = '<i class="fa-solid fa-box-open text-amber-400 mr-2"></i> Kargo & Emanet Talepleri';
@@ -650,6 +653,13 @@
         }
 
         // window.onload artık gerekli değil - auth.js otomatik çalışıyor
+
+        // OAuth dönüşü sonrasında URL'deki hash parametrelerini temizle
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.location.hash && window.location.hash.includes('access_token')) {
+                history.replaceState(null, '', window.location.pathname + window.location.search);
+            }
+        });
     </script>
     <script>
     // PWA Service Worker Kaydı

@@ -63,6 +63,7 @@
             // Kullanıcı kontrolü
             const user = await getCurrentUser();
             if (!user) {
+                localStorage.setItem('authRedirect', window.location.href);
                 window.location.href = 'login.html';
                 return;
             }

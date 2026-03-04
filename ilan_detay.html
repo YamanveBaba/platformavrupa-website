@@ -66,7 +66,7 @@
             const fiyat = ilan.price || "Belirtilmedi";
             const aciklama = ilan.description || "Açıklama girilmemiş.";
             const konum = (ilan.city && ilan.country) ? `${ilan.city}, ${ilan.country}` : "Konum Belirtilmemiş";
-            const tarih = new Date(ilan.created_at).toLocaleDateString('tr-TR');
+            const tarih = formatDate(ilan.created_at, 'long');
             const kategori = ilan.category || "Genel";
             const sahip = ilan.owner_name || "Platform Üyesi";
             

@@ -57,7 +57,10 @@
                 const user = await getCurrentUser();
                 if (!user) {
                     Swal.fire('Giriş Gerekli', 'İlan vermek için giriş yapmalısınız.', 'warning')
-                        .then(() => window.location.href = 'login.html');
+                        .then(() => {
+                            localStorage.setItem('authRedirect', window.location.href);
+                            window.location.href = 'login.html';
+                        });
                     return;
                 }
 
@@ -104,7 +107,10 @@
                 const user = await getCurrentUser();
                 if (!user) {
                     Swal.fire('Giriş Gerekli', 'Talep oluşturmak için giriş yapmalısınız.', 'warning')
-                        .then(() => window.location.href = 'login.html');
+                        .then(() => {
+                            localStorage.setItem('authRedirect', window.location.href);
+                            window.location.href = 'login.html';
+                        });
                     return;
                 }
 

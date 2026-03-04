@@ -24,11 +24,11 @@
         <form id="form" class="space-y-4 text-left">
             <div>
                 <label class="text-xs font-bold text-slate-500 uppercase ml-1 block mb-1">Yeni Şifre</label>
-                <input type="password" id="newPassword" required minlength="6" placeholder="En az 6 karakter" class="w-full border-2 border-slate-200 rounded-xl p-3 outline-none focus:border-indigo-500 transition">
+                <input type="password" id="newPassword" required minlength="8" placeholder="En az 8 karakter" autocomplete="new-password" class="w-full border-2 border-slate-200 rounded-xl p-3 outline-none focus:border-indigo-500 transition">
             </div>
             <div>
                 <label class="text-xs font-bold text-slate-500 uppercase ml-1 block mb-1">Şifre Tekrar</label>
-                <input type="password" id="confirmPassword" required minlength="6" placeholder="Şifreyi tekrar girin" class="w-full border-2 border-slate-200 rounded-xl p-3 outline-none focus:border-indigo-500 transition">
+                <input type="password" id="confirmPassword" required minlength="8" placeholder="Şifreyi tekrar girin" autocomplete="new-password" class="w-full border-2 border-slate-200 rounded-xl p-3 outline-none focus:border-indigo-500 transition">
             </div>
             <p id="msg" class="text-sm text-center hidden"></p>
             <button type="submit" id="submitBtn" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3.5 rounded-xl transition shadow-lg">
@@ -48,14 +48,36 @@
         const msgEl = document.getElementById('msg');
         const submitBtn = document.getElementById('submitBtn');
 
+        // Sayfa yüklendiğinde hash üzerinden gelen recovery oturumunu kontrol et
+        document.addEventListener('DOMContentLoaded', async function () {
+            if (!window.sb) return;
+
+            try {
+                const { data: { session }, error } = await sb.auth.getSession();
+                if (error || !session) {
+                    msgEl.textContent = 'Bu şifre sıfırlama bağlantısı geçersiz veya süresi dolmuş olabilir. Lütfen yeniden talep edin.';
+                    msgEl.className = 'text-sm text-center text-red-600';
+                    msgEl.classList.remove('hidden');
+                    submitBtn.disabled = true;
+                }
+            } catch (e) {
+                console.error('Recovery oturumu kontrol hatası:', e);
+            }
+
+            // URL hash içindeki access_token vb. bilgileri gizle
+            if (window.location.hash && window.location.hash.includes('access_token')) {
+                history.replaceState(null, '', window.location.pathname + window.location.search);
+            }
+        });
+
         form.onsubmit = async function(e) {
             e.preventDefault();
             const newP = document.getElementById('newPassword').value;
             const confirmP = document.getElementById('confirmPassword').value;
             msgEl.classList.add('hidden');
 
-            if (newP.length < 6) {
-                msgEl.textContent = 'Şifre en az 6 karakter olmalıdır.';
+            if (newP.length < 8) {
+                msgEl.textContent = 'Şifre en az 8 karakter olmalıdır.';
                 msgEl.className = 'text-sm text-center text-red-600';
                 msgEl.classList.remove('hidden');
                 return;

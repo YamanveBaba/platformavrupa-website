@@ -1473,7 +1473,7 @@
                                 image: article.urlToImage,
                                 source: article.source.name,
                                 url: article.url,
-                                publishedAt: new Date(article.publishedAt).toLocaleDateString('tr-TR')
+                                publishedAt: formatDate(article.publishedAt, 'long')
                             });
                         }
                     });
@@ -1589,7 +1589,7 @@
             }
         }
         
-        async function loadAnnouncements() { const { data } = await sb.from('announcements').select('*').order('created_at', {ascending: false}); const div = document.getElementById('activeAnnouncements'); div.innerHTML = ''; if(!data) return; data.forEach(a => { let img = a.image_url ? `<img src="${a.image_url}" loading="lazy" alt="${a.title}" class="w-12 h-12 rounded-lg object-cover">` : '<div class="w-12 h-12 bg-slate-700 rounded-lg flex items-center justify-center text-slate-500"><i class="fa-solid fa-image"></i></div>'; let badge = a.type === 'ulke' ? `<span class="bg-red-500/20 text-red-400 px-2 py-1 rounded text-xs font-bold border border-red-500/30">${a.country_code} ÖZEL</span>` : `<span class="bg-blue-500/20 text-blue-400 px-2 py-1 rounded text-xs font-bold border border-blue-500/30">GENEL</span>`; div.innerHTML += `<div class="glass-panel p-4 rounded-xl flex justify-between items-center border border-white/5 hover:border-white/10 transition"><div class="flex gap-4 items-center">${img} <div><h4 class="font-bold text-white text-sm">${a.title}</h4><div class="flex gap-2 mt-1">${badge} <span class="text-xs text-slate-500">${new Date(a.created_at).toLocaleDateString()}</span></div></div></div><button onclick="delAnn('${a.id}')" class="w-8 h-8 rounded-full bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition flex items-center justify-center"><i class="fa-solid fa-trash text-xs"></i></button></div>`; }); }
+        async function loadAnnouncements() { const { data } = await sb.from('announcements').select('*').order('created_at', {ascending: false}); const div = document.getElementById('activeAnnouncements'); div.innerHTML = ''; if(!data) return; data.forEach(a => { let img = a.image_url ? `<img src="${a.image_url}" loading="lazy" alt="${a.title}" class="w-12 h-12 rounded-lg object-cover">` : '<div class="w-12 h-12 bg-slate-700 rounded-lg flex items-center justify-center text-slate-500"><i class="fa-solid fa-image"></i></div>'; let badge = a.type === 'ulke' ? `<span class="bg-red-500/20 text-red-400 px-2 py-1 rounded text-xs font-bold border border-red-500/30">${a.country_code} ÖZEL</span>` : `<span class="bg-blue-500/20 text-blue-400 px-2 py-1 rounded text-xs font-bold border border-blue-500/30">GENEL</span>`; const createdStr = formatDate(a.created_at, 'long'); div.innerHTML += `<div class="glass-panel p-4 rounded-xl flex justify-between items-center border border-white/5 hover:border-white/10 transition"><div class="flex gap-4 items-center">${img} <div><h4 class="font-bold text-white text-sm">${a.title}</h4><div class="flex gap-2 mt-1">${badge} <span class="text-xs text-slate-500">${createdStr}</span></div></div></div><button onclick="delAnn('${a.id}')" class="w-8 h-8 rounded-full bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition flex items-center justify-center"><i class="fa-solid fa-trash text-xs"></i></button></div>`; }); }
         async function delAnn(id) { if(confirm('Silinsin mi?')) { await sb.from('announcements').delete().eq('id', id); loadAnnouncements(); } }
         async function renderCharts() {
             const trafficEl = document.getElementById('trafficChart');
@@ -1812,7 +1812,7 @@
                             <span class="text-xs ${statusColors[r.status] || 'bg-slate-500'} text-white px-2 py-1 rounded mr-2">${r.status}</span>
                             <span class="text-xs bg-slate-700 text-slate-300 px-2 py-1 rounded">${typeLabels[r.request_type] || r.request_type}</span>
                         </div>
-                        <span class="text-xs text-slate-500">${new Date(r.created_at).toLocaleDateString('tr-TR')}</span>
+                        <span class="text-xs text-slate-500">${formatDate(r.created_at, 'long')}</span>
                     </div>
                     <h5 class="font-bold text-white mb-2">${sanitize(r.title)}</h5>
                     <p class="text-sm text-slate-400 mb-3">${sanitize(r.description || '')}</p>
@@ -2646,7 +2646,7 @@
                         <div class="flex justify-between items-center">
                             <div>
                                 <div class="font-bold text-white">€${log.amount.toFixed(2)}</div>
-                                <div class="text-sm text-slate-400">${new Date(log.created_at).toLocaleDateString('tr-TR')}</div>
+                                <div class="text-sm text-slate-400">${formatDate(log.created_at, 'long')}</div>
                             </div>
                             <span class="text-xs ${statusConfig.bg} ${statusConfig.text} px-2 py-1 rounded-full border">
                                 ${statusConfig.label}
@@ -2709,7 +2709,8 @@
             else {
                 trips.forEach(t => {
                     const cargoBadge = t.is_cargo_allowed ? '<span class="text-green-400 ml-2 text-[10px] border border-green-500/30 px-1 rounded"><i class="fa-solid fa-box"></i> Kargo Alır</span>' : '';
-                    tripsDiv.innerHTML += `<div class="bg-slate-800/50 p-4 rounded-xl border border-white/5 hover:border-blue-500/50 transition relative group"><div class="flex justify-between items-start mb-2"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center font-bold text-xs">${t.driver_name.substring(0,2)}</div><div><h5 class="font-bold text-white text-sm">${t.driver_name}</h5><p class="text-[10px] text-slate-400">${t.travel_date}</p></div></div><span class="font-bold text-lg text-emerald-400">${t.price}€</span></div><div class="flex items-center gap-2 text-sm text-slate-300 font-bold mb-2"><span>${t.from_city}</span> <i class="fa-solid fa-arrow-right text-slate-500 text-xs"></i> <span>${t.to_city}</span></div><div class="flex items-center gap-2 text-xs text-slate-500"><span><i class="fa-solid fa-chair"></i> ${t.seats_available} Boş</span>${cargoBadge}</div><button onclick="delTrip('${t.id}')" class="absolute top-2 right-2 text-red-400 opacity-0 group-hover:opacity-100 transition hover:bg-white/10 p-1 rounded"><i class="fa-solid fa-trash"></i></button></div>`;
+                    const formattedDate = formatDate(t.travel_date, 'long');
+                    tripsDiv.innerHTML += `<div class="bg-slate-800/50 p-4 rounded-xl border border-white/5 hover:border-blue-500/50 transition relative group"><div class="flex justify-between items-start mb-2"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center font-bold text-xs">${t.driver_name.substring(0,2)}</div><div><h5 class="font-bold text-white text-sm">${t.driver_name}</h5><p class="text-[10px] text-slate-400">${formattedDate}</p></div></div><span class="font-bold text-lg text-emerald-400">${t.price}€</span></div><div class="flex items-center gap-2 text-sm text-slate-300 font-bold mb-2"><span>${t.from_city}</span> <i class="fa-solid fa-arrow-right text-slate-500 text-xs"></i> <span>${t.to_city}</span></div><div class="flex items-center gap-2 text-xs text-slate-500"><span><i class="fa-solid fa-chair"></i> ${t.seats_available} Boş</span>${cargoBadge}</div><button onclick="delTrip('${t.id}')" class="absolute top-2 right-2 text-red-400 opacity-0 group-hover:opacity-100 transition hover:bg-white/10 p-1 rounded"><i class="fa-solid fa-trash"></i></button></div>`;
                 });
             }
             const { data: ships } = await sb.from('shipments').select('*').order('created_at', {ascending: false});
@@ -3265,7 +3266,7 @@
                                 </div>
                                 <span>${deal.profiles?.full_name || deal.profiles?.email || 'Anonim'}</span>
                             </div>
-                            <span>${new Date(deal.created_at).toLocaleDateString('tr-TR')}</span>
+                            <span>${formatDate(deal.created_at, 'long')}</span>
                         </div>
                         
                         ${deal.status === 'pending' ? `
@@ -3501,7 +3502,7 @@
                 const date = new Date();
                 date.setDate(date.getDate() - i);
                 last7Days.push(date.toISOString().split('T')[0]);
-                labels.push(date.toLocaleDateString('tr-TR', { weekday: 'short', day: 'numeric' }));
+                labels.push(formatDate(date, 'weekdayShort'));
             }
             
             // Partner bazında günlük veriler

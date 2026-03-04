@@ -255,10 +255,10 @@
                         referrerpolicy="strict-origin-when-cross-origin"></iframe>
                 <!-- YouTube "Daha fazla video" alanını kapatmak için overlay + sitede kalan öneriler -->
                 <div id="videoOverlay" class="absolute bottom-0 left-0 right-0 h-[32%] min-h-[80px] pointer-events-none bg-gradient-to-t from-black/98 via-black/90 to-transparent flex flex-col justify-end rounded-b-2xl">
-                    <div class="px-3 pb-2 pt-4 pointer-events-auto">
+                    <div class="px-3 pb-2 pt-4 pointer-events-none">
                         <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Önerilen videolar</p>
                         <div id="modalRecommendedVideos" class="flex gap-2 overflow-x-auto pb-1 scrollbar-thin" style="scrollbar-width: thin;">
-                            <!-- JS ile doldurulacak -->
+                            <!-- JS ile doldurulacak; butonlara pointer-events-auto verilir -->
                         </div>
                     </div>
                 </div>
@@ -313,11 +313,11 @@
         let standaloneVideoList = [];
         const SERI_YOK_KEY = 'none';
 
-        // Serideki ilk videoyu bul (thumbnail için; series_order 1 veya en küçük)
+        // Serideki ilk videoyu bul (thumbnail için; listeleme sırası azalan: en büyük series_order = listede ilk)
         function getFirstVideoForSeries(seriesId) {
             const inSeries = allVideos.filter(v => v.series_id === seriesId);
             if (inSeries.length === 0) return null;
-            const sorted = [...inSeries].sort((a, b) => (a.series_order || 0) - (b.series_order || 0));
+            const sorted = [...inSeries].sort((a, b) => (b.series_order || 0) - (a.series_order || 0));
             return sorted[0];
         }
 
@@ -518,7 +518,7 @@
             
             if (seriesId) {
                 filteredVideos = allVideos.filter(v => v.series_id === seriesId);
-                filteredVideos.sort((a, b) => (a.series_order || 0) - (b.series_order || 0));
+                filteredVideos.sort((a, b) => (b.series_order || 0) - (a.series_order || 0));
                 const series = allSeries.find(s => s.id === seriesId);
                 
                 if (playlistOverview) playlistOverview.classList.add('hidden');
@@ -556,7 +556,7 @@
                     filteredVideos.sort((a, b) => (b.view_count || 0) - (a.view_count || 0));
                     break;
                 case 'series':
-                    filteredVideos.sort((a, b) => (a.series_order || 0) - (b.series_order || 0));
+                    filteredVideos.sort((a, b) => (b.series_order || 0) - (a.series_order || 0));
                     break;
             }
             
@@ -597,7 +597,7 @@
                 switch (currentSort) {
                     case 'newest': a.sort((x, y) => new Date(y.created_at) - new Date(x.created_at)); break;
                     case 'popular': a.sort((x, y) => (y.view_count || 0) - (x.view_count || 0)); break;
-                    case 'series': a.sort((x, y) => (x.series_order || 0) - (y.series_order || 0)); break;
+                    case 'series': a.sort((x, y) => (y.series_order || 0) - (x.series_order || 0)); break;
                 }
                 return a;
             };
@@ -723,7 +723,7 @@
                 const idx = list.findIndex(x => x.id === v.id);
                 const thumbUrl = v.thumbnail_url || `https://img.youtube.com/vi/${v.youtube_id}/mqdefault.jpg`;
                 return `
-                <button type="button" onclick="playVideo(${idx})" class="flex-shrink-0 w-28 sm:w-36 rounded-lg overflow-hidden bg-white/5 border border-white/10 hover:border-purple-500/50 transition text-left group">
+                <button type="button" onclick="playVideo(${idx})" class="flex-shrink-0 w-28 sm:w-36 rounded-lg overflow-hidden bg-white/5 border border-white/10 hover:border-purple-500/50 transition text-left group pointer-events-auto relative z-10">
                     <div class="aspect-video relative">
                         <img src="${thumbUrl}" alt="" class="w-full h-full object-cover" loading="lazy">
                         <span class="absolute bottom-1 right-1 bg-black/80 text-white text-xs px-1 rounded">${formatDuration(v.duration_seconds)}</span>

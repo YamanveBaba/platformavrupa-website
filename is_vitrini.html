@@ -302,7 +302,7 @@
                             ulke: i.country || '',
                             fiyat: i.price,
                             pozisyon: "Tam Zamanlı",
-                            tarih: new Date(i.created_at).toLocaleDateString('tr-TR'),
+                            tarih: formatDate(i.created_at, 'long'),
                             lat: 48.0 + (Math.random() * 5), 
                             lon: 10.0 + (Math.random() * 5)
                         }));

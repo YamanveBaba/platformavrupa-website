@@ -360,17 +360,6 @@
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-bold text-slate-300 mb-2">Tercih Edilen Tarih</label>
-                    <div class="relative w-full bg-slate-800 rounded-lg border border-slate-700">
-                        <div onclick="var el=document.getElementById('preferredDate'); (el.showPicker&&el.showPicker())||el.click();" class="w-full py-3 px-4 flex items-center justify-between cursor-pointer" role="button" tabindex="0">
-                            <span id="preferredDateLabel" class="text-slate-400">Tarih seçmek için tıklayın</span>
-                            <i class="fa-solid fa-calendar-days text-pink-400"></i>
-                        </div>
-                        <input type="date" id="preferredDate" name="preferredDate" min="" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" aria-hidden="true">
-                    </div>
-                </div>
-                
-                <div>
                     <label class="block text-sm font-bold text-slate-300 mb-2">Öncesi Fotoğraflar (Opsiyonel)</label>
                     <div class="relative">
                         <input type="file" id="photos" name="photos" multiple accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
@@ -403,20 +392,6 @@
             await loadClinics();
             populateCountryDropdown();
             populatePhoneCodeDropdowns();
-            setMinDate();
-            // Tarih seçildiğinde etiketi güncelle
-            const preferredDate = document.getElementById('preferredDate');
-            const preferredDateLabel = document.getElementById('preferredDateLabel');
-            if (preferredDate && preferredDateLabel) {
-                preferredDate.addEventListener('change', function() {
-                    if (this.value) {
-                        const d = new Date(this.value + 'T00:00:00');
-                        preferredDateLabel.textContent = d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
-                    } else {
-                        preferredDateLabel.textContent = 'Tarih seçmek için tıklayın';
-                    }
-                });
-            }
             // Dosya seçildiğinde etiketi güncelle (Türkçe)
             const photosInput = document.getElementById('photos');
             const photosLabel = document.getElementById('photosLabel');
@@ -427,15 +402,6 @@
                 });
             }
         };
-
-        // Minimum tarihi bugün yap
-        function setMinDate() {
-            const today = new Date().toISOString().split('T')[0];
-            const dateInput = document.getElementById('preferredDate');
-            if (dateInput) {
-                dateInput.setAttribute('min', today);
-            }
-        }
 
         // Ülke dropdown'ını doldur
         function populateCountryDropdown() {
@@ -1049,7 +1015,6 @@
                     city: formData.get('city') || null,
                     photos: photoUrls,
                     description: formData.get('description') || null,
-                    preferred_date: formData.get('preferredDate') || null,
                     status: 'new'
                 };
                 

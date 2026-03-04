@@ -96,6 +96,7 @@
             // Kullanıcı kontrolü
             const user = await getCurrentUser();
             if (!user) {
+                localStorage.setItem('authRedirect', window.location.href);
                 window.location.href = 'login.html';
                 return;
             }
@@ -269,7 +270,7 @@
         function yolculukKarti(trip) {
             const safeFrom = sanitize(trip.from_city);
             const safeTo = sanitize(trip.to_city);
-            const safeDate = sanitize(trip.travel_date);
+            const safeDate = formatDate(trip.travel_date, 'long');
             const safePrice = sanitize(trip.price);
             
             return `

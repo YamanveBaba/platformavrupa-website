@@ -176,7 +176,7 @@
 
             const resim = haber.image_url ? haber.image_url : 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?q=80&w=1200';
 
-            const tarih = new Date(haber.created_at).toLocaleDateString('tr-TR');
+            const tarih = formatDate(haber.created_at, 'long');
 
 
 

@@ -98,8 +98,9 @@ async function getCurrentUser() {
     if (!sb) return null;
     
     try {
-        const { data: { user } } = await sb.auth.getUser();
-        return user;
+        const { data: { session }, error } = await sb.auth.getSession();
+        if (error) throw error;
+        return session?.user || null;
     } catch (error) {
         return null;
     }

@@ -241,7 +241,7 @@
                             konum: i.city,
                             ulke: i.country || '',
                             fiyat: i.price,
-                            tarih: new Date(i.created_at).toLocaleDateString(),
+                            tarih: formatDate(i.created_at, 'long'),
                             lat: 48.0 + (Math.random() * 5),
                             lon: 10.0 + (Math.random() * 5)
                         }));

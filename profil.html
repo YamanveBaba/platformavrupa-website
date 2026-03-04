@@ -8,6 +8,7 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
     <script src="utils.js"></script>
+    <script src="auth.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }</style>
@@ -123,8 +124,6 @@
     <script>
         // Supabase bağlantısı config.js'den geliyor
 
-        let currentUser = null;
-
         window.onload = async function() {
             // 1. Önce Hızlıca LocalStorage'dan Çek
             // NOT: Burada '||' operatörünü kaldırdık. Gerçek isim yoksa BOŞ kalsın, takma ad yazmasın.
@@ -139,7 +138,7 @@
             );
 
             // 2. Veritabanından En Güncelini Çek
-            const { data: { user } } = await sb.auth.getUser();
+            const user = await getCurrentUser();
             
             if (user) {
                 currentUser = user;
@@ -164,6 +163,8 @@
                     localStorage.setItem('userCountry', profile.country);
                 }
             } else {
+                // Giriş yoksa önce geri dönüş adresini ayarla
+                localStorage.setItem('authRedirect', window.location.href);
                 window.location.href = "login.html";
             }
         };
@@ -222,9 +223,13 @@
         }
 
         function cikisYap() {
-            sb.auth.signOut();
-            localStorage.clear();
-            window.location.href = "index.html";
+            if (typeof signOut === 'function') {
+                signOut();
+            } else {
+                sb.auth.signOut();
+                localStorage.clear();
+                window.location.href = "index.html";
+            }
         }
     </script>
 </body>
