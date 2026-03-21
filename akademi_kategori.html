@@ -3,8 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kategori | Platform Akademi</title>
-    <meta name="description" content="Kategori bazlı eğitim videoları">
+    <title>Kategori | Platform Akademi - PlatformAvrupa</title>
+    <meta name="description" content="Kategori bazlı eğitim videoları. Dil, kariyer, finans, resmi işlemler ve daha fazlası.">
+    <link rel="canonical" href="https://www.platformavrupa.com/akademi_kategori.html">
+    <meta property="og:title" content="Kategori | Platform Akademi - PlatformAvrupa">
+    <meta property="og:description" content="Kategori bazlı eğitim videoları. Avrupa'daki Türkler için ücretsiz eğitim içerikleri.">
+    <meta property="og:url" content="https://www.platformavrupa.com/akademi_kategori.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Platform Avrupa">
+    <meta property="og:image" content="https://www.platformavrupa.com/og-image.png">
+    <meta property="og:locale" content="tr_TR">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Kategori | Platform Akademi - PlatformAvrupa">
+    <meta name="twitter:description" content="Kategori bazlı eğitim videoları.">
+    <meta name="twitter:image" content="https://www.platformavrupa.com/og-image.png">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -147,24 +159,7 @@
 
     <!-- İÇERİK -->
     <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
-        <!-- Sırala (tam genişlik) -->
-        <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-            <h4 class="text-sm font-bold text-slate-400 uppercase tracking-wider">Sırala</h4>
-            <div class="flex items-center gap-4">
-                <label class="flex items-center gap-2 cursor-pointer text-sm text-slate-300 hover:text-white transition">
-                    <input type="radio" name="sort" value="newest" checked onchange="sortVideos(this.value)" class="text-purple-500">
-                    En Yeni
-                </label>
-                <label class="flex items-center gap-2 cursor-pointer text-sm text-slate-300 hover:text-white transition">
-                    <input type="radio" name="sort" value="popular" onchange="sortVideos(this.value)" class="text-purple-500">
-                    En Popüler
-                </label>
-                <label class="flex items-center gap-2 cursor-pointer text-sm text-slate-300 hover:text-white transition">
-                    <input type="radio" name="sort" value="series" onchange="sortVideos(this.value)" class="text-purple-500">
-                    Seri Sırası
-                </label>
-            </div>
-        </div>
+        <!-- Sırala seçenekleri kaldırıldı: videolar otomatik olarak varsayılan düzende sıralanıyor -->
 
         <!-- Seri seçiliyken: Serilere dön + Banner + Video grid -->
         <div id="seriesDetailView" class="hidden">
@@ -253,14 +248,13 @@
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                         allowfullscreen
                         referrerpolicy="strict-origin-when-cross-origin"></iframe>
-                <!-- YouTube "Daha fazla video" alanını kapatmak için overlay + sitede kalan öneriler -->
-                <div id="videoOverlay" class="absolute bottom-0 left-0 right-0 h-[32%] min-h-[80px] pointer-events-none bg-gradient-to-t from-black/98 via-black/90 to-transparent flex flex-col justify-end rounded-b-2xl">
-                    <div class="px-3 pb-2 pt-4 pointer-events-none">
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Önerilen videolar</p>
-                        <div id="modalRecommendedVideos" class="flex gap-2 overflow-x-auto pb-1 scrollbar-thin" style="scrollbar-width: thin;">
-                            <!-- JS ile doldurulacak; butonlara pointer-events-auto verilir -->
-                        </div>
-                    </div>
+            </div>
+
+            <!-- Önerilen videolar: oynatıcının altında, sitede kalan liste -->
+            <div class="mt-4">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Önerilen videolar</p>
+                <div id="modalRecommendedVideos" class="flex gap-2 overflow-x-auto pb-1 scrollbar-thin" style="scrollbar-width: thin;">
+                    <!-- JS ile doldurulacak; butonlara pointer-events-auto verilir -->
                 </div>
             </div>
             
@@ -309,15 +303,14 @@
         let expandedSeriesSet = new Set();
         let currentVideoIndex = 0;
         let currentSeriesId = null;
-        let currentSort = 'newest';
         let standaloneVideoList = [];
         const SERI_YOK_KEY = 'none';
 
-        // Serideki ilk videoyu bul (thumbnail için; listeleme sırası azalan: en büyük series_order = listede ilk)
+        // Serideki ilk videoyu bul (thumbnail için; listeleme sırası artan: en küçük series_order = ilk ders)
         function getFirstVideoForSeries(seriesId) {
             const inSeries = allVideos.filter(v => v.series_id === seriesId);
             if (inSeries.length === 0) return null;
-            const sorted = [...inSeries].sort((a, b) => (b.series_order || 0) - (a.series_order || 0));
+            const sorted = [...inSeries].sort((a, b) => (a.series_order || 0) - (b.series_order || 0));
             return sorted[0];
         }
 
@@ -453,6 +446,21 @@
             }).join('');
         }
 
+        // Varsayılan sıralama: seri videoları ders sırasına göre, tekli videolar en yeniye göre
+        function applyDefaultSortForSeriesVideos(arr) {
+            const a = [...arr];
+            a.sort((x, y) => {
+                const soX = x.series_order || 0;
+                const soY = y.series_order || 0;
+                if (soX !== 0 || soY !== 0) {
+                    return soX - soY; // 1,2,3... ders sırası
+                }
+                // Seri bilgisi yoksa created_at'e göre en yeni üstte
+                return new Date(y.created_at) - new Date(x.created_at);
+            });
+            return a;
+        }
+
         // Tekli videolar bölümü (seriye ait olmayan)
         function renderStandaloneVideos() {
             const grid = document.getElementById('standaloneVideosGrid');
@@ -462,11 +470,7 @@
             const standalone = allVideos.filter(v => !v.series_id);
             const sortVids = (arr) => {
                 const a = [...arr];
-                switch (currentSort) {
-                    case 'newest': a.sort((x, y) => new Date(y.created_at) - new Date(x.created_at)); break;
-                    case 'popular': a.sort((x, y) => (y.view_count || 0) - (x.view_count || 0)); break;
-                    default: break;
-                }
+                a.sort((x, y) => new Date(y.created_at) - new Date(x.created_at));
                 return a;
             };
             standaloneVideoList = sortVids(standalone);
@@ -518,7 +522,7 @@
             
             if (seriesId) {
                 filteredVideos = allVideos.filter(v => v.series_id === seriesId);
-                filteredVideos.sort((a, b) => (b.series_order || 0) - (a.series_order || 0));
+                filteredVideos = applyDefaultSortForSeriesVideos(filteredVideos);
                 const series = allSeries.find(s => s.id === seriesId);
                 
                 if (playlistOverview) playlistOverview.classList.add('hidden');
@@ -542,29 +546,6 @@
         // Filtreyi kaldır
         function clearSeriesFilter() {
             filterBySeries(null);
-        }
-
-        // Videoları sırala
-        function sortVideos(sortType) {
-            currentSort = sortType;
-            
-            switch(sortType) {
-                case 'newest':
-                    filteredVideos.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-                    break;
-                case 'popular':
-                    filteredVideos.sort((a, b) => (b.view_count || 0) - (a.view_count || 0));
-                    break;
-                case 'series':
-                    filteredVideos.sort((a, b) => (b.series_order || 0) - (a.series_order || 0));
-                    break;
-            }
-            
-            if (currentSeriesId) {
-                renderVideos();
-            } else {
-                renderStandaloneVideos();
-            }
         }
 
         // Seri accordion bölümünü aç/kapa (kullanıcı sayfası)
@@ -592,20 +573,20 @@
             
             noVideos.classList.add('hidden');
             
-            const sortVids = (arr) => {
+            const sortVids = (arr, isSeriesGroup) => {
                 const a = [...arr];
-                switch (currentSort) {
-                    case 'newest': a.sort((x, y) => new Date(y.created_at) - new Date(x.created_at)); break;
-                    case 'popular': a.sort((x, y) => (y.view_count || 0) - (x.view_count || 0)); break;
-                    case 'series': a.sort((x, y) => (y.series_order || 0) - (x.series_order || 0)); break;
+                if (isSeriesGroup) {
+                    return applyDefaultSortForSeriesVideos(a);
                 }
+                // Diğer videolar: en yeni üstte
+                a.sort((x, y) => new Date(y.created_at) - new Date(x.created_at));
                 return a;
             };
             
             const groups = [];
             if (currentSeriesId) {
                 const series = allSeries.find(s => s.id === currentSeriesId);
-                const vids = sortVids(filteredVideos);
+                const vids = sortVids(filteredVideos, true);
                 groups.push({ key: currentSeriesId, name: series ? series.name : '', videos: vids });
             } else {
                 const bySeries = new Map();
@@ -617,7 +598,8 @@
                 const orderedKeys = allSeries.map(s => s.id).filter(id => bySeries.has(id));
                 if (bySeries.has(SERI_YOK_KEY)) orderedKeys.push(SERI_YOK_KEY);
                 orderedKeys.forEach(key => {
-                    const vids = sortVids(bySeries.get(key));
+                    const isSeriesGroup = key !== SERI_YOK_KEY;
+                    const vids = sortVids(bySeries.get(key), isSeriesGroup);
                     const name = key === SERI_YOK_KEY ? 'Diğer videolar' : (allSeries.find(s => s.id === key)?.name || 'Seri');
                     groups.push({ key, name, videos: vids });
                 });
@@ -872,7 +854,12 @@
                 );
             }
             
-            sortVideos(currentSort);
+            if (currentSeriesId) {
+                filteredVideos = applyDefaultSortForSeriesVideos(filteredVideos);
+                renderVideos();
+            } else {
+                renderStandaloneVideos();
+            }
         }
 
         // Süre formatla

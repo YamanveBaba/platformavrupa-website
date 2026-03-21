@@ -1,0 +1,49 @@
+========================================
+COLRUYT COOKIE NASIL BULUNUR (Adım adım)
+========================================
+
+Cookie sadece SİZİN tarayıcınızda, colruyt.be'ye giriş yaptığınızda oluşur.
+Aşağıdaki adımları kendi bilgisayarınızda yapın.
+
+--- ADIM 1: Giriş ve mağaza ---
+1. Chrome veya Edge ile https://www.colruyt.be adresine gidin.
+2. Giriş yapın (sağ üst).
+3. Mağaza seçin (Producten / ürünler sayfasında geçerli mağaza olsun).
+
+--- ADIM 2: Geliştirici araçlarını açın ---
+4. Klavyeden F12 tuşuna basın (veya sağ tık → "İncele" / "Inspect").
+5. Üstte "Network" (Ağ) sekmesine tıklayın.
+6. "Fetch/XHR" veya "XHR" filtresine tıklayın (isteğe bağlı; istek listesini sadeleştirir).
+
+--- ADIM 3: API isteğini tetikleyin ---
+7. Aynı sekmede https://www.colruyt.be/nl/producten sayfasına gidin
+   (veya sitede arama kutusuna bir şey yazıp arama yapın).
+8. Network listesinde yeni istekler görünecek. Listeyi aşağı kaydırın.
+9. "product-search-prs" veya "product-search" yazan isteği bulun.
+   (İsim tam böyle olmayabilir; "search" veya "product" geçen isimlere bakın.)
+10. Bu isteğe TIKLAYIN (tek tık).
+
+--- ADIM 4: Cookie'yi kopyalayın ---
+11. Sağ tarafta veya altta detaylar açılacak.
+12. "Headers" (Başlıklar) bölümüne bakın.
+13. "Request Headers" (İstek Başlıkları) listesini bulun.
+14. Bu listede "Cookie:" satırı var. Sağındaki değer ÇOK UZUN bir metindir
+    (örn. "JSESSIONID=...; BIGipServer...=...; ..." gibi).
+15. "Cookie:" yazısının HEMEN SAĞINDAN itibaren tüm satırı (veya tüm değeri)
+    SEÇİN ve Ctrl+C ile KOPYALAYIN.
+
+--- ADIM 5: cookie.txt dosyasına yapıştırın ---
+16. market_fiyat_cekici klasöründeki "cookie.txt" dosyasını açın
+    (Not Defteri ile açabilirsiniz).
+17. İçindeki "BURAYA_TARAYICIDAN_COOKIE_YAPISTIR" yazısını SİLİN.
+18. Kopyaladığınız Cookie değerini Ctrl+V ile YAPIŞTIRIN.
+19. Dosyayı KAYDEDİN ve kapatın.
+
+--- ADIM 6: Script'i çalıştırın ---
+20. calistir_colruyt_api.bat dosyasına çift tıklayın.
+
+========================================
+ÖNEMLİ
+========================================
+- Cookie bir süre sonra geçersiz olur (birkaç saat veya gün). 406 tekrarlanırsa bu adımları tekrarlayıp cookie.txt'yi yenileyin.
+- Cookie'yi kimseyle paylaşmayın; hesabınıza erişim sağlar.

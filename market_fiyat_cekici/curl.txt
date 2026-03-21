@@ -1,0 +1,2 @@
+Bu dosyaya tarayıcıdan kopyaladığınız cURL komutunu yapıştırın.
+Adımlar: CURL_ILE_COOKIE_ALMA.txt dosyasını okuyun.

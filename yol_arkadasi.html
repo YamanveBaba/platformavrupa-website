@@ -4,6 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Yol Arkadaşı - PlatformAvrupa</title>
+    <meta name="description" content="Sıla yolunda yol arkadaşı bul. Avrupa şehirleri arası paylaşımlı yolculuk ilanları. Gurbetçiler için güvenli yol arkadaşı platformu.">
+    <link rel="canonical" href="https://www.platformavrupa.com/yol_arkadasi.html">
+    <meta property="og:title" content="Yol Arkadaşı - PlatformAvrupa">
+    <meta property="og:description" content="Sıla yolunda yol arkadaşı bul. Avrupa şehirleri arası paylaşımlı yolculuk ilanları.">
+    <meta property="og:url" content="https://www.platformavrupa.com/yol_arkadasi.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Platform Avrupa">
+    <meta property="og:image" content="https://www.platformavrupa.com/og-image.png">
+    <meta property="og:locale" content="tr_TR">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Yol Arkadaşı - PlatformAvrupa">
+    <meta name="twitter:description" content="Sıla yolunda yol arkadaşı bul. Avrupa şehirleri arası paylaşımlı yolculuk ilanları.">
+    <meta name="twitter:image" content="https://www.platformavrupa.com/og-image.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -56,46 +69,84 @@
 
             <!-- Filtreler -->
             <div class="bg-white rounded-2xl p-4 shadow-2xl max-w-4xl mx-auto">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3">
-                    <!-- Nereden Ülke -->
-                    <div>
-                        <label class="text-xs font-bold text-slate-600 mb-1 block">Nereden Ülke</label>
-                        <select id="filterFromCountry" onchange="updateFromCities()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
-                            <option value="">Tüm Ülkeler</option>
-                        </select>
+                <div class="flex flex-col lg:flex-row gap-4">
+                    <!-- Nereden Bloğu -->
+                    <div class="flex-1 bg-slate-50 rounded-xl p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xs font-semibold uppercase tracking-wide bg-purple-50 text-purple-700 rounded-full px-3 py-1">
+                                Çıkış Noktası
+                            </span>
+                            <span class="hidden sm:inline text-[10px] text-slate-500">
+                                Nereden başlıyorsun?
+                            </span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <!-- Nereden Ülke -->
+                            <div>
+                                <label class="text-xs font-bold text-slate-600 mb-1 block">Nereden Ülke</label>
+                                <select id="filterFromCountry" onchange="updateFromCities()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                    <option value="">Tüm Ülkeler</option>
+                                </select>
+                            </div>
+                            <!-- Nereden Şehir -->
+                            <div>
+                                <label class="text-xs font-bold text-slate-600 mb-1 block">Nereden Şehir</label>
+                                <select id="filterFromCity" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                    <option value="">Tüm Şehirler</option>
+                                </select>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-3">
+                            Yolculuğun başladığı ülke ve şehri seçin.
+                        </p>
                     </div>
-                    <!-- Nereden Şehir -->
-                    <div>
-                        <label class="text-xs font-bold text-slate-600 mb-1 block">Nereden Şehir</label>
-                        <select id="filterFromCity" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
-                            <option value="">Tüm Şehirler</option>
-                        </select>
+
+                    <!-- Nereye Bloğu -->
+                    <div class="flex-1 bg-slate-50 rounded-xl p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xs font-semibold uppercase tracking-wide bg-indigo-50 text-indigo-700 rounded-full px-3 py-1">
+                                Varış Noktası
+                            </span>
+                            <span class="hidden sm:inline text-[10px] text-slate-500">
+                                Nereye gitmek istiyorsun?
+                            </span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <!-- Nereye Ülke -->
+                            <div>
+                                <label class="text-xs font-bold text-slate-600 mb-1 block">Nereye Ülke</label>
+                                <select id="filterToCountry" onchange="updateToCities()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                    <option value="">Tüm Ülkeler</option>
+                                </select>
+                            </div>
+                            <!-- Nereye Şehir -->
+                            <div>
+                                <label class="text-xs font-bold text-slate-600 mb-1 block">Nereye Şehir</label>
+                                <select id="filterToCity" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                    <option value="">Tüm Şehirler</option>
+                                </select>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-3">
+                            Gitmek istediğiniz ülke ve şehri seçin.
+                        </p>
                     </div>
-                    <!-- Nereye Ülke -->
-                    <div>
-                        <label class="text-xs font-bold text-slate-600 mb-1 block">Nereye Ülke</label>
-                        <select id="filterToCountry" onchange="updateToCities()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
-                            <option value="">Tüm Ülkeler</option>
-                        </select>
-                    </div>
-                    <!-- Ok İşareti -->
-                    <div class="flex items-center justify-center pt-6">
-                        <i class="fa-solid fa-arrow-right text-purple-600 text-xl"></i>
-                    </div>
-                    <!-- Nereye Şehir -->
-                    <div>
-                        <label class="text-xs font-bold text-slate-600 mb-1 block">Nereye Şehir</label>
-                        <select id="filterToCity" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
-                            <option value="">Tüm Şehirler</option>
-                        </select>
-                    </div>
+
                     <!-- Tarih + Ara Butonu -->
-                    <div>
+                    <div class="w-full lg:w-56 bg-slate-50 rounded-xl p-4">
+                        <div class="mb-2">
+                            <span class="text-xs font-semibold uppercase tracking-wide bg-slate-100 text-slate-700 rounded-full px-3 py-1">
+                                Tarih ve Arama
+                            </span>
+                        </div>
                         <label class="text-xs font-bold text-slate-600 mb-1 block">Tarih</label>
                         <input type="date" id="filterDate" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 mb-2">
                         <button onclick="applyFilters()" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-2 rounded-lg font-bold hover:shadow-lg transition text-xs">
                             <i class="fa-solid fa-search mr-1"></i>Ara
                         </button>
+                        <p class="text-[11px] text-slate-500 mt-2">
+                            Tarih seçmezseniz tüm yaklaşan yolculuklar listelenir.
+                        </p>
                     </div>
                 </div>
             </div>

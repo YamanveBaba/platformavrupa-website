@@ -17,7 +17,9 @@
 * **Backend:** **Supabase** (PostgreSQL).
 * **Frontend:** HTML5, Vanilla JS, Tailwind CSS. (Derleme gerektirmeyen yapı).
 * **Harita:** Google Maps JS API & Distance Matrix.
-* **Hosting:** Netlify.
+* **Domain & e-posta:** **Cloudflare** (DNS, Email Routing).
+* **Statik site yayını:** **Cloudflare Pages** (proje: `platformavrupa-website`). Eski Netlify/Vercel projeleri yedek/legacy olabilir; canlı domain DNS’i Pages’e bağlıdır.
+* **Zincir market ürün+fiyat:** Laptop’ta Python (Playwright / API); çıktı **Supabase** `market_chain_products` (ve isteğe bağlı import log tablosu). Sitede sadece okuma.
 
 ---
 
@@ -28,6 +30,8 @@ Kod yazarken bu tablo yapısına sadık kal:
     * `id`, `name`, `category` ('tamirci', 'cekici'...), `lat`, `lng`, `is_verified`, `phone`.
 2.  **`listings` (Pazar Yeri):**
     * `title`, `price`, `category`, `status`, `image_url`.
+3.  **`market_chain_products` (Zincir market fiyatları):**
+    * `chain_slug`, `external_product_id`, `name`, `brand`, `price`, `currency`, `in_promo`, `captured_at` — tam şema: `market_fiyat_cekici/supabase_market_chain_products.sql`
 
 ---
 

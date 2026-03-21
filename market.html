@@ -4,6 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Market Fiyatları | PlatformAvrupa</title>
+    <meta name="description" content="Avrupa market broşürleri ve indirimler. Lidl, Aldi ve diğer marketlerin güncel fiyatları ve kampanyaları.">
+    <link rel="canonical" href="https://www.platformavrupa.com/market.html">
+    <meta property="og:title" content="Market Fiyatları | PlatformAvrupa">
+    <meta property="og:description" content="Avrupa market broşürleri ve indirimler. Güncel kampanyalar.">
+    <meta property="og:url" content="https://www.platformavrupa.com/market.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Platform Avrupa">
+    <meta property="og:image" content="https://www.platformavrupa.com/og-image.png">
+    <meta property="og:locale" content="tr_TR">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Market Fiyatları | PlatformAvrupa">
+    <meta name="twitter:description" content="Avrupa market broşürleri ve indirimler.">
+    <meta name="twitter:image" content="https://www.platformavrupa.com/og-image.png">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
@@ -123,6 +136,22 @@
         </div>
     </section>
 
+    <!-- Belçika: Supabase market_chain_products özeti + arama -->
+    <section id="bePriceSection" class="px-4 mb-8 hidden">
+        <div class="max-w-7xl mx-auto">
+            <div class="glass-card p-6 md:p-8">
+                <h3 class="font-bold text-slate-800 text-lg mb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-euro-sign text-amber-500"></i> Belçika — güncel fiyat verisi
+                </h3>
+                <p class="text-slate-600 text-sm mb-4">Zincir market ürün ve fiyatları (<code>chain_slug</code>, <code>captured_at</code>). Veri haftalık job ile güncellenir.</p>
+                <div id="bePriceStats" class="text-sm text-slate-700 mb-6 min-h-[2rem]"></div>
+                <label for="bePriceSearch" class="block text-slate-700 text-sm font-semibold mb-2">Ürün ara (Belçika)</label>
+                <input type="search" id="bePriceSearch" class="w-full max-w-md rounded-xl border border-slate-200 px-4 py-2.5 text-slate-800 shadow-sm focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 outline-none" placeholder="Örn. melk, brood…" autocomplete="off" />
+                <div id="bePriceSearchResults" class="mt-4 space-y-2 text-sm max-h-80 overflow-y-auto"></div>
+            </div>
+        </div>
+    </section>
+
     <!-- Haftalık Broşürler -->
     <section class="px-4 mb-8">
         <div class="max-w-7xl mx-auto">
@@ -199,6 +228,114 @@
             return domain ? ('https://logo.clearbit.com/' + domain) : '';
         }
 
+        function formatCapturedAt(ts) {
+            if (!ts) return '—';
+            try {
+                const d = new Date(ts);
+                return d.toLocaleString('tr-TR', { dateStyle: 'short', timeStyle: 'short' });
+            } catch (e) {
+                return String(ts);
+            }
+        }
+
+        function chainSlugLabel(slug) {
+            if (slug === 'colruyt_be') return 'Colruyt';
+            if (slug === 'aldi_be') return 'ALDI';
+            return slug || '—';
+        }
+
+        async function refreshBePricePanel() {
+            const sec = document.getElementById('bePriceSection');
+            if (!sec) return;
+            if (selectedCountry !== 'BE') {
+                sec.classList.add('hidden');
+                return;
+            }
+            sec.classList.remove('hidden');
+            const statsEl = document.getElementById('bePriceStats');
+            if (!statsEl) return;
+            if (!sb) {
+                statsEl.innerHTML = '<p class="text-amber-800 text-sm">Supabase bağlantısı yok (config.js).</p>';
+                return;
+            }
+            statsEl.innerHTML = '<p class="text-slate-500"><i class="fa-solid fa-spinner fa-spin"></i> Özet yükleniyor...</p>';
+            try {
+                const { data, error } = await sb
+                    .from('market_chain_products_stats')
+                    .select('country_code, chain_slug, product_count, last_captured_at')
+                    .eq('country_code', 'BE')
+                    .order('chain_slug');
+                if (error) throw error;
+                if (!data || data.length === 0) {
+                    statsEl.innerHTML = '<p class="text-slate-600">Henüz Belçika için kayıt yok veya özet boş.</p>';
+                    return;
+                }
+                statsEl.innerHTML = `
+                    <ul class="space-y-2">
+                        ${data.map((row) => `
+                            <li class="flex flex-wrap gap-x-3 gap-y-1 items-baseline border-b border-slate-100 pb-2 last:border-0">
+                                <span class="font-semibold text-slate-800">${chainSlugLabel(row.chain_slug)}</span>
+                                <span class="text-slate-600">${Number(row.product_count || 0).toLocaleString('tr-TR')} ürün</span>
+                                <span class="text-slate-500 text-xs">Son veri: ${formatCapturedAt(row.last_captured_at)}</span>
+                            </li>
+                        `).join('')}
+                    </ul>`;
+            } catch (err) {
+                console.warn('market_chain_products_stats:', err);
+                statsEl.innerHTML =
+                    '<p class="text-amber-900 text-sm leading-relaxed">Özet yüklenemedi. Supabase SQL Editor’da <code class="bg-amber-50 px-1 rounded">supabase_market_stats_and_cross_chain.sql</code> dosyasını çalıştırıp <code class="bg-amber-50 px-1 rounded">market_chain_products_stats</code> görünümünü oluşturun; ardından veri import edin.</p>';
+            }
+        }
+
+        let beSearchTimer = null;
+        async function runBeProductSearch(raw) {
+            const out = document.getElementById('bePriceSearchResults');
+            if (!out || !sb) return;
+            const q = String(raw || '')
+                .trim()
+                .replace(/[^a-zA-Z0-9\u00C0-\u024F\s.-]/g, '')
+                .slice(0, 80);
+            if (q.length < 2) {
+                out.innerHTML = '';
+                return;
+            }
+            out.innerHTML = '<p class="text-slate-500"><i class="fa-solid fa-spinner fa-spin"></i> Aranıyor...</p>';
+            try {
+                const { data, error } = await sb
+                    .from('market_chain_products')
+                    .select('name, price, currency, chain_slug, captured_at, in_promo, promo_price')
+                    .eq('country_code', 'BE')
+                    .ilike('name', '%' + q + '%')
+                    .order('name')
+                    .limit(25);
+                if (error) throw error;
+                if (!data || data.length === 0) {
+                    out.innerHTML = '<p class="text-slate-600">Sonuç yok.</p>';
+                    return;
+                }
+                out.innerHTML = data
+                    .map((row) => {
+                        const price = Number(row.price);
+                        const pStr = Number.isFinite(price) ? price.toFixed(2) + ' ' + (row.currency || 'EUR') : '—';
+                        const promo = row.in_promo && row.promo_price != null
+                            ? ` <span class="text-emerald-600 font-semibold">Promo: ${Number(row.promo_price).toFixed(2)}</span>`
+                            : '';
+                        return `
+                            <div class="rounded-xl bg-slate-50/90 px-4 py-3 border border-slate-100">
+                                <div class="font-medium text-slate-800">${String(row.name || '').replace(/</g, '&lt;')}</div>
+                                <div class="text-slate-600 mt-1">
+                                    ${chainSlugLabel(row.chain_slug)} · ${pStr}${promo}
+                                    <span class="text-slate-400 text-xs ml-2">${formatCapturedAt(row.captured_at)}</span>
+                                </div>
+                            </div>`;
+                    })
+                    .join('');
+            } catch (err) {
+                console.warn('market_chain_products search:', err);
+                out.innerHTML = '<p class="text-red-600 text-sm">Arama başarısız. Tablo ve RLS kontrol edin.</p>';
+            }
+        }
+
         // Broşür agregator siteleri
         const brochureAgregators = {
             'DE': 'https://www.kaufda.de',
@@ -271,6 +408,17 @@
             try {
                 renderCountryChips();
                 await loadMarketChains();
+                refreshBePricePanel();
+                const beSearchInput = document.getElementById('bePriceSearch');
+                if (beSearchInput) {
+                    beSearchInput.addEventListener('input', function () {
+                        clearTimeout(beSearchTimer);
+                        const inputEl = this;
+                        beSearchTimer = setTimeout(function () {
+                            runBeProductSearch(inputEl.value);
+                        }, 400);
+                    });
+                }
                 // Otomatik konum tespiti (sessiz)
                 autoDetectLocation();
             } catch (error) {
@@ -326,6 +474,7 @@
             selectedCountry = code;
             renderCountryChips();
             renderMarketGrid();
+            refreshBePricePanel();
         }
 
         // --- KONUM TESPİTİ ---

@@ -1,5 +1,7 @@
 # platformavrupa.com – Netlify’a Bu Projeden Deploy
 
+> **Güncel (2026-02):** Canlı site **Cloudflare Pages** (`platformavrupa-website`) ve DNS **Cloudflare** üzerinden yayınlanıyor olabilir. Bu dosya **Netlify** kullananlar için arşiv rehberidir. Yeni kurulum için önce `PLATFORMAVRUPA_PROJE_DOKUMANTASYONU.md` → **Deployment** bölümüne bakın.
+
 Bu klasör **Platform Avrupa** statik sitesidir. platformavrupa.com’un WorldMonitor yerine bu projeyi göstermesi için aşağıdakileri uygula.
 
 ---

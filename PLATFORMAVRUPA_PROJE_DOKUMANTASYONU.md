@@ -1,7 +1,7 @@
 # PLATFORMAVRUPA - KAPSAMLI PROJE DOKÜMANTASYONU
 
-**Versiyon:** 3.0 Final  
-**Tarih:** 2026-02-04  
+**Versiyon:** 3.1  
+**Tarih:** 2026-02-24 (hosting + market veri deposu netleştirildi)  
 **Web:** www.platformavrupa.com  
 **Domain:** platformavrupa.com, platformavrupa.eu (yedek)  
 **Hedef:** Avrupa'daki Türk diasporası için "Süper Uygulama"  
@@ -98,8 +98,11 @@
 - **Service Worker** - Offline destek, cache yönetimi
 
 ### Hosting & CDN
-- **Netlify** - Statik hosting
-- **CDN** - Tailwind, Font Awesome, Supabase JS (CDN üzerinden)
+- **Cloudflare Pages** - Canlı statik site (`platformavrupa-website`); özel alan adı `platformavrupa.com` / `www` (DNS Cloudflare üzerinden)
+- **Cloudflare** - DNS yönetimi, proxy (turuncu bulut), güvenlik; **Email Routing** (`info@` vb. → Gmail)
+- **GoDaddy** - Domain kayıt (satın alma); nameserver’lar Cloudflare’e yönlendirilmiş olabilir
+- **Netlify / Vercel** - Geçmiş veya ikincil projeler olabilir; **tek kaynaklı yayın** Cloudflare Pages olarak kabul edilir
+- **CDN** - Tailwind, Font Awesome, Supabase JS (CDN üzerinden); Font Awesome linklerinde `cdnjs.cloudflare.com` kullanımı yaygındır
 
 ---
 
@@ -225,6 +228,7 @@ proje-klasoru/
 - Haftalık broşürler
 - Otomatik konum tespiti
 - Direkt broşür linkleri
+- **Ürün + güncel fiyat verisi:** `market_fiyat_cekici/` altında Python scriptleri (ör. ALDI BE, Colruyt API veya Playwright). Çekilen veri **yerel `cikti/*.json`** ile doğrulanır, ardından **Supabase** `market_chain_products` tablosuna yazılır (haftalık job). Site ziyaretçileri veriyi **yalnızca Supabase’ten okur**; scraper sunucuda değil, tercihen **geliştiricinin bilgisayarında** çalışır (oturum/cookie riski düşük).
 
 ### 8. Akademi
 **Kategoriler:**
@@ -500,6 +504,34 @@ proje-klasoru/
   - `user_id` (UUID, FK)
   - `points` (INTEGER)
   - `badges` (TEXT[])
+
+##### Zincir marketten çekilen ürün + fiyat (karşılaştırma için)
+> **Kaynak:** Haftalık laptop script → JSON → Supabase `upsert`. SQL örneği: [market_fiyat_cekici/supabase_market_chain_products.sql](market_fiyat_cekici/supabase_market_chain_products.sql)
+
+- **`market_chain_products`** - Belirli bir zincir/ülke için **son bilinen** ürün satırı (tekrar çekimde güncellenir)
+  - `id` (BIGSERIAL, PK)
+  - `chain_slug` (TEXT, örn. `colruyt_be`, `aldi_be`) — `market_chains` ile eşleştirilebilir veya serbest metin
+  - `country_code` (TEXT, örn. `BE`, `NL`)
+  - `external_product_id` (TEXT) — zincire özgü kimlik (Colruyt: `retailProductNumber`, ALDI: `productID` vb.)
+  - `place_or_store_ref` (TEXT, nullable) — örn. Colruyt `placeId`
+  - `name` (TEXT), `brand` (TEXT), `unit_or_content` (TEXT, nullable)
+  - `price` (NUMERIC), `currency` (TEXT, varsayılan `EUR`)
+  - `promo_price` (NUMERIC, nullable), `in_promo` (BOOLEAN, varsayılan false)
+  - `promo_valid_until` (DATE, nullable)
+  - `category_name` (TEXT, nullable), `image_url` (TEXT, nullable)
+  - `captured_at` (TIMESTAMPTZ) — son çekim zamanı
+  - `import_run_id` (UUID, nullable) — toplu içe aktarım partisi
+  - `raw_json` (JSONB, nullable) — hata ayıklama / alan genişletme
+  - **Benzersizlik:** `(chain_slug, external_product_id)` üzerinde `UNIQUE` — `upsert` ile haftalık güncelleme
+
+- **`market_price_import_runs`** (isteğe bağlı) — Her haftalık job için özet log
+  - `id` (UUID, PK)
+  - `chain_slug` (TEXT)
+  - `started_at`, `finished_at` (TIMESTAMPTZ)
+  - `row_count` (INTEGER), `status` (TEXT: `ok`, `partial`, `failed`)
+  - `notes` (TEXT, nullable)
+
+**RLS önerisi:** `market_chain_products` için **herkese `SELECT`** (anon okuyabilsin); **`INSERT`/`UPDATE`/`DELETE` sadece `service_role`** veya güvenli bir Edge Function (secret ile) — service key asla tarayıcıya konmaz.
 
 #### Akademi
 - `academy_categories` - Eğitim kategorileri
@@ -849,11 +881,15 @@ proje-klasoru/
 
 ## 🚀 DEPLOYMENT
 
-### Hosting
-- **Platform:** Netlify
-- **Yöntem:** Manuel sürükle-bırak veya Git entegrasyonu
-- **Domain:** platformavrupa.com
-- **SSL:** Otomatik (Netlify)
+### Hosting (güncel)
+- **Platform:** **Cloudflare Pages** — GitHub repo bağlantısı ile deploy; proje adı örn. `platformavrupa-website`
+- **Domain:** `platformavrupa.com` — Cloudflare DNS’te kök genelde **CNAME** (flatten) → Pages; `www` aynı siteye yönlendirilir
+- **SSL:** Otomatik (Cloudflare)
+- **Not:** Netlify’da `platformavrupa.com` adlı eski proje görünebilir; **aktif trafik DNS kayıtlarına göre** Cloudflare Pages’e gider. Vercel’deki `worldmonitor` tabanlı proje legacy sayılmalıdır.
+
+### Domain & e-posta (Cloudflare)
+- Domain kaydı: GoDaddy (veya benzeri); **nameserver** çoğu zaman Cloudflare
+- **Email Routing:** Gelen posta Gmail’e; gönderim için Gmail SMTP + “başka adres” (`info@platformavrupa.com`)
 
 ### Cache Yönetimi
 - **Dosya:** `_headers`
@@ -867,9 +903,10 @@ proje-klasoru/
 - **CDN:** Tailwind, Font Awesome, Supabase JS
 
 ### Environment Variables
-- Supabase URL/Key: `config.js` içinde
+- Supabase URL/Key: `config.js` içinde (anon key; RLS ile sınırlı)
 - API Keys: `config.js` içinde
-- Production'da environment variables kullanılabilir (Netlify)
+- Cloudflare Pages: İsteğe bağlı build-time env (şu an statik site için zorunlu değil)
+- **Market içe aktarım:** `service_role` anahtarı yalnızca laptop’taki script veya güvenli backend’de; **asla** `config.js` veya repo’ya commit edilmez
 
 ### Supabase Edge Functions Deployment
 - **Platform:** Supabase Dashboard

@@ -1,3 +1,11 @@
+# PLATFORMAVRUPA - Teknik dokümantasyon (yönlendirme)
+
+**Güncel ve bakımı yapılan tek dosya:** [`PLATFORMAVRUPA_PROJE_DOKUMANTASYONU.md`](./PLATFORMAVRUPA_PROJE_DOKUMANTASYONU.md) (sürüm **3.1+**).
+
+Aşağıdaki içerik eski tam kopyadır; çelişki olursa **her zaman** `PLATFORMAVRUPA_PROJE_DOKUMANTASYONU.md` esas alınır.
+
+---
+
 # PLATFORMAVRUPA - KAPSAMLI PROJE DOKÜMANTASYONU
 
 **Versiyon:** 3.0 Final  

@@ -2,6 +2,7 @@
 .env
 .env.local
 .env.*.local
+market_fiyat_cekici/supabase_import_secrets.txt
 
 # IDE / editör
 .cursor/
