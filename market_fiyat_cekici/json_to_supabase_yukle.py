@@ -10,6 +10,11 @@ Kullanım:
   python json_to_supabase_yukle.py "cikti\\aldi_be_tum_urunler_platform_2026-01-01_12-00.json"
   python json_to_supabase_yukle.py --dry-run "cikti\\colruyt_be_playwright_....json"
 
+Desteklenen zincirler: ALDI, Colruyt, Delhaize, Lidl, Carrefour (JSON icinde kaynak/chain_slug veya urun alanlari).
+
+Supabase: market_chain_products tablosunda promo_valid_from sutunu yoksa supabase_market_chain_products.sql
+icindeki ALTER satirini SQL Editor'da bir kez calistirin (aksi halde upsert 400 donebilir).
+
 Kimlik bilgisi (birini kullanın):
  1) Ortam değişkenleri: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
  2) Dosya: supabase_import_secrets.txt (ilk satır URL, ikinci satır service_role key)
@@ -76,11 +81,28 @@ def load_secrets(script_dir: str) -> tuple[str, str]:
 
 
 def detect_format(data: dict) -> Optional[str]:
+    slug = str(data.get("chain_slug") or "").lower()
+    if slug == "delhaize_be":
+        return "delhaize"
+    if slug == "lidl_be":
+        return "lidl"
+    if slug == "carrefour_be":
+        return "carrefour"
+    if slug.startswith("colruyt_"):
+        return "colruyt"
+    if slug.startswith("aldi_"):
+        return "aldi"
     kaynak = str(data.get("kaynak") or "")
     if "Colruyt" in kaynak or "colruyt" in kaynak.lower():
         return "colruyt"
     if "ALDI" in kaynak or "aldi" in kaynak.lower():
         return "aldi"
+    if "delhaize" in kaynak.lower():
+        return "delhaize"
+    if "lidl" in kaynak.lower():
+        return "lidl"
+    if "carrefour" in kaynak.lower():
+        return "carrefour"
     urunler = data.get("urunler") or data.get("products") or []
     if not urunler:
         return None
@@ -90,6 +112,13 @@ def detect_format(data: dict) -> Optional[str]:
             return "colruyt"
         if s0.get("productID") is not None:
             return "aldi"
+        pc = s0.get("productCode")
+        if pc and str(pc).startswith("F"):
+            return "delhaize"
+        if s0.get("lidlProductKey") or s0.get("lidlUrlPath"):
+            return "lidl"
+        if s0.get("carrefourPid"):
+            return "carrefour"
     return None
 
 
@@ -105,7 +134,15 @@ def parse_promo_date(s: Optional[str]) -> Optional[str]:
     return None
 
 
-def row_aldi(u: dict, captured_at: str, import_run_id: str, include_raw: bool) -> dict:
+def row_aldi(
+    u: dict,
+    captured_at: str,
+    import_run_id: str,
+    include_raw: bool,
+    *,
+    chain_slug: str = "aldi_be",
+    country_code: str = "BE",
+) -> dict:
     pid = str(u.get("productID") or "").strip()
     if not pid:
         return {}
@@ -120,9 +157,11 @@ def row_aldi(u: dict, captured_at: str, import_run_id: str, include_raw: bool) -
     except (TypeError, ValueError):
         promo_f = None
     in_promo = bool(u.get("inPromotion"))
+    promo_from = parse_promo_date(u.get("promotionStartDate"))
+    promo_until = parse_promo_date(u.get("promotionEndDate"))
     row = {
-        "chain_slug": "aldi_be",
-        "country_code": "BE",
+        "chain_slug": chain_slug[:80],
+        "country_code": country_code[:8],
         "external_product_id": pid,
         "place_or_store_ref": None,
         "name": (u.get("productName") or "")[:2000],
@@ -132,7 +171,8 @@ def row_aldi(u: dict, captured_at: str, import_run_id: str, include_raw: bool) -
         "currency": "EUR",
         "promo_price": promo_f if in_promo else None,
         "in_promo": in_promo,
-        "promo_valid_until": None,
+        "promo_valid_from": promo_from,
+        "promo_valid_until": promo_until,
         "category_name": (u.get("category") or "")[:500] or None,
         "image_url": None,
         "captured_at": captured_at,
@@ -142,7 +182,16 @@ def row_aldi(u: dict, captured_at: str, import_run_id: str, include_raw: bool) -
     return row
 
 
-def row_colruyt(p: dict, place_id: Optional[str], captured_at: str, import_run_id: str, include_raw: bool) -> dict:
+def row_colruyt(
+    p: dict,
+    place_id: Optional[str],
+    captured_at: str,
+    import_run_id: str,
+    include_raw: bool,
+    *,
+    chain_slug: str = "colruyt_be",
+    country_code: str = "BE",
+) -> dict:
     rpn = p.get("retailProductNumber")
     if rpn is None or str(rpn).strip() == "":
         return {}
@@ -156,10 +205,11 @@ def row_colruyt(p: dict, place_id: Optional[str], captured_at: str, import_run_i
     except (TypeError, ValueError):
         promo_f = None
     in_promo = bool(p.get("inPromo"))
+    promo_start = parse_promo_date(p.get("promoPublicationStart"))
     promo_end = parse_promo_date(p.get("promoPublicationEnd"))
     row = {
-        "chain_slug": "colruyt_be",
-        "country_code": "BE",
+        "chain_slug": chain_slug[:80],
+        "country_code": country_code[:8],
         "external_product_id": str(rpn).strip(),
         "place_or_store_ref": place_id,
         "name": (p.get("name") or p.get("LongName") or "")[:2000],
@@ -169,7 +219,119 @@ def row_colruyt(p: dict, place_id: Optional[str], captured_at: str, import_run_i
         "currency": "EUR",
         "promo_price": promo_f if in_promo else None,
         "in_promo": in_promo,
+        "promo_valid_from": promo_start,
         "promo_valid_until": promo_end,
+        "category_name": (p.get("topCategoryName") or "")[:500] or None,
+        "image_url": None,
+        "captured_at": captured_at,
+        "import_run_id": import_run_id,
+        "raw_json": p if include_raw else None,
+    }
+    return row
+
+
+def row_delhaize(p: dict, captured_at: str, import_run_id: str, include_raw: bool) -> dict:
+    code = str(p.get("productCode") or "").strip()
+    if not code:
+        return {}
+    try:
+        price_f = float(p.get("basicPrice"))
+    except (TypeError, ValueError):
+        price_f = 0.0
+    pp = p.get("promoPrice")
+    try:
+        promo_f = float(pp) if pp is not None else None
+    except (TypeError, ValueError):
+        promo_f = None
+    in_promo = bool(p.get("inPromo"))
+    row = {
+        "chain_slug": "delhaize_be",
+        "country_code": str(p.get("country_code") or "BE")[:8],
+        "external_product_id": code,
+        "place_or_store_ref": None,
+        "name": (p.get("name") or "")[:2000],
+        "brand": (p.get("brand") or "")[:500] or None,
+        "unit_or_content": (p.get("unitContent") or "")[:200] or None,
+        "price": price_f,
+        "currency": "EUR",
+        "promo_price": promo_f if in_promo else None,
+        "in_promo": in_promo,
+        "promo_valid_from": None,
+        "promo_valid_until": None,
+        "category_name": (p.get("topCategoryName") or "")[:500] or None,
+        "image_url": None,
+        "captured_at": captured_at,
+        "import_run_id": import_run_id,
+        "raw_json": p if include_raw else None,
+    }
+    return row
+
+
+def row_lidl(p: dict, captured_at: str, import_run_id: str, include_raw: bool) -> dict:
+    pid = str(p.get("lidlProductKey") or p.get("external_product_id") or "").strip()
+    if not pid:
+        return {}
+    try:
+        price_f = float(p.get("basicPrice"))
+    except (TypeError, ValueError):
+        price_f = 0.0
+    in_promo = bool(p.get("inPromo"))
+    try:
+        promo_f = float(p.get("promoPrice")) if p.get("promoPrice") is not None else None
+    except (TypeError, ValueError):
+        promo_f = None
+    promo_from = parse_promo_date(p.get("promotionStartDate"))
+    promo_until = parse_promo_date(p.get("promotionEndDate"))
+    row = {
+        "chain_slug": "lidl_be",
+        "country_code": "BE",
+        "external_product_id": pid[:500],
+        "place_or_store_ref": None,
+        "name": (p.get("name") or "")[:2000],
+        "brand": (p.get("brand") or "")[:500] or None,
+        "unit_or_content": (p.get("unitContent") or "")[:200] or None,
+        "price": price_f,
+        "currency": "EUR",
+        "promo_price": promo_f if in_promo else None,
+        "in_promo": in_promo,
+        "promo_valid_from": promo_from,
+        "promo_valid_until": promo_until,
+        "category_name": (p.get("topCategoryName") or "")[:500] or None,
+        "image_url": None,
+        "captured_at": captured_at,
+        "import_run_id": import_run_id,
+        "raw_json": p if include_raw else None,
+    }
+    return row
+
+
+def row_carrefour(p: dict, captured_at: str, import_run_id: str, include_raw: bool) -> dict:
+    pid = str(p.get("carrefourPid") or "").strip()
+    if not pid:
+        return {}
+    try:
+        price_f = float(p.get("basicPrice"))
+    except (TypeError, ValueError):
+        price_f = 0.0
+    in_promo = bool(p.get("inPromo"))
+    try:
+        promo_f = float(p.get("promoPrice")) if p.get("promoPrice") is not None else None
+    except (TypeError, ValueError):
+        promo_f = None
+    row = {
+        "chain_slug": "carrefour_be",
+        "country_code": "BE",
+        "external_product_id": pid[:500],
+        "place_or_store_ref": None,
+        "name": (p.get("name") or "")[:2000],
+        "brand": (p.get("brand") or "")[:500] or None,
+        "unit_or_content": (p.get("unitContent") or "")[:200] or None,
+        "price": price_f,
+        "currency": "EUR",
+        "promo_price": promo_f if in_promo else None,
+        "in_promo": in_promo,
+        "promo_valid_from": None,
+        "promo_valid_until": None,
         "category_name": (p.get("topCategoryName") or "")[:500] or None,
         "image_url": None,
         "captured_at": captured_at,
@@ -182,7 +344,7 @@ def row_colruyt(p: dict, place_id: Optional[str], captured_at: str, import_run_i
 def json_to_rows(data: dict, include_raw: bool) -> List[dict]:
     fmt = detect_format(data)
     if not fmt:
-        print("HATA: JSON formatı tanınamadı (ALDI veya Colruyt bekleniyor).")
+        print("HATA: JSON formatı tanınamadı (desteklenen zincir: ALDI, Colruyt, Delhaize, Lidl, Carrefour).")
         return []
 
     now = datetime.now(timezone.utc).isoformat()
@@ -195,20 +357,60 @@ def json_to_rows(data: dict, include_raw: bool) -> List[dict]:
     import_run_id = str(uuid.uuid4())
     urunler = data.get("urunler") or data.get("products") or []
     place_id = str(data.get("placeId") or "") or None
+    cc = str(data.get("country_code") or "BE")[:8]
+    colruyt_slug = str(data.get("chain_slug") or "colruyt_be")[:80]
+    aldi_slug = str(data.get("chain_slug") or "aldi_be")[:80]
 
     rows: List[dict] = []
     if fmt == "aldi":
         for u in urunler:
             if not isinstance(u, dict):
                 continue
-            r = row_aldi(u, captured_at, import_run_id, include_raw)
+            r = row_aldi(
+                u,
+                captured_at,
+                import_run_id,
+                include_raw,
+                chain_slug=aldi_slug,
+                country_code=cc,
+            )
             if r:
                 rows.append(r)
-    else:
+    elif fmt == "colruyt":
         for p in urunler:
             if not isinstance(p, dict):
                 continue
-            r = row_colruyt(p, place_id, captured_at, import_run_id, include_raw)
+            r = row_colruyt(
+                p,
+                place_id,
+                captured_at,
+                import_run_id,
+                include_raw,
+                chain_slug=colruyt_slug,
+                country_code=cc,
+            )
+            if r:
+                rows.append(r)
+    elif fmt == "delhaize":
+        for p in urunler:
+            if not isinstance(p, dict):
+                continue
+            p = {**p, "country_code": cc}
+            r = row_delhaize(p, captured_at, import_run_id, include_raw)
+            if r:
+                rows.append(r)
+    elif fmt == "lidl":
+        for p in urunler:
+            if not isinstance(p, dict):
+                continue
+            r = row_lidl(p, captured_at, import_run_id, include_raw)
+            if r:
+                rows.append(r)
+    elif fmt == "carrefour":
+        for p in urunler:
+            if not isinstance(p, dict):
+                continue
+            r = row_carrefour(p, captured_at, import_run_id, include_raw)
             if r:
                 rows.append(r)
 
@@ -331,6 +533,9 @@ def main():
             "aldi_be_tum_yeme_icme_*.json",
             "colruyt_be_playwright_*.json",
             "colruyt_be_producten_*.json",
+            "delhaize_be_producten_*.json",
+            "lidl_be_producten_*.json",
+            "carrefour_be_producten_*.json",
         ]
         json_path = None
         for name in patterns_in_order:
@@ -370,7 +575,7 @@ def main():
         sys.exit(1)
 
     chain_slug = rows[0]["chain_slug"]
-    print(f"Format: {fmt}  →  {len(rows)} satır  (chain_slug={chain_slug})")
+    print(f"Format: {fmt} -> {len(rows)} rows (chain_slug={chain_slug})")
 
     url, key = load_secrets(script_dir)
 

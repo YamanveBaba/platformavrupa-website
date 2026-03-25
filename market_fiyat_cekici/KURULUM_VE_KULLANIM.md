@@ -53,6 +53,20 @@ Python, script’in çalışması için gereken programdır. Ücretsizdir.
 
 ---
 
+## Bölüm 2b: Beş zincir (geliştirici) — ortam ve gizli dosyalar
+
+- **Python paketleri:** Komut İstemi’nde `market_fiyat_cekici` içindeyken: `pip install -r requirements.txt` ve `playwright install chromium`.
+- **İsteğe bağlı sanal ortam:** `python -m venv .venv` → `.venv\Scripts\activate` → aynı `pip install` komutları.
+- **Supabase:** `supabase_import_secrets.txt` (1. satır Project URL, 2. satır service_role). Git’e eklenmez.
+- **Ortak yükleme:** `python json_to_supabase_yukle.py --dry-run "cikti\....json"` ile format kontrolü; otomasyon: `--no-pause`.
+- **JSON üst alanları (önerilen):** `kaynak`, `cekilme_tarihi`, `chain_slug`, `country_code` — `json_to_supabase_yukle.py` format seçiminde kullanılır.
+- **Zincir betikleri (Belçika):** Delhaize [`delhaize_be_graphql_cek.py`](delhaize_be_graphql_cek.py), Lidl [`lidl_be_playwright_cek.py`](lidl_be_playwright_cek.py), Carrefour [`carrefour_be_playwright_cek.py`](carrefour_be_playwright_cek.py). Haftalık toplu: `haftalik_*_supabase.py` ve `calistir_*_haftalik.bat` dosyalarına bakın.
+- **Gizli / yerel:** `delhaize_cookie.txt`, `playwright_user_data/` Git’e eklenmez (`.gitignore`).
+
+Pilot ülke (NL) şablonu: [`PILOT_ULKE_NL_SABLON.md`](PILOT_ULKE_NL_SABLON.md).
+
+---
+
 ## Bölüm 3: Playwright Kurulumu (Bir kez yapılır)
 
 Playwright, script’in ALDI sayfasını açıp veri çekmesini sağlayan kütüphanedir. Ücretsizdir.
@@ -98,7 +112,10 @@ Bu adımlar tamamlandıysa kurulum bitti demektir. Bir daha yapmanız gerekmez.
 | **Tüm yeme-içme** kategorileri | **calistir_aldi_tum_yeme_icme.bat** | ~5–15 dk |
 | **Colruyt** tüm ürün+fiyat (API) | **calistir_colruyt_api.bat**       | uzun (insan benzeri bekleme) |
 | **Colruyt** tam otomatik (tarayıcı) | **calistir_colruyt_otomatik.bat** | Playwright; curl/token gerekmez; ilk seferde giriş |
-| **JSON → Supabase** | **calistir_supabase_yukle.bat** | `supabase_import_secrets.txt` gerekli; ALDI/Colruyt `cikti/*.json` → `market_chain_products` |
+| **Delhaize** GraphQL | **calistir_delhaize_haftalik.bat** veya `python delhaize_be_graphql_cek.py` | `cikti/delhaize_be_producten_*.json` |
+| **Lidl BE** Playwright | **calistir_lidl_be.bat** / **calistir_lidl_haftalik.bat** | `cikti/lidl_be_producten_*.json` |
+| **Carrefour BE** Playwright | **calistir_carrefour_be.bat** / **calistir_carrefour_haftalik.bat** | Kalıcı profil; ilk sefer `--headed` önerilir |
+| **JSON → Supabase** | **calistir_supabase_yukle.bat** | `supabase_import_secrets.txt`; ALDI, Colruyt, Delhaize, Lidl, Carrefour `cikti/*.json` |
 
 İki yöntem var. İstediğinizi kullanın.
 
@@ -215,7 +232,7 @@ API oturum isteyebilir. **A) Token:** Script ile aynı klasörde **token.txt** o
 
 1. Supabase → **SQL Editor** → **`supabase_market_chain_products.sql`** dosyasının içeriğini yapıştırıp çalıştırın.  
 2. **Service role** anahtarını yalnızca laptop’ta kullanın: **`supabase_import_secrets_ORNEK.txt`** dosyasına bakıp aynı klasörde **`supabase_import_secrets.txt`** oluşturun (1. satır Project URL, 2. satır service_role). Bu dosya **Git’e eklenmez** (`.gitignore`).  
-3. Yükleme: **`calistir_supabase_yukle.bat`** veya `python json_to_supabase_yukle.py` — `cikti/` içinde sırayla aranır: **`aldi_be_tum_urunler_platform_*.json`** → **`aldi_be_tum_yeme_icme_*.json`** → **`colruyt_be_*.json`** (her grupta en yeni dosya). Belirli dosya: `python json_to_supabase_yukle.py "cikti\\dosya.json"`. Görev Zamanlayıcı / otomasyon için Enter beklemeden bitirmek: **`--no-pause`**.  
+3. Yükleme: **`calistir_supabase_yukle.bat`** veya `python json_to_supabase_yukle.py` — `cikti/` içinde sırayla aranır: **`aldi_be_tum_urunler_platform_*.json`** → **`aldi_be_tum_yeme_icme_*.json`** → **`colruyt_be_*.json`** → **`delhaize_be_producten_*.json`** → **`lidl_be_producten_*.json`** → **`carrefour_be_producten_*.json`** (her grupta en yeni dosya). Belirli dosya: `python json_to_supabase_yukle.py "cikti\\dosya.json"`. Görev Zamanlayıcı / otomasyon için Enter beklemeden bitirmek: **`--no-pause`**.  
 4. Önce deneme: `python json_to_supabase_yukle.py --dry-run "cikti\\..."` veya otomatik seçimle: `python json_to_supabase_yukle.py --dry-run --no-pause`  
 5. `market.html` tarafında sorgu: `from('market_chain_products').select(...)` ile **salt okunur** (anon key).
 

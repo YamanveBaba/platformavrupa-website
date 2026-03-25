@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS public.market_chain_products (
   promo_price NUMERIC,
   in_promo BOOLEAN NOT NULL DEFAULT false,
   promo_valid_until DATE,
+  promo_valid_from DATE,
   category_name TEXT,
   image_url TEXT,
   captured_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -29,6 +30,9 @@ CREATE INDEX IF NOT EXISTS idx_market_chain_products_captured ON public.market_c
 CREATE INDEX IF NOT EXISTS idx_market_chain_products_name_search ON public.market_chain_products USING gin (to_tsvector('simple', coalesce(name, '') || ' ' || coalesce(brand, '')));
 
 COMMENT ON TABLE public.market_chain_products IS 'Zincir market scraper çıktısı; site sadece okur. Yazım service_role veya Edge Function ile.';
+
+-- Mevcut projede tablo daha önce oluşturulduysa bir kez çalıştırın:
+-- ALTER TABLE public.market_chain_products ADD COLUMN IF NOT EXISTS promo_valid_from DATE;
 
 -- İsteğe bağlı: job logları
 CREATE TABLE IF NOT EXISTS public.market_price_import_runs (

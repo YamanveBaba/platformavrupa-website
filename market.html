@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Market Fiyatları | PlatformAvrupa</title>
-    <meta name="description" content="Avrupa market broşürleri ve indirimler. Lidl, Aldi ve diğer marketlerin güncel fiyatları ve kampanyaları.">
+    <title>Belçika market fiyatları | PlatformAvrupa</title>
+    <meta name="description" content="Belçika market fiyat karşılaştırması: Colruyt, ALDI, Delhaize, Lidl, Carrefour. Yakında tüm Avrupa.">
     <link rel="canonical" href="https://www.platformavrupa.com/market.html">
     <meta property="og:title" content="Market Fiyatları | PlatformAvrupa">
     <meta property="og:description" content="Avrupa market broşürleri ve indirimler. Güncel kampanyalar.">
@@ -95,7 +95,7 @@
                 </div>
                 <div>
                     <h1 class="font-black text-xl text-slate-800 tracking-tight">Market Fiyatları</h1>
-                    <p class="text-xs text-slate-500">İndirimler & Broşürler</p>
+                    <p class="text-xs text-slate-500">Belçika · Fiyat &amp; kampanyalar</p>
                 </div>
             </div>
         </div>
@@ -108,9 +108,13 @@
                 <div class="flex flex-col md:flex-row items-center gap-6">
                     <div class="flex-1 text-center md:text-left">
                         <h2 class="text-3xl md:text-4xl font-black text-slate-800 mb-2">
-                            Avrupa'nın <span class="gradient-text">Market</span> Broşürleri
+                            <span class="gradient-text">Belçika</span> market fiyatları
                         </h2>
-                        <p class="text-slate-600 text-lg">30 ülke, 100+ market zinciri</p>
+                        <p class="text-slate-600 text-lg">5 büyük zincirde ürün bazlı karşılaştırma</p>
+                        <p class="mt-3 text-sm text-slate-500 leading-relaxed max-w-xl">
+                            <i class="fa-solid fa-circle-info text-blue-500 mr-1"></i>
+                            Şu an yalnızca <strong>Belçika</strong> market verileriyle sınırlıdır; yakın zamanda tüm Avrupa ülkeleri eklenecektir.
+                        </p>
                     </div>
                     <div class="hidden md:block">
                         <div class="w-32 h-32 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-3xl flex items-center justify-center text-white text-5xl shadow-2xl shadow-orange-500/30 pulse-badge">
@@ -122,46 +126,71 @@
         </div>
     </div>
 
-    <!-- Ülke Seçimi -->
-    <section class="px-4 mb-8">
+    <!-- Bölge: şimdilik yalnızca Belçika -->
+    <section class="px-4 mb-6">
         <div class="max-w-7xl mx-auto">
-            <div class="mb-4">
+            <div class="mb-2">
                 <h3 class="font-bold text-white text-lg flex items-center gap-2">
-                    <i class="fa-solid fa-globe text-blue-400"></i> Ülke Seç
+                    <i class="fa-solid fa-location-dot text-amber-400"></i> Bölge
                 </h3>
             </div>
-            <div id="countryChips" class="flex flex-wrap gap-2 pb-3">
-                <!-- Dinamik olarak doldurulacak -->
+            <div id="countryChips" class="flex flex-wrap items-center gap-2 pb-2">
+                <!-- Belçika + yakında notu -->
             </div>
         </div>
     </section>
 
-    <!-- Belçika: Supabase market_chain_products özeti + arama -->
-    <section id="bePriceSection" class="px-4 mb-8 hidden">
+    <!-- 5 zincirde fiyat karşılaştırma -->
+    <section id="beCompareSection" class="px-4 mb-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="glass-card p-6 md:p-8 border-2 border-emerald-200/50">
+                <h3 class="font-bold text-slate-800 text-xl mb-1 flex items-center gap-2">
+                    <i class="fa-solid fa-scale-balanced text-emerald-600"></i> Ürün fiyat karşılaştırması
+                </h3>
+                <p class="text-slate-600 text-sm mb-5">Aynı ürün için <strong>5 Belçika zincirinde</strong> (Colruyt, ALDI, Delhaize, Lidl, Carrefour) listedeki fiyatları karşılaştırır; <span class="text-emerald-700 font-semibold">en uygun</span> olanı vurgular.</p>
+                <div class="flex flex-col sm:flex-row gap-3 max-w-3xl">
+                    <input type="search" id="compareProductInput" class="flex-1 rounded-xl border border-slate-200 px-4 py-3 text-slate-800 shadow-sm focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 outline-none" placeholder="Ürün adı yazın (örn. melk, boter, cola)…" autocomplete="off" />
+                    <button type="button" id="btnComparePrices" class="shrink-0 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold px-8 py-3 shadow-lg hover:opacity-95 active:scale-[0.99] transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-magnifying-glass-chart"></i> Karşılaştır
+                    </button>
+                </div>
+                <p class="text-xs text-slate-500 mt-2">Veri kaynağı: Platform veritabanı (haftalık güncellenen içe aktarımlar). Sonuç bulunamazsa arama terimini kısaltmayı deneyin.</p>
+                <div id="compareLoading" class="hidden mt-6 text-slate-600"><i class="fa-solid fa-spinner fa-spin"></i> Karşılaştırılıyor…</div>
+                <div id="compareError" class="hidden mt-4 text-red-600 text-sm"></div>
+                <div id="compareResults" class="mt-6 hidden"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Belçika: özet istatistik -->
+    <section id="bePriceSection" class="px-4 mb-8">
         <div class="max-w-7xl mx-auto">
             <div class="glass-card p-6 md:p-8">
                 <h3 class="font-bold text-slate-800 text-lg mb-2 flex items-center gap-2">
-                    <i class="fa-solid fa-euro-sign text-amber-500"></i> Belçika — güncel fiyat verisi
+                    <i class="fa-solid fa-database text-sky-500"></i> Veri özeti (Belçika)
                 </h3>
-                <p class="text-slate-600 text-sm mb-4">Zincir market ürün ve fiyatları (<code>chain_slug</code>, <code>captured_at</code>). Veri haftalık job ile güncellenir.</p>
-                <div id="bePriceStats" class="text-sm text-slate-700 mb-6 min-h-[2rem]"></div>
-                <label for="bePriceSearch" class="block text-slate-700 text-sm font-semibold mb-2">Ürün ara (Belçika)</label>
-                <input type="search" id="bePriceSearch" class="w-full max-w-md rounded-xl border border-slate-200 px-4 py-2.5 text-slate-800 shadow-sm focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 outline-none" placeholder="Örn. melk, brood…" autocomplete="off" />
-                <div id="bePriceSearchResults" class="mt-4 space-y-2 text-sm max-h-80 overflow-y-auto"></div>
+                <p class="text-slate-600 text-sm mb-4">Zincir başına ürün sayısı ve son güncelleme.</p>
+                <div id="bePriceStats" class="text-sm text-slate-700 min-h-[2rem]"></div>
             </div>
         </div>
     </section>
 
-    <!-- Haftalık Broşürler -->
+    <!-- Kampanyalar & broşürler -->
     <section class="px-4 mb-8">
         <div class="max-w-7xl mx-auto">
             <div class="mb-4">
                 <h3 class="font-bold text-white text-lg flex items-center gap-2">
-                    <i class="fa-solid fa-newspaper text-emerald-400"></i> Haftalık Broşürler
+                    <i class="fa-solid fa-bullhorn text-amber-400"></i> Kampanyalar &amp; broşürler
                 </h3>
+                <p class="text-white/70 text-sm mt-1">Belçika’daki güncel promosyon ve haftalık broşür bağlantıları</p>
             </div>
-            <div id="marketGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                <!-- Dinamik olarak doldurulacak -->
+            <div id="beCampaignLinks" class="mb-6 flex flex-wrap gap-3">
+                <a href="https://www.folder.be" target="_blank" rel="noopener" class="inline-flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white text-sm font-semibold px-4 py-2 rounded-xl border border-white/20">
+                    <i class="fa-solid fa-folder-open"></i> Folder.be (tüm broşürler)
+                </a>
+            </div>
+            <div id="marketGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                <!-- Belçika market kartları -->
             </div>
         </div>
     </section>
@@ -196,8 +225,16 @@
 
     <script>
         // --- VERİ YAPILARI ---
-        let selectedCountry = 'DE'; // Varsayılan: Almanya
+        let selectedCountry = 'BE'; // Market modülü şimdilik yalnızca Belçika
         let marketChains = [];
+
+        const BE_COMPARE_CHAINS = [
+            { slug: 'colruyt_be', label: 'Colruyt', color: 'from-amber-50 to-orange-50' },
+            { slug: 'aldi_be', label: 'ALDI', color: 'from-blue-50 to-indigo-50' },
+            { slug: 'delhaize_be', label: 'Delhaize', color: 'from-red-50 to-rose-50' },
+            { slug: 'lidl_be', label: 'Lidl', color: 'from-blue-100 to-sky-50' },
+            { slug: 'carrefour_be', label: 'Carrefour', color: 'from-blue-50 to-cyan-50' },
+        ];
 
         // Market adı -> domain (Clearbit Logo API: https://logo.clearbit.com/{domain})
         const MARKET_LOGO_DOMAINS = {
@@ -238,19 +275,187 @@
             }
         }
 
+        function formatPromoDate(val) {
+            if (!val) return null;
+            try {
+                const d = new Date(val);
+                if (Number.isNaN(d.getTime())) return String(val);
+                return d.toLocaleDateString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric' });
+            } catch (e) {
+                return String(val);
+            }
+        }
+
+        function effectiveUnitPrice(row) {
+            if (!row) return NaN;
+            if (row.in_promo && row.promo_price != null && row.promo_price !== '') {
+                const p = Number(row.promo_price);
+                if (Number.isFinite(p)) return p;
+            }
+            const b = Number(row.price);
+            return Number.isFinite(b) ? b : NaN;
+        }
+
+        function escapeHtml(s) {
+            return String(s || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        async function runCompareAcrossChains() {
+            const input = document.getElementById('compareProductInput');
+            const out = document.getElementById('compareResults');
+            const errEl = document.getElementById('compareError');
+            const loadEl = document.getElementById('compareLoading');
+            if (!out || !sb) {
+                if (errEl) {
+                    errEl.classList.remove('hidden');
+                    errEl.textContent = 'Supabase bağlantısı yok (config.js).';
+                }
+                return;
+            }
+            const raw = input ? String(input.value || '').trim() : '';
+            const q = raw.replace(/[^a-zA-Z0-9\u00C0-\u024F\s.-]/g, '').slice(0, 80);
+            errEl.classList.add('hidden');
+            errEl.textContent = '';
+            out.classList.add('hidden');
+            out.innerHTML = '';
+            if (q.length < 2) {
+                errEl.classList.remove('hidden');
+                errEl.textContent = 'En az 2 karakter yazın.';
+                return;
+            }
+            loadEl.classList.remove('hidden');
+            const slugs = BE_COMPARE_CHAINS.map((c) => c.slug);
+            const baseSelect =
+                'name, brand, price, currency, chain_slug, captured_at, in_promo, promo_price, promo_valid_from, promo_valid_until';
+            let data, error;
+            try {
+                const r1 = await sb
+                    .from('market_chain_products')
+                    .select(baseSelect)
+                    .eq('country_code', 'BE')
+                    .in('chain_slug', slugs)
+                    .ilike('name', '%' + q + '%')
+                    .limit(120);
+                data = r1.data;
+                error = r1.error;
+                if (error && String(error.message || '').toLowerCase().includes('column')) {
+                    const r2 = await sb
+                        .from('market_chain_products')
+                        .select('name, brand, price, currency, chain_slug, captured_at, in_promo, promo_price')
+                        .eq('country_code', 'BE')
+                        .in('chain_slug', slugs)
+                        .ilike('name', '%' + q + '%')
+                        .limit(120);
+                    data = r2.data;
+                    error = r2.error;
+                }
+            } catch (e) {
+                error = e;
+            }
+            loadEl.classList.add('hidden');
+            if (error) {
+                console.warn('compare:', error);
+                errEl.classList.remove('hidden');
+                errEl.textContent = 'Karşılaştırma başarısız. Tablo veya RLS kontrol edin.';
+                return;
+            }
+            if (!data || data.length === 0) {
+                out.classList.remove('hidden');
+                out.innerHTML =
+                    '<p class="text-slate-600">Bu arama için veritabanında eşleşen ürün yok. Veri içe aktarımı veya arama terimini kontrol edin.</p>';
+                return;
+            }
+            const bestBySlug = {};
+            for (const row of data) {
+                const slug = row.chain_slug;
+                if (!slugs.includes(slug)) continue;
+                const eff = effectiveUnitPrice(row);
+                if (!Number.isFinite(eff)) continue;
+                const prev = bestBySlug[slug];
+                if (!prev || eff < effectiveUnitPrice(prev)) {
+                    bestBySlug[slug] = row;
+                }
+            }
+            let minPrice = Infinity;
+            let minSlug = null;
+            for (const c of BE_COMPARE_CHAINS) {
+                const row = bestBySlug[c.slug];
+                if (!row) continue;
+                const eff = effectiveUnitPrice(row);
+                if (eff < minPrice) {
+                    minPrice = eff;
+                    minSlug = c.slug;
+                }
+            }
+            const cards = BE_COMPARE_CHAINS.map((c) => {
+                const row = bestBySlug[c.slug];
+                const isBest = row && minSlug === c.slug && Number.isFinite(minPrice);
+                const eff = row ? effectiveUnitPrice(row) : NaN;
+                const priceStr = row && Number.isFinite(eff)
+                    ? eff.toFixed(2) + ' ' + (row.currency || 'EUR')
+                    : '—';
+                const listStr = row && Number.isFinite(Number(row.price))
+                    ? Number(row.price).toFixed(2) + ' ' + (row.currency || 'EUR')
+                    : '—';
+                const promoLine =
+                    row && row.in_promo && row.promo_price != null
+                        ? `<div class="text-emerald-600 font-bold">Kampanya: ${Number(row.promo_price).toFixed(2)} ${row.currency || 'EUR'}</div>`
+                        : '';
+                const fromD = row && row.promo_valid_from ? formatPromoDate(row.promo_valid_from) : null;
+                const untilD = row && row.promo_valid_until ? formatPromoDate(row.promo_valid_until) : null;
+                let dateLine = '';
+                if (fromD || untilD) {
+                    dateLine =
+                        '<div class="text-xs text-slate-500 mt-2">' +
+                        (fromD ? 'İndirim başlangıç: ' + fromD + '<br/>' : '') +
+                        (untilD ? 'İndirim / kampanya bitiş: ' + untilD : '') +
+                        '</div>';
+                }
+                const border = isBest
+                    ? 'ring-4 ring-emerald-400 ring-offset-2 border-emerald-300'
+                    : 'border-slate-100';
+                const badge = isBest
+                    ? '<div class="absolute -top-2 -right-2 bg-emerald-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow">En uygun</div>'
+                    : '';
+                return `
+                    <div class="relative rounded-2xl border ${border} bg-gradient-to-br ${c.color} p-4 shadow-sm">
+                        ${badge}
+                        <div class="font-bold text-slate-800 text-lg mb-1">${escapeHtml(c.label)}</div>
+                        ${
+                            row
+                                ? `<div class="text-slate-700 text-sm font-medium line-clamp-2 min-h-[2.5rem]">${escapeHtml(row.name)}</div>
+                        <div class="mt-2 text-slate-600 text-sm">Liste: ${listStr}</div>
+                        ${promoLine}
+                        <div class="mt-1 text-slate-800 font-semibold">Ödenen: ${priceStr}</div>
+                        ${dateLine}
+                        <div class="text-xs text-slate-400 mt-2">Veri: ${formatCapturedAt(row.captured_at)}</div>`
+                                : '<p class="text-slate-500 text-sm mt-2">Bu zincirde eşleşen ürün yok.</p>'
+                        }
+                    </div>`;
+            }).join('');
+            out.classList.remove('hidden');
+            out.innerHTML = `
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">${cards}</div>
+                ${Number.isFinite(minPrice) ? `<p class="mt-4 text-center text-slate-600 text-sm">En düşük birim fiyat: <strong class="text-emerald-700">${minPrice.toFixed(2)} EUR</strong></p>` : ''}
+            `;
+        }
+
         function chainSlugLabel(slug) {
             if (slug === 'colruyt_be') return 'Colruyt';
             if (slug === 'aldi_be') return 'ALDI';
+            if (slug === 'delhaize_be') return 'Delhaize';
+            if (slug === 'lidl_be') return 'Lidl';
+            if (slug === 'carrefour_be') return 'Carrefour';
             return slug || '—';
         }
 
         async function refreshBePricePanel() {
             const sec = document.getElementById('bePriceSection');
             if (!sec) return;
-            if (selectedCountry !== 'BE') {
-                sec.classList.add('hidden');
-                return;
-            }
             sec.classList.remove('hidden');
             const statsEl = document.getElementById('bePriceStats');
             if (!statsEl) return;
@@ -284,55 +489,6 @@
                 console.warn('market_chain_products_stats:', err);
                 statsEl.innerHTML =
                     '<p class="text-amber-900 text-sm leading-relaxed">Özet yüklenemedi. Supabase SQL Editor’da <code class="bg-amber-50 px-1 rounded">supabase_market_stats_and_cross_chain.sql</code> dosyasını çalıştırıp <code class="bg-amber-50 px-1 rounded">market_chain_products_stats</code> görünümünü oluşturun; ardından veri import edin.</p>';
-            }
-        }
-
-        let beSearchTimer = null;
-        async function runBeProductSearch(raw) {
-            const out = document.getElementById('bePriceSearchResults');
-            if (!out || !sb) return;
-            const q = String(raw || '')
-                .trim()
-                .replace(/[^a-zA-Z0-9\u00C0-\u024F\s.-]/g, '')
-                .slice(0, 80);
-            if (q.length < 2) {
-                out.innerHTML = '';
-                return;
-            }
-            out.innerHTML = '<p class="text-slate-500"><i class="fa-solid fa-spinner fa-spin"></i> Aranıyor...</p>';
-            try {
-                const { data, error } = await sb
-                    .from('market_chain_products')
-                    .select('name, price, currency, chain_slug, captured_at, in_promo, promo_price')
-                    .eq('country_code', 'BE')
-                    .ilike('name', '%' + q + '%')
-                    .order('name')
-                    .limit(25);
-                if (error) throw error;
-                if (!data || data.length === 0) {
-                    out.innerHTML = '<p class="text-slate-600">Sonuç yok.</p>';
-                    return;
-                }
-                out.innerHTML = data
-                    .map((row) => {
-                        const price = Number(row.price);
-                        const pStr = Number.isFinite(price) ? price.toFixed(2) + ' ' + (row.currency || 'EUR') : '—';
-                        const promo = row.in_promo && row.promo_price != null
-                            ? ` <span class="text-emerald-600 font-semibold">Promo: ${Number(row.promo_price).toFixed(2)}</span>`
-                            : '';
-                        return `
-                            <div class="rounded-xl bg-slate-50/90 px-4 py-3 border border-slate-100">
-                                <div class="font-medium text-slate-800">${String(row.name || '').replace(/</g, '&lt;')}</div>
-                                <div class="text-slate-600 mt-1">
-                                    ${chainSlugLabel(row.chain_slug)} · ${pStr}${promo}
-                                    <span class="text-slate-400 text-xs ml-2">${formatCapturedAt(row.captured_at)}</span>
-                                </div>
-                            </div>`;
-                    })
-                    .join('');
-            } catch (err) {
-                console.warn('market_chain_products search:', err);
-                out.innerHTML = '<p class="text-red-600 text-sm">Arama başarısız. Tablo ve RLS kontrol edin.</p>';
             }
         }
 
@@ -409,17 +565,17 @@
                 renderCountryChips();
                 await loadMarketChains();
                 refreshBePricePanel();
-                const beSearchInput = document.getElementById('bePriceSearch');
-                if (beSearchInput) {
-                    beSearchInput.addEventListener('input', function () {
-                        clearTimeout(beSearchTimer);
-                        const inputEl = this;
-                        beSearchTimer = setTimeout(function () {
-                            runBeProductSearch(inputEl.value);
-                        }, 400);
+                const btnCmp = document.getElementById('btnComparePrices');
+                const inpCmp = document.getElementById('compareProductInput');
+                if (btnCmp) btnCmp.addEventListener('click', runCompareAcrossChains);
+                if (inpCmp) {
+                    inpCmp.addEventListener('keydown', function (e) {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            runCompareAcrossChains();
+                        }
                     });
                 }
-                // Otomatik konum tespiti (sessiz)
                 autoDetectLocation();
             } catch (error) {
                 console.error('❌ Market modülü başlatma hatası:', error);
@@ -444,34 +600,24 @@
             }
         });
 
-        // --- ÜLKE SEÇİMİ ---
+        // --- BÖLGE (şimdilik yalnızca BE) ---
         function renderCountryChips() {
             const container = document.getElementById('countryChips');
             if (!container) return;
-            
-            container.innerHTML = '';
-            
-            // Alfabetik sırala
-            const sortedCountries = Object.keys(lokasyonVeritabani).sort((a, b) => 
-                lokasyonVeritabani[a].isim.localeCompare(lokasyonVeritabani[b].isim, 'tr')
-            );
-            
-            sortedCountries.forEach(code => {
-                const country = lokasyonVeritabani[code];
-                const chip = document.createElement('button');
-                chip.className = `country-chip flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs md:text-sm font-bold whitespace-nowrap ${
-                    code === selectedCountry 
-                        ? 'active shadow-lg' 
-                        : 'bg-white/10 text-white hover:bg-white/20'
-                }`;
-                chip.innerHTML = `${country.bayrak} ${country.isim}`;
-                chip.onclick = () => selectCountry(code);
-                container.appendChild(chip);
-            });
+            selectedCountry = 'BE';
+            const be = lokasyonVeritabani && lokasyonVeritabani['BE'];
+            const beLabel = be ? `${be.bayrak} ${be.isim}` : '🇧🇪 Belçika';
+            container.innerHTML = `
+                <div class="country-chip active shadow-lg flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap cursor-default" role="status" aria-label="Seçili bölge Belçika">
+                    ${beLabel}
+                </div>
+                <span class="text-white/40 text-sm px-1">|</span>
+                <span class="text-white/80 text-xs md:text-sm">Diğer Avrupa ülkeleri yakında eklenecek</span>
+            `;
         }
 
         function selectCountry(code) {
-            selectedCountry = code;
+            selectedCountry = 'BE';
             renderCountryChips();
             renderMarketGrid();
             refreshBePricePanel();
@@ -507,14 +653,18 @@
                         const city = data.address?.city || data.address?.town || data.address?.village || '';
                         
                         if (countryCode && lokasyonVeritabani[countryCode]) {
-                            selectCountry(countryCode);
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Konum Tespit Edildi!',
-                                html: `<strong>${city}</strong>, ${lokasyonVeritabani[countryCode].bayrak} ${lokasyonVeritabani[countryCode].isim}`,
-                                timer: 2000,
-                                showConfirmButton: false
-                            });
+                            if (countryCode === 'BE') {
+                                selectCountry('BE');
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Konum: Belçika',
+                                    html: `<strong>${city}</strong> — Market verisi Belçika için gösteriliyor.`,
+                                    timer: 2200,
+                                    showConfirmButton: false
+                                });
+                            } else {
+                                Swal.fire('Bilgi', 'Market karşılaştırması şu an yalnızca Belçika içindir.', 'info');
+                            }
                         } else {
                             Swal.fire('Bilgi', 'Konumunuz desteklenen ülkeler arasında değil.', 'info');
                         }
@@ -551,8 +701,12 @@
                         const countryCode = data.address?.country_code?.toUpperCase();
                         
                         if (countryCode && lokasyonVeritabani[countryCode]) {
-                            selectCountry(countryCode);
-                            console.log(`✅ Otomatik konum tespit edildi: ${lokasyonVeritabani[countryCode].isim}`);
+                            if (countryCode === 'BE') {
+                                selectCountry('BE');
+                                console.log(`✅ Konum Belçika ile eşleşti.`);
+                            } else {
+                                console.log(`ℹ️ Konum ${countryCode}; market modülü yalnızca BE verisi gösteriyor.`);
+                            }
                         }
                     } catch (err) {
                         console.warn('⚠️ Otomatik konum tespiti başarısız:', err);

@@ -15,6 +15,16 @@ Aşağıdaki adımları kendi bilgisayarınızda yapın.
 5. Üstte "Network" (Ağ) sekmesine tıklayın.
 6. "Fetch/XHR" veya "XHR" filtresine tıklayın (isteğe bağlı; istek listesini sadeleştirir).
 
+--- ADIM 2b: placeId (mağaza) doğrulama ---
+Mağaza yanlışsa fiyatlar veya ürün listesi beklediğiniz gibi olmaz. placeId'yi şöyle kontrol edin:
+- Network'te bir "product-search-prs" isteğine tıklayın.
+- curl.txt içindeki URL'de placeId=710 gibi görünmeli; sonda ^ karakteri OLMAMALI (cmd kopyası bazen ekler — silin).
+- "Payload" veya adres çubuğundaki Query String içinde "placeId=..." değerini not alın.
+- Betikte: python colruyt_product_search_api_cek.py --place-id BU_DEGER
+- Veya curl.txt kullanıyorsanız, cURL içindeki placeId otomatik okunur; komutta --place-id verirseniz o değer önceliklidir.
+
+CONFIG içindeki varsayılan place_id (colruyt_product_search_api_cek.py) eski mağazaya ait olabilir; mağaza değiştirdiyseniz mutlaka güncelleyin.
+
 --- ADIM 3: API isteğini tetikleyin ---
 7. Aynı sekmede https://www.colruyt.be/nl/producten sayfasına gidin
    (veya sitede arama kutusuna bir şey yazıp arama yapın).
@@ -45,5 +55,7 @@ Aşağıdaki adımları kendi bilgisayarınızda yapın.
 ========================================
 ÖNEMLİ
 ========================================
-- Cookie bir süre sonra geçersiz olur (birkaç saat veya gün). 406 tekrarlanırsa bu adımları tekrarlayıp cookie.txt'yi yenileyin.
+- Cookie bir süre sonra geçersiz olur (birkaç saat veya gün). 401 / 403 / 406 tekrarlanırsa bu adımları tekrarlayıp cookie.txt veya curl.txt'yi yenileyin.
+- Hızlı bağlantı testi: python colruyt_product_search_api_cek.py --probe --no-pause --minimal-query
+- 406 alıyorsanız: curl.txt güncel olsa bile klasördeki token.txt eski oturumla çakışabiliyordu; betik artık curl Cookie’yi tek başına kullanır. Yine 406 ise token.txt’yi geçici olarak başka klasöre taşıyıp tekrar deneyin.
 - Cookie'yi kimseyle paylaşmayın; hesabınıza erişim sağlar.

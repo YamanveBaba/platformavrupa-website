@@ -1,8 +1,8 @@
 # PLATFORMAVRUPA - Teknik dokümantasyon (yönlendirme)
 
-**Güncel ve bakımı yapılan tek dosya:** [`PLATFORMAVRUPA_PROJE_DOKUMANTASYONU.md`](./PLATFORMAVRUPA_PROJE_DOKUMANTASYONU.md) (sürüm **3.1+**).
+**Güncel ve bakımı yapılan tek dosya:** [`PLATFORMAVRUPA_PROJE_DOKUMANTASYONU.md`](./PLATFORMAVRUPA_PROJE_DOKUMANTASYONU.md) (sürüm **3.2+**).
 
-Aşağıdaki içerik eski tam kopyadır; çelişki olursa **her zaman** `PLATFORMAVRUPA_PROJE_DOKUMANTASYONU.md` esas alınır.
+Aşağıdaki içerik eski tam kopyadır; çelişki olursa **her zaman** `PLATFORMAVRUPA_PROJE_DOKUMANTASYONU.md` esas alınır. Deployment / GitHub Desktop akışı için özellikle ana dosyadaki **Deployment** bölümüne bakın.
 
 ---
 
@@ -857,8 +857,16 @@ proje-klasoru/
 
 ## 🚀 DEPLOYMENT
 
-### Hosting
-- **Platform:** Netlify
+**Güncel iş akışı (2026):** Canlı site artık Netlify üzerinden güncellenmeyebilir. Geliştirme klasöründeki (`04.01.2026` vb.) değişiklikler, **`platformavrupa-website`** adlı kopya klasöre alınır; ardından **GitHub Desktop** ile commit ve `origin`’e **push** yapılır. Hosting tarafı (GitHub Pages, başka statik host veya önceki Netlify bağlantısı) repoya bağlı olarak güncellenir. SSL ve domain, kullandığınız sağlayıcıya göre değişir.
+
+### Hosting (özet)
+- **Kaynak kontrol:** GitHub (GitHub Desktop ile yerel repodan push)
+- **Yerel yayın öncesi kopya:** `04.01.2026` → `platformavrupa-website` (sadece yayınlanacak site dosyaları; gizli anahtarlar ve `market_fiyat_cekici` gibi betik klasörleri repoya konmamalı veya `.gitignore` ile dışlanmalı)
+- **Domain:** platformavrupa.com (yapılandırma hosting sağlayıcısında)
+- **Eski not:** Aşağıdaki Netlify maddeleri tarihsel referans olarak kalabilir; çelişki olursa yukarıdaki GitHub akışı esas alınır.
+
+### Hosting (eski — Netlify, referans)
+- **Platform:** Netlify (kullanılmıyorsa yok sayın)
 - **Yöntem:** Manuel sürükle-bırak veya Git entegrasyonu
 - **Domain:** platformavrupa.com
 - **SSL:** Otomatik (Netlify)
@@ -877,7 +885,7 @@ proje-klasoru/
 ### Environment Variables
 - Supabase URL/Key: `config.js` içinde
 - API Keys: `config.js` içinde
-- Production'da environment variables kullanılabilir (Netlify)
+- Production'da değerler `config.js` veya hosting panelindeki ortam değişkenleri ile yönetilebilir (Netlify kullanılmıyorsa ilgili platformun ayarları)
 
 ### Supabase Edge Functions Deployment
 - **Platform:** Supabase Dashboard

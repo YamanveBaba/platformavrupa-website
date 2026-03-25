@@ -1,7 +1,7 @@
 # PLATFORMAVRUPA - KAPSAMLI PROJE DOKÜMANTASYONU
 
-**Versiyon:** 3.1  
-**Tarih:** 2026-02-24 (hosting + market veri deposu netleştirildi)  
+**Versiyon:** 3.2  
+**Tarih:** 2026-03-21 (deployment yerel akış + Belçika 5 zincir stratejisi)  
 **Web:** www.platformavrupa.com  
 **Domain:** platformavrupa.com, platformavrupa.eu (yedek)  
 **Hedef:** Avrupa'daki Türk diasporası için "Süper Uygulama"  
@@ -229,6 +229,9 @@ proje-klasoru/
 - Otomatik konum tespiti
 - Direkt broşür linkleri
 - **Ürün + güncel fiyat verisi:** `market_fiyat_cekici/` altında Python scriptleri (ör. ALDI BE, Colruyt API veya Playwright). Çekilen veri **yerel `cikti/*.json`** ile doğrulanır, ardından **Supabase** `market_chain_products` tablosuna yazılır (haftalık job). Site ziyaretçileri veriyi **yalnızca Supabase’ten okur**; scraper sunucuda değil, tercihen **geliştiricinin bilgisayarında** çalışır (oturum/cookie riski düşük).
+
+**Belçika — beş zincir hedefi (ALDI, Colruyt, Lidl, Delhaize, Carrefour):**  
+Şu an repoda **tam çekim yolu hazır olanlar:** ALDI BE, Colruyt (API + Playwright yedek). **Henüz betik olmayanlar:** Lidl BE, Delhaize BE, Carrefour BE — her biri için ayrı site keşfi ve kod gerekir; boş vaat yerine somut strateji: [`market_fiyat_cekici/MARKET_BE_BETIKSIZ_UC_ZINCIR_STRATEJI.md`](market_fiyat_cekici/MARKET_BE_BETIKSIZ_UC_ZINCIR_STRATEJI.md). Özet: kısa vadede ALDI+Colruyt ile kıyaslamayı yayına almak; üçü için sırayla Network’ten cURL/JSON örneği toplayıp betik yazdırmak veya Playwright uyarlamak.
 
 ### 8. Akademi
 **Kategoriler:**
@@ -882,10 +885,15 @@ proje-klasoru/
 ## 🚀 DEPLOYMENT
 
 ### Hosting (güncel)
-- **Platform:** **Cloudflare Pages** — GitHub repo bağlantısı ile deploy; proje adı örn. `platformavrupa-website`
+- **Platform:** **Cloudflare Pages** — GitHub repo bağlantısı ile deploy; repo adı örn. `platformavrupa-website`
 - **Domain:** `platformavrupa.com` — Cloudflare DNS’te kök genelde **CNAME** (flatten) → Pages; `www` aynı siteye yönlendirilir
 - **SSL:** Otomatik (Cloudflare)
 - **Not:** Netlify’da `platformavrupa.com` adlı eski proje görünebilir; **aktif trafik DNS kayıtlarına göre** Cloudflare Pages’e gider. Vercel’deki `worldmonitor` tabanlı proje legacy sayılmalıdır.
+
+### Yerel yayın iş akışı (GitHub Desktop)
+- Geliştirme klasörü (örn. `04.01.2026`) ile **canlı site GitHub reposu** (`platformavrupa-website`) ayrı tutulabilir.
+- Güncel statik dosyalar (`*.html`, `config.js`, `auth.js`, …) hedef repoya kopyalanır; **GitHub Desktop** ile commit ve `origin`’e **push** yapılır; Cloudflare Pages deploy tetiklenir.
+- **`market_fiyat_cekici/`** (Python betikleri), **`cikti/`**, **`supabase_import_secrets.txt`** gibi dosyalar **canlı site reposuna eklenmemeli** (`.gitignore` veya kopyalamama); gizli anahtar asla commit edilmez.
 
 ### Domain & e-posta (Cloudflare)
 - Domain kaydı: GoDaddy (veya benzeri); **nameserver** çoğu zaman Cloudflare

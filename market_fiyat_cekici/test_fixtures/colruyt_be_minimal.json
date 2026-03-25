@@ -1,0 +1,17 @@
+{
+  "kaynak": "Colruyt Belçika (test fixture)",
+  "yontem": "product-search-prs API",
+  "placeId": "762",
+  "cekilme_tarihi": "2026-03-21T12:00:00",
+  "urunler": [
+    {
+      "retailProductNumber": "99999901",
+      "technicalArticleNumber": 99999901,
+      "name": "Pipeline test product",
+      "brand": "Test",
+      "basicPrice": 1.99,
+      "inPromo": false,
+      "topCategoryName": "Test"
+    }
+  ]
+}

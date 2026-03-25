@@ -15,6 +15,8 @@
 4. Haftalık Colruyt otomasyonu: **`calistir_colruyt_haftalik.bat`** veya `python haftalik_colruyt_supabase.py`. Oturum hatası (406): **`SESSION_VE_406_COZUMU.md`**.  
 5. Eski ALDI akışındaki `aldi_be_tum_urunler_platform_*.json` alanları, `market_chain_products` sütunlarına **map** edilir (`chain_slug='aldi_be'`, `external_product_id` = `productID` vb.).
 
+Belçika zincir matrisi ve test: **`BELCIKA_ZINCIR_VERI_HATTI.md`**, **`PIPELINE_TEST_NOTLARI.md`**, haftalık zamanlama: **`HAFTALIK_CEKIM_TAKVIMI_VE_GOREV_ZAMANLAYICI.md`**.
+
 Ana proje dokümantasyonu: **`PLATFORMAVRUPA_PROJE_DOKUMANTASYONU.md`** (v3.1) — Veritabanı bölümünde aynı şema metni var.
 
 ---
