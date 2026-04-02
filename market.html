@@ -574,6 +574,86 @@ async function loadUpcoming() {
 // ═══════════════════════════════════════════════════════════════════
 // KARŞILAŞTIR
 // ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
+// TÜRKÇE → HOLLANDACA ÇEVİRİ SÖZLÜĞÜ
+// ═══════════════════════════════════════════════════════════════════
+const TR_NL = {
+    // Süt & süt ürünleri
+    'süt':'melk','sut':'melk','tam yağlı süt':'volle melk','yağsız süt':'magere melk',
+    'tereyağı':'boter','tereyag':'boter','tereyağ':'boter',
+    'peynir':'kaas','beyaz peynir':'witte kaas','kaşar':'gouda','lor peyniri':'kwark',
+    'yoğurt':'yoghurt','yogurt':'yoghurt','kefir':'kefir','krema':'room','süt kreması':'slagroom',
+    // Ekmek & unlu
+    'ekmek':'brood','francala':'stokbrood','baget':'baguette','sandviç ekmeği':'sandwichbrood',
+    'un':'bloem','buğday unu':'tarwebloem','mısır unu':'maizena',
+    'bisküvi':'koekjes','kurabiye':'koekjes','kraker':'crackers','wafer':'wafels',
+    // Et
+    'et':'vlees','kıyma':'gehakt','dana kıyma':'rundergehakt','dana eti':'rundvlees',
+    'tavuk':'kip','tavuk göğsü':'kipfilet','tavuk but':'kippendij','hindi':'kalkoen',
+    'kuzu eti':'lamsvlees','domuz':'varkensvlees','jambon':'ham','sosis':'worst',
+    'sucuk':'droge worst','salam':'salami','pastırma':'bacon',
+    // Balık & deniz ürünleri
+    'balık':'vis','somon':'zalm','ton balığı':'tonijn','tuna':'tonijn',
+    'karides':'garnalen','midye':'mosselen','alabalık':'forel',
+    // Sebze
+    'domates':'tomaat','salatalık':'komkommer','biber':'paprika','kırmızı biber':'rode paprika',
+    'soğan':'ui','sarımsak':'knoflook','patates':'aardappel','havuç':'wortel',
+    'kabak':'courgette','patlıcan':'aubergine','brokoli':'broccoli','marul':'sla',
+    'ıspanak':'spinazie','karnabahar':'bloemkool','lahana':'kool','bezelye':'erwten',
+    'fasulye':'bonen','mısır':'mais','mantar':'champignon','kereviz':'selderij',
+    'pırasa':'prei','turp':'radijs','roka':'rucola','maydanoz':'peterselie',
+    'nane':'munt','dereotu':'dille','fesleğen':'basilicum',
+    // Meyve
+    'elma':'appel','armut':'peer','muz':'banaan','portakal':'sinaasappel',
+    'limon':'citroen','çilek':'aardbei','kiraz':'kers','üzüm':'druiven',
+    'karpuz':'watermeloen','kavun':'meloen','şeftali':'perzik','kayısı':'abrikoos',
+    'erik':'pruim','nar':'granaatappel','kivi':'kiwi','ananas':'ananas',
+    'mango':'mango','avokado':'avocado','greyfurt':'grapefruit','incir':'vijg',
+    // Tahıl & bakliyat
+    'pirinç':'rijst','makarna':'pasta','spagetti':'spaghetti','erişte':'noedels',
+    'nohut':'kikkererwten','mercimek':'linzen','kırmızı mercimek':'rode linzen',
+    'yulaf':'haver','yulaf ezmesi':'havermout','müsli':'muesli','mısır gevreği':'cornflakes',
+    // İçecek
+    'su':'water','maden suyu':'bruisend water','meyve suyu':'fruitsap',
+    'portakal suyu':'sinaasappelsap','elma suyu':'appelsap',
+    'kahve':'koffie','çay':'thee','kakao':'cacao','soda':'frisdrank',
+    'cola':'cola','bira':'bier','şarap':'wijn','kırmızı şarap':'rode wijn',
+    // Yağ & sos
+    'zeytinyağı':'olijfolie','ayçiçek yağı':'zonnebloemolie','mısırözü yağı':'maïsolie',
+    'sirke':'azijn','elma sirkesi':'appelazijn','ketçap':'ketchup',
+    'mayonez':'mayonaise','hardal':'mosterd','salça':'tomatenpuree',
+    'sos':'saus','domates sosu':'tomatensaus','makarna sosu':'pastasaus',
+    // Tatlı & atıştırmalık
+    'çikolata':'chocolade','sütlü çikolata':'melkchocolade','bitter çikolata':'pure chocolade',
+    'gofret':'wafels','cips':'chips','patates cipsi':'chips',
+    'bal':'honing','reçel':'jam','fıstık ezmesi':'pindakaas',
+    'dondurma':'ijs','pasta':'taart','kek':'cake',
+    // Baharat & çeşni
+    'tuz':'zout','karabiber':'zwarte peper','kırmızı pul biber':'rode peper vlokken',
+    'kimyon':'komijn','tarçın':'kaneel','vanilya':'vanille','zerdeçal':'kurkuma',
+    'nane':'munt','kekik':'tijm','biberiye':'rozemarijn',
+    'şeker':'suiker','pudra şekeri':'poedersuiker','esmer şeker':'rietsuiker',
+    // Temizlik & kişisel bakım
+    'şampuan':'shampoo','sabun':'zeep','diş macunu':'tandpasta',
+    'tuvalet kağıdı':'toiletpapier','kağıt havlu':'keukenpapier',
+    'bulaşık deterjanı':'afwasmiddel','deterjan':'wasmiddel','çamaşır deterjanı':'waspoeder',
+    // Bebek
+    'bebek maması':'babyvoeding','bebek bezi':'luiers','ıslak mendil':'vochtige doekjes',
+    // Diğer yaygın
+    'yumurta':'eieren','ekmek kızartması':'toast','kruvasan':'croissant',
+};
+
+function trCevir(q) {
+    const lower = q.toLowerCase().trim();
+    // Tam eşleşme
+    if (TR_NL[lower]) return TR_NL[lower];
+    // Kelime bazlı çeviri — her kelimeyi tek tek çevir
+    const words = lower.split(/\s+/);
+    const translated = words.map(w => TR_NL[w] || w);
+    if (translated.join(' ') !== lower) return translated.join(' ');
+    return null;
+}
+
 async function runCompare() {
     const input = document.getElementById('cmpInput');
     const resEl  = document.getElementById('cmpResults');
@@ -597,17 +677,25 @@ async function runCompare() {
         return;
     }
 
+    // Türkçe → Hollandaca çeviri
+    const nlQ = trCevir(q);
+    const queries = nlQ && nlQ !== q ? [q, nlQ] : [q];
+
     loadEl.classList.remove('hidden');
-    let data, error;
+    let data = [], error;
     try {
-        const r = await sb
-            .from('market_chain_products')
-            .select('name,price,promo_price,currency,chain_slug,captured_at,in_promo,promo_valid_from,promo_valid_until')
-            .eq('country_code','BE')
-            .in('chain_slug', SLUGS)
-            .ilike('name','%'+q+'%')
-            .limit(150);
-        data = r.data; error = r.error;
+        // Her arama terimi için sorgu at, sonuçları birleştir
+        for (const term of queries) {
+            const r = await sb
+                .from('market_chain_products')
+                .select('name,price,promo_price,currency,chain_slug,captured_at,in_promo,promo_valid_from,promo_valid_until')
+                .eq('country_code','BE')
+                .in('chain_slug', SLUGS)
+                .ilike('name','%'+term+'%')
+                .limit(150);
+            if (r.error) { error = r.error; break; }
+            if (r.data) data = data.concat(r.data);
+        }
     } catch(e) { error = e; }
     loadEl.classList.add('hidden');
 
