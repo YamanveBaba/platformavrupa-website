@@ -1,4 +1,4 @@
-const CACHE_NAME = 'platform-avrupa-v1';
+const CACHE_NAME = 'platform-avrupa-v3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -17,12 +17,23 @@ const ASSETS_TO_CACHE = [
   './logo.png'
 ];
 
-// Kurulum: Dosyaları önbelleğe al
+// Kurulum: Yeni cache aç, hemen aktive et
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS_TO_CACHE);
-    })
+    }).then(() => self.skipWaiting())
+  );
+});
+
+// Aktive: Eski cache versiyonlarını sil
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+      );
+    }).then(() => self.clients.claim())
   );
 });
 
