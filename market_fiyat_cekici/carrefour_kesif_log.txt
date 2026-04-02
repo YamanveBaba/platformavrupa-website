@@ -1,0 +1,75 @@
+=== Carrefour camoufox Keşif 2026-04-01 20:49:41.130176 ===
+
+────────────────────────────────────────────────────────────
+[SAYFA] https://www.carrefour.be/nl/al-onze-promoties
+  [URL] 200 https://www.carrefour.be/nl/al-onze-promoties
+  [URL] 200 https://www.carrefour.be/on/demandware.static/Sites-carrefour-be-Site/-/default/v1775054788198/js/search.js
+  [URL] 200 https://www.carrefour.be/on/demandware.store/Sites-carrefour-be-Site/default/Wishlist-GetProducts
+  [JSON] 200 boyut=2458 toplam=None
+         https://carrefourbe-nlbe.backend.verbolia.com/nl/vb/api/gial?url=https://www.carrefour.be/nl/al-onze
+  [JSON] 200 boyut=97568 toplam=None
+         https://www.carrefour.be/on/demandware.store/Sites-carrefour-be-Site/default/Einstein-Recommendation
+  [JSON] 200 boyut=2471 toplam=None
+         https://www.carrefour.be/on/demandware.store/Sites-carrefour-be-Site/default/Availability-ATS?pids=0
+  [JSON] 200 boyut=1834 toplam=None
+         https://www.carrefour.be/on/demandware.store/Sites-carrefour-be-Site/default/Cart-Get
+  [JSON] 200 boyut=5406 toplam=None
+         https://www.carrefour.be/nl/minicart
+  [baslik] Al onze promoties | Carrefour België
+  [JSON] 200 boyut=4476 toplam=None
+         https://cdn.cookielaw.org/consent/018dd088-6c17-7ad3-95d4-f0bace80a869/018dd088-6c17-7ad3-95d4-f0bac
+  [URL] 200 https://www.carrefour.be/on/demandware.store/Sites-carrefour-be-Site/default/__Analytics-Start?url=https%3A%2F
+  [scroll] …
+  [JSON] 200 boyut=97556 toplam=None
+         https://www.carrefour.be/on/demandware.store/Sites-carrefour-be-Site/default/Einstein-Recommendation
+  [JSON] 200 boyut=99193 toplam=None
+         https://www.carrefour.be/on/demandware.store/Sites-carrefour-be-Site/default/Einstein-Recommendation
+  [URL] 200 https://www.carrefour.be/on/demandware.store/Sites-carrefour-be-Site/default/Wishlist-GetProducts
+  [URL] 200 https://www.carrefour.be/on/demandware.store/Sites-carrefour-be-Site/default/Wishlist-GetProducts
+  [JSON] 200 boyut=4308 toplam=None
+         https://www.carrefour.be/on/demandware.store/Sites-carrefour-be-Site/default/Cart-Get
+  [JSON] 200 boyut=2536 toplam=None
+         https://www.carrefour.be/on/demandware.store/Sites-carrefour-be-Site/default/Availability-ATS?pids=0
+  [JSON] 200 boyut=3189 toplam=None
+         https://www.carrefour.be/on/demandware.store/Sites-carrefour-be-Site/default/Availability-ATS?pids=0
+  [JSON] 200 boyut=346977 toplam=None
+         https://cdn.cookielaw.org/consent/018dd088-6c17-7ad3-95d4-f0bace80a869/a7737776-1b73-4804-851c-2d89d
+  [JSON] 200 boyut=9661 toplam=None
+         https://cdn.cookielaw.org/scripttemplates/202407.1.0/assets/otCenterRounded.json
+  [URL] 200 https://www.carrefour.be/on/demandware.store/Sites-carrefour-be-Site/default/__Analytics-Start?url=https%3A%2F
+  [JSON] 200 boyut=63353 toplam=None
+         https://cdn.cookielaw.org/scripttemplates/202407.1.0/assets/v2/otPcCenter.json
+  [JSON] 200 boyut=8662 toplam=None
+         https://carrefour-france-portail.my.onetrust.com/request/v1/consentreceipts
+  [perf] 30 istek, 8 ilginç:
+    560ms  https://carrefourbe-nlbe.backend.verbolia.com/nl/vb/api/gial?url=https://www.carrefour.be/nl/al-onze-promoties
+    630ms  https://www.carrefour.be/on/demandware.store/Sites-carrefour-be-Site/default/Einstein-Recommendations?cgid=all
+    872ms  https://www.carrefour.be/on/demandware.store/Sites-carrefour-be-Site/default/Wishlist-GetProducts
+    1794ms  https://www.carrefour.be/on/demandware.store/Sites-carrefour-be-Site/default/Einstein-Recommendations?cgid=all
+    271ms  https://www.carrefour.be/on/demandware.store/Sites-carrefour-be-Site/default/Einstein-Recommendations?cgid=all
+    362ms  https://www.carrefour.be/on/demandware.store/Sites-carrefour-be-Site/default/Wishlist-GetProducts
+    926ms  https://www.carrefour.be/on/demandware.store/Sites-carrefour-be-Site/default/Wishlist-GetProducts
+    0ms  https://www.google.com/ccm/collect?frm=0&ae=g&en=page_view&dl=https%3A%2F%2Fwww.carrefour.be%2Fnl%2Fal-onze-pr
+  [son_url] https://www.carrefour.be/nl/al-onze-promoties
+
+────────────────────────────────────────────────────────────
+[SAYFA] https://www.carrefour.be/nl/alle-producten
+  [URL] 404 https://www.carrefour.be/nl/alle-producten
+  [JSON] 200 boyut=4476 toplam=None
+         https://cdn.cookielaw.org/consent/018dd088-6c17-7ad3-95d4-f0bace80a869/018dd088-6c17-7ad3-95d4-f0bac
+  [JSON] 200 boyut=346977 toplam=None
+         https://cdn.cookielaw.org/consent/018dd088-6c17-7ad3-95d4-f0bace80a869/a7737776-1b73-4804-851c-2d89d
+  [JSON] 200 boyut=9661 toplam=None
+         https://cdn.cookielaw.org/scripttemplates/202407.1.0/assets/otCenterRounded.json
+  [JSON] 200 boyut=63353 toplam=None
+         https://cdn.cookielaw.org/scripttemplates/202407.1.0/assets/v2/otPcCenter.json
+  [JSON] 200 boyut=128 toplam=None
+         https://www.carrefour.be/on/demandware.store/Sites-carrefour-be-Site/default/ConsentTracking-CitrusA
+  [JSON] 200 boyut=7894 toplam=None
+         https://www.carrefour.be/nl/minicart
+  [baslik] Sites-carrefour-be-Site
+  [scroll] …
+  [perf] 9 istek, 0 ilginç:
+  [son_url] https://www.carrefour.be/nl/alle-producten
+
+=== Bitti 2026-04-01 20:50:48.638362 ===

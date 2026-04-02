@@ -1,0 +1,76 @@
+name: Belçika Market Fiyat Çekici
+
+on:
+  # Her Salı sabahı 03:00 UTC (Belçika 04:00/05:00) — marketler güncellendi
+  schedule:
+    - cron: "0 3 * * 2"
+
+  # Elle de çalıştırılabilir (test için)
+  workflow_dispatch:
+    inputs:
+      market:
+        description: "Belirli bir marketi çalıştır (boş = tümü)"
+        required: false
+        default: ""
+        type: choice
+        options:
+          - ""
+          - colruyt
+          - aldi
+          - lidl
+          - delhaize
+          - carrefour
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180  # 3 saat max
+
+    defaults:
+      run:
+        working-directory: market_fiyat_cekici
+
+    steps:
+      - name: Kodu al
+        uses: actions/checkout@v4
+
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: market_fiyat_cekici/requirements.txt
+
+      - name: Bağımlılıkları yükle
+        run: pip install -r requirements.txt
+
+      - name: Playwright Chromium yükle
+        run: playwright install chromium --with-deps
+
+      - name: Bağlantı testi
+        env:
+          SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python main.py --test
+
+      - name: Tüm marketleri çek
+        if: ${{ github.event.inputs.market == '' || github.event_name == 'schedule' }}
+        env:
+          SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python main.py
+
+      - name: Belirli marketi çek
+        if: ${{ github.event.inputs.market != '' }}
+        env:
+          SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python main.py --market ${{ github.event.inputs.market }}
+
+      - name: Log dosyasını kaydet
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: scraper-log-${{ github.run_id }}
+          path: market_fiyat_cekici/scraper.log
+          retention-days: 7

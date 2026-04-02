@@ -1,3 +1,9 @@
-2026/03/24-00:07:40.740 2450 Reusing MANIFEST c:\Users\yaman\Desktop\04.01.2026\market_fiyat_cekici\colruyt_browser_profile\Default\Local Storage\leveldb/MANIFEST-000001
-2026/03/24-00:07:40.749 2450 Recovering log #7
-2026/03/24-00:07:40.752 2450 Reusing old log c:\Users\yaman\Desktop\04.01.2026\market_fiyat_cekici\colruyt_browser_profile\Default\Local Storage\leveldb/000007.log 
+2026/03/26-21:52:45.157 6da4 Reusing MANIFEST c:\Users\yaman\Desktop\04.01.2026\market_fiyat_cekici\colruyt_browser_profile\Default\Local Storage\leveldb/MANIFEST-000001
+2026/03/26-21:52:45.175 6da4 Recovering log #7
+2026/03/26-21:52:45.179 6da4 Reusing old log c:\Users\yaman\Desktop\04.01.2026\market_fiyat_cekici\colruyt_browser_profile\Default\Local Storage\leveldb/000007.log 
+2026/03/26-22:11:46.531 340c Level-0 table #11: started
+2026/03/26-22:11:46.548 340c Level-0 table #11: 14973 bytes OK
+2026/03/26-22:11:46.553 340c Delete type=0 #7
+2026/03/26-22:41:46.523 340c Level-0 table #13: started
+2026/03/26-22:41:46.544 340c Level-0 table #13: 13368 bytes OK
+2026/03/26-22:41:46.550 340c Delete type=0 #10
