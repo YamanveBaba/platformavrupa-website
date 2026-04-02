@@ -138,6 +138,34 @@
             50%      { box-shadow:0 0 0 6px rgba(16,185,129,0); }
         }
         .live-dot { animation: pulse-dot 1.8s infinite; }
+
+        /* ── Mode toggle ── */
+        .mode-btn { transition: all 0.2s ease; border-radius: 12px; color: rgba(255,255,255,.5); font-size:.78rem; font-weight:700; }
+        .mode-btn.active { background: rgba(255,255,255,.13); color:#fff; }
+
+        /* ── Category tile ── */
+        .cat-tile {
+            background: rgba(255,255,255,.06);
+            border: 1.5px solid rgba(255,255,255,.09);
+            border-radius: 18px;
+            padding: 14px 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all .2s ease;
+        }
+        .cat-tile:hover, .cat-tile:active { background: rgba(255,255,255,.13); border-color: rgba(16,185,129,.5); transform: translateY(-2px); }
+        .cat-tile .cat-emoji { font-size: 1.9rem; display:block; margin-bottom:6px; line-height:1; }
+        .cat-tile .cat-name  { font-size: .68rem; font-weight:700; color:rgba(255,255,255,.75); line-height:1.2; }
+
+        /* ── Cat product card ── */
+        .cat-prod-row {
+            background: #fff;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 1px 10px rgba(0,0,0,.07);
+            transition: transform .22s ease, box-shadow .22s ease;
+        }
+        .cat-prod-row:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.11); }
     </style>
 </head>
 <body class="pb-28">
@@ -274,39 +302,108 @@
 <!-- ═══ TAB: KARŞILAŞTIR ══════════════════════════════════════════ -->
 <div id="sec-karsilastir" class="hidden px-4 max-w-7xl mx-auto space-y-4">
 
-    <!-- Search box -->
-    <div class="glass-dark p-5">
-        <h3 class="text-white font-bold text-base mb-1 flex items-center gap-2">
-            <i class="fa-solid fa-magnifying-glass-chart text-emerald-400"></i> 5 Markette Fiyat Karşılaştır
-        </h3>
-        <p class="text-white/40 text-xs mb-4">Ürün adı yaz — tüm zincirlerdeki en iyi fiyatı görelim</p>
-        <div class="flex gap-3">
-            <input type="search" id="cmpInput"
-                class="search-input flex-1 px-4 py-3.5 text-sm font-medium"
-                placeholder="melk, boter, cola, appel, brood…"
-                autocomplete="off" />
-            <button id="cmpBtn"
-                class="shrink-0 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold px-5 py-3.5 shadow-lg shadow-emerald-500/25 hover:opacity-90 active:scale-95 transition flex items-center gap-2">
-                <i class="fa-solid fa-bolt"></i>
-                <span class="hidden sm:inline">Karşılaştır</span>
-            </button>
+    <!-- Mode toggle -->
+    <div class="glass-dark p-1.5 flex gap-1">
+        <button id="mode-ara-btn" onclick="showMode('ara')"
+            class="mode-btn active flex-1 py-2.5 flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-magnifying-glass text-emerald-400"></i> Ürün Ara
+        </button>
+        <button id="mode-kat-btn" onclick="showMode('kat')"
+            class="mode-btn flex-1 py-2.5 flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-th-large text-sky-400"></i> Kategoriler
+        </button>
+    </div>
+
+    <!-- ── ARA MODU ── -->
+    <div id="mode-ara-wrap">
+        <div class="glass-dark p-5">
+            <h3 class="text-white font-bold text-base mb-1 flex items-center gap-2">
+                <i class="fa-solid fa-magnifying-glass-chart text-emerald-400"></i> 5 Markette Fiyat Karşılaştır
+            </h3>
+            <p class="text-white/40 text-xs mb-4">Ürün adı yaz — tüm zincirlerdeki en iyi fiyatı görelim</p>
+            <div class="flex gap-3">
+                <input type="search" id="cmpInput"
+                    class="search-input flex-1 px-4 py-3.5 text-sm font-medium"
+                    placeholder="süt, ekmek, cola, elma…"
+                    autocomplete="off" />
+                <button id="cmpBtn"
+                    class="shrink-0 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold px-5 py-3.5 shadow-lg shadow-emerald-500/25 hover:opacity-90 active:scale-95 transition flex items-center gap-2">
+                    <i class="fa-solid fa-bolt"></i>
+                    <span class="hidden sm:inline">Karşılaştır</span>
+                </button>
+            </div>
+            <p class="text-white/25 text-xs mt-2.5">
+                <i class="fa-solid fa-circle-info mr-1"></i> Türkçe veya Hollandaca yazabilirsiniz.
+            </p>
         </div>
-        <p class="text-white/25 text-xs mt-2.5">
-            <i class="fa-solid fa-circle-info mr-1"></i> Haftalık güncellenen veri. Sonuç yoksa arama terimini kısaltın.
-        </p>
+        <div id="cmpLoading" class="hidden text-center py-10">
+            <i class="fa-solid fa-spinner fa-spin text-3xl text-emerald-400 mb-3 block"></i>
+            <p class="text-white/50 text-sm">5 markette aranıyor…</p>
+        </div>
+        <div id="cmpError" class="hidden glass-dark rounded-2xl p-4 flex items-center gap-3 text-red-400 text-sm">
+            <i class="fa-solid fa-circle-exclamation text-lg"></i>
+            <span id="cmpErrMsg"></span>
+        </div>
+        <div id="cmpResults" class="hidden"></div>
     </div>
 
-    <div id="cmpLoading" class="hidden text-center py-10">
-        <i class="fa-solid fa-spinner fa-spin text-3xl text-emerald-400 mb-3 block"></i>
-        <p class="text-white/50 text-sm">5 markette aranıyor…</p>
-    </div>
+    <!-- ── KATEGORİLER MODU ── -->
+    <div id="mode-kat-wrap" class="hidden space-y-4">
 
-    <div id="cmpError" class="hidden glass-dark rounded-2xl p-4 flex items-center gap-3 text-red-400 text-sm">
-        <i class="fa-solid fa-circle-exclamation text-lg"></i>
-        <span id="cmpErrMsg"></span>
-    </div>
+        <!-- Kategori grid -->
+        <div id="catGrid">
+            <p class="text-white/50 text-xs mb-3 flex items-center gap-1.5">
+                <i class="fa-solid fa-th-large text-sky-400"></i>
+                Bir kategori seç
+            </p>
+            <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2.5" id="catTileGrid"></div>
+        </div>
 
-    <div id="cmpResults" class="hidden"></div>
+        <!-- Kategori ürünleri (kategori seçince açılır) -->
+        <div id="catProdWrap" class="hidden space-y-3">
+
+            <!-- Başlık + geri -->
+            <div class="flex items-center gap-3">
+                <button onclick="backToCatGrid()"
+                    class="w-9 h-9 rounded-xl glass-dark flex items-center justify-center text-white/70 hover:text-white transition">
+                    <i class="fa-solid fa-arrow-left text-sm"></i>
+                </button>
+                <div>
+                    <h3 id="catProdTitle" class="text-white font-black text-base"></h3>
+                    <p id="catProdCount" class="text-white/40 text-xs"></p>
+                </div>
+            </div>
+
+            <!-- Arama (kategoride) -->
+            <div class="flex gap-2">
+                <input type="search" id="catSearch"
+                    class="search-input flex-1 px-4 py-3 text-sm font-medium"
+                    placeholder="İsimde ara…"
+                    autocomplete="off"
+                    oninput="filterCatProds()" />
+            </div>
+
+            <!-- Market filtresi -->
+            <div class="flex gap-2 overflow-x-auto no-scroll pb-1">
+                <button class="filter-chip active" data-cf="all" onclick="filterCatChain('all')">Tümü</button>
+                <button class="filter-chip" data-cf="colruyt_be"   onclick="filterCatChain('colruyt_be')">Colruyt</button>
+                <button class="filter-chip" data-cf="aldi_be"      onclick="filterCatChain('aldi_be')">ALDI</button>
+                <button class="filter-chip" data-cf="delhaize_be"  onclick="filterCatChain('delhaize_be')">Delhaize</button>
+                <button class="filter-chip" data-cf="lidl_be"      onclick="filterCatChain('lidl_be')">Lidl</button>
+                <button class="filter-chip" data-cf="carrefour_be" onclick="filterCatChain('carrefour_be')">Carrefour</button>
+            </div>
+
+            <!-- Yükleniyor -->
+            <div id="catProdLoading" class="hidden text-center py-8">
+                <i class="fa-solid fa-spinner fa-spin text-2xl text-emerald-400 mb-2 block"></i>
+                <p class="text-white/40 text-sm">Ürünler yükleniyor…</p>
+            </div>
+
+            <!-- Ürün listesi -->
+            <div id="catProdGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3"></div>
+
+        </div>
+    </div>
 
 </div>
 
@@ -569,6 +666,165 @@ async function loadUpcoming() {
         }).join('');
         sec.classList.remove('hidden');
     } catch {}
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// KATEGORİLER MODU
+// ═══════════════════════════════════════════════════════════════════
+const KAT_LIST = [
+    {emoji:'🥛', label:'Süt Ürünleri'},
+    {emoji:'🥩', label:'Et & Şarküteri'},
+    {emoji:'🍗', label:'Tavuk & Kümes'},
+    {emoji:'🐟', label:'Balık & Deniz Ürünleri'},
+    {emoji:'🥦', label:'Sebze & Meyve'},
+    {emoji:'🍞', label:'Ekmek & Unlu Mamüller'},
+    {emoji:'🧊', label:'Donmuş Ürünler'},
+    {emoji:'🥫', label:'Konserve & Hazır Yemek'},
+    {emoji:'🍝', label:'Tahıllar & Makarna'},
+    {emoji:'🫙', label:'Yağ, Sos & Baharat'},
+    {emoji:'🍿', label:'Atıştırmalık & Tatlı'},
+    {emoji:'🍦', label:'Dondurma & Tatlı'},
+    {emoji:'🧃', label:'İçecekler'},
+    {emoji:'☕', label:'Kahve & Çay'},
+    {emoji:'🍺', label:'Alkol'},
+    {emoji:'🥚', label:'Yumurta'},
+    {emoji:'👶', label:'Bebek Ürünleri'},
+    {emoji:'🧴', label:'Kişisel Bakım'},
+    {emoji:'🧹', label:'Temizlik & Ev Bakımı'},
+    {emoji:'🐾', label:'Evcil Hayvan'},
+    {emoji:'🧸', label:'Oyuncak & Çocuk'},
+    {emoji:'👕', label:'Giyim'},
+    {emoji:'🌿', label:'Ev & Bahçe'},
+    {emoji:'⛺', label:'Spor & Outdoor'},
+    {emoji:'📱', label:'Teknoloji'},
+];
+
+let catAllProds = [];       // Seçili kategorinin tüm ürünleri
+let catChainFilter = 'all'; // Aktif market filtresi
+
+function showMode(mode) {
+    const isAra = mode === 'ara';
+    document.getElementById('mode-ara-btn').classList.toggle('active', isAra);
+    document.getElementById('mode-kat-btn').classList.toggle('active', !isAra);
+    document.getElementById('mode-ara-btn').classList.toggle('text-white/50', !isAra);
+    document.getElementById('mode-kat-btn').classList.toggle('text-white/50', isAra);
+    document.getElementById('mode-ara-wrap').classList.toggle('hidden', !isAra);
+    document.getElementById('mode-kat-wrap').classList.toggle('hidden', isAra);
+}
+
+function renderCatTiles() {
+    const grid = document.getElementById('catTileGrid');
+    if (!grid) return;
+    grid.innerHTML = KAT_LIST.map(k =>
+        `<div class="cat-tile" onclick="browseCat('${esc(k.label)}','${esc(k.emoji)}')">
+            <span class="cat-emoji">${k.emoji}</span>
+            <span class="cat-name">${esc(k.label)}</span>
+        </div>`
+    ).join('');
+}
+
+function backToCatGrid() {
+    document.getElementById('catGrid').classList.remove('hidden');
+    document.getElementById('catProdWrap').classList.add('hidden');
+    catAllProds = [];
+    catChainFilter = 'all';
+}
+
+function filterCatChain(chain) {
+    catChainFilter = chain;
+    document.querySelectorAll('[data-cf]').forEach(el => {
+        el.classList.toggle('active', el.dataset.cf === chain);
+    });
+    renderCatProdGrid();
+}
+
+function filterCatProds() {
+    renderCatProdGrid();
+}
+
+function renderCatProdGrid() {
+    const grid = document.getElementById('catProdGrid');
+    if (!grid) return;
+    const search = (document.getElementById('catSearch')?.value || '').toLowerCase().trim();
+    let list = catAllProds;
+    if (catChainFilter !== 'all') list = list.filter(r => r.chain_slug === catChainFilter);
+    if (search) list = list.filter(r => (r.name||'').toLowerCase().includes(search));
+    document.getElementById('catProdCount').textContent = list.length + ' ürün';
+    if (list.length === 0) {
+        grid.innerHTML = `<div class="col-span-full text-center py-10">
+            <i class="fa-solid fa-box-open text-3xl text-white/15 mb-2 block"></i>
+            <p class="text-white/40 text-sm">Ürün bulunamadı</p>
+        </div>`;
+        return;
+    }
+    grid.innerHTML = list.map(row => {
+        const cfg = CHAINS[row.chain_slug] || {label:row.chain_slug, color:'#64748b', logo:''};
+        const pct = row.in_promo && row.promo_price != null ? discPct(row.price, row.promo_price) : null;
+        const eff = effPrice(row);
+        return `<div class="cat-prod-row">
+            <div style="height:3px;background:${cfg.color}"></div>
+            <div class="p-3">
+                <div class="flex items-center justify-between mb-1.5">
+                    ${logoImg(row.chain_slug, 4)}
+                    ${pct ? `<span class="badge-red">-${pct}%</span>` : ''}
+                </div>
+                <p class="text-slate-800 font-semibold text-xs leading-snug line-clamp-3 mb-2 min-h-[2.8rem]">${esc(row.name)}</p>
+                <div class="flex items-center justify-between gap-1">
+                    <div>
+                        ${row.in_promo && row.promo_price != null && Number(row.price) !== Number(row.promo_price)
+                            ? `<div class="strike text-[.65rem]">${fmtP(row.price,row.currency)}</div>` : ''}
+                        <div class="font-black text-sm leading-tight" style="color:${cfg.color}">${fmtP(eff,row.currency)}</div>
+                    </div>
+                    <button onclick="compareFromCat('${esc(row.name).replace(/'/g,"\\'")}','${esc(row.chain_slug)}')"
+                        class="shrink-0 w-7 h-7 rounded-lg bg-emerald-500 flex items-center justify-center text-white hover:bg-emerald-600 transition"
+                        title="5 markette karşılaştır">
+                        <i class="fa-solid fa-scale-balanced text-[.6rem]"></i>
+                    </button>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+async function browseCat(catLabel, catEmoji) {
+    if (!sb) return;
+    // Grid → ürün listesi
+    document.getElementById('catGrid').classList.add('hidden');
+    const wrap = document.getElementById('catProdWrap');
+    wrap.classList.remove('hidden');
+    document.getElementById('catProdTitle').textContent = (catEmoji||'') + ' ' + catLabel;
+    document.getElementById('catProdCount').textContent = 'yükleniyor…';
+    document.getElementById('catSearch').value = '';
+    document.getElementById('catProdGrid').innerHTML = '';
+    document.getElementById('catProdLoading').classList.remove('hidden');
+    // Market filter sıfırla
+    catChainFilter = 'all';
+    document.querySelectorAll('[data-cf]').forEach(el => el.classList.toggle('active', el.dataset.cf === 'all'));
+
+    try {
+        const { data, error } = await sb
+            .from('market_chain_products')
+            .select('name,price,promo_price,currency,chain_slug,in_promo,promo_valid_until')
+            .eq('country_code','BE')
+            .eq('category_tr', catLabel)
+            .gt('price', 0)
+            .order('price', {ascending: true})
+            .limit(400);
+        if (error) throw error;
+        catAllProds = data || [];
+    } catch(e) {
+        catAllProds = [];
+    }
+    document.getElementById('catProdLoading').classList.add('hidden');
+    renderCatProdGrid();
+}
+
+function compareFromCat(productName, fromSlug) {
+    // Karşılaştır moduna geç, ürün adını ara
+    showMode('ara');
+    const inp = document.getElementById('cmpInput');
+    if (inp) inp.value = productName;
+    runCompare();
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -843,6 +1099,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('cmpInput')?.addEventListener('keydown', e => {
         if (e.key === 'Enter') { e.preventDefault(); runCompare(); }
     });
+
+    // Kategori tile'larını render et
+    renderCatTiles();
 
     // Wait for sb (defined in config.js)
     let waited = 0;
