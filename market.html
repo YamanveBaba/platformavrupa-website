@@ -515,7 +515,7 @@ function logoImg(slug, size) {
     const cfg = CHAINS[slug];
     if (!cfg) return '';
     const s = size || 6;
-    const fallbackStyle = `style='background:${cfg.color}'`;
+    const fallbackStyle = `style="background:${cfg.color}"`;
     return `<img src="https://logo.clearbit.com/${cfg.logo}" alt="${esc(cfg.label)}"
         class="w-${s} h-${s} object-contain rounded-lg"
         onerror="this.outerHTML='<div class=\\'w-${s} h-${s} rounded-lg flex items-center justify-center text-white text-xs font-black\\' ${fallbackStyle}>${esc(cfg.label.slice(0,2))}</div>'" referrerpolicy="no-referrer">`;
