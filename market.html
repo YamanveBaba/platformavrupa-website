@@ -945,14 +945,14 @@ async function runCompare() {
     loadEl.classList.remove('hidden');
     let data = [], error;
     try {
-        // Her arama terimi için sorgu at, sonuçları birleştir
+        // Her arama terimi için sorgu at — name ve name_tr kolonu
         for (const term of queries) {
             const r = await sb
                 .from('market_chain_products')
-                .select('name,price,promo_price,currency,chain_slug,captured_at,in_promo,promo_valid_from,promo_valid_until')
+                .select('name,name_tr,price,promo_price,currency,chain_slug,captured_at,in_promo,promo_valid_from,promo_valid_until')
                 .eq('country_code','BE')
                 .in('chain_slug', SLUGS)
-                .ilike('name','%'+term+'%')
+                .or(`name.ilike.%${term}%,name_tr.ilike.%${term}%`)
                 .limit(150);
             if (r.error) { error = r.error; break; }
             if (r.data) data = data.concat(r.data);
@@ -1045,11 +1045,25 @@ async function loadMarketCards() {
     let statsMap = {};
     if (sb) {
         try {
-            const { data, error } = await sb
-                .from('market_chain_products_stats')
-                .select('chain_slug,product_count,last_captured_at')
-                .eq('country_code','BE');
-            if (!error && data) data.forEach(r => { statsMap[r.chain_slug] = r; });
+            // Her zincir için ürün sayısını say
+            for (const slug of SLUGS) {
+                const { count } = await sb
+                    .from('market_chain_products')
+                    .select('id', { count: 'exact', head: true })
+                    .eq('country_code','BE')
+                    .eq('chain_slug', slug);
+                const { data: latest } = await sb
+                    .from('market_chain_products')
+                    .select('captured_at')
+                    .eq('country_code','BE')
+                    .eq('chain_slug', slug)
+                    .order('captured_at', { ascending: false })
+                    .limit(1);
+                statsMap[slug] = {
+                    product_count: count || 0,
+                    last_captured_at: latest?.[0]?.captured_at || null
+                };
+            }
         } catch {}
     }
 
