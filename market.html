@@ -717,8 +717,8 @@ function showMode(mode) {
 function renderCatTiles() {
     const grid = document.getElementById('catTileGrid');
     if (!grid) return;
-    grid.innerHTML = KAT_LIST.map(k =>
-        `<div class="cat-tile" onclick="browseCat('${esc(k.label)}','${esc(k.emoji)}')">
+    grid.innerHTML = KAT_LIST.map((k, i) =>
+        `<div class="cat-tile" onclick="browseCat(${i})">
             <span class="cat-emoji">${k.emoji}</span>
             <span class="cat-name">${esc(k.label)}</span>
         </div>`
@@ -788,7 +788,10 @@ function renderCatProdGrid() {
     }).join('');
 }
 
-async function browseCat(catLabel, catEmoji) {
+async function browseCat(idx) {
+    const k = KAT_LIST[idx];
+    if (!k) return;
+    const catLabel = k.label, catEmoji = k.emoji;
     if (!sb) return;
     // Grid → ürün listesi
     document.getElementById('catGrid').classList.add('hidden');
