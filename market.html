@@ -825,11 +825,11 @@ async function browseCat(idx) {
 }
 
 function compareFromCat(productName, fromSlug) {
-    // Karşılaştır moduna geç, ürün adını ara
+    switchTab('karsilastir');
     showMode('ara');
     const inp = document.getElementById('cmpInput');
     if (inp) inp.value = productName;
-    runCompare();
+    showCompareCards(productName);
 }
 
 // ═══════════════════════════════════════════════════════════════════
