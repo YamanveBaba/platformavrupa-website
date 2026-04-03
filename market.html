@@ -915,6 +915,9 @@ function trCevir(q) {
     return null;
 }
 
+// ── Arama sonuçları (ham veri) — ürün seçimi için tutuluyor
+let _searchResults = [];
+
 async function runCompare() {
     const input = document.getElementById('cmpInput');
     const resEl  = document.getElementById('cmpResults');
@@ -922,10 +925,11 @@ async function runCompare() {
     const errMsg = document.getElementById('cmpErrMsg');
     const loadEl = document.getElementById('cmpLoading');
 
-    const q = String(input?.value||'').trim().replace(/[^a-zA-Z0-9\u00C0-\u024F\s.-]/g,'').slice(0,80);
+    const q = String(input?.value||'').trim().replace(/[^a-zA-Z0-9\u00C0-\u024F\s&.-]/g,'').slice(0,80);
     errEl.classList.add('hidden');
     resEl.classList.add('hidden');
     resEl.innerHTML = '';
+    _searchResults = [];
 
     if (q.length < 2) {
         errMsg.textContent = 'En az 2 karakter yazın.';
@@ -933,19 +937,17 @@ async function runCompare() {
         return;
     }
     if (!sb) {
-        errMsg.textContent = 'Supabase bağlantısı yok (config.js).';
+        errMsg.textContent = 'Supabase bağlantısı yok.';
         errEl.classList.remove('hidden');
         return;
     }
 
-    // Türkçe → Hollandaca çeviri
     const nlQ = trCevir(q);
     const queries = nlQ && nlQ !== q ? [q, nlQ] : [q];
 
     loadEl.classList.remove('hidden');
     let data = [], error;
     try {
-        // Her arama terimi için sorgu at
         for (const term of queries) {
             const r = await sb
                 .from('market_chain_products')
@@ -953,7 +955,8 @@ async function runCompare() {
                 .eq('country_code','BE')
                 .in('chain_slug', SLUGS)
                 .ilike('name', `%${term}%`)
-                .limit(150);
+                .gt('price', 0)
+                .limit(200);
             if (r.error) { error = r.error; break; }
             if (r.data) data = data.concat(r.data);
         }
@@ -961,7 +964,7 @@ async function runCompare() {
     loadEl.classList.add('hidden');
 
     if (error) {
-        errMsg.textContent = 'Karşılaştırma başarısız. Lütfen tekrar deneyin.';
+        errMsg.textContent = 'Arama başarısız. Lütfen tekrar deneyin.';
         errEl.classList.remove('hidden');
         return;
     }
@@ -969,13 +972,96 @@ async function runCompare() {
         resEl.classList.remove('hidden');
         resEl.innerHTML = `<div class="glass-dark rounded-2xl p-8 text-center">
             <i class="fa-solid fa-magnifying-glass text-3xl text-white/15 mb-3 block"></i>
-            <p class="text-white/50 text-sm mb-1">Eşleşen ürün bulunamadı</p>
+            <p class="text-white/50 text-sm mb-1">Ürün bulunamadı</p>
             <p class="text-white/25 text-xs">Arama terimini kısaltmayı deneyin</p>
         </div>`;
         return;
     }
 
-    // Best per chain
+    _searchResults = data;
+
+    // Benzersiz ürün adlarını çıkar (her chain'den en ucuz)
+    const nameMap = {};
+    for (const row of data) {
+        const key = row.name.toLowerCase().trim();
+        if (!nameMap[key] || effPrice(row) < effPrice(nameMap[key])) {
+            nameMap[key] = row;
+        }
+    }
+    const unique = Object.values(nameMap).sort((a,b) => effPrice(a)-effPrice(b)).slice(0,40);
+
+    resEl.classList.remove('hidden');
+    resEl.innerHTML = `
+        <div class="glass-dark rounded-2xl p-4">
+            <p class="text-white/50 text-xs mb-3 flex items-center gap-1.5">
+                <i class="fa-solid fa-hand-pointer text-emerald-400"></i>
+                Karşılaştırmak istediğin ürünü seç (${unique.length} sonuç)
+            </p>
+            <div class="space-y-2">
+                ${unique.map((row,i) => {
+                    const cfg = CHAINS[row.chain_slug] || {label:row.chain_slug,color:'#64748b'};
+                    const eff = effPrice(row);
+                    return `<button onclick="selectAndCompare(${i})"
+                        class="w-full text-left bg-white rounded-xl px-4 py-3 flex items-center gap-3 hover:bg-emerald-50 active:bg-emerald-100 transition border border-slate-100">
+                        <div style="width:4px;height:36px;background:${cfg.color};border-radius:4px;flex-shrink:0"></div>
+                        <div class="flex-1 min-w-0">
+                            <div class="text-slate-800 font-semibold text-sm leading-snug line-clamp-1">${esc(row.name)}</div>
+                            <div class="text-slate-500 text-xs mt-0.5">${esc(cfg.label)}</div>
+                        </div>
+                        <div class="text-slate-800 font-black text-sm shrink-0">${fmtP(eff,row.currency)}</div>
+                        <i class="fa-solid fa-chevron-right text-slate-300 text-xs shrink-0"></i>
+                    </button>`;
+                }).join('')}
+            </div>
+        </div>`;
+}
+
+function selectAndCompare(i) {
+    const row = Object.values((() => {
+        const nameMap = {};
+        for (const r of _searchResults) {
+            const key = r.name.toLowerCase().trim();
+            if (!nameMap[key] || effPrice(r) < effPrice(nameMap[key])) nameMap[key] = r;
+        }
+        return nameMap;
+    })()).sort((a,b) => effPrice(a)-effPrice(b)).slice(0,40)[i];
+    if (!row) return;
+    document.getElementById('cmpInput').value = row.name;
+    showCompareCards(row.name);
+}
+
+async function showCompareCards(productName) {
+    const resEl  = document.getElementById('cmpResults');
+    const errEl  = document.getElementById('cmpError');
+    const loadEl = document.getElementById('cmpLoading');
+
+    errEl.classList.add('hidden');
+    resEl.classList.add('hidden');
+    loadEl.classList.remove('hidden');
+
+    let data = [], error;
+    try {
+        const r = await sb
+            .from('market_chain_products')
+            .select('name,price,promo_price,currency,chain_slug,captured_at,in_promo,promo_valid_from,promo_valid_until')
+            .eq('country_code','BE')
+            .in('chain_slug', SLUGS)
+            .ilike('name', `%${productName.split(' ').slice(0,3).join(' ')}%`)
+            .gt('price', 0)
+            .limit(200);
+        if (r.error) error = r.error;
+        else data = r.data || [];
+    } catch(e) { error = e; }
+    loadEl.classList.add('hidden');
+
+    if (error || data.length === 0) {
+        resEl.classList.remove('hidden');
+        resEl.innerHTML = `<div class="glass-dark rounded-2xl p-8 text-center">
+            <p class="text-white/50 text-sm">Karşılaştırma verisi bulunamadı</p>
+        </div>`;
+        return;
+    }
+
     const best = {};
     for (const row of data) {
         if (!SLUGS.includes(row.chain_slug)) continue;
@@ -1001,9 +1087,7 @@ async function runCompare() {
         return `<div class="promo-card ${isW ? 'compare-winner' : ''} border-2 ${isW ? 'border-emerald-400' : 'border-transparent'} relative">
             <div style="height:4px;background:${isW ? '#10b981' : cfg.color}"></div>
             <div class="p-4">
-                ${isW ? `<div class="mb-2.5">
-                    <span class="badge-green text-[.7rem]"><i class="fa-solid fa-crown mr-1"></i>En Uygun</span>
-                </div>` : ''}
+                ${isW ? `<div class="mb-2.5"><span class="badge-green text-[.7rem]"><i class="fa-solid fa-crown mr-1"></i>En Uygun</span></div>` : ''}
                 <div class="flex items-center gap-2 mb-3">
                     ${logoImg(slug,8)}
                     <div class="flex-1 min-w-0">
@@ -1025,6 +1109,9 @@ async function runCompare() {
 
     resEl.classList.remove('hidden');
     resEl.innerHTML = `
+        <button onclick="runCompare()" class="text-white/40 text-xs flex items-center gap-1.5 mb-2 hover:text-white/70 transition">
+            <i class="fa-solid fa-arrow-left text-xs"></i> Aramaya dön
+        </button>
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">${cards}</div>
         ${Number.isFinite(minP) ? `
         <div class="mt-4 glass-dark rounded-2xl p-4 flex items-center justify-center gap-3 flex-wrap">
