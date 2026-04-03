@@ -174,9 +174,9 @@
 <!-- ═══ HEADER ═══════════════════════════════════════════════════ -->
 <nav class="bg-white/96 backdrop-blur-xl sticky top-0 z-50 border-b border-slate-200/60 shadow-md">
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-        <a href="index.html" class="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-500 hover:bg-slate-200 transition">
+        <button onclick="navBack()" class="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-500 hover:bg-slate-200 transition">
             <i class="fa-solid fa-arrow-left"></i>
-        </a>
+        </button>
         <div class="flex items-center gap-2.5">
             <div class="w-11 h-11 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-emerald-500/25">
                 <i class="fa-solid fa-tags text-lg"></i>
@@ -519,6 +519,35 @@ function logoImg(slug, size) {
     return `<img src="https://www.google.com/s2/favicons?domain=${cfg.logo}&sz=64" alt="${esc(cfg.label)}"
         class="w-${s} h-${s} object-contain rounded-lg"
         onerror="this.onerror=null;this.style.cssText='background:${cfg.color};border-radius:8px;display:inline-block'" referrerpolicy="no-referrer">`;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// NAV BACK
+// ═══════════════════════════════════════════════════════════════════
+function navBack() {
+    const catProdWrap = document.getElementById('catProdWrap');
+    if (catProdWrap && !catProdWrap.classList.contains('hidden')) {
+        backToCatGrid();
+        return;
+    }
+    const cmpResults = document.getElementById('cmpResults');
+    if (cmpResults && !cmpResults.classList.contains('hidden') && _searchResults.length > 0) {
+        const inp = document.getElementById('cmpInput');
+        if (inp) { const q = inp.value; inp.value = q; }
+        runCompare();
+        return;
+    }
+    const secK = document.getElementById('sec-karsilastir');
+    if (secK && !secK.classList.contains('hidden')) {
+        switchTab('indirimler');
+        return;
+    }
+    const secM = document.getElementById('sec-marketler');
+    if (secM && !secM.classList.contains('hidden')) {
+        switchTab('indirimler');
+        return;
+    }
+    window.location.href = 'index.html';
 }
 
 // ═══════════════════════════════════════════════════════════════════
