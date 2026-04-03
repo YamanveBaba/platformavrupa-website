@@ -1,2 +1,0 @@
-# Opsiyonel: satır başına bir kategori kodu (ör. v2FRU). Tüm satırlar # ile başlıyorsa veya dosya yoksa
-# kategoriler https://www.delhaize.be/nl/shop sayfasından otomatik toplanır.

@@ -1,3 +1,0 @@
-# Bu dosyayi kopyalayip lidl_cookie.txt yapin (gitignore).
-# Tarayici: F12 -> Network -> q/api/search -> Request Headers -> Cookie degeri.
-# Yorum satirlari (#) kalabilir; gercek cerez tek satir name=value;...

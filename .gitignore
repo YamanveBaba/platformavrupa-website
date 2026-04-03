@@ -27,3 +27,4 @@ Thumbs.db
 node_modules/
 dist/
 *.log
+market_fiyat_cekici/

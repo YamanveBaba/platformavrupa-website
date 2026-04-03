@@ -1,3 +1,0 @@
-# Bu dosyayi kopyalayip lidl_be_api_categories.txt yapin (basindaki # satirlari silin).
-# Her satir: tarayicidan bir kategori liste sayfasi URL'si (adres cubugundan).
-https://www.lidl.be/c/nl-BE/voeding-drank/s10068374
