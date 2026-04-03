@@ -462,11 +462,11 @@
 // CONFIG
 // ═══════════════════════════════════════════════════════════════════
 const CHAINS = {
-    colruyt_be:   { label:'Colruyt',   color:'#E31E24', logo:'colruyt.com',   brosur:'https://www.folder.be/colruyt'   },
-    aldi_be:      { label:'ALDI',      color:'#003F7F', logo:'aldi.com',      brosur:'https://www.folder.be/aldi'      },
-    delhaize_be:  { label:'Delhaize',  color:'#E31837', logo:'delhaize.com',  brosur:'https://www.folder.be/delhaize'  },
-    lidl_be:      { label:'Lidl',      color:'#0050AA', logo:'lidl.com',      brosur:'https://www.folder.be/lidl'      },
-    carrefour_be: { label:'Carrefour', color:'#007DC5', logo:'carrefour.com', brosur:'https://www.folder.be/carrefour' },
+    colruyt_be:   { label:'Colruyt',   color:'#E31E24', logo:'colruyt.com',   brosur:'https://www.colruyt.be/nl/aanbiedingen'         },
+    aldi_be:      { label:'ALDI',      color:'#003F7F', logo:'aldi.com',      brosur:'https://www.aldi.be/nl/aanbiedingen'            },
+    delhaize_be:  { label:'Delhaize',  color:'#E31837', logo:'delhaize.com',  brosur:'https://www.delhaize.be/nl/aanbiedingen'        },
+    lidl_be:      { label:'Lidl',      color:'#0050AA', logo:'lidl.com',      brosur:'https://www.lidl.be/nl/aanbiedingen.htm'        },
+    carrefour_be: { label:'Carrefour', color:'#007DC5', logo:'carrefour.com', brosur:'https://www.carrefour.be/nl/promoties'          },
 };
 const SLUGS = Object.keys(CHAINS);
 
@@ -945,14 +945,14 @@ async function runCompare() {
     loadEl.classList.remove('hidden');
     let data = [], error;
     try {
-        // Her arama terimi için sorgu at — name ve name_tr kolonu
+        // Her arama terimi için sorgu at
         for (const term of queries) {
             const r = await sb
                 .from('market_chain_products')
-                .select('name,name_tr,price,promo_price,currency,chain_slug,captured_at,in_promo,promo_valid_from,promo_valid_until')
+                .select('name,price,promo_price,currency,chain_slug,captured_at,in_promo,promo_valid_from,promo_valid_until')
                 .eq('country_code','BE')
                 .in('chain_slug', SLUGS)
-                .or(`name.ilike.%${term}%,name_tr.ilike.%${term}%`)
+                .ilike('name', `%${term}%`)
                 .limit(150);
             if (r.error) { error = r.error; break; }
             if (r.data) data = data.concat(r.data);
