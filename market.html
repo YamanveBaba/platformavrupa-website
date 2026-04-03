@@ -509,15 +509,16 @@ function discPct(price, promo) {
 function effPrice(row) {
     if (row.in_promo && row.promo_price != null && Number.isFinite(Number(row.promo_price)))
         return Number(row.promo_price);
-    return Number.isFinite(Number(row.price)) ? Number(row.price) : NaN;
+    const p = Number(row.price);
+    return (Number.isFinite(p) && p > 0) ? p : NaN;
 }
 function logoImg(slug, size) {
     const cfg = CHAINS[slug];
     if (!cfg) return '';
     const s = size || 6;
-    return `<img src="https://logo.clearbit.com/${cfg.logo}" alt="${esc(cfg.label)}"
+    return `<img src="https://www.google.com/s2/favicons?domain=${cfg.logo}&sz=64" alt="${esc(cfg.label)}"
         class="w-${s} h-${s} object-contain rounded-lg"
-        onerror="this.onerror=null;this.src='';this.style.cssText='background:${cfg.color};border-radius:8px'" referrerpolicy="no-referrer">`;
+        onerror="this.onerror=null;this.style.cssText='background:${cfg.color};border-radius:8px;display:inline-block'" referrerpolicy="no-referrer">`;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -609,11 +610,12 @@ async function loadPromos() {
             .from('market_chain_products')
             .select('name,price,promo_price,currency,chain_slug,in_promo,promo_valid_from,promo_valid_until,captured_at')
             .eq('country_code','BE')
-            .eq('in_promo', true)
+            .not('promo_price','is',null)
+            .gt('promo_price', 0)
             .order('captured_at',{ascending:false})
             .limit(300);
         if (error) throw error;
-        allPromos = (data||[]).filter(r => r.promo_price != null);
+        allPromos = (data||[]).filter(r => r.promo_price != null && Number(r.price) > Number(r.promo_price));
         // Sort by discount % desc
         allPromos.sort((a,b) => (discPct(b.price,b.promo_price)||0) - (discPct(a.price,a.promo_price)||0));
         renderPromos();
