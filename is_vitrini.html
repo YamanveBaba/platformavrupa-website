@@ -311,10 +311,11 @@
                 try {
                     // ARTIK 'listings' DEĞİL 'ilanlar' TABLOSUNDAN ÇEKİYORUZ!
                     const { data, error } = await sb.from('ilanlar')
-                        .select('*')
-                        .eq('category', 'İş İlanı') // Kategori filtresi
-                        .eq('status', 'active') // Sadece aktifler
-                        .order('created_at', { ascending: false });
+                        .select('id,title,city,country,owner_name,price,sektor,pozisyon,sub_category,source_url,source,created_at,lat,lon')
+                        .eq('category', 'İş İlanı')
+                        .eq('status', 'active')
+                        .order('created_at', { ascending: false })
+                        .limit(500);
 
                     if (!error && data) {
                         tumIlanlar = data.map(i => ({
