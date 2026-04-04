@@ -307,17 +307,19 @@
                     if (!error && data) {
                         tumIlanlar = data.map(i => ({
                             id: i.id,
-                            role: 'isveren', // Bot verileri genelde işverendir
-                            sektor: 'Genel', // Sektör yoksa Genel olsun
+                            role: i.sub_category === 'İş Arıyorum' ? 'isci' : 'isveren',
+                            sektor: i.sektor || 'Diğer',
                             baslik: i.title,
-                            firma: i.owner_name || "Üye", // Şirket adı yoksa Üye yaz
+                            firma: i.owner_name || "Üye",
                             konum: i.city || "Avrupa",
                             ulke: i.country || '',
-                            fiyat: i.price,
-                            pozisyon: "Tam Zamanlı",
+                            fiyat: i.price || '',
+                            pozisyon: i.pozisyon || "Tam Zamanlı",
                             tarih: formatDate(i.created_at, 'long'),
-                            lat: 48.0 + (Math.random() * 5), 
-                            lon: 10.0 + (Math.random() * 5)
+                            source_url: i.source_url || '',
+                            source: i.source || 'user',
+                            lat: i.lat || (48.0 + (Math.random() * 5)),
+                            lon: i.lon || (10.0 + (Math.random() * 5))
                         }));
                     }
                 } catch (err) { console.error(err); }
@@ -400,7 +402,9 @@
                     </div>
                     <div class="flex justify-between items-center pt-3 border-t border-gray-50">
                          <span class="text-xs text-gray-400 flex items-center gap-1"><i class="fa-solid fa-location-dot"></i> ${item.ulke}</span>
-                         <span class="font-bold text-slate-800 text-sm">${item.fiyat}</span>
+                         ${item.source_url
+                            ? `<a href="${item.source_url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="text-xs font-bold text-purple-600 hover:text-purple-800 flex items-center gap-1"><i class="fa-solid fa-arrow-up-right-from-square"></i> Orijinal İlan</a>`
+                            : `<span class="font-bold text-slate-800 text-sm">${item.fiyat || ''}</span>`}
                     </div>
                 </div>`;
             });
