@@ -4,6 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Başvurularım | PlatformAvrupa</title>
+    <meta name="description" content="Sağlık turizmi danışmanlık başvurularınız. Platform Avrupa sağlık başvuruları.">
+    <link rel="canonical" href="https://www.platformavrupa.com/saglik_basvurularim.html">
+    <meta property="og:title" content="Başvurularım | PlatformAvrupa">
+    <meta property="og:url" content="https://www.platformavrupa.com/saglik_basvurularim.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Platform Avrupa">
+    <meta property="og:image" content="https://www.platformavrupa.com/og-image.png">
+    <meta property="og:locale" content="tr_TR">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Başvurularım | PlatformAvrupa">
+    <meta name="twitter:image" content="https://www.platformavrupa.com/og-image.png">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
@@ -82,7 +93,10 @@
                     text: 'Başvurularınızı görmek için giriş yapmalısınız.',
                     confirmButtonText: 'Giriş Yap'
                 }).then((result) => {
-                    if (result.isConfirmed) window.location.href = 'login.html';
+                    if (result.isConfirmed) {
+                        localStorage.setItem('authRedirect', window.location.href);
+                        window.location.href = 'login.html';
+                    }
                 });
                 return;
             }
@@ -172,7 +186,7 @@
                                 <div class="flex items-center gap-2 text-sm">
                                     <i class="fa-solid fa-calendar text-pink-400"></i>
                                     <span class="text-slate-300">Tercih Edilen Tarih:</span>
-                                    <span class="text-white">${new Date(lead.preferred_date).toLocaleDateString('tr-TR')}</span>
+                                    <span class="text-white">${formatDate(lead.preferred_date, 'long')}</span>
                                 </div>
                             ` : ''}
                             ${lead.clinic_quote ? `

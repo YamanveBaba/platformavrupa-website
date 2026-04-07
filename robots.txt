@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+# Admin ve yönetim sayfaları arama sonuçlarında çıkmasın (isteğe bağlı)
+Disallow: /admin.html
+Disallow: /admin_listings.html
+Disallow: /admin_chat.html
+Disallow: /video_yonetim.html
+Disallow: /sifre_yenile.html
+
+Sitemap: https://www.platformavrupa.com/sitemap.xml

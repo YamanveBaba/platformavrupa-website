@@ -5,6 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Platform Akademi | PlatformAvrupa</title>
     <meta name="description" content="Avrupa'da yaşayan Türkler için ücretsiz eğitim videoları. Dil, kariyer, finans ve yaşam rehberi.">
+    <link rel="canonical" href="https://www.platformavrupa.com/akademi.html">
+    <meta property="og:title" content="Platform Akademi | PlatformAvrupa">
+    <meta property="og:description" content="Avrupa'da yaşayan Türkler için ücretsiz eğitim videoları. Dil, kariyer, finans ve yaşam rehberi.">
+    <meta property="og:url" content="https://www.platformavrupa.com/akademi.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Platform Avrupa">
+    <meta property="og:image" content="https://www.platformavrupa.com/og-image.png">
+    <meta property="og:locale" content="tr_TR">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Platform Akademi | PlatformAvrupa">
+    <meta name="twitter:description" content="Avrupa'da yaşayan Türkler için ücretsiz eğitim videoları.">
+    <meta name="twitter:image" content="https://www.platformavrupa.com/og-image.png">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -209,13 +221,23 @@
     <!-- VİDEO MODAL -->
     <div id="videoModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/95 backdrop-blur-md">
         <div class="relative w-full max-w-5xl mx-4">
-            <button onclick="closeVideoModal()" class="absolute -top-12 right-0 text-white hover:text-red-400 font-bold flex items-center gap-2 transition">
-                <i class="fa-solid fa-xmark text-xl"></i> Kapat
-            </button>
-            <div class="aspect-video w-full bg-black rounded-2xl overflow-hidden shadow-2xl">
+            <div class="flex absolute -top-12 right-0 gap-2">
+                <button onclick="closeVideoModal()" class="text-white hover:text-purple-400 font-bold flex items-center gap-2 transition px-3 py-1.5 rounded-lg hover:bg-white/10">
+                    <i class="fa-solid fa-list"></i> Listeye dön
+                </button>
+                <button onclick="closeVideoModal()" class="text-white hover:text-red-400 font-bold flex items-center gap-2 transition px-3 py-1.5 rounded-lg hover:bg-white/10">
+                    <i class="fa-solid fa-xmark text-xl"></i> Kapat
+                </button>
+            </div>
+            <div class="aspect-video w-full bg-black rounded-2xl overflow-hidden shadow-2xl relative">
                 <iframe id="youtubePlayer" class="w-full h-full" src="" frameborder="0" 
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                        allowfullscreen></iframe>
+                        allowfullscreen
+                        referrerpolicy="strict-origin-when-cross-origin"></iframe>
+                <!-- YouTube "Daha fazla video" tıklanmasını engellemek için alt overlay -->
+                <div class="absolute bottom-0 left-0 right-0 h-[28%] min-h-[70px] pointer-events-none bg-gradient-to-t from-black/95 to-transparent rounded-b-2xl flex items-end justify-center pb-2">
+                    <p class="text-slate-500 text-xs">Öneriler için kategorilere gidin</p>
+                </div>
             </div>
             <div id="videoInfo" class="mt-4 text-white">
                 <h3 id="videoTitle" class="text-xl font-bold"></h3>
@@ -421,7 +443,7 @@
             const titleEl = document.getElementById('videoTitle');
             const descEl = document.getElementById('videoDescription');
             
-            player.src = `https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0`;
+            player.src = `https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=1&rel=0`;
             titleEl.textContent = title;
             descEl.textContent = description;
             
@@ -525,6 +547,7 @@
                     cancelButtonText: 'İptal'
                 }).then(result => {
                     if (result.isConfirmed) {
+                        localStorage.setItem('authRedirect', window.location.href);
                         window.location.href = 'login.html';
                     }
                 });

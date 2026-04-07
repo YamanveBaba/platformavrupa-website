@@ -9,6 +9,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Haber Detayı - PlatformAvrupa</title>
+    <meta name="description" content="Platform Avrupa haber ve duyuru detayı. Gurbetçilere yönelik güncel içerik.">
+    <link rel="canonical" href="https://www.platformavrupa.com/duyuru_detay.html">
+    <meta property="og:title" content="Haber Detayı - PlatformAvrupa">
+    <meta property="og:description" content="Platform Avrupa haber ve duyuru detayı.">
+    <meta property="og:url" content="https://www.platformavrupa.com/duyuru_detay.html">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="Platform Avrupa">
+    <meta property="og:image" content="https://www.platformavrupa.com/og-image.png">
+    <meta property="og:locale" content="tr_TR">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Haber Detayı - PlatformAvrupa">
+    <meta name="twitter:description" content="Platform Avrupa haber ve duyuru detayı.">
+    <meta name="twitter:image" content="https://www.platformavrupa.com/og-image.png">
 
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -19,6 +32,9 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
     <style>body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }</style>
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"Article","headline":"Haber Detayı","publisher":{"@type":"Organization","name":"Platform Avrupa","logo":{"@type":"ImageObject","url":"https://www.platformavrupa.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.platformavrupa.com/duyuru_detay.html"}}
+    </script>
 
 </head>
 
@@ -176,7 +192,7 @@
 
             const resim = haber.image_url ? haber.image_url : 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?q=80&w=1200';
 
-            const tarih = new Date(haber.created_at).toLocaleDateString('tr-TR');
+            const tarih = formatDate(haber.created_at, 'long');
 
 
 

@@ -4,6 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kargo & Emanet - PlatformAvrupa</title>
+    <meta name="description" content="Kargo ve emanet talepleri. Gurbetçiler arası güvenli kargo paylaşımı. Türkiye-Avrupa arası kargo ve emanet ilanları.">
+    <link rel="canonical" href="https://www.platformavrupa.com/kargo_emanet.html">
+    <meta property="og:title" content="Kargo & Emanet - PlatformAvrupa">
+    <meta property="og:description" content="Kargo ve emanet talepleri. Gurbetçiler arası güvenli kargo paylaşımı.">
+    <meta property="og:url" content="https://www.platformavrupa.com/kargo_emanet.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Platform Avrupa">
+    <meta property="og:image" content="https://www.platformavrupa.com/og-image.png">
+    <meta property="og:locale" content="tr_TR">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Kargo & Emanet - PlatformAvrupa">
+    <meta name="twitter:description" content="Kargo ve emanet talepleri. Gurbetçiler arası güvenli kargo paylaşımı.">
+    <meta name="twitter:image" content="https://www.platformavrupa.com/og-image.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -323,10 +336,10 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bg-slate-50 px-6 py-3 flex items-center justify-between border-t">
+                        <div class="bg-slate-50 px-6 py-3 flex items-center justify-between border-t">
                         <div class="text-xs text-slate-500">
                             <i class="fa-solid fa-clock mr-1"></i>
-                            ${new Date(req.created_at).toLocaleDateString('tr-TR')}
+                            ${formatDate(req.created_at, 'long')}
                         </div>
                         <span class="text-orange-600 font-bold text-sm hover:text-orange-700 transition pointer-events-none">
                             Detayları Gör <i class="fa-solid fa-arrow-right ml-1"></i>
@@ -361,6 +374,7 @@
             container.innerHTML = '';
             carriers.forEach((carrier, index) => {
                 const isTrip = carrier.travel_date ? true : false; // trip mi yoksa carrier request mi?
+                const formattedTravelDate = carrier.travel_date ? formatDate(carrier.travel_date, 'long') : null;
                 const card = document.createElement('div');
                 card.className = 'cargo-card';
                 card.dataset.carrierId = carrier.id;
@@ -400,7 +414,7 @@
                         </div>
 
                         <div class="flex items-center justify-between text-xs text-slate-600">
-                            <span><i class="fa-solid fa-calendar text-orange-500 mr-1"></i>${carrier.travel_date || 'Esnek tarih'}</span>
+                            <span><i class="fa-solid fa-calendar text-orange-500 mr-1"></i>${formattedTravelDate || 'Esnek tarih'}</span>
                             <span class="text-green-600 font-bold"><i class="fa-solid fa-box mr-1"></i>Kargo Kabul Eder</span>
                         </div>
                     </div>
@@ -533,7 +547,10 @@
                     confirmButtonText: 'Giriş Yap',
                     showCancelButton: true
                 }).then((result) => {
-                    if (result.isConfirmed) window.location.href = 'login.html';
+                    if (result.isConfirmed) {
+                        localStorage.setItem('authRedirect', window.location.href);
+                        window.location.href = 'login.html';
+                    }
                 });
                 return;
             }
@@ -656,7 +673,10 @@
                         confirmButtonText: 'Giriş Yap',
                         showCancelButton: true
                     }).then((result) => {
-                        if (result.isConfirmed) window.location.href = 'login.html';
+                        if (result.isConfirmed) {
+                            localStorage.setItem('authRedirect', window.location.href);
+                            window.location.href = 'login.html';
+                        }
                     });
                     return;
                 }

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'platform-avrupa-v1';
+const CACHE_NAME = 'platform-avrupa-v5';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -17,12 +17,23 @@ const ASSETS_TO_CACHE = [
   './logo.png'
 ];
 
-// Kurulum: Dosyaları önbelleğe al
+// Kurulum: Yeni cache aç, hemen aktive et
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS_TO_CACHE);
-    })
+    }).then(() => self.skipWaiting())
+  );
+});
+
+// Aktive: Eski cache versiyonlarını sil
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+      );
+    }).then(() => self.clients.claim())
   );
 });
 
@@ -97,7 +108,22 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Sadece kendi origin'imizdeki dosyaları cache'le
+  // HTML sayfaları: her zaman önce ağdan çek (stale cache sorunu yaşanmasın)
+  if (request.destination === 'document' ||
+      requestUrl.pathname.endsWith('.html') ||
+      requestUrl.pathname === '/' ||
+      requestUrl.pathname === '') {
+    event.respondWith(
+      fetch(request).then((response) => {
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
+        return response;
+      }).catch(() => caches.match(request))
+    );
+    return;
+  }
+
+  // JS/CSS/resimler: cache first
   if (requestUrl.origin === location.origin) {
     event.respondWith(
       caches.match(request).then((response) => {

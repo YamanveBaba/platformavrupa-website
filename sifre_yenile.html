@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yeni Şifre Belirle - PlatformAvrupa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="utils.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; }</style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-md bg-white p-10 rounded-3xl shadow-xl border border-slate-200 text-center">
+        <div class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-6">
+            <i class="fa-solid fa-lock"></i>
+        </div>
+        <h2 class="text-2xl font-extrabold text-slate-900 mb-2">Yeni Şifre Belirle</h2>
+        <p class="text-slate-500 text-sm mb-6">Yeni şifrenizi en az 6 karakter olacak şekilde girin.</p>
+
+        <form id="form" class="space-y-4 text-left">
+            <div>
+                <label class="text-xs font-bold text-slate-500 uppercase ml-1 block mb-1">Yeni Şifre</label>
+                <input type="password" id="newPassword" required minlength="8" placeholder="En az 8 karakter" autocomplete="new-password" class="w-full border-2 border-slate-200 rounded-xl p-3 outline-none focus:border-indigo-500 transition">
+            </div>
+            <div>
+                <label class="text-xs font-bold text-slate-500 uppercase ml-1 block mb-1">Şifre Tekrar</label>
+                <input type="password" id="confirmPassword" required minlength="8" placeholder="Şifreyi tekrar girin" autocomplete="new-password" class="w-full border-2 border-slate-200 rounded-xl p-3 outline-none focus:border-indigo-500 transition">
+            </div>
+            <p id="msg" class="text-sm text-center hidden"></p>
+            <button type="submit" id="submitBtn" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3.5 rounded-xl transition shadow-lg">
+                Şifreyi Güncelle
+            </button>
+        </form>
+
+        <div class="mt-6 pt-6 border-t border-slate-100">
+            <a href="login.html" class="text-sm font-bold text-slate-600 hover:text-slate-900 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-arrow-left"></i> Giriş Ekranına Dön
+            </a>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('form');
+        const msgEl = document.getElementById('msg');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // Sayfa yüklendiğinde hash üzerinden gelen recovery oturumunu kontrol et
+        document.addEventListener('DOMContentLoaded', async function () {
+            if (!window.sb) return;
+
+            try {
+                const { data: { session }, error } = await sb.auth.getSession();
+                if (error || !session) {
+                    msgEl.textContent = 'Bu şifre sıfırlama bağlantısı geçersiz veya süresi dolmuş olabilir. Lütfen yeniden talep edin.';
+                    msgEl.className = 'text-sm text-center text-red-600';
+                    msgEl.classList.remove('hidden');
+                    submitBtn.disabled = true;
+                }
+            } catch (e) {
+                console.error('Recovery oturumu kontrol hatası:', e);
+            }
+
+            // URL hash içindeki access_token vb. bilgileri gizle
+            if (window.location.hash && window.location.hash.includes('access_token')) {
+                history.replaceState(null, '', window.location.pathname + window.location.search);
+            }
+        });
+
+        form.onsubmit = async function(e) {
+            e.preventDefault();
+            const newP = document.getElementById('newPassword').value;
+            const confirmP = document.getElementById('confirmPassword').value;
+            msgEl.classList.add('hidden');
+
+            if (newP.length < 8) {
+                msgEl.textContent = 'Şifre en az 8 karakter olmalıdır.';
+                msgEl.className = 'text-sm text-center text-red-600';
+                msgEl.classList.remove('hidden');
+                return;
+            }
+            if (newP !== confirmP) {
+                msgEl.textContent = 'Şifreler eşleşmiyor.';
+                msgEl.className = 'text-sm text-center text-red-600';
+                msgEl.classList.remove('hidden');
+                return;
+            }
+
+            if (!window.sb) {
+                msgEl.textContent = 'Bağlantı hatası. Sayfayı yenileyip tekrar deneyin.';
+                msgEl.className = 'text-sm text-center text-red-600';
+                msgEl.classList.remove('hidden');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Güncelleniyor...';
+
+            const { error } = await sb.auth.updateUser({ password: newP });
+
+            if (error) {
+                msgEl.textContent = error.message || 'Şifre güncellenemedi.';
+                msgEl.className = 'text-sm text-center text-red-600';
+                msgEl.classList.remove('hidden');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Şifreyi Güncelle';
+                return;
+            }
+
+            msgEl.textContent = 'Şifreniz güncellendi. Giriş sayfasına yönlendiriliyorsunuz...';
+            msgEl.className = 'text-sm text-center text-green-600';
+            msgEl.classList.remove('hidden');
+            setTimeout(function() {
+                window.location.href = 'login.html';
+            }, 2000);
+        };
+    </script>
+</body>
+</html>

@@ -1,10 +1,7 @@
 # Platform Avrupa - Statik site (HTML/JS/CSS, build yok)
 # Netlify bu klasörü doğrudan yayınlar.
+# Not: Tüm .html dosyaları doğrudan sunulur (SEO ve doğrudan linkler için).
+# Eski SPA-style redirect kaldırıldı; yoksa her istek index.html'e düşer ve diğer sayfalar indexlenmez.
 
 [build]
   publish = "."
-
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200

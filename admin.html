@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
     <title>Admin Paneli - PlatformAvrupa HQ</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -64,16 +66,16 @@
     <aside class="w-64 glass-panel flex flex-col h-full border-r border-white/5 z-20">
         <div class="h-20 flex items-center gap-3 px-6 border-b border-white/5">
             <div class="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold shadow-lg shadow-indigo-500/30">PA</div>
-            <div><h1 class="font-bold text-lg leading-none">Yönetim</h1><span class="text-[10px] text-slate-400 tracking-widest uppercase">Admin v13.0 (FULL)</span></div>
+            <div><h1 class="font-bold text-lg leading-none">Yönetim</h1><span class="text-[10px] text-slate-400 tracking-widest uppercase">Admin v13.1 (Akademi güncel)</span></div>
         </div>
 
         <nav class="flex-1 py-6 space-y-1 overflow-y-auto">
             <a href="#" onclick="switchTab('dashboard', this); loadDashboard();" class="nav-item active flex items-center gap-4 px-6 py-3 text-slate-400 hover:text-white transition"><i class="fa-solid fa-chart-pie w-5"></i> Genel Bakış</a>
+            <a href="#" onclick="switchTab('doviz', this); updateCurrency();" class="nav-item flex items-center gap-4 px-6 py-3 text-slate-400 hover:text-white transition"><i class="fa-solid fa-coins w-5 text-yellow-400"></i> Döviz & Altın</a>
+            <a href="#" onclick="switchTab('market', this); initMarketTab(); loadMarketPrices(); loadCatalogs();" class="nav-item flex items-center gap-4 px-6 py-3 text-emerald-400 font-bold bg-emerald-500/10 hover:text-white transition"><i class="fa-solid fa-basket-shopping w-5"></i> Market & İndirim</a>
             
-            <a href="#" onclick="switchTab('market', this); loadMarketPrices(); loadCatalogs();" class="nav-item flex items-center gap-4 px-6 py-3 text-emerald-400 font-bold bg-emerald-500/10 hover:text-white transition"><i class="fa-solid fa-basket-shopping w-5"></i> Market & İndirim</a>
-            
-            <a href="#" onclick="switchTab('users', this); loadUsers();" class="nav-item flex items-center gap-4 px-6 py-3 text-slate-400 hover:text-white transition"><i class="fa-solid fa-users w-5"></i> Kullanıcılar</a>
-            <a href="#" onclick="switchTab('listings', this); loadListings();" class="nav-item flex items-center gap-4 px-6 py-3 text-slate-400 hover:text-white transition"><i class="fa-solid fa-layer-group w-5"></i> İlan Yönetimi</a>
+            <a href="#" id="nav-users" onclick="switchTab('users', this); loadUsers();" class="nav-item flex items-center gap-4 px-6 py-3 text-slate-400 hover:text-white transition"><i class="fa-solid fa-users w-5"></i> Kullanıcılar</a>
+            <a href="#" id="nav-listings" onclick="switchTab('listings', this); loadListings();" class="nav-item flex items-center gap-4 px-6 py-3 text-slate-400 hover:text-white transition"><i class="fa-solid fa-layer-group w-5"></i> İlan Yönetimi</a>
             
             <div class="px-6 pt-4 pb-2 text-[10px] uppercase text-slate-500 font-bold tracking-wider">Master Modüller</div>
             
@@ -140,6 +142,19 @@
                     <div class="glass-panel p-6 rounded-2xl border-l-4 border-red-500">
                         <div class="flex justify-between items-start"><div><p class="text-slate-400 text-sm">Duyurular</p><h3 class="text-3xl font-bold mt-1" id="dashAnnounce">...</h3></div><div class="w-10 h-10 bg-red-500/20 rounded-lg flex items-center justify-center text-red-400"><i class="fa-solid fa-bullhorn"></i></div></div>
                     </div>
+                    <div class="glass-panel p-6 rounded-2xl border-l-4 border-pink-500">
+                        <div class="flex justify-between items-start"><div><p class="text-slate-400 text-sm">Sağlık Başvuruları</p><h3 class="text-3xl font-bold mt-1" id="dashHealthLeads">...</h3></div><div class="w-10 h-10 bg-pink-500/20 rounded-lg flex items-center justify-center text-pink-400"><i class="fa-solid fa-heart-pulse"></i></div></div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="glass-panel p-6 rounded-2xl">
+                        <h3 class="font-bold mb-4">Son İlanlar</h3>
+                        <div id="dashLastListings" class="space-y-2 text-sm text-slate-400">Yükleniyor...</div>
+                    </div>
+                    <div class="glass-panel p-6 rounded-2xl">
+                        <h3 class="font-bold mb-4">Son Kayıt Olanlar</h3>
+                        <div id="dashLastUsers" class="space-y-2 text-sm text-slate-400">Yükleniyor...</div>
+                    </div>
                 </div>
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="lg:col-span-2 glass-panel p-6 rounded-2xl">
@@ -156,8 +171,8 @@
                 </div>
             </div>
 
-            <div id="section-market" class="hide-section">
-                <div class="max-w-6xl mx-auto space-y-8">
+            <div id="section-doviz" class="hide-section">
+                <div class="max-w-2xl mx-auto">
                     <div class="glass-panel p-6 rounded-2xl border-t-4 border-yellow-500">
                         <div class="flex justify-between items-center mb-6">
                             <h3 class="font-bold text-xl text-white"><i class="fa-solid fa-coins mr-2 text-yellow-400"></i> Döviz & Altın</h3>
@@ -169,10 +184,15 @@
                             <div class="bg-slate-800/50 p-4 rounded-xl"><span class="text-slate-400 text-xs">GRAM ALTIN</span><div class="text-2xl font-bold text-yellow-400 mt-1" id="rateGold">2485 ₺</div></div>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <div id="section-market" class="hide-section">
+                <div class="max-w-6xl mx-auto space-y-8">
                     <div class="glass-panel p-6 rounded-2xl border-t-4 border-emerald-500">
                         <div class="flex justify-between items-center mb-6">
                             <h3 class="font-bold text-xl text-white"><i class="fa-solid fa-basket-shopping mr-2 text-emerald-400"></i> Temel Gıda Fiyatları</h3>
-                            <button onclick="fetchMarketPrices()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg font-bold transition flex items-center gap-2"><i class="fa-solid fa-robot"></i> Botu Çalıştır</button>
+                            <button onclick="fetchMarketPrices()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg font-bold transition flex items-center gap-2"><i class="fa-solid fa-robot"></i> Botu Çalıştır <span class="text-xs opacity-75">(Demo)</span></button>
                         </div>
                         <div class="overflow-x-auto rounded-xl border border-white/10">
                             <table class="w-full text-left text-sm text-slate-300">
@@ -649,8 +669,8 @@
                             <i class="fa-solid fa-plus mr-1"></i> Yeni Video
                         </button>
                     </div>
-                    <div id="academyVideoList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <p class="text-slate-400 col-span-full text-center py-8">Yükleniyor...</p>
+                    <div id="academyVideoList" class="space-y-3">
+                        <p class="text-slate-400 text-center py-8">Yükleniyor...</p>
                     </div>
                 </div>
 
@@ -986,6 +1006,8 @@
     <script src="genel_veriler.js"></script>
 
     <script>
+        // v13.1: loadTravel erken tanım, academy_requests select(*), Chart destroy, video slug benzersiz, insert hata kontrolü
+        console.log('Admin panel güncel sürüm (cache yok) - ' + new Date().toISOString());
         const ulkelerTamListe = [{code:"DE", isim:"Almanya"}, {code:"AT", isim:"Avusturya"}, {code:"BE", isim:"Belçika"}, {code:"GB", isim:"Birleşik Krallık"}, {code:"BG", isim:"Bulgaristan"}, {code:"CZ", isim:"Çekya"}, {code:"DK", isim:"Danimarka"}, {code:"EE", isim:"Estonya"}, {code:"FI", isim:"Finlandiya"}, {code:"FR", isim:"Fransa"}, {code:"HR", isim:"Hırvatistan"}, {code:"NL", isim:"Hollanda"}, {code:"IE", isim:"İrlanda"}, {code:"ES", isim:"İspanya"}, {code:"SE", isim:"İsveç"}, {code:"CH", isim:"İsviçre"}, {code:"IT", isim:"İtalya"}, {code:"IS", isim:"İzlanda"}, {code:"ME", isim:"Karadağ"}, {code:"XK", isim:"Kosova"}, {code:"LV", isim:"Letonya"}, {code:"LI", isim:"Lihtenştayn"}, {code:"LT", isim:"Litvanya"}, {code:"LU", isim:"Lüksemburg"}, {code:"HU", isim:"Macaristan"}, {code:"MK", isim:"Makedonya"}, {code:"MT", isim:"Malta"}, {code:"NO", isim:"Norveç"}, {code:"PL", isim:"Polonya"}, {code:"PT", isim:"Portekiz"}, {code:"RO", isim:"Romanya"}, {code:"RS", isim:"Sırbistan"}, {code:"SK", isim:"Slovakya"}, {code:"SI", isim:"Slovenya"}, {code:"GR", isim:"Yunanistan"}, {code:"TR", isim:"Türkiye"}];
         // --- ADMİN İÇİN ÖZEL MARKET ÜLKE LİSTESİ (ÇAKIŞMAYI ÖNLER) ---
         const marketUlkeListesi = [
@@ -1003,10 +1025,22 @@
 
         function switchTab(id, el) { document.querySelectorAll('[id^="section-"]').forEach(d => { d.classList.remove('show-section'); d.classList.add('hide-section'); }); document.getElementById('section-'+id).classList.remove('hide-section'); document.getElementById('section-'+id).classList.add('show-section'); document.getElementById('pageTitle').innerText = el ? el.innerText.trim() : 'Yönetim'; if(el) { document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); el.classList.add('active'); }}
         function toggleCountrySelect() { const type = document.getElementById('annType').value; const div = document.getElementById('countrySelectDiv'); if(type === 'ulke') div.classList.remove('hidden'); else div.classList.add('hidden'); }
+        function loadTravel() { const container = document.getElementById('travelList'); if (container) container.innerHTML = '<p class="text-center text-slate-500 py-6 col-span-2">Seyahat verisi henüz yok.</p>'; }
         window.onload = function() { 
             const select = document.getElementById('annCountry'); select.innerHTML = '<option value="">Ülke Seçiniz...</option>'; 
             ulkelerTamListe.sort((a,b) => a.isim.localeCompare(b.isim)); ulkelerTamListe.forEach(ulke => { const opt = document.createElement('option'); opt.value = ulke.code; opt.text = ulke.isim + " (" + ulke.code + ")"; select.add(opt); }); 
-            loadDashboard(); loadUsers(); loadListings(); loadTravel(); loadAcademy(); loadLaw(); loadAnnouncements(); renderCharts(); loadBorders(); loadTransfer(); loadSOS(); loadWaze();
+            try { loadDashboard(); } catch(e) { console.warn('loadDashboard:', e); }
+            try { loadUsers(); } catch(e) { console.warn('loadUsers:', e); }
+            try { loadListings(); } catch(e) { console.warn('loadListings:', e); }
+            try { loadTravel(); } catch(e) { console.warn('loadTravel:', e); }
+            try { loadAcademy(); } catch(e) { console.warn('loadAcademy:', e); }
+            try { loadLaw(); } catch(e) { console.warn('loadLaw:', e); }
+            try { loadAnnouncements(); } catch(e) { console.warn('loadAnnouncements:', e); }
+            try { renderCharts(); } catch(e) { console.warn('renderCharts:', e); }
+            try { loadBorders(); } catch(e) { console.warn('loadBorders:', e); }
+            try { loadTransfer(); } catch(e) { console.warn('loadTransfer:', e); }
+            try { loadSOS(); } catch(e) { console.warn('loadSOS:', e); }
+            try { loadWaze(); } catch(e) { console.warn('loadWaze:', e); }
             // Yeni Modüller
             loadMarketPrices();
             loadCatalogs();
@@ -1017,15 +1051,60 @@
         };
 
         // --- DASHBOARD, USERS, LISTINGS ---
-        async function loadDashboard() { const { count: u } = await sb.from('profiles').select('*', {count:'exact', head:true}); const { count: l } = await sb.from('ilanlar').select('*', {count:'exact', head:true}); const { count: p } = await sb.from('listings').select('*', {count:'exact', head:true}).eq('status','pending'); const { count: a } = await sb.from('announcements').select('*', {count:'exact', head:true}); document.getElementById('dashUsers').innerText = u || 0; document.getElementById('dashListings').innerText = l || 0; document.getElementById('dashPending').innerText = p || 0; document.getElementById('dashAnnounce').innerText = a || 0; }
-        async function loadUsers() { const { data } = await sb.from('profiles').select('*').order('created_at', {ascending: false}); const tb = document.getElementById('usersTable'); tb.innerHTML = ''; if(!data || data.length === 0) { tb.innerHTML = '<tr><td colspan="4" class="text-center py-4">Kayıt yok.</td></tr>'; return; } data.forEach(user => { let statusColor = user.status === 'banned' ? 'text-red-400 bg-red-400/10' : 'text-emerald-400 bg-emerald-400/10'; const safeName = sanitize(user.full_name || 'İsimsiz'); const safeEmail = sanitize(user.email); const safeRole = sanitize(user.role); const safeStatus = sanitize(user.status); tb.innerHTML += `<tr class="hover:bg-white/5 border-b border-slate-800"><td class="px-6 py-4 flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center font-bold text-xs">${safeName.substring(0,2)||'U'}</div><div><p>${safeName}</p><p class="text-xs text-slate-500">${safeEmail}</p></div></td><td class="px-6 py-4">${safeRole}</td><td class="px-6 py-4"><span class="px-2 py-1 rounded text-xs font-bold ${statusColor}">${safeStatus}</span></td><td class="px-6 py-4 text-right"><button onclick="sendMessageToUser('${sanitize(user.id)}', '${safeName}')" class="text-blue-400 mr-2"><i class="fa-solid fa-envelope"></i></button><button onclick="toggleBan('${sanitize(user.id)}', '${safeStatus}')" class="text-amber-400 mr-2"><i class="fa-solid fa-ban"></i></button><button onclick="delUser('${sanitize(user.id)}')" class="text-red-400"><i class="fa-solid fa-trash"></i></button></td></tr>`; }); }
+        async function loadDashboard() {
+            const [profRes, ilanRes, listRes, annRes] = await Promise.all([
+                sb.from('profiles').select('*', {count:'exact', head:true}),
+                sb.from('ilanlar').select('*', {count:'exact', head:true}),
+                sb.from('listings').select('*', {count:'exact', head:true}).eq('status','pending'),
+                sb.from('announcements').select('*', {count:'exact', head:true})
+            ]);
+            const u = profRes.count; const l = ilanRes.count; const p = listRes.count; const a = annRes.count;
+            const dashUsersEl = document.getElementById('dashUsers');
+            const dashListingsEl = document.getElementById('dashListings');
+            const dashPendingEl = document.getElementById('dashPending');
+            const dashAnnounceEl = document.getElementById('dashAnnounce');
+            if (dashUsersEl) dashUsersEl.innerText = u ?? 0;
+            if (dashListingsEl) dashListingsEl.innerText = l ?? 0;
+            if (dashPendingEl) dashPendingEl.innerText = p ?? 0;
+            if (dashAnnounceEl) dashAnnounceEl.innerText = a ?? 0;
+            try {
+                const { count: hl } = await sb.from('health_leads').select('*', {count:'exact', head:true});
+                const healthEl = document.getElementById('dashHealthLeads');
+                if (healthEl) healthEl.innerText = hl ?? 0;
+            } catch (e) { const healthEl = document.getElementById('dashHealthLeads'); if (healthEl) healthEl.innerText = '0'; }
+            const lastListingsEl = document.getElementById('dashLastListings');
+            const lastUsersEl = document.getElementById('dashLastUsers');
+            try {
+                const { data: lastIlanlar } = await sb.from('ilanlar').select('id, title, category, created_at').order('created_at', { ascending: false }).limit(5);
+                if (lastListingsEl) {
+                    if (!lastIlanlar || lastIlanlar.length === 0) lastListingsEl.innerHTML = '<p class="text-slate-500">Henüz ilan yok.</p>';
+                    else lastListingsEl.innerHTML = lastIlanlar.map(i => `<a href="#" onclick="event.preventDefault(); switchTab('listings', document.getElementById('nav-listings')); loadListings();" class="block py-2 border-b border-white/5 hover:text-white text-slate-300 truncate" title="${sanitize(i.title)}">${sanitize(i.title)} <span class="text-xs text-slate-500">${i.category || ''}</span></a>`).join('');
+                }
+            } catch (e) { if (lastListingsEl) lastListingsEl.innerHTML = '<p class="text-slate-500">Yüklenemedi.</p>'; }
+            try {
+                const { data: lastProfiles } = await sb.from('profiles').select('id, full_name, email, created_at').order('created_at', { ascending: false }).limit(5);
+                if (lastUsersEl) {
+                    if (!lastProfiles || lastProfiles.length === 0) lastUsersEl.innerHTML = '<p class="text-slate-500">Henüz kullanıcı yok.</p>';
+                    else lastUsersEl.innerHTML = lastProfiles.map(u => `<a href="#" onclick="event.preventDefault(); switchTab('users', document.getElementById('nav-users')); loadUsers();" class="block py-2 border-b border-white/5 hover:text-white text-slate-300 truncate">${sanitize(u.full_name || 'İsimsiz')} <span class="text-xs text-slate-500">${(u.email || '').substring(0,20)}</span></a>`).join('');
+                }
+            } catch (e) { if (lastUsersEl) lastUsersEl.innerHTML = '<p class="text-slate-500">Yüklenemedi.</p>'; }
+        }
+        async function loadUsers() {
+            const { data } = await sb.from('profiles').select('*').order('created_at', {ascending: false});
+            const tb = document.getElementById('usersTable');
+            if (!tb) return;
+            tb.innerHTML = '';
+            if(!data || data.length === 0) { tb.innerHTML = '<tr><td colspan="4" class="text-center py-4">Kayıt yok.</td></tr>'; return; }
+            data.forEach(user => { let statusColor = user.status === 'banned' ? 'text-red-400 bg-red-400/10' : 'text-emerald-400 bg-emerald-400/10'; const safeName = sanitize(user.full_name || 'İsimsiz'); const safeEmail = sanitize(user.email); const safeRole = sanitize(user.role); const safeStatus = sanitize(user.status); tb.innerHTML += `<tr class="hover:bg-white/5 border-b border-slate-800"><td class="px-6 py-4 flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center font-bold text-xs">${safeName.substring(0,2)||'U'}</div><div><p>${safeName}</p><p class="text-xs text-slate-500">${safeEmail}</p></div></td><td class="px-6 py-4">${safeRole}</td><td class="px-6 py-4"><span class="px-2 py-1 rounded text-xs font-bold ${statusColor}">${safeStatus}</span></td><td class="px-6 py-4 text-right"><button onclick="sendMessageToUser('${sanitize(user.id)}', '${safeName}')" class="text-blue-400 mr-2"><i class="fa-solid fa-envelope"></i></button><button onclick="toggleBan('${sanitize(user.id)}', '${safeStatus}')" class="text-amber-400 mr-2"><i class="fa-solid fa-ban"></i></button><button onclick="delUser('${sanitize(user.id)}')" class="text-red-400"><i class="fa-solid fa-trash"></i></button></td></tr>`; });
+        }
         async function delUser(id) { if(confirm('Silinsin mi?')) { await sb.from('profiles').delete().eq('id', id); loadUsers(); } }
         async function toggleBan(id, st) { let newSt = st === 'active' ? 'banned' : 'active'; await sb.from('profiles').update({status: newSt}).eq('id', id); loadUsers(); }
         async function sendMessageToUser(uid, name) { const { value: txt } = await Swal.fire({ title: `Mesaj: ${name}`, input: 'text', inputPlaceholder: 'Mesajınız...' }); if(txt) { await sb.from('notifications').insert([{user_id: uid, title:'Yönetim', content:txt}]); Swal.fire('Gönderildi', '', 'success'); } }
         
         async function loadListings() { 
             const { data } = await sb.from('ilanlar').select('*').order('created_at', {ascending: false}); 
-            const div = document.getElementById('listingsContainer'); 
+            const div = document.getElementById('listingsContainer');
+            if (!div) return;
             div.innerHTML = ''; 
             if(!data || data.length === 0) { 
                 div.innerHTML = '<p class="text-center text-slate-500 py-10">Henüz hiç ilan yok.</p>'; 
@@ -1053,7 +1132,7 @@
                         <button onclick="delListing('${safeId}')" class="text-red-400 hover:text-red-500 hover:scale-110 transition bg-red-500/10 p-2 rounded"><i class="fa-solid fa-trash"></i></button>
                     </div>
                 </div>`; 
-            }); 
+            });
         }
         async function updateStatus(id, status) { await sb.from('ilanlar').update({status}).eq('id', id); loadListings(); }
         async function delListing(id) { if(confirm('Bu ilan silinsin mi?')) { await sb.from('ilanlar').delete().eq('id', id); loadListings(); } }
@@ -1100,6 +1179,7 @@
 
         function loadMarketPrices() {
             const tbody = document.getElementById('marketTable');
+            if (!tbody) return;
             tbody.innerHTML = '';
             temelUrunler.forEach(item => {
                 const min = Math.min(item.aldi, item.lidl, item.tr);
@@ -1393,7 +1473,7 @@
                                 image: article.urlToImage,
                                 source: article.source.name,
                                 url: article.url,
-                                publishedAt: new Date(article.publishedAt).toLocaleDateString('tr-TR')
+                                publishedAt: formatDate(article.publishedAt, 'long')
                             });
                         }
                     });
@@ -1509,36 +1589,61 @@
             }
         }
         
-        async function loadAnnouncements() { const { data } = await sb.from('announcements').select('*').order('created_at', {ascending: false}); const div = document.getElementById('activeAnnouncements'); div.innerHTML = ''; if(!data) return; data.forEach(a => { let img = a.image_url ? `<img src="${a.image_url}" loading="lazy" alt="${a.title}" class="w-12 h-12 rounded-lg object-cover">` : '<div class="w-12 h-12 bg-slate-700 rounded-lg flex items-center justify-center text-slate-500"><i class="fa-solid fa-image"></i></div>'; let badge = a.type === 'ulke' ? `<span class="bg-red-500/20 text-red-400 px-2 py-1 rounded text-xs font-bold border border-red-500/30">${a.country_code} ÖZEL</span>` : `<span class="bg-blue-500/20 text-blue-400 px-2 py-1 rounded text-xs font-bold border border-blue-500/30">GENEL</span>`; div.innerHTML += `<div class="glass-panel p-4 rounded-xl flex justify-between items-center border border-white/5 hover:border-white/10 transition"><div class="flex gap-4 items-center">${img} <div><h4 class="font-bold text-white text-sm">${a.title}</h4><div class="flex gap-2 mt-1">${badge} <span class="text-xs text-slate-500">${new Date(a.created_at).toLocaleDateString()}</span></div></div></div><button onclick="delAnn('${a.id}')" class="w-8 h-8 rounded-full bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition flex items-center justify-center"><i class="fa-solid fa-trash text-xs"></i></button></div>`; }); }
+        async function loadAnnouncements() { const { data } = await sb.from('announcements').select('*').order('created_at', {ascending: false}); const div = document.getElementById('activeAnnouncements'); div.innerHTML = ''; if(!data) return; data.forEach(a => { let img = a.image_url ? `<img src="${a.image_url}" loading="lazy" alt="${a.title}" class="w-12 h-12 rounded-lg object-cover">` : '<div class="w-12 h-12 bg-slate-700 rounded-lg flex items-center justify-center text-slate-500"><i class="fa-solid fa-image"></i></div>'; let badge = a.type === 'ulke' ? `<span class="bg-red-500/20 text-red-400 px-2 py-1 rounded text-xs font-bold border border-red-500/30">${a.country_code} ÖZEL</span>` : `<span class="bg-blue-500/20 text-blue-400 px-2 py-1 rounded text-xs font-bold border border-blue-500/30">GENEL</span>`; const createdStr = formatDate(a.created_at, 'long'); div.innerHTML += `<div class="glass-panel p-4 rounded-xl flex justify-between items-center border border-white/5 hover:border-white/10 transition"><div class="flex gap-4 items-center">${img} <div><h4 class="font-bold text-white text-sm">${a.title}</h4><div class="flex gap-2 mt-1">${badge} <span class="text-xs text-slate-500">${createdStr}</span></div></div></div><button onclick="delAnn('${a.id}')" class="w-8 h-8 rounded-full bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition flex items-center justify-center"><i class="fa-solid fa-trash text-xs"></i></button></div>`; }); }
         async function delAnn(id) { if(confirm('Silinsin mi?')) { await sb.from('announcements').delete().eq('id', id); loadAnnouncements(); } }
-        function renderCharts() { new Chart(document.getElementById('trafficChart').getContext('2d'), { type: 'line', data: { labels: ['Pzt', 'Sal', 'Çar', 'Per', 'Cum'], datasets: [{ label: 'Ziyaretçi', data: [120, 190, 300, 500, 240], borderColor: '#4f46e5', backgroundColor: 'rgba(79, 70, 229, 0.1)', fill: true, tension: 0.4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.1)' } }, x: { grid: { display: false } } } } }); new Chart(document.getElementById('categoryChart').getContext('2d'), { type: 'doughnut', data: { labels: ['Emlak', 'Vasıta', 'İş'], datasets: [{ data: [30, 50, 20], backgroundColor: ['#4f46e5', '#10b981', '#f59e0b'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: 'white' } } } } }); }
+        async function renderCharts() {
+            const trafficEl = document.getElementById('trafficChart');
+            const categoryEl = document.getElementById('categoryChart');
+            if (trafficEl) {
+                try {
+                    new Chart(trafficEl.getContext('2d'), { type: 'line', data: { labels: ['Pzt', 'Sal', 'Çar', 'Per', 'Cum'], datasets: [{ label: 'Ziyaretçi', data: [120, 190, 300, 500, 240], borderColor: '#4f46e5', backgroundColor: 'rgba(79, 70, 229, 0.1)', fill: true, tension: 0.4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.1)' } }, x: { grid: { display: false } } } } });
+                } catch (e) { console.warn('Trafik grafiği çizilemedi:', e); }
+            }
+            let catLabels = ['Emlak', 'Vasıta', 'İş']; let catData = [0, 0, 0]; let catColors = ['#4f46e5', '#10b981', '#f59e0b'];
+            try {
+                const { data: ilanlar } = await sb.from('ilanlar').select('category');
+                if (ilanlar && ilanlar.length > 0) {
+                    const counts = {};
+                    ilanlar.forEach(i => { const c = i.category || 'Diğer'; counts[c] = (counts[c] || 0) + 1; });
+                    catLabels = Object.keys(counts); catData = Object.values(counts);
+                    const pal = ['#4f46e5', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'];
+                    catColors = catLabels.map((_, i) => pal[i % pal.length]);
+                }
+            } catch (e) { console.warn('Kategori verisi alınamadı, örnek veri kullanılıyor:', e); }
+            if (categoryEl) {
+                try {
+                    if (catData.every(n => n === 0)) catData = [1]; catLabels = catLabels.length ? catLabels : ['Veri yok'];
+                    new Chart(categoryEl.getContext('2d'), { type: 'doughnut', data: { labels: catLabels, datasets: [{ data: catData, backgroundColor: catColors, borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: 'white' } } } } });
+                } catch (e) { console.warn('Kategori grafiği çizilemedi:', e); }
+            }
+        }
         async function downloadSitemap() { const { data: listings } = await sb.from('listings').select('id, created_at').eq('status', 'active'); const { data: travels } = await sb.from('travel_packages').select('id, created_at'); let xmlContent = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n   <url>\n      <loc>https://www.platformavrupa.com/</loc>\n      <changefreq>daily</changefreq>\n      <priority>1.0</priority>\n   </url>`; listings?.forEach(item => { xmlContent += `\n   <url>\n      <loc>https://www.platformavrupa.com/ilan-detay.html?id=${item.id}</loc>\n      <lastmod>${item.created_at.split('T')[0]}</lastmod>\n      <changefreq>weekly</changefreq>\n      <priority>0.8</priority>\n   </url>`; }); travels?.forEach(item => { xmlContent += `\n   <url>\n      <loc>https://www.platformavrupa.com/seyahat-detay.html?id=${item.id}</loc>\n      <lastmod>${item.created_at.split('T')[0]}</lastmod>\n      <changefreq>weekly</changefreq>\n      <priority>0.8</priority>\n   </url>`; }); xmlContent += `\n</urlset>`; const blob = new Blob([xmlContent], { type: 'text/xml' }); const url = window.URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'sitemap.xml'; document.body.appendChild(a); a.click(); window.URL.revokeObjectURL(url); Swal.fire('Başarılı', 'sitemap.xml indirildi. Bunu hosting paneline yükle!', 'success'); }
         // ========== AKADEMİ YÖNETİMİ ==========
         let academyCategories = [];
         let academySeries = [];
         let academyVideos = [];
+        let academyCategoryChartInstance = null;
 
         async function loadAcademy() {
-            // İstatistikleri yükle
-            const [catRes, serRes, vidRes, reqRes, viewsRes] = await Promise.all([
+            // Tek bir istek hata verse bile videolar yüklensin diye allSettled kullanıyoruz
+            const results = await Promise.allSettled([
                 sb.from('academy_categories').select('*').eq('is_active', true).order('sort_order'),
                 sb.from('academy_series').select('*').eq('is_active', true).order('sort_order'),
                 sb.from('academy_videos').select('*, academy_categories(name, color), academy_series(name)').eq('is_active', true).order('created_at', { ascending: false }),
                 sb.from('academy_requests').select('*').eq('status', 'pending'),
                 sb.from('academy_videos').select('view_count')
             ]);
-            
-            academyCategories = catRes.data || [];
-            academySeries = serRes.data || [];
-            academyVideos = vidRes.data || [];
-            
-            const totalViews = (viewsRes.data || []).reduce((sum, v) => sum + (v.view_count || 0), 0);
-            
+            const getData = (r) => (r.status === 'fulfilled' && r.value && !r.value.error) ? (r.value.data || []) : [];
+            academyCategories = getData(results[0]);
+            academySeries = getData(results[1]);
+            academyVideos = getData(results[2]);
+            const reqData = getData(results[3]);
+            const viewsData = getData(results[4]);
+            const totalViews = viewsData.reduce((sum, v) => sum + (v.view_count || 0), 0);
             document.getElementById('academyTotalVideos').textContent = academyVideos.length;
             document.getElementById('academyTotalViews').textContent = totalViews.toLocaleString();
-            document.getElementById('academyPendingRequests').textContent = (reqRes.data || []).length;
+            document.getElementById('academyPendingRequests').textContent = reqData.length;
             document.getElementById('academyTotalSeries').textContent = academySeries.length;
-            
             renderAcademyVideos();
             renderAcademyCategories();
             renderAcademySeries();
@@ -1558,14 +1663,46 @@
             document.getElementById(`academy-tab-${tab}`).classList.remove('hidden');
         }
 
+        function toggleSeriesSection(key) {
+            const content = document.getElementById('series-videos-' + key);
+            const chevron = document.querySelector('[data-series-toggle="' + key + '"]');
+            if (!content || !chevron) return;
+            const isHidden = content.classList.contains('hidden');
+            content.classList.toggle('hidden', !isHidden);
+            chevron.classList.toggle('rotate-180', !isHidden);
+        }
+
         function renderAcademyVideos() {
             const div = document.getElementById('academyVideoList');
             if (academyVideos.length === 0) {
-                div.innerHTML = '<p class="text-slate-400 col-span-full text-center py-8">Henüz video eklenmemiş.</p>';
+                div.innerHTML = '<p class="text-slate-400 text-center py-8">Henüz video eklenmemiş.</p>';
                 return;
             }
-            
-            div.innerHTML = academyVideos.map(v => `
+            const SERI_YOK_KEY = 'none';
+            const bySeries = new Map();
+            academyVideos.forEach(v => {
+                const key = v.series_id || SERI_YOK_KEY;
+                if (!bySeries.has(key)) bySeries.set(key, []);
+                bySeries.get(key).push(v);
+            });
+            const orderedKeys = academySeries.map(s => s.id).filter(id => bySeries.has(id));
+            if (bySeries.has(SERI_YOK_KEY)) orderedKeys.push(SERI_YOK_KEY);
+            let html = '';
+            orderedKeys.forEach((key, idx) => {
+                let videos = bySeries.get(key);
+                videos = key === SERI_YOK_KEY ? videos : [...videos].sort((a, b) => (a.series_order || 0) - (b.series_order || 0));
+                const isFirst = idx === 0;
+                const label = key === SERI_YOK_KEY ? 'Seri Yok' : (academySeries.find(s => s.id === key)?.name || 'Seri');
+                const count = videos.length;
+                html += `
+                <div class="glass-panel rounded-xl overflow-hidden">
+                    <button type="button" onclick="toggleSeriesSection('${key}')" class="w-full flex items-center justify-between gap-4 p-4 text-left hover:bg-white/5 transition min-h-[44px]">
+                        <span class="font-bold text-white">${sanitize(label)}</span>
+                        <span class="text-slate-400 text-sm">${count} video</span>
+                        <i data-series-toggle="${key}" class="fa-solid fa-chevron-down text-slate-400 transition-transform ${isFirst ? 'rotate-180' : ''}"></i>
+                    </button>
+                    <div id="series-videos-${key}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4 border-t border-white/10 ${isFirst ? '' : 'hidden'}">
+                        ${videos.map(v => `
                 <div class="glass-panel rounded-xl overflow-hidden group">
                     <div class="relative aspect-video">
                         <img src="${v.thumbnail_url || `https://img.youtube.com/vi/${v.youtube_id}/mqdefault.jpg`}" class="w-full h-full object-cover">
@@ -1576,7 +1713,8 @@
                         ${v.is_featured ? '<span class="absolute top-2 right-2 bg-orange-500 text-white px-2 py-1 rounded text-xs"><i class="fa-solid fa-star"></i></span>' : ''}
                     </div>
                     <div class="p-4">
-                        <h5 class="font-bold text-white line-clamp-2 mb-2">${sanitize(v.title)}</h5>
+                        <h5 class="font-bold text-white line-clamp-2 mb-1">${sanitize(v.title)}</h5>
+                        ${v.description ? `<p class="text-sm text-slate-400 line-clamp-1 mb-2">${sanitize(v.description)}</p>` : ''}
                         <div class="flex items-center gap-3 text-xs text-slate-400 mb-3">
                             <span><i class="fa-solid fa-eye mr-1"></i>${v.view_count || 0}</span>
                             <span><i class="fa-solid fa-heart mr-1"></i>${v.like_count || 0}</span>
@@ -1592,7 +1730,11 @@
                         </div>
                     </div>
                 </div>
-            `).join('');
+                        `).join('')}
+                    </div>
+                </div>`;
+            });
+            div.innerHTML = html;
         }
 
         function renderAcademyCategories() {
@@ -1651,7 +1793,8 @@
         }
 
         async function loadAcademyRequests() {
-            const { data } = await sb.from('academy_requests').select('*, profiles(full_name)').order('created_at', { ascending: false }).limit(50);
+            const { data, error } = await sb.from('academy_requests').select('*').order('created_at', { ascending: false }).limit(50);
+            if (error) { console.warn('academy_requests yüklenemedi:', error); }
             const div = document.getElementById('academyRequestList');
             
             if (!data || data.length === 0) {
@@ -1669,12 +1812,12 @@
                             <span class="text-xs ${statusColors[r.status] || 'bg-slate-500'} text-white px-2 py-1 rounded mr-2">${r.status}</span>
                             <span class="text-xs bg-slate-700 text-slate-300 px-2 py-1 rounded">${typeLabels[r.request_type] || r.request_type}</span>
                         </div>
-                        <span class="text-xs text-slate-500">${new Date(r.created_at).toLocaleDateString('tr-TR')}</span>
+                        <span class="text-xs text-slate-500">${formatDate(r.created_at, 'long')}</span>
                     </div>
                     <h5 class="font-bold text-white mb-2">${sanitize(r.title)}</h5>
                     <p class="text-sm text-slate-400 mb-3">${sanitize(r.description || '')}</p>
                     <div class="flex items-center justify-between">
-                        <span class="text-xs text-slate-500">Gönderen: ${r.profiles?.full_name || 'Anonim'}</span>
+                        <span class="text-xs text-slate-500">Gönderen: ${r.user_id ? 'Kullanıcı' : 'Anonim'}</span>
                         ${r.status === 'pending' ? `
                             <div class="flex gap-2">
                                 <button onclick="respondToRequest('${r.id}')" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded text-xs font-bold">Yanıtla</button>
@@ -1713,23 +1856,30 @@
                 categoryViews[catName] = (categoryViews[catName] || 0) + (v.view_count || 0);
             });
             
-            const ctx = document.getElementById('academyCategoryChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(categoryViews),
-                    datasets: [{
-                        data: Object.values(categoryViews),
-                        backgroundColor: ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#06b6d4', '#6366f1'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom', labels: { color: 'white', font: { size: 10 } } } }
+            const chartEl = document.getElementById('academyCategoryChart');
+            if (chartEl) {
+                if (academyCategoryChartInstance) {
+                    academyCategoryChartInstance.destroy();
+                    academyCategoryChartInstance = null;
                 }
-            });
+                const ctx = chartEl.getContext('2d');
+                academyCategoryChartInstance = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(categoryViews),
+                        datasets: [{
+                            data: Object.values(categoryViews),
+                            backgroundColor: ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#06b6d4', '#6366f1'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom', labels: { color: 'white', font: { size: 10 } } } }
+                    }
+                });
+            }
         }
 
         // Video Ekleme/Düzenleme Modal
@@ -1745,7 +1895,7 @@
                     <div class="text-left space-y-4">
                         <div>
                             <label class="text-sm text-slate-400 block mb-1">YouTube URL *</label>
-                            <input id="swal-youtube" class="w-full bg-slate-700 border border-slate-600 rounded-lg p-3 text-white" placeholder="https://www.youtube.com/watch?v=..." value="${video?.youtube_url || ''}" onpaste="setTimeout(() => extractYoutubeInfo(this.value), 100)">
+                            <input id="swal-youtube" class="w-full bg-slate-700 border border-slate-600 rounded-lg p-3 text-white" placeholder="https://www.youtube.com/watch?v=..." value="${video?.youtube_url || ''}">
                         </div>
                         <div>
                             <label class="text-sm text-slate-400 block mb-1">Başlık *</label>
@@ -1802,13 +1952,16 @@
                         return false;
                     }
                     
+                    const titleSlug = title.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, '') || 'video';
+                    // Slug UNIQUE: aynı başlık + aynı video tekrar eklenirse çakışma olmasın diye benzersiz slug
+                    const slug = video ? titleSlug : (titleSlug + '-' + youtubeId + '-' + Date.now().toString(36));
                     return {
                         youtube_url: youtubeUrl,
                         youtube_id: youtubeId,
                         title: title,
-                        slug: title.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-'),
+                        slug: slug,
                         category_id: categoryId,
-                        series_id: document.getElementById('swal-series').value || null,
+                        series_id: (() => { const v = document.getElementById('swal-series')?.value; return (v && v.trim()) ? v.trim() : null; })(),
                         description: document.getElementById('swal-desc').value,
                         duration_seconds: parseInt(document.getElementById('swal-duration').value) || 0,
                         series_order: parseInt(document.getElementById('swal-order').value) || 0,
@@ -1821,14 +1974,24 @@
             if (formValues) {
                 try {
                     if (video) {
-                        await sb.from('academy_videos').update(formValues).eq('id', video.id);
+                        const { data: upData, error: updateErr } = await sb.from('academy_videos').update(formValues).eq('id', video.id).select();
+                        if (updateErr) {
+                            console.error('Academy video update hatası:', updateErr);
+                            throw updateErr;
+                        }
                     } else {
-                        await sb.from('academy_videos').insert(formValues);
+                        const { data: insData, error: insertErr } = await sb.from('academy_videos').insert(formValues).select();
+                        if (insertErr) {
+                            console.error('Academy video insert hatası:', insertErr);
+                            throw insertErr;
+                        }
                     }
+                    await loadAcademy();
                     Swal.fire('Başarılı', video ? 'Video güncellendi' : 'Video eklendi', 'success');
-                    loadAcademy();
                 } catch (err) {
-                    Swal.fire('Hata', err.message, 'error');
+                    const msg = err?.message || err?.error_description || (err?.details || err?.hint) || String(err);
+                    console.error('Academy video kayıt hatası:', err);
+                    Swal.fire('Hata', msg, 'error');
                 }
             }
         }
@@ -2483,7 +2646,7 @@
                         <div class="flex justify-between items-center">
                             <div>
                                 <div class="font-bold text-white">€${log.amount.toFixed(2)}</div>
-                                <div class="text-sm text-slate-400">${new Date(log.created_at).toLocaleDateString('tr-TR')}</div>
+                                <div class="text-sm text-slate-400">${formatDate(log.created_at, 'long')}</div>
                             </div>
                             <span class="text-xs ${statusConfig.bg} ${statusConfig.text} px-2 py-1 rounded-full border">
                                 ${statusConfig.label}
@@ -2546,7 +2709,8 @@
             else {
                 trips.forEach(t => {
                     const cargoBadge = t.is_cargo_allowed ? '<span class="text-green-400 ml-2 text-[10px] border border-green-500/30 px-1 rounded"><i class="fa-solid fa-box"></i> Kargo Alır</span>' : '';
-                    tripsDiv.innerHTML += `<div class="bg-slate-800/50 p-4 rounded-xl border border-white/5 hover:border-blue-500/50 transition relative group"><div class="flex justify-between items-start mb-2"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center font-bold text-xs">${t.driver_name.substring(0,2)}</div><div><h5 class="font-bold text-white text-sm">${t.driver_name}</h5><p class="text-[10px] text-slate-400">${t.travel_date}</p></div></div><span class="font-bold text-lg text-emerald-400">${t.price}€</span></div><div class="flex items-center gap-2 text-sm text-slate-300 font-bold mb-2"><span>${t.from_city}</span> <i class="fa-solid fa-arrow-right text-slate-500 text-xs"></i> <span>${t.to_city}</span></div><div class="flex items-center gap-2 text-xs text-slate-500"><span><i class="fa-solid fa-chair"></i> ${t.seats_available} Boş</span>${cargoBadge}</div><button onclick="delTrip('${t.id}')" class="absolute top-2 right-2 text-red-400 opacity-0 group-hover:opacity-100 transition hover:bg-white/10 p-1 rounded"><i class="fa-solid fa-trash"></i></button></div>`;
+                    const formattedDate = formatDate(t.travel_date, 'long');
+                    tripsDiv.innerHTML += `<div class="bg-slate-800/50 p-4 rounded-xl border border-white/5 hover:border-blue-500/50 transition relative group"><div class="flex justify-between items-start mb-2"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center font-bold text-xs">${t.driver_name.substring(0,2)}</div><div><h5 class="font-bold text-white text-sm">${t.driver_name}</h5><p class="text-[10px] text-slate-400">${formattedDate}</p></div></div><span class="font-bold text-lg text-emerald-400">${t.price}€</span></div><div class="flex items-center gap-2 text-sm text-slate-300 font-bold mb-2"><span>${t.from_city}</span> <i class="fa-solid fa-arrow-right text-slate-500 text-xs"></i> <span>${t.to_city}</span></div><div class="flex items-center gap-2 text-xs text-slate-500"><span><i class="fa-solid fa-chair"></i> ${t.seats_available} Boş</span>${cargoBadge}</div><button onclick="delTrip('${t.id}')" class="absolute top-2 right-2 text-red-400 opacity-0 group-hover:opacity-100 transition hover:bg-white/10 p-1 rounded"><i class="fa-solid fa-trash"></i></button></div>`;
                 });
             }
             const { data: ships } = await sb.from('shipments').select('*').order('created_at', {ascending: false});
@@ -3102,7 +3266,7 @@
                                 </div>
                                 <span>${deal.profiles?.full_name || deal.profiles?.email || 'Anonim'}</span>
                             </div>
-                            <span>${new Date(deal.created_at).toLocaleDateString('tr-TR')}</span>
+                            <span>${formatDate(deal.created_at, 'long')}</span>
                         </div>
                         
                         ${deal.status === 'pending' ? `
@@ -3266,10 +3430,9 @@
             }
         }
         
-        // Market tabı açıldığında indirim moderasyonunu da yükle
-        function loadMarketPrices() {
+        // Market tabı açıldığında indirim moderasyonu ve ülke filtresini doldur (tablo loadMarketPrices ile doldurulur)
+        function initMarketTab() {
             loadPendingDeals();
-            // Ülke filtresini doldur
             const countrySelect = document.getElementById('dealFilterCountry');
             if (countrySelect && countrySelect.options.length <= 1) {
                 const countries = {
@@ -3339,7 +3502,7 @@
                 const date = new Date();
                 date.setDate(date.getDate() - i);
                 last7Days.push(date.toISOString().split('T')[0]);
-                labels.push(date.toLocaleDateString('tr-TR', { weekday: 'short', day: 'numeric' }));
+                labels.push(formatDate(date, 'weekdayShort'));
             }
             
             // Partner bazında günlük veriler

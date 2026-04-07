@@ -4,6 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kayıt Ol - PlatformAvrupa</title>
+    <meta name="description" content="Platform Avrupa'ya ücretsiz kayıt olun. Gurbetçiler için tek platform.">
+    <link rel="canonical" href="https://www.platformavrupa.com/kayit.html">
+    <meta property="og:title" content="Kayıt Ol - PlatformAvrupa">
+    <meta property="og:url" content="https://www.platformavrupa.com/kayit.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Platform Avrupa">
+    <meta property="og:image" content="https://www.platformavrupa.com/og-image.png">
+    <meta property="og:locale" content="tr_TR">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Kayıt Ol - PlatformAvrupa">
+    <meta name="twitter:image" content="https://www.platformavrupa.com/og-image.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
@@ -185,13 +196,29 @@
 
             if(ulke === "" || sehir === "" || sehir === "Şehir") { alert("Lütfen Şehir Seçiniz!"); return; }
 
+            if (typeof isValidEmail === 'function' && !isValidEmail(email)) {
+                alert("Lütfen geçerli bir e-posta adresi giriniz.");
+                return;
+            }
+
+            if (password.length < 8) {
+                alert("Şifreniz en az 8 karakter olmalıdır.");
+                return;
+            }
+
             btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Kaydediliyor...';
             btn.disabled = true;
             msg.classList.add('hidden');
 
             try {
                 // 1. Kullanıcıyı Oluştur
-                const { data, error } = await sb.auth.signUp({ email: email, password: password });
+                const { data, error } = await sb.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        emailRedirectTo: window.location.origin + '/login.html'
+                    }
+                });
                 if (error) throw error;
 
                 if (data.user) {
@@ -208,17 +235,16 @@
                         status: 'active'
                     }]);
 
-                    // 3. HAFIZAYA KAYDET (DÜZELTİLEN KISIM: real_name de ekledik)
-                    localStorage.setItem('isLoggedIn', 'true');
-                    localStorage.setItem('userEmail', email);
-                    localStorage.setItem('userName', finalName); // Görünen isim
-                    localStorage.setItem('userRealName', tamIsim); // **Gerçek isim (Profilde görünecek)**
-                    localStorage.setItem('userCity', sehir);
-                    localStorage.setItem('userLocation', sehir); // Sohbet için yedek
-                    localStorage.setItem('userCountry', ulke);
-
-                    // Direkt yönlendir
-                    window.location.href = 'index.html'; 
+                    // 3. Eğer anında oturum açıldıysa (e-posta doğrulaması kapalı) kullanıcıyı içeri al
+                    if (data.session) {
+                        if (typeof initAuth === 'function') {
+                            await initAuth();
+                        }
+                        window.location.href = 'index.html';
+                    } else {
+                        // E-posta doğrulaması açıksa kullanıcıya bilgi ver
+                        alert("Kayıt başarılı! Lütfen e-posta adresinize gönderilen doğrulama bağlantısına tıklayın.");
+                    }
                 }
             } catch (err) {
                 console.error(err);

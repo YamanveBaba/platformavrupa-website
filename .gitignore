@@ -1,7 +1,22 @@
+# Şifreler / gizli dosyalar
+*.txt.gpg
+uygulama\ şifrem.txt
+*şifrem*
+*sifrem*
+
 # Ortam ve gizlilik
 .env
 .env.local
 .env.*.local
+market_fiyat_cekici/supabase_import_secrets.txt
+market_fiyat_cekici/delhaize_cookie.txt
+market_fiyat_cekici/lidl_cookie.txt
+market_fiyat_cekici/playwright_user_data/
+
+# Colruyt oturum (asla commit etmeyin)
+market_fiyat_cekici/cookie.txt
+market_fiyat_cekici/curl.txt
+market_fiyat_cekici/token.txt
 
 # IDE / editör
 .cursor/

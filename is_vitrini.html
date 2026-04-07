@@ -202,6 +202,18 @@
         let tumIlanlar = [];
         let filters = { rol: 'Hepsi', country: '', city: '', sektor: '', pozisyon: 'Hepsi' };
 
+        function formatDate(isoStr) {
+            if (!isoStr) return '';
+            const d = new Date(isoStr);
+            if (isNaN(d)) return '';
+            const now = new Date();
+            const diff = Math.floor((now - d) / 86400000);
+            if (diff === 0) return 'Bugün';
+            if (diff === 1) return 'Dün';
+            if (diff < 7) return diff + ' gün önce';
+            return d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
         window.onload = function() {
             initMap();
             // genel_veriler.js'den ülkeleri doldur
@@ -299,9 +311,9 @@
                 try {
                     // ARTIK 'listings' DEĞİL 'ilanlar' TABLOSUNDAN ÇEKİYORUZ!
                     const { data, error } = await sb.from('ilanlar')
-                        .select('*')
-                        .eq('category', 'İş İlanı') // Kategori filtresi
-                        .eq('status', 'active') // Sadece aktifler
+                        .select('id,title,city,country,owner_name,price,sektor,pozisyon,sub_category,source_url,source,created_at,lat,lon')
+                        .eq('category', 'İş İlanı')
+                        .eq('status', 'active')
                         .order('created_at', { ascending: false });
 
                     if (!error && data) {

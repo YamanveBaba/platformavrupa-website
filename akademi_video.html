@@ -3,8 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video | Platform Akademi</title>
-    <meta name="description" content="Platform Akademi eğitim videosu">
+    <title>Video | Platform Akademi - PlatformAvrupa</title>
+    <meta name="description" content="Platform Akademi eğitim videosu. Avrupa'daki Türkler için ücretsiz eğitim içerikleri.">
+    <link rel="canonical" href="https://www.platformavrupa.com/akademi_video.html">
+    <meta property="og:title" content="Video | Platform Akademi - PlatformAvrupa">
+    <meta property="og:description" content="Platform Akademi eğitim videosu. Avrupa'daki Türkler için ücretsiz eğitim içerikleri.">
+    <meta property="og:url" content="https://www.platformavrupa.com/akademi_video.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Platform Avrupa">
+    <meta property="og:image" content="https://www.platformavrupa.com/og-image.png">
+    <meta property="og:locale" content="tr_TR">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Video | Platform Akademi - PlatformAvrupa">
+    <meta name="twitter:description" content="Platform Akademi eğitim videosu.">
+    <meta name="twitter:image" content="https://www.platformavrupa.com/og-image.png">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -66,6 +78,9 @@
             transition: width 0.3s;
         }
     </style>
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"VideoObject","name":"Platform Akademi Eğitim Videosu","description":"Avrupa'daki Türkler için ücretsiz eğitim içeriği","publisher":{"@type":"Organization","name":"Platform Avrupa","logo":{"@type":"ImageObject","url":"https://www.platformavrupa.com/logo.png"}}}
+    </script>
 </head>
 <body class="min-h-screen flex flex-col">
 
@@ -104,15 +119,21 @@
                 <div id="videoContainer" class="video-container skeleton">
                     <iframe id="youtubePlayer" src="" frameborder="0" 
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                            allowfullscreen></iframe>
+                            allowfullscreen
+                            referrerpolicy="strict-origin-when-cross-origin"></iframe>
                 </div>
                 
                 <!-- Video Bilgileri -->
                 <div class="mt-6">
-                    <!-- Kategori Badge -->
-                    <a id="categoryBadge" href="#" class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold mb-3 transition hover:opacity-80">
-                        <i class="fa-solid fa-book"></i> <span id="categoryName">Yükleniyor...</span>
-                    </a>
+                    <!-- Kategoriye dön + Kategori Badge -->
+                    <div class="flex flex-wrap items-center gap-3 mb-3">
+                        <a id="backToCategoryLink" href="akademi.html" class="hidden items-center gap-2 text-sm text-slate-400 hover:text-purple-400 transition">
+                            <i class="fa-solid fa-arrow-left"></i> Kategoriye dön
+                        </a>
+                        <a id="categoryBadge" href="akademi.html" class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold transition hover:opacity-80">
+                            <i class="fa-solid fa-book"></i> <span id="categoryName">Yükleniyor...</span>
+                        </a>
+                    </div>
                     
                     <h1 id="videoTitle" class="text-2xl md:text-3xl font-extrabold text-white mb-4">Yükleniyor...</h1>
                     
@@ -257,7 +278,7 @@
             const v = currentVideo;
             
             // Player
-            document.getElementById('youtubePlayer').src = `https://www.youtube.com/embed/${v.youtube_id}?autoplay=0&rel=0`;
+            document.getElementById('youtubePlayer').src = `https://www.youtube-nocookie.com/embed/${v.youtube_id}?autoplay=0&rel=0`;
             document.getElementById('videoContainer').classList.remove('skeleton');
             
             // Başlık ve meta
@@ -268,8 +289,9 @@
             document.getElementById('duration').innerHTML = `<i class="fa-solid fa-clock mr-1"></i> ${formatDuration(v.duration_seconds)}`;
             document.getElementById('publishDate').innerHTML = `<i class="fa-solid fa-calendar mr-1"></i> ${formatDate(v.created_at)}`;
             
-            // Kategori badge
+            // Kategori badge ve Kategoriye dön linki
             const catBadge = document.getElementById('categoryBadge');
+            const backToCat = document.getElementById('backToCategoryLink');
             const cat = v.academy_categories;
             if (cat) {
                 catBadge.href = `akademi_kategori.html?slug=${cat.slug}`;
@@ -277,6 +299,14 @@
                 catBadge.style.color = cat.color;
                 catBadge.innerHTML = `<i class="fa-solid ${cat.icon}"></i> <span>${cat.name}</span>`;
                 document.getElementById('categoryName').textContent = cat.name;
+                if (backToCat) {
+                    backToCat.href = `akademi_kategori.html?slug=${cat.slug}`;
+                    backToCat.classList.remove('hidden');
+                    backToCat.classList.add('flex');
+                }
+            } else if (backToCat) {
+                backToCat.classList.add('hidden');
+                backToCat.classList.remove('flex');
             }
             
             // Sayfa başlığı
@@ -290,7 +320,7 @@
                 .select('id, title, youtube_id, thumbnail_url, duration_seconds, series_order')
                 .eq('series_id', seriesId)
                 .eq('is_active', true)
-                .order('series_order');
+                .order('series_order', { ascending: false });
             
             if (videos && videos.length > 1) {
                 seriesVideos = videos;
@@ -509,8 +539,7 @@
 
         function formatDate(dateStr) {
             if (!dateStr) return '--';
-            const date = new Date(dateStr);
-            return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+            return window.formatDate ? window.formatDate(dateStr, 'long') : new Date(dateStr).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
         }
 
         function getSessionId() {

@@ -4,6 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Türkiye Sağlık Turizmi | PlatformAvrupa</title>
+    <meta name="description" content="Türkiye sağlık turizmi ve ücretsiz danışmanlık. Avrupa'daki Türkler için estetik, diş, göz ve genel sağlık hizmetleri.">
+    <link rel="canonical" href="https://www.platformavrupa.com/saglik_turizmi.html">
+    <meta property="og:title" content="Türkiye Sağlık Turizmi | PlatformAvrupa">
+    <meta property="og:description" content="Türkiye sağlık turizmi ve ücretsiz danışmanlık. Avrupa'daki Türkler için sağlık hizmetleri.">
+    <meta property="og:url" content="https://www.platformavrupa.com/saglik_turizmi.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Platform Avrupa">
+    <meta property="og:image" content="https://www.platformavrupa.com/og-image.png">
+    <meta property="og:locale" content="tr_TR">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Türkiye Sağlık Turizmi | PlatformAvrupa">
+    <meta name="twitter:description" content="Türkiye sağlık turizmi ve ücretsiz danışmanlık.">
+    <meta name="twitter:image" content="https://www.platformavrupa.com/og-image.png">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
@@ -166,33 +179,34 @@
     <!-- Hizmet Kategorileri -->
     <div class="max-w-7xl mx-auto px-4 mb-8">
         <h3 class="text-2xl font-bold text-white mb-4 text-center">Hizmet Kategorilerimiz</h3>
+        <p class="text-slate-400 text-sm text-center mb-6">Kategoriye tıklayarak ayrıntılı bilgi alabilir ve ilgili klinikleri görebilirsiniz.</p>
         <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-            <div class="category-card rounded-2xl p-6 text-center cursor-pointer" data-category="sac_ekimi" onclick="filterByCategory('sac_ekimi', this)">
+            <div class="category-card rounded-2xl p-6 text-center cursor-pointer" data-category="sac_ekimi" onclick="openCategoryDetail('sac_ekimi', this)">
                 <i class="fa-solid fa-scissors text-4xl text-pink-400 mb-3"></i>
                 <h4 class="font-bold text-white mb-2">Saç Ekimi</h4>
                 <p class="text-xs text-slate-400">FUE, DHI, Sapphire</p>
             </div>
-            <div class="category-card rounded-2xl p-6 text-center cursor-pointer" data-category="dis" onclick="filterByCategory('dis', this)">
+            <div class="category-card rounded-2xl p-6 text-center cursor-pointer" data-category="dis" onclick="openCategoryDetail('dis', this)">
                 <i class="fa-solid fa-tooth text-4xl text-blue-400 mb-3"></i>
                 <h4 class="font-bold text-white mb-2">Diş Tedavisi</h4>
                 <p class="text-xs text-slate-400">İmplant, Veneer, Estetik</p>
             </div>
-            <div class="category-card rounded-2xl p-6 text-center cursor-pointer" data-category="estetik" onclick="filterByCategory('estetik', this)">
-                <i class="fa-solid fa-sparkles text-4xl text-purple-400 mb-3"></i>
+            <div class="category-card rounded-2xl p-6 text-center cursor-pointer" data-category="estetik" onclick="openCategoryDetail('estetik', this)">
+                <i class="fa-solid fa-star text-4xl text-purple-400 mb-3"></i>
                 <h4 class="font-bold text-white mb-2">Estetik Cerrahi</h4>
                 <p class="text-xs text-slate-400">Rinoplasti, Meme, Vücut</p>
             </div>
-            <div class="category-card rounded-2xl p-6 text-center cursor-pointer" data-category="erkek_cinsel" onclick="filterByCategory('erkek_cinsel', this)">
+            <div class="category-card rounded-2xl p-6 text-center cursor-pointer" data-category="erkek_cinsel" onclick="openCategoryDetail('erkek_cinsel', this)">
                 <i class="fa-solid fa-mars text-4xl text-indigo-400 mb-3"></i>
                 <h4 class="font-bold text-white mb-2">Erkek Cinsel Sağlık</h4>
                 <p class="text-xs text-slate-400">Erken boşalma, Erektil disfonksiyon</p>
             </div>
-            <div class="category-card rounded-2xl p-6 text-center cursor-pointer" data-category="kadin_cinsel" onclick="filterByCategory('kadin_cinsel', this)">
+            <div class="category-card rounded-2xl p-6 text-center cursor-pointer" data-category="kadin_cinsel" onclick="openCategoryDetail('kadin_cinsel', this)">
                 <i class="fa-solid fa-venus text-4xl text-rose-400 mb-3"></i>
                 <h4 class="font-bold text-white mb-2">Kadın Cinsel Sağlık</h4>
                 <p class="text-xs text-slate-400">Vajinismus, Vajinal estetik</p>
             </div>
-            <div class="category-card rounded-2xl p-6 text-center cursor-pointer" data-category="tup_bebek" onclick="filterByCategory('tup_bebek', this)">
+            <div class="category-card rounded-2xl p-6 text-center cursor-pointer" data-category="tup_bebek" onclick="openCategoryDetail('tup_bebek', this)">
                 <i class="fa-solid fa-baby text-4xl text-amber-400 mb-3"></i>
                 <h4 class="font-bold text-white mb-2">Tüp Bebek</h4>
                 <p class="text-xs text-slate-400">IVF, Embriyo transferi</p>
@@ -202,6 +216,7 @@
 
     <!-- Klinik Kartları -->
     <div class="max-w-7xl mx-auto px-4 mb-8">
+        <p id="clinicsCategoryTitle" class="text-slate-400 text-sm mb-4 hidden"></p>
         <div id="clinicsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <!-- Klinikler buraya yüklenecek -->
         </div>
@@ -243,6 +258,24 @@
                 <h4 class="font-bold text-white mb-2">İşlem & Takip</h4>
                 <p class="text-sm text-slate-400">Tedavi sonrası da yanınızdayız</p>
             </div>
+        </div>
+    </div>
+
+    <!-- Kategori Ayrıntı Modal -->
+    <div id="categoryDetailModal" class="modal-overlay" onclick="closeCategoryDetailModal(event)">
+        <div class="modal-content p-6" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="categoryDetailTitle" class="text-2xl font-bold text-white"></h3>
+                <button onclick="closeCategoryDetailModal()" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-times text-2xl"></i>
+                </button>
+            </div>
+            <div id="categoryDetailContent" class="space-y-4 text-slate-300">
+                <!-- Kategori ayrıntıları buraya yüklenecek -->
+            </div>
+            <button id="categoryDetailShowClinicsBtn" onclick="closeCategoryDetailModal(); openConsultationFromCategory()" class="w-full mt-6 bg-gradient-to-r from-pink-500 to-rose-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-pink-500/30 hover:shadow-pink-500/50 transition">
+                <i class="fa-brands fa-whatsapp mr-2"></i> Ücretsiz Danışmanlık Al
+            </button>
         </div>
     </div>
 
@@ -340,13 +373,14 @@
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-bold text-slate-300 mb-2">Tercih Edilen Tarih</label>
-                    <input type="date" id="preferredDate" name="preferredDate" min="" class="w-full bg-slate-800 text-white rounded-lg px-4 py-3 border border-slate-700 focus:border-pink-500 focus:outline-none">
-                </div>
-                
-                <div>
                     <label class="block text-sm font-bold text-slate-300 mb-2">Öncesi Fotoğraflar (Opsiyonel)</label>
-                    <input type="file" id="photos" name="photos" multiple accept="image/*" class="w-full bg-slate-800 text-white rounded-lg px-4 py-3 border border-slate-700 focus:border-pink-500 focus:outline-none">
+                    <div class="relative">
+                        <input type="file" id="photos" name="photos" multiple accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                        <div class="w-full bg-slate-800 text-white rounded-lg px-4 py-3 border border-slate-700 flex items-center justify-between pointer-events-none">
+                            <span id="photosLabel" class="text-slate-400">Dosya seçin</span>
+                            <i class="fa-solid fa-paperclip text-pink-400"></i>
+                        </div>
+                    </div>
                     <p class="text-xs text-slate-400 mt-1">Saç, diş veya estetik için öncesi fotoğraflarınızı yükleyebilirsiniz</p>
                 </div>
                 
@@ -371,17 +405,16 @@
             await loadClinics();
             populateCountryDropdown();
             populatePhoneCodeDropdowns();
-            setMinDate();
-        };
-
-        // Minimum tarihi bugün yap
-        function setMinDate() {
-            const today = new Date().toISOString().split('T')[0];
-            const dateInput = document.getElementById('preferredDate');
-            if (dateInput) {
-                dateInput.setAttribute('min', today);
+            // Dosya seçildiğinde etiketi güncelle (Türkçe)
+            const photosInput = document.getElementById('photos');
+            const photosLabel = document.getElementById('photosLabel');
+            if (photosInput && photosLabel) {
+                photosInput.addEventListener('change', function() {
+                    const n = this.files.length;
+                    photosLabel.textContent = n === 0 ? 'Dosya seçin' : (n === 1 ? '1 dosya seçildi' : n + ' dosya seçildi');
+                });
             }
-        }
+        };
 
         // Ülke dropdown'ını doldur
         function populateCountryDropdown() {
@@ -591,9 +624,117 @@
             }).join('');
         }
 
+        // Kategori ayrıntı verileri (halk dilinde; teknik terimler parantez içinde)
+        const categoryDetailData = {
+            sac_ekimi: {
+                title: 'Saç Ekimi',
+                icon: 'fa-solid fa-scissors',
+                iconColor: 'text-pink-400',
+                description: 'Türkiye saç ekiminde dünya liderlerinden biri. Saç köklerini tek tek alıp seyrek bölgeye nakletme yöntemleriyle doğal sonuçlar alıyorsunuz; Avrupa\'ya göre %50-70 daha uygun fiyatlarla.',
+                procedures: ['Saç kökü nakli (FUE)', 'Kalemle saç ekimi (DHI)', 'Safir uçlu saç ekimi (Sapphire FUE)', 'Sakal ve bıyık ekimi', 'Kadın saç ekimi'],
+                notes: 'İşlem 1-2 gün sürer. 6-12 ay içinde kalıcı sonuçlar görülür. Kliniğimiz transfer ve konaklama desteği sunar.'
+            },
+            dis: {
+                title: 'Diş Tedavisi',
+                icon: 'fa-solid fa-tooth',
+                iconColor: 'text-blue-400',
+                description: 'Eksik dişe vida (implant), diş kaplama, gülüş tasarımı ve genel diş tedavileri Türkiye\'de modern kliniklerde, çok daha uygun fiyatlarla yapılıyor.',
+                procedures: ['Eksik dişe vida ile yeni diş (implant)', 'Diş yüzeyine yapışan ince kaplama (veneer)', 'Gülüş tasarımı (Hollywood smile)', 'Seramik diş kaplama (zirkonyum)', 'Sinir tedavisi (kanal tedavisi)', 'Diş beyazlatma'],
+                notes: 'Vida ile diş tedavisi tek seferde veya iki aşamada yapılabilir. Fiyatlar Avrupa\'nın yaklaşık yarısı kadar.'
+            },
+            estetik: {
+                title: 'Estetik Cerrahi',
+                icon: 'fa-solid fa-star',
+                iconColor: 'text-purple-400',
+                description: 'Burun estetiği, meme estetiği, karın germe, yağ aldırma ve yüz gençleştirme gibi işlemlerde Türkiye deneyimli cerrahlar ve uygun maliyetler sunuyor.',
+                procedures: ['Burun estetiği (rinoplasti)', 'Meme büyütme veya küçültme', 'Karın germe', 'Yağ aldırma (liposuction)', 'Yüz germe', 'Göz kapağı estetiği', 'Kırışıklık ve dolgu (botoks / dolgu)'],
+                notes: 'Uluslararası kalite belgeli (JCI) hastaneler ve uzman cerrahlarla çalışıyoruz. Konaklama ve transfer dahil paketler mevcuttur.'
+            },
+            erkek_cinsel: {
+                title: 'Erkek Cinsel Sağlık',
+                icon: 'fa-solid fa-mars',
+                iconColor: 'text-indigo-400',
+                description: 'Erken boşalma, sertleşme sorunu ve benzeri konularda gizlilik ve kalite ön planda. Türkiye\'deki partner kliniklerimizle hizmet veriyoruz.',
+                procedures: ['Erken boşalma tedavisi', 'Sertleşme sorunu tedavisi (erektil disfonksiyon)', 'Penis protezi (penil implant)', 'Kan ve PRP ile tedavi seçenekleri', 'Hormon ve genel kontrol'],
+                notes: 'Tüm süreç gizlilik içinde yürütülür. Önce online danışmanlık, gerekirse yüz yüze muayene planlanır.'
+            },
+            kadin_cinsel: {
+                title: 'Kadın Cinsel Sağlık',
+                icon: 'fa-solid fa-venus',
+                iconColor: 'text-rose-400',
+                description: 'Cinsel birleşme sırasında ağrı (vajinismus), vajina bölgesi estetiği ve cinsel sağlık tedavileri Türkiye\'de kadın hastalıkları ve üroloji uzmanları tarafından güvenle uygulanıyor.',
+                procedures: ['Cinsel birleşmede ağrı tedavisi (vajinismus)', 'Vajina bölgesi estetiği (labioplasti vb.)', 'Lazer ile tedaviler', 'Pelvik taban güçlendirme', 'Cinsel terapi desteği'],
+                notes: 'Kadın dostu klinikler ve bayan danışmanlarımızla iletişim kurabilirsiniz. Gizlilik esastır.'
+            },
+            tup_bebek: {
+                title: 'Tüp Bebek',
+                icon: 'fa-solid fa-baby',
+                iconColor: 'text-amber-400',
+                description: 'Yumurta ve sperm laboratuvarda birleştirilip embriyo oluşturma (tüp bebek) tedavileri Türkiye\'de yüksek başarı oranları ve uygun fiyatlarla sunuluyor.',
+                procedures: ['Tüp bebek tedavisi (IVF)', 'Mikroenjeksiyon ile döllenme (ICSI)', 'Embriyo dondurma', 'Embriyoda genetik tarama (PGT)', 'Yumurta / sperm donörü programları', 'Taşıyıcı annelik (yasal çerçevede)'],
+                notes: 'Tedavi süreci 2-3 hafta sürebilir. Transfer, konaklama ve çeviri desteği paketlerimiz mevcuttur.'
+            }
+        };
+
+        let lastSelectedCategoryForFilter = null;
+
+        function openCategoryDetail(categoryKey, element) {
+            const data = categoryDetailData[categoryKey];
+            if (!data) return;
+            lastSelectedCategoryForFilter = categoryKey;
+            document.getElementById('categoryDetailTitle').innerHTML = `<i class="${data.icon} ${data.iconColor} mr-2"></i>${data.title}`;
+            const content = document.getElementById('categoryDetailContent');
+            content.innerHTML = `
+                <p class="text-slate-300 leading-relaxed">${data.description}</p>
+                <div>
+                    <h4 class="text-sm font-bold text-slate-400 mb-2">Yaygın İşlemler</h4>
+                    <ul class="space-y-1 text-slate-300">
+                        ${data.procedures.map(p => `<li class="flex items-center gap-2"><i class="fa-solid fa-check text-pink-400 text-xs"></i>${p}</li>`).join('')}
+                    </ul>
+                </div>
+                <p class="text-sm text-slate-400 border-l-4 border-pink-500/50 pl-4">${data.notes}</p>
+            `;
+            document.getElementById('categoryDetailShowClinicsBtn').setAttribute('data-category', categoryKey);
+            document.getElementById('categoryDetailModal').classList.add('active');
+        }
+
+        function closeCategoryDetailModal(event) {
+            if (event && event.target && event.target.id !== 'categoryDetailModal') return;
+            document.getElementById('categoryDetailModal').classList.remove('active');
+        }
+
+        function applyCategoryAndScroll() {
+            const category = lastSelectedCategoryForFilter;
+            if (!category) return;
+            const card = document.querySelector(`[data-category="${category}"]`);
+            filterByCategory(category, card || undefined);
+        }
+
+        // Kategori modalındaki "Ücretsiz Danışmanlık Al" ile formu aç (seçili kategoriyle)
+        function openConsultationFromCategory() {
+            const btn = document.getElementById('categoryDetailShowClinicsBtn');
+            const category = btn ? btn.getAttribute('data-category') : null;
+            closeCategoryDetailModal();
+            if (category) {
+                const sel = document.getElementById('treatmentCategory');
+                if (sel) {
+                    sel.value = category;
+                    updateTreatmentTypes();
+                }
+            }
+            openConsultationForm();
+        }
+
         // Kategoriye göre filtrele
         function filterByCategory(category, element) {
             console.log('Kategori seçildi:', category, element);
+            
+            // Klinikler bölümüne "Bu kategorideki klinikler" başlığını yaz
+            const titleEl = document.getElementById('clinicsCategoryTitle');
+            if (titleEl && categoryDetailData[category]) {
+                titleEl.textContent = categoryDetailData[category].title + ' kategorisindeki klinikler aşağıda listeleniyor.';
+                titleEl.classList.remove('hidden');
+            }
             
             // Önceki aktif kategoriyi kaldır
             document.querySelectorAll('.category-card').forEach(card => {
@@ -887,7 +1028,6 @@
                     city: formData.get('city') || null,
                     photos: photoUrls,
                     description: formData.get('description') || null,
-                    preferred_date: formData.get('preferredDate') || null,
                     status: 'new'
                 };
                 

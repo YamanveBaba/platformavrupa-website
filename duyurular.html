@@ -8,7 +8,20 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Duyuru ve Haberler</title>
+    <title>Duyurular ve Haberler | PlatformAvrupa</title>
+    <meta name="description" content="Platform Avrupa duyuruları ve haberler. Gurbetçilere yönelik güncel duyurular, etkinlikler ve bilgilendirmeler.">
+    <link rel="canonical" href="https://www.platformavrupa.com/duyurular.html">
+    <meta property="og:title" content="Duyurular ve Haberler | PlatformAvrupa">
+    <meta property="og:description" content="Platform Avrupa duyuruları ve haberler. Gurbetçilere yönelik güncel duyurular ve etkinlikler.">
+    <meta property="og:url" content="https://www.platformavrupa.com/duyurular.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Platform Avrupa">
+    <meta property="og:image" content="https://www.platformavrupa.com/og-image.png">
+    <meta property="og:locale" content="tr_TR">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Duyurular ve Haberler | PlatformAvrupa">
+    <meta name="twitter:description" content="Platform Avrupa duyuruları ve haberler. Gurbetçilere yönelik güncel duyurular.">
+    <meta name="twitter:image" content="https://www.platformavrupa.com/og-image.png">
 
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -124,7 +137,7 @@
 
             data.forEach(haber => {
 
-                const tarih = new Date(haber.created_at).toLocaleDateString('tr-TR');
+                const tarih = formatDate(haber.created_at, 'long');
 
                 const resim = haber.image_url ? haber.image_url : 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=600';
 
