@@ -3,670 +3,1113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Market Fiyatları | PlatformAvrupa</title>
-    
+    <title>Belçika market fiyatları | PlatformAvrupa</title>
+    <meta name="description" content="Belçika market fiyat karşılaştırması: Colruyt, ALDI, Delhaize, Lidl, Carrefour. Haftalık indirimler ve kampanyalar.">
+    <link rel="canonical" href="https://www.platformavrupa.com/market.html">
+    <meta property="og:title" content="Market Fiyatları | PlatformAvrupa">
+    <meta property="og:description" content="5 Belçika zincirinde haftalık indirimler ve fiyat karşılaştırması.">
+    <meta property="og:url" content="https://www.platformavrupa.com/market.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Platform Avrupa">
+    <meta property="og:image" content="https://www.platformavrupa.com/og-image.png">
+    <meta property="og:locale" content="tr_TR">
+    <meta name="twitter:card" content="summary_large_image">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
     <script src="auth.js"></script>
     <script src="utils.js"></script>
     <script src="genel_veriler.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
+
     <style>
-        body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%);
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(160deg, #090f1e 0%, #0e1f3e 40%, #122348 70%, #090f1e 100%);
             min-height: 100vh;
         }
-        .glass-card { 
-            background: rgba(255,255,255,0.95); 
-            backdrop-filter: blur(20px); 
-            border-radius: 24px; 
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+
+        /* ── Glass ── */
+        .glass-dark {
+            background: rgba(255,255,255,0.055);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(255,255,255,0.09);
+            border-radius: 20px;
         }
-        .market-card { 
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
-            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%);
-            backdrop-filter: blur(20px);
-            border-radius: 24px;
+
+        /* ── Tabs ── */
+        .tab-btn { transition: all 0.22s ease; border-radius: 14px; }
+        .tab-btn.active { background: rgba(255,255,255,0.13); color: white !important; }
+        .tab-btn.active .tab-indicator { opacity: 1; }
+        .tab-indicator {
+            display: block; height: 3px; width: 20px;
+            background: #10b981; border-radius: 2px;
+            margin: 3px auto 0; opacity: 0;
+            transition: opacity 0.22s;
+        }
+
+        /* ── Promo / compare card ── */
+        .promo-card {
+            background: #fff;
+            border-radius: 18px;
             overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.3);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+            transition: transform 0.28s cubic-bezier(.4,0,.2,1), box-shadow 0.28s ease;
+            display: flex;
+            flex-direction: column;
         }
-        .market-card:hover { 
-            transform: translateY(-8px) scale(1.03); 
-            box-shadow: 0 20px 60px rgba(16, 185, 129, 0.2); 
-            border-color: rgba(16, 185, 129, 0.3);
+        .promo-card:hover { transform: translateY(-4px); box-shadow: 0 10px 28px rgba(0,0,0,0.13); }
+        .promo-card .p-3 { flex:1; display:flex; flex-direction:column; }
+        .promo-card .p-3 > p { flex:1; }
+
+        /* ── Badges ── */
+        .badge-red  { background: linear-gradient(135deg,#ef4444,#dc2626); color:#fff; font-weight:800; font-size:.72rem; padding:3px 8px; border-radius:20px; white-space:nowrap; }
+        .badge-amber{ background: linear-gradient(135deg,#f59e0b,#d97706); color:#fff; font-weight:700; font-size:.7rem;  padding:3px 8px; border-radius:20px; white-space:nowrap; }
+        .badge-green{ background: linear-gradient(135deg,#10b981,#059669); color:#fff; font-weight:800; font-size:.72rem; padding:3px 8px; border-radius:20px; white-space:nowrap; }
+
+        /* ── Filter chips ── */
+        .filter-chip {
+            cursor: pointer; border-radius: 100px;
+            border: 1.5px solid rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.65);
+            font-size: .78rem; font-weight: 600;
+            padding: 5px 14px; white-space: nowrap;
+            transition: all 0.18s ease;
         }
-        .gradient-text {
-            background: linear-gradient(135deg, #f59e0b, #ef4444);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .filter-chip:hover { background: rgba(255,255,255,0.1); color:#fff; }
+        .filter-chip.active { background:#10b981; border-color:#10b981; color:#fff; box-shadow:0 3px 10px rgba(16,185,129,.3); }
+
+        /* ── Search ── */
+        .search-input {
+            border-radius: 14px;
+            border: 1.5px solid rgba(255,255,255,0.13);
+            background: rgba(255,255,255,0.07);
+            color: #fff; transition: all .25s ease;
+            font-family: inherit;
         }
-        .pulse-badge {
-            animation: pulse 2s infinite;
+        .search-input:focus { border-color:#10b981; background:rgba(255,255,255,0.1); outline:none; box-shadow:0 0 0 3px rgba(16,185,129,.18); }
+        .search-input::placeholder { color: rgba(255,255,255,.35); }
+
+        /* ── Market brand card ── */
+        .market-card {
+            background:#fff; border-radius:20px; overflow:hidden;
+            box-shadow:0 2px 20px rgba(0,0,0,.07);
+            transition: transform .3s cubic-bezier(.4,0,.2,1), box-shadow .3s ease;
         }
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+        .market-card:hover { transform:translateY(-5px); box-shadow:0 12px 32px rgba(0,0,0,.13); }
+
+        /* ── Winner ── */
+        .compare-winner {
+            box-shadow: 0 0 0 2px #10b981, 0 12px 32px rgba(16,185,129,.2);
+            transform: scale(1.02);
         }
-        .country-chip {
-            transition: all 0.3s ease;
+
+        /* ── Stat pill ── */
+        .stat-pill {
+            background: rgba(16,185,129,.1);
+            border: 1px solid rgba(16,185,129,.22);
+            border-radius: 100px; padding: 4px 12px;
+            font-size:.77rem; color:#34d399; font-weight:600;
+            display:inline-flex; align-items:center; gap:5px;
         }
-        .country-chip.active {
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-            color: white;
-            transform: scale(1.05);
+
+        /* ── Price strike ── */
+        .strike { text-decoration:line-through; color:#94a3b8; font-size:.82em; }
+
+        /* ── Scrollbar ── */
+        .no-scroll::-webkit-scrollbar { display:none; }
+        .no-scroll { -ms-overflow-style:none; scrollbar-width:none; }
+
+        /* ── Shimmer ── */
+        @keyframes shimmer {
+            0%   { background-position:-400px 0; }
+            100% { background-position: 400px 0; }
         }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .shimmer {
+            background: linear-gradient(90deg,rgba(255,255,255,.04) 25%,rgba(255,255,255,.09) 50%,rgba(255,255,255,.04) 75%);
+            background-size: 400px 100%;
+            animation: shimmer 1.4s infinite linear;
+        }
+
+        /* ── Live dot ── */
+        @keyframes pulse-dot {
+            0%,100% { box-shadow:0 0 0 0 rgba(16,185,129,.5); }
+            50%      { box-shadow:0 0 0 6px rgba(16,185,129,0); }
+        }
+        .live-dot { animation: pulse-dot 1.8s infinite; }
+
+        /* ── Mode toggle ── */
+        .mode-btn { transition: all 0.2s ease; border-radius: 12px; color: rgba(255,255,255,.5); font-size:.78rem; font-weight:700; }
+        .mode-btn.active { background: rgba(255,255,255,.13); color:#fff; }
+
+        /* ── Category tile ── */
+        .cat-tile {
+            background: rgba(255,255,255,.06);
+            border: 1.5px solid rgba(255,255,255,.09);
+            border-radius: 18px;
+            padding: 14px 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all .2s ease;
+        }
+        .cat-tile:hover, .cat-tile:active { background: rgba(255,255,255,.13); border-color: rgba(16,185,129,.5); transform: translateY(-2px); }
+        .cat-tile .cat-emoji { font-size: 1.9rem; display:block; margin-bottom:6px; line-height:1; }
+        .cat-tile .cat-name  { font-size: .68rem; font-weight:700; color:rgba(255,255,255,.75); line-height:1.2; }
+
+        /* ── Cat product card ── */
+        .cat-prod-row {
+            background: #fff;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 1px 10px rgba(0,0,0,.07);
+            transition: transform .22s ease, box-shadow .22s ease;
+        }
+        .cat-prod-row:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.11); }
     </style>
 </head>
-<body class="pb-24">
+<body class="pb-28">
 
-    <!-- Header -->
-    <nav class="bg-white/95 backdrop-blur-xl sticky top-0 z-50 shadow-xl border-b border-slate-200/50">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-            <a href="index.html" class="flex items-center gap-2 text-slate-600 hover:text-blue-600 transition font-bold">
-                <div class="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center shadow-inner">
-                    <i class="fa-solid fa-arrow-left"></i>
-                </div>
-            </a>
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center text-white text-xl shadow-lg shadow-emerald-500/30">
-                    <i class="fa-solid fa-tags"></i>
-                </div>
-                <div>
-                    <h1 class="font-black text-xl text-slate-800 tracking-tight">Market Fiyatları</h1>
-                    <p class="text-xs text-slate-500">İndirimler & Broşürler</p>
+<!-- ═══ HEADER ═══════════════════════════════════════════════════ -->
+<nav class="bg-white/96 backdrop-blur-xl sticky top-0 z-50 border-b border-slate-200/60 shadow-md">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+        <button onclick="navBack()" class="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-500 hover:bg-slate-200 transition">
+            <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <div class="flex items-center gap-2.5">
+            <div class="w-11 h-11 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-emerald-500/25">
+                <i class="fa-solid fa-tags text-lg"></i>
+            </div>
+            <div>
+                <h1 class="font-black text-[1.1rem] text-slate-800 leading-tight">Market Fiyatları</h1>
+                <div class="flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full live-dot inline-block"></span>
+                    <p class="text-xs text-slate-500">🇧🇪 Belçika · haftalık güncelleme</p>
                 </div>
             </div>
         </div>
-    </nav>
+        <div id="headerTotal" class="text-right hidden md:block opacity-0 transition-opacity duration-500">
+            <div class="text-xs text-slate-400">takipte</div>
+            <div id="headerTotalNum" class="font-black text-slate-700 text-sm leading-tight">—</div>
+        </div>
+    </div>
+</nav>
 
-    <!-- Hero Banner -->
-    <div class="relative overflow-hidden py-8 px-4">
-        <div class="max-w-7xl mx-auto">
-            <div class="glass-card p-6 md:p-8">
-                <div class="flex flex-col md:flex-row items-center gap-6">
-                    <div class="flex-1 text-center md:text-left">
-                        <h2 class="text-3xl md:text-4xl font-black text-slate-800 mb-2">
-                            Avrupa'nın <span class="gradient-text">Market</span> Broşürleri
-                        </h2>
-                        <p class="text-slate-600 text-lg">30 ülke, 100+ market zinciri</p>
-                    </div>
-                    <div class="hidden md:block">
-                        <div class="w-32 h-32 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-3xl flex items-center justify-center text-white text-5xl shadow-2xl shadow-orange-500/30 pulse-badge">
-                            <i class="fa-solid fa-percent"></i>
-                        </div>
-                    </div>
+<!-- ═══ HERO ══════════════════════════════════════════════════════ -->
+<div class="px-4 pt-5 pb-3 max-w-7xl mx-auto">
+    <div class="glass-dark p-5 md:p-6">
+        <div class="flex flex-col md:flex-row md:items-center gap-4">
+            <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="text-3xl">🇧🇪</span>
+                    <h2 class="text-2xl md:text-3xl font-black text-white leading-tight">Belçika Market Fiyatları</h2>
+                </div>
+                <p class="text-white/50 text-sm mb-4">Colruyt, ALDI, Delhaize, Lidl ve Carrefour'da <span class="text-emerald-400 font-semibold">gerçek fiyatlar</span></p>
+                <div class="flex flex-wrap gap-2" id="heroStats">
+                    <div class="shimmer h-7 w-36 rounded-full"></div>
+                    <div class="shimmer h-7 w-28 rounded-full"></div>
+                    <div class="shimmer h-7 w-32 rounded-full"></div>
+                </div>
+            </div>
+            <div class="flex gap-3 md:flex-col">
+                <div class="glass-dark rounded-2xl px-5 py-3 text-center flex-1 md:flex-none">
+                    <div id="heroPromoNum" class="text-2xl font-black text-emerald-400">—</div>
+                    <div class="text-white/40 text-xs mt-0.5">İndirimde</div>
+                </div>
+                <div class="glass-dark rounded-2xl px-5 py-3 text-center flex-1 md:flex-none">
+                    <div class="text-2xl font-black text-sky-400">5</div>
+                    <div class="text-white/40 text-xs mt-0.5">Market</div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Ülke Seçimi -->
-    <section class="px-4 mb-8">
-        <div class="max-w-7xl mx-auto">
-            <div class="mb-4">
-                <h3 class="font-bold text-white text-lg flex items-center gap-2">
-                    <i class="fa-solid fa-globe text-blue-400"></i> Ülke Seç
-                </h3>
-            </div>
-            <div id="countryChips" class="flex flex-wrap gap-2 pb-3">
-                <!-- Dinamik olarak doldurulacak -->
+<!-- ═══ TABS ══════════════════════════════════════════════════════ -->
+<div class="sticky top-[68px] z-40 px-4 pb-3 max-w-7xl mx-auto">
+    <div class="glass-dark p-1.5 flex gap-1">
+        <button id="tab-indirimler" onclick="switchTab('indirimler')"
+            class="tab-btn active flex-1 flex flex-col items-center py-2 text-white text-xs font-bold">
+            <div class="flex items-center gap-1.5"><i class="fa-solid fa-fire text-orange-400"></i> İndirimler</div>
+            <span class="tab-indicator"></span>
+        </button>
+        <button id="tab-karsilastir" onclick="switchTab('karsilastir')"
+            class="tab-btn flex-1 flex flex-col items-center py-2 text-white/50 text-xs font-bold">
+            <div class="flex items-center gap-1.5"><i class="fa-solid fa-scale-balanced text-emerald-400"></i> Karşılaştır</div>
+            <span class="tab-indicator"></span>
+        </button>
+        <button id="tab-marketler" onclick="switchTab('marketler')"
+            class="tab-btn flex-1 flex flex-col items-center py-2 text-white/50 text-xs font-bold">
+            <div class="flex items-center gap-1.5"><i class="fa-solid fa-store text-sky-400"></i> Marketler</div>
+            <span class="tab-indicator"></span>
+        </button>
+    </div>
+</div>
+
+<!-- ═══ TAB: İNDİRİMLER ══════════════════════════════════════════ -->
+<div id="sec-indirimler" class="px-4 max-w-7xl mx-auto space-y-5">
+
+    <!-- Filter chips -->
+    <div class="flex gap-2 overflow-x-auto no-scroll pb-1 pt-1">
+        <button class="filter-chip active" data-f="all" onclick="filterPromos('all')">Tümü</button>
+        <button class="filter-chip" data-f="colruyt_be" onclick="filterPromos('colruyt_be')">
+            <img src="https://logo.clearbit.com/colruyt.com" class="w-3.5 h-3.5 inline-block rounded mr-0.5 align-middle" onerror="this.remove()"> Colruyt
+        </button>
+        <button class="filter-chip" data-f="aldi_be" onclick="filterPromos('aldi_be')">
+            <img src="https://logo.clearbit.com/aldi.com" class="w-3.5 h-3.5 inline-block rounded mr-0.5 align-middle" onerror="this.remove()"> ALDI
+        </button>
+        <button class="filter-chip" data-f="delhaize_be" onclick="filterPromos('delhaize_be')">
+            <img src="https://logo.clearbit.com/delhaize.com" class="w-3.5 h-3.5 inline-block rounded mr-0.5 align-middle" onerror="this.remove()"> Delhaize
+        </button>
+        <button class="filter-chip" data-f="lidl_be" onclick="filterPromos('lidl_be')">
+            <img src="https://logo.clearbit.com/lidl.com" class="w-3.5 h-3.5 inline-block rounded mr-0.5 align-middle" onerror="this.remove()"> Lidl
+        </button>
+        <button class="filter-chip" data-f="carrefour_be" onclick="filterPromos('carrefour_be')">
+            <img src="https://logo.clearbit.com/carrefour.com" class="w-3.5 h-3.5 inline-block rounded mr-0.5 align-middle" onerror="this.remove()"> Carrefour
+        </button>
+    </div>
+
+    <!-- Active promos -->
+    <div>
+        <div class="flex items-center justify-between mb-3">
+            <h3 class="text-white font-bold text-base flex items-center gap-2">
+                <i class="fa-solid fa-fire text-orange-400"></i> Bu Hafta İndirimde
+            </h3>
+            <span id="promoBadge" class="stat-pill">yükleniyor…</span>
+        </div>
+        <div id="promoGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+            <div class="shimmer h-40 rounded-2xl"></div>
+            <div class="shimmer h-40 rounded-2xl"></div>
+            <div class="shimmer h-40 rounded-2xl"></div>
+            <div class="shimmer h-40 rounded-2xl"></div>
+            <div class="shimmer h-40 rounded-2xl hidden sm:block"></div>
+            <div class="shimmer h-40 rounded-2xl hidden md:block"></div>
+        </div>
+    </div>
+
+    <!-- Upcoming promos -->
+    <div id="upcomingSec" class="hidden">
+        <div class="flex items-center gap-2 mb-3">
+            <h3 class="text-white font-bold text-base flex items-center gap-2">
+                <i class="fa-solid fa-clock text-amber-400"></i> Yakında İndirime Giriyor
+            </h3>
+        </div>
+        <div id="upcomingGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"></div>
+    </div>
+
+</div>
+
+<!-- ═══ TAB: KARŞILAŞTIR ══════════════════════════════════════════ -->
+<div id="sec-karsilastir" class="hidden px-4 max-w-7xl mx-auto space-y-4">
+
+    <!-- Geri + breadcrumb (Step 1, 2, 3'te görünür) -->
+    <div id="wiz-nav" class="hidden flex items-center gap-2">
+        <button onclick="wizBack()"
+            class="w-9 h-9 rounded-xl glass-dark flex items-center justify-center text-white/70 hover:text-white transition shrink-0">
+            <i class="fa-solid fa-arrow-left text-sm"></i>
+        </button>
+        <div class="flex items-center gap-1.5 text-xs overflow-hidden flex-1 min-w-0">
+            <span class="text-white/40 cursor-pointer hover:text-white/70 shrink-0 transition"
+                onclick="wizGoStep(0)">Kategoriler</span>
+            <span id="wiz-bc-1" class="hidden text-white/25 shrink-0">›</span>
+            <span id="wiz-bc-cat" class="hidden text-white/60 cursor-pointer hover:text-white/80 truncate transition"
+                onclick="wizGoStep(1)"></span>
+            <span id="wiz-bc-2" class="hidden text-white/25 shrink-0">›</span>
+            <span id="wiz-bc-prod" class="hidden text-white/80 font-semibold truncate"></span>
+        </div>
+    </div>
+
+    <!-- ── STEP 0: Kategori seç ── -->
+    <div id="wiz-step0">
+        <p class="text-white/40 text-xs mb-3 flex items-center gap-1.5">
+            <i class="fa-solid fa-scale-balanced text-emerald-400"></i>
+            Hangi ürünü 5 markette karşılaştıralım?
+        </p>
+        <div id="wiz-cat-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2.5"></div>
+    </div>
+
+    <!-- ── STEP 1: Ürün seç ── -->
+    <div id="wiz-step1" class="hidden">
+        <div class="glass-dark p-4">
+            <p class="text-white/40 text-xs flex items-center gap-1.5 mb-3">
+                <i class="fa-solid fa-hand-pointer text-emerald-400"></i>
+                Hangi ürünü karşılaştıralım?
+            </p>
+            <div id="wiz-prod-chips" class="flex flex-wrap gap-2">
+                <div class="shimmer h-8 w-24 rounded-full"></div>
+                <div class="shimmer h-8 w-20 rounded-full"></div>
+                <div class="shimmer h-8 w-28 rounded-full"></div>
+                <div class="shimmer h-8 w-16 rounded-full"></div>
+                <div class="shimmer h-8 w-24 rounded-full"></div>
             </div>
         </div>
-    </section>
+    </div>
 
-    <!-- Haftalık Broşürler -->
-    <section class="px-4 mb-8">
-        <div class="max-w-7xl mx-auto">
-            <div class="mb-4">
-                <h3 class="font-bold text-white text-lg flex items-center gap-2">
-                    <i class="fa-solid fa-newspaper text-emerald-400"></i> Haftalık Broşürler
-                </h3>
-            </div>
-            <div id="marketGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                <!-- Dinamik olarak doldurulacak -->
-            </div>
+    <!-- ── STEP 2: Karşılaştırma sonucu ── -->
+    <div id="wiz-step2" class="hidden space-y-3">
+        <div id="wiz-result-loading" class="hidden text-center py-10">
+            <i class="fa-solid fa-spinner fa-spin text-3xl text-emerald-400 mb-3 block"></i>
+            <p class="text-white/50 text-sm">5 markette aranıyor…</p>
         </div>
-    </section>
+        <div id="wiz-result-cards"></div>
+    </div>
 
+</div>
 
-    <!-- Bottom Navigation -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-200 z-50 px-4 py-2 safe-area-inset-bottom">
-        <div class="max-w-lg mx-auto flex justify-around items-center">
-            <a href="index.html" class="flex flex-col items-center py-2 px-3 text-slate-500">
-                <i class="fa-solid fa-house text-lg"></i>
-                <span class="text-xs mt-1">Ana Sayfa</span>
-            </a>
-            <a href="market.html" class="flex flex-col items-center py-2 px-3 text-emerald-600">
-                <i class="fa-solid fa-tags text-lg"></i>
-                <span class="text-xs mt-1 font-bold">Market</span>
-            </a>
-            <a href="indirim_paylas.html" class="flex flex-col items-center py-2 px-3 text-slate-500">
-                <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center text-white -mt-6 shadow-lg">
-                    <i class="fa-solid fa-plus text-xl"></i>
+<!-- ═══ TAB: MARKETLER ════════════════════════════════════════════ -->
+<div id="sec-marketler" class="hidden px-4 max-w-7xl mx-auto space-y-4">
+    <div id="marketGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="shimmer h-28 rounded-2xl"></div>
+        <div class="shimmer h-28 rounded-2xl"></div>
+        <div class="shimmer h-28 rounded-2xl"></div>
+        <div class="shimmer h-28 rounded-2xl"></div>
+        <div class="shimmer h-28 rounded-2xl"></div>
+    </div>
+    <!-- Folder.be link -->
+    <div class="glass-dark rounded-2xl p-4 flex items-center justify-between gap-3">
+        <div>
+            <p class="text-white font-semibold text-sm">Tüm Belçika broşürleri</p>
+            <p class="text-white/40 text-xs mt-0.5">folder.be — haftalık kampanyalar</p>
+        </div>
+        <a href="https://www.folder.be" target="_blank" rel="noopener"
+            class="shrink-0 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-sm font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-lg shadow-emerald-500/20">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> Aç
+        </a>
+    </div>
+</div>
+
+<!-- ═══ BOTTOM NAV ════════════════════════════════════════════════ -->
+<nav class="fixed bottom-0 left-0 right-0 bg-white/96 backdrop-blur-xl border-t border-slate-200 z-50 px-4 py-2">
+    <div class="max-w-lg mx-auto flex justify-around items-center">
+        <a href="index.html" class="flex flex-col items-center py-2 px-3 text-slate-500">
+            <i class="fa-solid fa-house text-lg"></i>
+            <span class="text-xs mt-1">Ana Sayfa</span>
+        </a>
+        <a href="market.html" class="flex flex-col items-center py-2 px-3 text-emerald-600">
+            <i class="fa-solid fa-tags text-lg"></i>
+            <span class="text-xs mt-1 font-bold">Market</span>
+        </a>
+        <a href="indirim_paylas.html" class="flex flex-col items-center py-2 px-3 text-slate-500">
+            <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center text-white -mt-6 shadow-lg">
+                <i class="fa-solid fa-plus text-xl"></i>
+            </div>
+        </a>
+        <a href="favorilerim.html" class="flex flex-col items-center py-2 px-3 text-slate-500">
+            <i class="fa-solid fa-heart text-lg"></i>
+            <span class="text-xs mt-1">Favoriler</span>
+        </a>
+        <a href="profil.html" class="flex flex-col items-center py-2 px-3 text-slate-500">
+            <i class="fa-solid fa-user text-lg"></i>
+            <span class="text-xs mt-1">Profil</span>
+        </a>
+    </div>
+</nav>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════════════
+const CHAINS = {
+    colruyt_be:   { label:'Colruyt',   color:'#E31E24', logo:'colruyt.com',   brosur:'https://www.colruyt.be/nl/aanbiedingen'         },
+    aldi_be:      { label:'ALDI',      color:'#003F7F', logo:'aldi.com',      brosur:'https://www.aldi.be/nl/aanbiedingen'            },
+    delhaize_be:  { label:'Delhaize',  color:'#E31837', logo:'delhaize.com',  brosur:'https://www.delhaize.be/nl/aanbiedingen'        },
+    lidl_be:      { label:'Lidl',      color:'#0050AA', logo:'lidl.com',      brosur:'https://www.lidl.be/nl/aanbiedingen.htm'        },
+    carrefour_be: { label:'Carrefour', color:'#007DC5', logo:'carrefour.com', brosur:'https://www.carrefour.be/nl/promoties'          },
+};
+const SLUGS = Object.keys(CHAINS);
+
+// ── State ──
+let allPromos = [];
+let activeFilter = 'all';
+
+// ═══════════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════════
+function esc(s) {
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function fmtP(v, cur) {
+    const n = Number(v);
+    return Number.isFinite(n) ? n.toFixed(2)+' '+(cur||'EUR') : '—';
+}
+function fmtDate(v) {
+    if (!v) return null;
+    try {
+        const d = new Date(v);
+        if (isNaN(d.getTime())) return String(v);
+        return d.toLocaleDateString('tr-TR',{day:'2-digit',month:'short'});
+    } catch { return String(v); }
+}
+function fmtDateLong(v) {
+    if (!v) return '—';
+    try {
+        const d = new Date(v);
+        if (isNaN(d.getTime())) return String(v);
+        return d.toLocaleDateString('tr-TR',{day:'2-digit',month:'short',year:'numeric'});
+    } catch { return String(v); }
+}
+function discPct(price, promo) {
+    const p = Number(price), q = Number(promo);
+    if (!Number.isFinite(p)||!Number.isFinite(q)||p<=0) return null;
+    const pct = Math.round((1-q/p)*100);
+    return pct > 0 ? pct : null;
+}
+function effPrice(row) {
+    if (row.in_promo && row.promo_price != null && Number.isFinite(Number(row.promo_price)))
+        return Number(row.promo_price);
+    const p = Number(row.price);
+    return (Number.isFinite(p) && p > 0) ? p : NaN;
+}
+// Akıllı isim: name_tr temiz ve anlamlıysa kullan, değilse name
+function bestName(row) {
+    const nt = (row.name_tr || '').split('\n')[0].replace(/\s+/g,' ').trim();
+    const nl = (row.name || '').trim();
+    if (!nt || nt.length < 3) return nl;
+    // Çok fazla nokta/tire = bozuk çeviri
+    const dots = (nt.match(/\./g)||[]).length;
+    const letters = (nt.match(/[a-zA-ZğüşöçıİĞÜŞÖÇ]/g)||[]).length;
+    if (dots >= 3 && letters < dots * 2) return nl;
+    return nt;
+}
+
+function logoImg(slug, size) {
+    const cfg = CHAINS[slug];
+    if (!cfg) return '';
+    const s = size || 6;
+    return `<img src="https://www.google.com/s2/favicons?domain=${cfg.logo}&sz=64" alt="${esc(cfg.label)}"
+        class="w-${s} h-${s} object-contain rounded-lg"
+        onerror="this.onerror=null;this.style.cssText='background:${cfg.color};border-radius:8px;display:inline-block'" referrerpolicy="no-referrer">`;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// NAV BACK
+// ═══════════════════════════════════════════════════════════════════
+function navBack() {
+    // Wizard adımındaysa bir geri git
+    const secK = document.getElementById('sec-karsilastir');
+    if (secK && !secK.classList.contains('hidden') && wiz.step > 0) {
+        wizBack();
+        return;
+    }
+    // Karşılaştır sekmesindeyse → İndirimler'e
+    if (secK && !secK.classList.contains('hidden')) {
+        switchTab('indirimler');
+        return;
+    }
+    const secM = document.getElementById('sec-marketler');
+    if (secM && !secM.classList.contains('hidden')) {
+        switchTab('indirimler');
+        return;
+    }
+    window.location.href = 'index.html';
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════════════════════════
+function switchTab(tab) {
+    ['indirimler','karsilastir','marketler'].forEach(t => {
+        const btn = document.getElementById('tab-'+t);
+        const sec = document.getElementById('sec-'+t);
+        const isActive = t === tab;
+        if (isActive) {
+            btn.classList.add('active');
+            btn.classList.remove('text-white/50');
+            sec.classList.remove('hidden');
+        } else {
+            btn.classList.remove('active');
+            btn.classList.add('text-white/50');
+            sec.classList.add('hidden');
+        }
+    });
+    // Karşılaştır sekmesine geçince wizard başa dönsün
+    if (tab === 'karsilastir' && typeof wizShow === 'function') wizShow(0);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// İNDİRİMLER
+// ═══════════════════════════════════════════════════════════════════
+function buildPromoCard(row) {
+    const cfg     = CHAINS[row.chain_slug] || {label:row.chain_slug, color:'#64748b', logo:''};
+    const pct     = row.promo_price != null ? discPct(row.price, row.promo_price) : null;
+    const eff     = effPrice(row);
+    const until   = fmtDate(row.promo_valid_until);
+    const display = bestName(row);
+    const imgUrl  = row.image_url || '';
+
+    return `<div class="promo-card" data-chain="${esc(row.chain_slug)}">
+        <div style="height:3px;background:${cfg.color}"></div>
+        ${imgUrl ? `
+        <div class="bg-white flex items-center justify-center relative" style="height:120px">
+            <img src="${esc(imgUrl)}" alt="${esc(display)}"
+                loading="lazy"
+                class="max-h-full max-w-full object-contain p-2"
+                onerror="this.closest('.promo-card-img')?.remove()">
+            ${pct ? `<span class="badge-red" style="position:absolute;top:6px;right:6px">-${pct}%</span>` : ''}
+        </div>` : ''}
+        <div class="p-3 flex flex-col flex-1">
+            <div class="flex items-center justify-between mb-1.5">
+                <div class="flex items-center gap-1.5">
+                    ${logoImg(row.chain_slug, 4)}
+                    <span class="text-xs font-bold text-slate-500">${esc(cfg.label)}</span>
                 </div>
-            </a>
-            <a href="favorilerim.html" class="flex flex-col items-center py-2 px-3 text-slate-500">
-                <i class="fa-solid fa-heart text-lg"></i>
-                <span class="text-xs mt-1">Favoriler</span>
-            </a>
-            <a href="profil.html" class="flex flex-col items-center py-2 px-3 text-slate-500">
-                <i class="fa-solid fa-user text-lg"></i>
-                <span class="text-xs mt-1">Profil</span>
-            </a>
+                ${pct ? `<span class="badge-red">-${pct}%</span>` : `<span class="badge-green" style="font-size:.62rem">İndirimde</span>`}
+            </div>
+            <p class="text-slate-800 font-semibold text-sm leading-snug line-clamp-2 mb-auto min-h-[2.4rem]">${esc(display)}</p>
+            <div class="flex items-end justify-between mt-2">
+                <div>
+                    ${row.promo_price != null && Number(row.price) > 0 && Number(row.price) !== Number(row.promo_price)
+                        ? `<div class="strike">${fmtP(row.price, row.currency)}</div>` : ''}
+                    <div class="text-[1.1rem] font-black leading-tight" style="color:${cfg.color}">${fmtP(eff, row.currency)}</div>
+                </div>
+                ${until ? `<div class="text-[.65rem] text-slate-400 text-right leading-tight">${until}<br>kadar</div>` : ''}
+            </div>
         </div>
-    </nav>
+    </div>`;
+}
 
-    <script>
-        // --- VERİ YAPILARI ---
-        let selectedCountry = 'DE'; // Varsayılan: Almanya
-        let marketChains = [];
+function renderPromos() {
+    const grid = document.getElementById('promoGrid');
+    const badge = document.getElementById('promoBadge');
+    if (!grid) return;
+    const list = activeFilter === 'all' ? allPromos : allPromos.filter(r => r.chain_slug === activeFilter);
+    badge.textContent = list.length + ' ürün';
+    if (list.length === 0) {
+        grid.innerHTML = `<div class="col-span-full py-12 text-center">
+            <div class="glass-dark rounded-2xl p-8 inline-block">
+                <i class="fa-solid fa-tag text-4xl text-white/15 mb-3 block"></i>
+                <p class="text-white/40 text-sm">${activeFilter==='all' ? 'Henüz indirimli ürün yok.' : 'Bu market için indirimli ürün bulunamadı.'}</p>
+            </div></div>`;
+        return;
+    }
+    grid.innerHTML = list.map(buildPromoCard).join('');
+}
 
-        // Broşür agregator siteleri
-        const brochureAgregators = {
-            'DE': 'https://www.kaufda.de',
-            'AT': 'https://www.wogibtswas.at',
-            'BE': 'https://www.folder.be',
-            'NL': 'https://www.reclamefolder.nl',
-            'FR': 'https://www.bonial.fr',
-            'ES': 'https://www.tiendeo.com/es',
-            'IT': 'https://www.tiendeo.it',
-            'PT': 'https://www.tiendeo.pt',
-            'PL': 'https://www.tiendeo.pl',
-            'CZ': 'https://www.tiendeo.cz',
-            'HU': 'https://www.tiendeo.hu',
-            'RO': 'https://www.tiendeo.ro',
-            'BG': 'https://www.tiendeo.bg',
-            'GR': 'https://www.tiendeo.gr',
-            'HR': 'https://www.tiendeo.hr',
-            'SI': 'https://www.tiendeo.si',
-            'SK': 'https://www.tiendeo.sk',
-            'CH': 'https://www.tiendeo.ch',
-            'DK': 'https://www.tilbudsavis.dk',
-            'SE': 'https://www.tiendeo.se',
-            'NO': 'https://www.tiendeo.no',
-            'FI': 'https://www.tiendeo.fi',
-            'EE': 'https://www.tiendeo.ee',
-            'LV': 'https://www.tiendeo.lv',
-            'LT': 'https://www.tiendeo.lt',
-            'LU': 'https://www.tiendeo.lu',
-            'IE': 'https://www.tiendeo.ie',
-            'GB': 'https://www.tiendeo.co.uk',
-            'MT': 'https://www.tiendeo.com',
-            'TR': 'https://www.aktuelkatolog.com'
-        };
+function filterPromos(f) {
+    activeFilter = f;
+    document.querySelectorAll('.filter-chip').forEach(el => {
+        el.classList.toggle('active', el.dataset.f === f);
+    });
+    renderPromos();
+}
 
-        // --- SAYFA YÜKLENDİĞİNDE ---
-        // Script yükleme kontrolü ile başlat
-        function waitForScripts() {
-            return new Promise((resolve) => {
-                // genel_veriler.js yüklenene kadar bekle
-                const checkScripts = setInterval(() => {
-                    if (typeof lokasyonVeritabani !== 'undefined' && typeof marketZincirleri !== 'undefined') {
-                        clearInterval(checkScripts);
-                        console.log('✅ Tüm scriptler yüklendi');
-                        resolve();
-                    }
-                }, 100);
-                
-                // 5 saniye sonra timeout (scriptler yüklenemezse devam et)
-                setTimeout(() => {
-                    clearInterval(checkScripts);
-                    if (typeof lokasyonVeritabani === 'undefined') {
-                        console.warn('⚠️ lokasyonVeritabani yüklenemedi');
-                    }
-                    if (typeof marketZincirleri === 'undefined') {
-                        console.warn('⚠️ marketZincirleri yüklenemedi');
-                    }
-                    resolve();
-                }, 5000);
-            });
+async function loadPromos() {
+    if (!sb) {
+        document.getElementById('promoGrid').innerHTML =
+            `<div class="col-span-full text-center py-8 text-white/30 text-sm">Supabase bağlantısı yok.</div>`;
+        document.getElementById('promoBadge').textContent = '—';
+        return;
+    }
+    try {
+        const { data, error } = await sb
+            .from('market_chain_products')
+            .select('name,name_tr,price,promo_price,currency,chain_slug,in_promo,promo_valid_from,promo_valid_until,captured_at,image_url')
+            .in('chain_slug', SLUGS)
+            .eq('in_promo', true)
+            .gt('price', 0)
+            .order('captured_at',{ascending:false})
+            .limit(1000);
+        if (error) throw error;
+        // Her marketten dengeli seç: her chain'den max 200 al, resimli önce
+        const byChain = {};
+        for (const r of (data||[])) {
+            if (!byChain[r.chain_slug]) byChain[r.chain_slug] = [];
+            byChain[r.chain_slug].push(r);
         }
-        
-        // DOM ve scriptler hazır olduğunda başlat
-        document.addEventListener('DOMContentLoaded', async function() {
-            console.log('📦 Market modülü başlatılıyor...');
-            
-            // Scriptlerin yüklenmesini bekle
-            await waitForScripts();
-            
-            // UI'ı başlat
-            try {
-                renderCountryChips();
-                await loadMarketChains();
-                // Otomatik konum tespiti (sessiz)
-                autoDetectLocation();
-            } catch (error) {
-                console.error('❌ Market modülü başlatma hatası:', error);
-                // Kullanıcıya hata göster
-                const grid = document.getElementById('marketGrid');
-                if (grid) {
-                    grid.innerHTML = `
-                        <div class="col-span-full text-center py-12">
-                            <div class="glass-card p-8 inline-block max-w-md">
-                                <div class="w-20 h-20 bg-gradient-to-br from-red-100 to-pink-100 rounded-3xl flex items-center justify-center mx-auto mb-4">
-                                    <i class="fa-solid fa-exclamation-triangle text-3xl text-red-500"></i>
-                                </div>
-                                <h4 class="font-bold text-slate-800 text-lg mb-2">Yükleme Hatası</h4>
-                                <p class="text-slate-600 text-sm mb-4">Market verileri yüklenemedi. Lütfen sayfayı yenileyin.</p>
-                                <button onclick="location.reload()" class="bg-gradient-to-r from-red-500 to-pink-500 text-white px-6 py-3 rounded-xl font-bold hover:scale-105 transition shadow-lg">
-                                    Sayfayı Yenile
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                }
-            }
+        // Her chain içinde: resimli + indirimli önce
+        const balanced = [];
+        for (const slug of SLUGS) {
+            const arr = (byChain[slug]||[])
+                .sort((a,b) => {
+                    const ai = a.image_url ? 1 : 0, bi = b.image_url ? 1 : 0;
+                    if (bi !== ai) return bi - ai;
+                    return (discPct(b.price,b.promo_price)||0) - (discPct(a.price,a.promo_price)||0);
+                })
+                .slice(0, 200);
+            balanced.push(...arr);
+        }
+        // Tümü birlikte: resimli + indirimli önce, marketler arası karışık
+        allPromos = balanced.sort((a,b) => {
+            const ai = a.image_url ? 1 : 0, bi = b.image_url ? 1 : 0;
+            if (bi !== ai) return bi - ai;
+            return (discPct(b.price,b.promo_price)||0) - (discPct(a.price,a.promo_price)||0);
         });
+        renderPromos();
+        document.getElementById('heroPromoNum').textContent = allPromos.length;
+        await loadUpcoming();
+    } catch(err) {
+        console.warn('loadPromos:', err);
+        document.getElementById('promoGrid').innerHTML =
+            `<div class="col-span-full text-center py-8 text-white/30 text-sm">İndirim verileri yüklenemedi.</div>`;
+        document.getElementById('promoBadge').textContent = 'hata';
+    }
+}
 
-        // --- ÜLKE SEÇİMİ ---
-        function renderCountryChips() {
-            const container = document.getElementById('countryChips');
-            if (!container) return;
-            
-            container.innerHTML = '';
-            
-            // Alfabetik sırala
-            const sortedCountries = Object.keys(lokasyonVeritabani).sort((a, b) => 
-                lokasyonVeritabani[a].isim.localeCompare(lokasyonVeritabani[b].isim, 'tr')
-            );
-            
-            sortedCountries.forEach(code => {
-                const country = lokasyonVeritabani[code];
-                const chip = document.createElement('button');
-                chip.className = `country-chip flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs md:text-sm font-bold whitespace-nowrap ${
-                    code === selectedCountry 
-                        ? 'active shadow-lg' 
-                        : 'bg-white/10 text-white hover:bg-white/20'
-                }`;
-                chip.innerHTML = `${country.bayrak} ${country.isim}`;
-                chip.onclick = () => selectCountry(code);
-                container.appendChild(chip);
-            });
-        }
-
-        function selectCountry(code) {
-            selectedCountry = code;
-            renderCountryChips();
-            renderMarketGrid();
-        }
-
-        // --- KONUM TESPİTİ ---
-        function detectLocation() {
-            if (!navigator.geolocation) {
-                Swal.fire('Hata', 'Tarayıcınız konum desteği sunmuyor.', 'error');
-                return;
-            }
-            
-            Swal.fire({
-                title: 'Konum Tespit Ediliyor...',
-                allowOutsideClick: false,
-                didOpen: () => Swal.showLoading()
-            });
-            
-            navigator.geolocation.getCurrentPosition(
-                async (position) => {
-                    try {
-                        const { latitude, longitude } = position.coords;
-                        
-                        // Nominatim ile reverse geocoding
-                        const response = await fetch(
-                            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=tr`,
-                            { headers: { 'User-Agent': 'PlatformAvrupa/1.0' } }
-                        );
-                        const data = await response.json();
-                        
-                        // Ülke kodunu bul
-                        const countryCode = data.address?.country_code?.toUpperCase();
-                        const city = data.address?.city || data.address?.town || data.address?.village || '';
-                        
-                        if (countryCode && lokasyonVeritabani[countryCode]) {
-                            selectCountry(countryCode);
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Konum Tespit Edildi!',
-                                html: `<strong>${city}</strong>, ${lokasyonVeritabani[countryCode].bayrak} ${lokasyonVeritabani[countryCode].isim}`,
-                                timer: 2000,
-                                showConfirmButton: false
-                            });
-                        } else {
-                            Swal.fire('Bilgi', 'Konumunuz desteklenen ülkeler arasında değil.', 'info');
-                        }
-                    } catch (err) {
-                        console.error(err);
-                        Swal.fire('Hata', 'Konum tespit edilemedi.', 'error');
-                    }
-                },
-                (error) => {
-                    Swal.fire('Hata', 'Konum erişimi reddedildi.', 'error');
-                }
-            );
-        }
-
-        // --- OTOMATİK KONUM TESPİTİ (SESSİZ) ---
-        function autoDetectLocation() {
-            if (!navigator.geolocation) {
-                return; // Sessizce çık
-            }
-            
-            navigator.geolocation.getCurrentPosition(
-                async (position) => {
-                    try {
-                        const { latitude, longitude } = position.coords;
-                        
-                        // Nominatim ile reverse geocoding
-                        const response = await fetch(
-                            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=tr`,
-                            { headers: { 'User-Agent': 'PlatformAvrupa/1.0' } }
-                        );
-                        const data = await response.json();
-                        
-                        // Ülke kodunu bul
-                        const countryCode = data.address?.country_code?.toUpperCase();
-                        
-                        if (countryCode && lokasyonVeritabani[countryCode]) {
-                            selectCountry(countryCode);
-                            console.log(`✅ Otomatik konum tespit edildi: ${lokasyonVeritabani[countryCode].isim}`);
-                        }
-                    } catch (err) {
-                        console.warn('⚠️ Otomatik konum tespiti başarısız:', err);
-                    }
-                },
-                (error) => {
-                    // Kullanıcı izin vermedi veya hata oluştu - sessizce devam et
-                    console.log('ℹ️ Konum erişimi reddedildi veya kullanılamıyor');
-                }
-            );
-        }
-
-        // --- MARKET ZİNCİRLERİ ---
-        async function loadMarketChains() {
-            console.log('📦 Market zincirleri yükleniyor...');
-            
-            // Loading göster
-            const grid = document.getElementById('marketGrid');
-            if (grid) {
-                grid.innerHTML = `
-                    <div class="col-span-full text-center py-12">
-                        <div class="glass-card p-8 inline-block">
-                            <div class="w-16 h-16 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-3xl flex items-center justify-center mx-auto mb-4">
-                                <i class="fa-solid fa-spinner fa-spin text-3xl text-emerald-500"></i>
-                            </div>
-                            <p class="text-slate-600 text-sm">Market verileri yükleniyor...</p>
+async function loadUpcoming() {
+    if (!sb) return;
+    try {
+        const { data, error } = await sb
+            .from('market_chain_products')
+            .select('name,name_tr,price,promo_price,currency,chain_slug,promo_valid_from,promo_valid_until')
+            .in('chain_slug', SLUGS)
+            .eq('in_promo', false)
+            .gt('promo_valid_from', new Date().toISOString())
+            .order('promo_valid_from',{ascending:true})
+            .limit(20);
+        if (error || !data || data.length === 0) return;
+        const sec  = document.getElementById('upcomingSec');
+        const grid = document.getElementById('upcomingGrid');
+        if (!sec||!grid) return;
+        grid.innerHTML = data.map(row => {
+            const cfg = CHAINS[row.chain_slug]||{label:row.chain_slug,color:'#64748b',logo:''};
+            const fromD = fmtDate(row.promo_valid_from);
+            const days = Math.max(0, Math.ceil((new Date(row.promo_valid_from)-new Date())/86400000));
+            return `<div class="promo-card" data-chain="${esc(row.chain_slug)}">
+                <div style="height:4px;background:${cfg.color}"></div>
+                <div class="p-3">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-1.5">
+                            ${logoImg(row.chain_slug,5)}
+                            <span class="text-xs font-bold text-slate-600">${esc(cfg.label)}</span>
                         </div>
+                        <span class="badge-amber">${days===0?'Bugün!':(days+' gün')}</span>
                     </div>
-                `;
-            }
-            
-            // Önce Supabase'den dene
-            if (sb) {
-                try {
-                    console.log('🔍 Supabase\'den market zincirleri deneniyor...');
-                    const { data, error } = await sb
-                        .from('market_chains')
-                        .select('*')
-                        .order('name');
-                    
-                    if (!error && data && data.length > 0) {
-                        marketChains = data;
-                        console.log(`✅ ${marketChains.length} market zinciri Supabase'den yüklendi`);
-                        renderMarketGrid();
-                        return;
-                    } else {
-                        console.warn('⚠️ Supabase\'de market zinciri bulunamadı, fallback kullanılıyor');
-                    }
-                } catch (err) {
-                    console.warn('⚠️ Supabase market zincirleri yüklenemedi, fallback kullanılıyor:', err);
-                }
-            } else {
-                console.log('ℹ️ Supabase bağlantısı yok, fallback kullanılıyor');
-            }
-            
-            // Fallback: genel_veriler.js'deki marketZincirleri kullan
-            if (typeof marketZincirleri !== 'undefined' && marketZincirleri) {
-                console.log('📦 genel_veriler.js\'den market zincirleri yükleniyor...');
-                marketChains = [];
-                
-                for (const [countryCode, countryData] of Object.entries(marketZincirleri)) {
-                    if (countryData && countryData.marketler && Array.isArray(countryData.marketler)) {
-                        countryData.marketler.forEach(market => {
-                            // Aynı market birden fazla ülkede olabilir
-                            const existing = marketChains.find(m => m.name === market.isim);
-                            if (existing) {
-                                if (!existing.countries.includes(countryCode)) {
-                                    existing.countries.push(countryCode);
-                                }
-                            } else {
-                                marketChains.push({
-                                    name: market.isim,
-                                    logo_url: market.logo || null,
-                                    countries: [countryCode],
-                                    brochure_url: market.brosur || '#',
-                                    website: market.brosur ? market.brosur.split('/').slice(0, 3).join('/') : '#'
-                                });
-                            }
-                        });
-                    }
-                }
-                console.log(`✅ ${marketChains.length} market zinciri yüklendi (fallback: genel_veriler.js)`);
-            } else {
-                console.error('❌ marketZincirleri bulunamadı veya tanımsız');
-                marketChains = [];
-                
-                // Kullanıcıya hata mesajı göster
-                if (grid) {
-                    grid.innerHTML = `
-                        <div class="col-span-full text-center py-12">
-                            <div class="glass-card p-8 inline-block max-w-md">
-                                <div class="w-20 h-20 bg-gradient-to-br from-red-100 to-pink-100 rounded-3xl flex items-center justify-center mx-auto mb-4">
-                                    <i class="fa-solid fa-exclamation-triangle text-3xl text-red-500"></i>
-                                </div>
-                                <h4 class="font-bold text-slate-800 text-lg mb-2">Veri Yüklenemedi</h4>
-                                <p class="text-slate-600 text-sm mb-4">Market verileri bulunamadı. Lütfen sayfayı yenileyin veya internet bağlantınızı kontrol edin.</p>
-                                <button onclick="location.reload()" class="bg-gradient-to-r from-red-500 to-pink-500 text-white px-6 py-3 rounded-xl font-bold hover:scale-105 transition shadow-lg">
-                                    <i class="fa-solid fa-rotate"></i> Sayfayı Yenile
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                }
-                return;
-            }
-            
-            renderMarketGrid();
-        }
-
-        // --- BROŞÜR URL OLUŞTURMA ---
-        function getBrochureUrl(market, countryCode) {
-            // Market adını URL-friendly hale getir
-            function urlifyMarketName(name) {
-                return name
-                    .toLowerCase()
-                    .normalize('NFD')
-                    .replace(/[\u0300-\u036f]/g, '') // Türkçe karakterleri düzelt
-                    .replace(/ş/g, 's')
-                    .replace(/ç/g, 'c')
-                    .replace(/ğ/g, 'g')
-                    .replace(/ü/g, 'u')
-                    .replace(/ö/g, 'o')
-                    .replace(/ı/g, 'i')
-                    .replace(/[^a-z0-9]+/g, '-') // Özel karakterleri tire ile değiştir
-                    .replace(/^-+|-+$/g, ''); // Başta ve sonda tireleri kaldır
-            }
-            
-            const marketSlug = urlifyMarketName(market.name);
-            
-            // Ülkeye göre agregator URL'i oluştur
-            let aggregatorUrl = null;
-            
-            switch (countryCode) {
-                case 'DE':
-                    aggregatorUrl = `https://www.kaufda.de/${marketSlug}`;
-                    break;
-                case 'AT':
-                    aggregatorUrl = `https://www.wogibtswas.at/${marketSlug}`;
-                    break;
-                case 'BE':
-                    aggregatorUrl = `https://www.folder.be/${marketSlug}`;
-                    break;
-                case 'NL':
-                    aggregatorUrl = `https://www.reclamefolder.nl/${marketSlug}`;
-                    break;
-                case 'FR':
-                    aggregatorUrl = `https://www.bonial.fr/${marketSlug}`;
-                    break;
-                case 'DK':
-                    aggregatorUrl = `https://www.tilbudsavis.dk/${marketSlug}`;
-                    break;
-                case 'TR':
-                    aggregatorUrl = `https://www.aktuelkatolog.com/${marketSlug}`;
-                    break;
-                case 'ES':
-                case 'IT':
-                case 'PT':
-                case 'PL':
-                case 'CZ':
-                case 'HU':
-                case 'RO':
-                case 'BG':
-                case 'GR':
-                case 'HR':
-                case 'SI':
-                case 'SK':
-                case 'CH':
-                case 'SE':
-                case 'NO':
-                case 'FI':
-                case 'EE':
-                case 'LV':
-                case 'LT':
-                case 'LU':
-                case 'IE':
-                case 'GB':
-                case 'MT':
-                    // Tiendeo için ülke kodunu küçük harfe çevir
-                    const tiendeoCountryCode = countryCode.toLowerCase();
-                    aggregatorUrl = `https://www.tiendeo.com/${tiendeoCountryCode}/${marketSlug}`;
-                    break;
-                default:
-                    // Agregator yok, fallback kullan
-                    break;
-            }
-            
-            // Önce mevcut brochure_url'i kullan (zaten çalışan linkler)
-            if (market.brochure_url && market.brochure_url !== '#' && market.brochure_url !== '') {
-                return market.brochure_url;
-            }
-            
-            // Fallback: Agregator URL'i oluştur (varsa)
-            if (aggregatorUrl) {
-                return aggregatorUrl;
-            }
-            
-            // Son fallback: Market ana sayfası (website)
-            return market.website || '#';
-        }
-
-        function renderMarketGrid() {
-            const grid = document.getElementById('marketGrid');
-            if (!grid) {
-                console.error('❌ marketGrid elementi bulunamadı');
-                return;
-            }
-            
-            // Market zincirleri kontrolü
-            if (!marketChains || marketChains.length === 0) {
-                console.warn('⚠️ Market zincirleri boş, yükleniyor...');
-                loadMarketChains();
-                return;
-            }
-            
-            // Seçili ülkedeki marketleri filtrele
-            const filteredMarkets = marketChains.filter(m => 
-                m && m.countries && Array.isArray(m.countries) && m.countries.includes(selectedCountry)
-            );
-            
-            console.log(`📊 ${filteredMarkets.length} market bulundu (${selectedCountry})`);
-            
-            if (filteredMarkets.length === 0) {
-                grid.innerHTML = `
-                    <div class="col-span-full text-center py-12">
-                        <div class="glass-card p-8 inline-block max-w-md">
-                            <div class="w-20 h-20 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-3xl flex items-center justify-center mx-auto mb-4">
-                                <i class="fa-solid fa-store text-3xl text-emerald-500"></i>
-                            </div>
-                            <h4 class="font-bold text-slate-800 text-lg mb-2">Bu ülke için market verisi henüz eklenmedi</h4>
-                            <p class="text-slate-600 text-sm mb-4">Tüm broşürleri görmek için aşağıdaki linke tıklayın</p>
-                            <a href="${brochureAgregators[selectedCountry] || 'https://www.tiendeo.com'}" target="_blank" 
-                               class="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-6 py-3 rounded-xl font-bold hover:scale-105 transition shadow-lg">
-                                <i class="fa-solid fa-external-link"></i> Tümünü Gör
-                            </a>
-                        </div>
+                    <p class="text-slate-800 font-semibold text-sm leading-snug line-clamp-2 mb-2.5 min-h-[2.4rem]">${esc(bestName(row))}</p>
+                    <div class="flex items-end justify-between">
+                        <div class="text-[1.1rem] font-black text-slate-700">${fmtP(row.price,row.currency)}</div>
+                        ${fromD ? `<div class="text-[.68rem] text-amber-500 font-semibold">${fromD}'den</div>` : ''}
                     </div>
-                `;
-                return;
-            }
-            
-            grid.innerHTML = '';
-            filteredMarkets.forEach((market, index) => {
-                try {
-                    const card = document.createElement('a');
-                    const brochureUrl = getBrochureUrl(market, selectedCountry);
-                    card.href = brochureUrl || '#';
-                    card.target = '_blank';
-                    card.className = 'market-card block';
-                    
-                    // Gradient renkler (her market için farklı)
-                    const gradients = [
-                        'from-emerald-50 to-teal-50',
-                        'from-blue-50 to-cyan-50',
-                        'from-purple-50 to-pink-50',
-                        'from-orange-50 to-red-50',
-                        'from-yellow-50 to-amber-50',
-                        'from-indigo-50 to-blue-50'
-                    ];
-                    const gradientIndex = index % gradients.length;
-                    const gradient = gradients[gradientIndex];
-                    
-                    // Market adını güvenli hale getir
-                    const marketName = market.name || 'Market';
-                    const safeMarketName = marketName.replace(/[<>]/g, '');
-                    
-                    card.innerHTML = `
-                        <div class="p-5 text-center">
-                            <div class="w-20 h-20 bg-gradient-to-br ${gradient} rounded-3xl flex items-center justify-center mx-auto mb-4 overflow-hidden shadow-lg">
-                                ${market.logo_url 
-                                    ? `<img src="${market.logo_url}" alt="${safeMarketName}" class="w-16 h-16 object-contain p-2" onerror="this.parentElement.innerHTML='<div class=\\'w-16 h-16 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl flex items-center justify-center\\'><i class=\\'fa-solid fa-store text-2xl text-white\\'></i></div>'">`
-                                    : `<div class="w-16 h-16 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl flex items-center justify-center">
-                                        <i class="fa-solid fa-store text-2xl text-white"></i>
-                                       </div>`
-                                }
-                            </div>
-                            <h4 class="font-bold text-slate-800 text-base mb-2 truncate">${safeMarketName}</h4>
-                            <div class="flex items-center justify-center gap-2 text-emerald-600 font-semibold text-sm">
-                                <span>Broşüre Git</span>
-                                <i class="fa-solid fa-arrow-right"></i>
-                            </div>
-                        </div>
-                    `;
-                    
-                    grid.appendChild(card);
-                } catch (error) {
-                    console.error(`❌ Market kartı oluşturma hatası (${market.name}):`, error);
-                }
-            });
-            
-            console.log(`✅ ${filteredMarkets.length} market kartı oluşturuldu`);
-        }
+                </div>
+            </div>`;
+        }).join('');
+        sec.classList.remove('hidden');
+    } catch {}
+}
 
-    </script>
+// ═══════════════════════════════════════════════════════════════════
+// WIZARD — Karşılaştır
+// ═══════════════════════════════════════════════════════════════════
+const WIZ_CATS = [
+    {emoji:'🥛', label:'Süt',               db:'Süt Ürünleri'},
+    {emoji:'🧀', label:'Peynir & Yoğurt',   db:'Süt Ürünleri'},
+    {emoji:'🥩', label:'Et & Kıyma',        db:'Et & Şarküteri'},
+    {emoji:'🍗', label:'Tavuk',             db:'Tavuk & Kümes'},
+    {emoji:'🐟', label:'Balık',             db:'Balık & Deniz Ürünleri'},
+    {emoji:'🥦', label:'Sebze & Meyve',     db:'Sebze & Meyve'},
+    {emoji:'🍞', label:'Ekmek',             db:'Ekmek & Unlu Mamüller'},
+    {emoji:'🥚', label:'Yumurta',           db:'Yumurta'},
+    {emoji:'🍝', label:'Makarna & Pirinç',  db:'Tahıllar & Makarna'},
+    {emoji:'🧊', label:'Donmuş Ürünler',    db:'Donmuş Ürünler'},
+    {emoji:'🥫', label:'Konserve',          db:'Konserve & Hazır Yemek'},
+    {emoji:'🫙', label:'Yağ & Sos',         db:'Yağ, Sos & Baharat'},
+    {emoji:'🧃', label:'İçecekler',         db:'İçecekler'},
+    {emoji:'☕', label:'Kahve & Çay',       db:'Kahve & Çay'},
+    {emoji:'🍺', label:'Alkol',             db:'Alkol'},
+    {emoji:'🍫', label:'Atıştırmalık',      db:'Atıştırmalık & Tatlı'},
+    {emoji:'🧴', label:'Kişisel Bakım',     db:'Kişisel Bakım'},
+    {emoji:'🧹', label:'Temizlik',          db:'Temizlik & Ev Bakımı'},
+    {emoji:'🐾', label:'Evcil Hayvan',      db:'Evcil Hayvan'},
+    {emoji:'👶', label:'Bebek',             db:'Bebek Ürünleri'},
+];
+
+let wiz = { step:0, catIdx:-1, product:null, catProducts:[] };
+
+function wizRenderCats() {
+    const grid = document.getElementById('wiz-cat-grid');
+    if (!grid) return;
+    grid.innerHTML = WIZ_CATS.map((c,i) =>
+        `<div class="cat-tile" onclick="wizSelectCat(${i})">
+            <span class="cat-emoji">${c.emoji}</span>
+            <span class="cat-name">${esc(c.label)}</span>
+        </div>`
+    ).join('');
+}
+
+function wizShow(step) {
+    [0,1,2].forEach(s => {
+        const el = document.getElementById('wiz-step'+s);
+        if (el) el.classList.toggle('hidden', s !== step);
+    });
+    const nav = document.getElementById('wiz-nav');
+    if (nav) nav.classList.toggle('hidden', step === 0);
+    // Breadcrumb
+    const bcCat  = document.getElementById('wiz-bc-cat');
+    const bcProd = document.getElementById('wiz-bc-prod');
+    const bc1    = document.getElementById('wiz-bc-1');
+    const bc2    = document.getElementById('wiz-bc-2');
+    if (step >= 1 && wiz.catIdx >= 0) {
+        const c = WIZ_CATS[wiz.catIdx];
+        if (bcCat)  { bcCat.textContent = c.emoji+' '+c.label; bcCat.classList.remove('hidden'); }
+        if (bc1)    bc1.classList.remove('hidden');
+    } else {
+        bcCat?.classList.add('hidden'); bc1?.classList.add('hidden');
+    }
+    if (step >= 2 && wiz.product) {
+        if (bcProd) { bcProd.textContent = wiz.product; bcProd.classList.remove('hidden'); }
+        if (bc2)    bc2.classList.remove('hidden');
+    } else {
+        bcProd?.classList.add('hidden');
+        bc2?.classList.add('hidden');
+    }
+    wiz.step = step;
+    window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function wizBack()       { if (wiz.step > 0) wizShow(wiz.step - 1); }
+function wizGoStep(s)    { if (s < wiz.step) wizShow(s); }
+
+async function wizSelectCat(idx) {
+    wiz.catIdx = idx; wiz.product = null; wiz.catProducts = [];
+    wizShow(1);
+
+    const cat = WIZ_CATS[idx];
+    const chips = document.getElementById('wiz-prod-chips');
+    chips.innerHTML = [24,20,28,16,24,18].map(w =>
+        `<div class="shimmer h-8 rounded-full" style="width:${w*4}px"></div>`).join('');
+
+    if (!sb) { chips.innerHTML = '<p class="text-white/40 text-xs">Bağlantı yok</p>'; return; }
+    try {
+        const { data } = await sb
+            .from('market_chain_products')
+            .select('name_tr,name,unit,price')
+            .eq('category_tr', cat.db)
+            .gt('price', 0)
+            .limit(500);
+        wiz.catProducts = data || [];
+
+        // En sık geçen benzersiz isimler
+        // bestName kullan; ilk 2 kelime ile grupla
+        const freq = {};
+        for (const r of wiz.catProducts) {
+            const display = bestName(r);
+            if (!display || display.length < 2) continue;
+            const key = display.toLowerCase().split(/\s+/).slice(0,2).join(' ');
+            if (!freq[key]) freq[key] = { count:0, display, img: r.image_url || '' };
+            else freq[key].count++;
+            // resimli versiyonu tercih et
+            if (!freq[key].img && r.image_url) freq[key].img = r.image_url;
+        }
+        const topItems = Object.values(freq)
+            .sort((a,b) => b.count - a.count)
+            .slice(0, 30);
+
+        chips.innerHTML = topItems.length
+            ? topItems.map(item => {
+                const label = item.display.split(' ').slice(0,5).join(' ');
+                const imgHtml = item.img
+                    ? `<img src="${esc(item.img)}" class="w-6 h-6 object-contain rounded mr-1 shrink-0" loading="lazy" onerror="this.remove()">`
+                    : '';
+                return `<button class="filter-chip text-xs px-3 py-1.5 flex items-center"
+                    onclick="wizSelectProduct(${JSON.stringify(label)})">
+                    ${imgHtml}${esc(label)}
+                </button>`;
+              }).join('')
+            : '<p class="text-white/40 text-xs">Bu kategoride ürün bulunamadı.</p>';
+    } catch(e) {
+        chips.innerHTML = '<p class="text-red-400/60 text-xs">Yüklenemedi</p>';
+    }
+}
+
+async function wizSelectProduct(productTerm) {
+    wiz.product = productTerm;
+    wizShow(2);
+    await wizShowResult();
+}
+
+async function wizShowResult() {
+    const loadEl  = document.getElementById('wiz-result-loading');
+    const cardsEl = document.getElementById('wiz-result-cards');
+    if (!loadEl || !cardsEl) return;
+    loadEl.classList.remove('hidden');
+    cardsEl.innerHTML = '';
+
+    const productTerm = wiz.product || '';
+    const nlTerm = trCevir(productTerm);
+    const queries = (nlTerm && nlTerm !== productTerm) ? [productTerm, nlTerm] : [productTerm];
+
+    let data = [];
+    try {
+        for (const term of queries) {
+            const { data:d } = await sb
+                .from('market_chain_products')
+                .select('name,name_tr,price,promo_price,currency,chain_slug,captured_at,in_promo,promo_valid_from,promo_valid_until,unit,image_url')
+                .in('chain_slug', SLUGS)
+                .or(`name.ilike.*${term}*,name_tr.ilike.*${term}*`)
+                .gt('price', 0)
+                .limit(200);
+            if (d) for (const r of d)
+                if (!data.some(x => x.name===r.name && x.chain_slug===r.chain_slug)) data.push(r);
+        }
+    } catch(e) { console.warn('wizShowResult error:', e); }
+    loadEl.classList.add('hidden');
+
+    if (!data.length) {
+        cardsEl.innerHTML = `<div class="glass-dark rounded-2xl p-8 text-center">
+            <i class="fa-solid fa-magnifying-glass text-3xl text-white/15 mb-3 block"></i>
+            <p class="text-white/50 text-sm mb-1">Ürün bulunamadı</p>
+            <p class="text-white/25 text-xs">Farklı boyut seç veya geri dön</p>
+        </div>`;
+        return;
+    }
+
+    // Her market için en ucuz ürün
+    const best = {};
+    for (const row of data) {
+        if (!SLUGS.includes(row.chain_slug)) continue;
+        const eff = effPrice(row);
+        if (!Number.isFinite(eff)) continue;
+        if (!best[row.chain_slug] || eff < effPrice(best[row.chain_slug])) best[row.chain_slug] = row;
+    }
+    let minP = Infinity, winner = null;
+    for (const [slug, row] of Object.entries(best)) {
+        const eff = effPrice(row);
+        if (eff < minP) { minP = eff; winner = slug; }
+    }
+
+    const cards = SLUGS.map(slug => {
+        const cfg  = CHAINS[slug];
+        const row  = best[slug];
+        const isW  = slug === winner && row != null;
+        const eff  = row ? effPrice(row) : NaN;
+        const pct  = row?.in_promo && row?.promo_price != null ? discPct(row.price, row.promo_price) : null;
+        const until= row?.promo_valid_until ? fmtDate(row.promo_valid_until) : null;
+        const img  = row?.image_url || '';
+        const name = row ? bestName(row) : '';
+        return `<div class="promo-card ${isW?'compare-winner':''} border-2 ${isW?'border-emerald-400':'border-transparent'}">
+            <div style="height:3px;background:${isW?'#10b981':cfg.color}"></div>
+            ${img ? `<div class="bg-slate-50 flex items-center justify-center" style="height:100px">
+                <img src="${esc(img)}" alt="${esc(name)}" loading="lazy"
+                    class="max-h-full max-w-full object-contain p-2"
+                    onerror="this.parentElement.style.display='none'">
+            </div>` : ''}
+            <div class="p-3 flex flex-col flex-1">
+                ${isW?`<div class="mb-1.5"><span class="badge-green text-[.65rem]"><i class="fa-solid fa-crown mr-1"></i>En Uygun</span></div>`:''}
+                <div class="flex items-center gap-1.5 mb-2">
+                    ${logoImg(slug,6)}
+                    <div class="flex-1 min-w-0">
+                        <div class="font-black text-slate-800 text-sm">${esc(cfg.label)}</div>
+                    </div>
+                    ${pct?`<span class="badge-red">-${pct}%</span>`:''}
+                </div>
+                ${row?`
+                    <p class="text-slate-600 text-xs leading-snug line-clamp-2 mb-2 flex-1">${esc(name)}</p>
+                    ${row.in_promo&&row.promo_price!=null&&Number(row.price)!==Number(row.promo_price)
+                        ?`<div class="strike text-xs mb-0.5">${fmtP(row.price,row.currency)}</div>`:''}
+                    <div class="text-xl font-black ${isW?'text-emerald-600':'text-slate-800'}">${fmtP(eff,row.currency)}</div>
+                    ${until?`<div class="text-[.65rem] text-slate-400 mt-1"><i class="fa-regular fa-clock mr-1"></i>${until} kadar</div>`:''}
+                `:`<div class="flex items-center justify-center flex-1 py-4">
+                    <p class="text-slate-300 text-xs text-center italic">Bu markette<br>bulunamadı</p>
+                </div>`}
+            </div>
+        </div>`;
+    }).join('');
+
+    cardsEl.innerHTML = `
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">${cards}</div>
+        ${Number.isFinite(minP)?`
+        <div class="glass-dark rounded-2xl p-4 flex items-center justify-center gap-3 flex-wrap mt-1">
+            <i class="fa-solid fa-trophy text-amber-400 text-xl"></i>
+            <span class="text-white font-semibold text-sm">En uygun:
+                <strong class="text-emerald-400">${esc(CHAINS[winner]?.label||winner)}</strong>
+                — ${minP.toFixed(2)} EUR
+            </span>
+        </div>`:''}`;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// KARŞILAŞTIR
+// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
+// TÜRKÇE → HOLLANDACA ÇEVİRİ SÖZLÜĞÜ
+// ═══════════════════════════════════════════════════════════════════
+const TR_NL = {
+    // Süt & süt ürünleri
+    'süt':'melk','sut':'melk','tam yağlı süt':'volle melk','yağsız süt':'magere melk',
+    'tereyağı':'boter','tereyag':'boter','tereyağ':'boter',
+    'peynir':'kaas','beyaz peynir':'witte kaas','kaşar':'gouda','lor peyniri':'kwark',
+    'yoğurt':'yoghurt','yogurt':'yoghurt','kefir':'kefir','krema':'room','süt kreması':'slagroom',
+    // Ekmek & unlu
+    'ekmek':'brood','francala':'stokbrood','baget':'baguette','sandviç ekmeği':'sandwichbrood',
+    'un':'bloem','buğday unu':'tarwebloem','mısır unu':'maizena',
+    'bisküvi':'koekjes','kurabiye':'koekjes','kraker':'crackers','wafer':'wafels',
+    // Et
+    'et':'vlees','kıyma':'gehakt','dana kıyma':'rundergehakt','dana eti':'rundvlees',
+    'tavuk':'kip','tavuk göğsü':'kipfilet','tavuk but':'kippendij','hindi':'kalkoen',
+    'kuzu eti':'lamsvlees','domuz':'varkensvlees','jambon':'ham','sosis':'worst',
+    'sucuk':'droge worst','salam':'salami','pastırma':'bacon',
+    // Balık & deniz ürünleri
+    'balık':'vis','somon':'zalm','ton balığı':'tonijn','tuna':'tonijn',
+    'karides':'garnalen','midye':'mosselen','alabalık':'forel',
+    // Sebze
+    'domates':'tomaat','salatalık':'komkommer','biber':'paprika','kırmızı biber':'rode paprika',
+    'soğan':'ui','sarımsak':'knoflook','patates':'aardappel','havuç':'wortel',
+    'kabak':'courgette','patlıcan':'aubergine','brokoli':'broccoli','marul':'sla',
+    'ıspanak':'spinazie','karnabahar':'bloemkool','lahana':'kool','bezelye':'erwten',
+    'fasulye':'bonen','mısır':'mais','mantar':'champignon','kereviz':'selderij',
+    'pırasa':'prei','turp':'radijs','roka':'rucola','maydanoz':'peterselie',
+    'nane':'munt','dereotu':'dille','fesleğen':'basilicum',
+    // Meyve
+    'elma':'appel','armut':'peer','muz':'banaan','portakal':'sinaasappel',
+    'limon':'citroen','çilek':'aardbei','kiraz':'kers','üzüm':'druiven',
+    'karpuz':'watermeloen','kavun':'meloen','şeftali':'perzik','kayısı':'abrikoos',
+    'erik':'pruim','nar':'granaatappel','kivi':'kiwi','ananas':'ananas',
+    'mango':'mango','avokado':'avocado','greyfurt':'grapefruit','incir':'vijg',
+    // Tahıl & bakliyat
+    'pirinç':'rijst','makarna':'pasta','spagetti':'spaghetti','erişte':'noedels',
+    'nohut':'kikkererwten','mercimek':'linzen','kırmızı mercimek':'rode linzen',
+    'yulaf':'haver','yulaf ezmesi':'havermout','müsli':'muesli','mısır gevreği':'cornflakes',
+    // İçecek
+    'su':'water','maden suyu':'bruisend water','meyve suyu':'fruitsap',
+    'portakal suyu':'sinaasappelsap','elma suyu':'appelsap',
+    'kahve':'koffie','çay':'thee','kakao':'cacao','soda':'frisdrank',
+    'cola':'cola','bira':'bier','şarap':'wijn','kırmızı şarap':'rode wijn',
+    // Yağ & sos
+    'zeytinyağı':'olijfolie','ayçiçek yağı':'zonnebloemolie','mısırözü yağı':'maïsolie',
+    'sirke':'azijn','elma sirkesi':'appelazijn','ketçap':'ketchup',
+    'mayonez':'mayonaise','hardal':'mosterd','salça':'tomatenpuree',
+    'sos':'saus','domates sosu':'tomatensaus','makarna sosu':'pastasaus',
+    // Tatlı & atıştırmalık
+    'çikolata':'chocolade','sütlü çikolata':'melkchocolade','bitter çikolata':'pure chocolade',
+    'gofret':'wafels','cips':'chips','patates cipsi':'chips',
+    'bal':'honing','reçel':'jam','fıstık ezmesi':'pindakaas',
+    'dondurma':'ijs','pasta':'taart','kek':'cake',
+    // Baharat & çeşni
+    'tuz':'zout','karabiber':'zwarte peper','kırmızı pul biber':'rode peper vlokken',
+    'kimyon':'komijn','tarçın':'kaneel','vanilya':'vanille','zerdeçal':'kurkuma',
+    'nane':'munt','kekik':'tijm','biberiye':'rozemarijn',
+    'şeker':'suiker','pudra şekeri':'poedersuiker','esmer şeker':'rietsuiker',
+    // Temizlik & kişisel bakım
+    'şampuan':'shampoo','sabun':'zeep','diş macunu':'tandpasta',
+    'tuvalet kağıdı':'toiletpapier','kağıt havlu':'keukenpapier',
+    'bulaşık deterjanı':'afwasmiddel','deterjan':'wasmiddel','çamaşır deterjanı':'waspoeder',
+    // Bebek
+    'bebek maması':'babyvoeding','bebek bezi':'luiers','ıslak mendil':'vochtige doekjes',
+    // Diğer yaygın
+    'yumurta':'eieren','ekmek kızartması':'toast','kruvasan':'croissant',
+};
+
+// ASCII-normalize: ü→u, ç→c, ş→s, ı→i, ğ→g, ö→o
+function trNorm(s) {
+    return s.replace(/ü/g,'u').replace(/Ü/g,'u')
+             .replace(/ç/g,'c').replace(/Ç/g,'c')
+             .replace(/ş/g,'s').replace(/Ş/g,'s')
+             .replace(/ı/g,'i').replace(/İ/g,'i')
+             .replace(/ğ/g,'g').replace(/Ğ/g,'g')
+             .replace(/ö/g,'o').replace(/Ö/g,'o');
+}
+// Dict'in ASCII-normalize edilmiş kopyası (cikolata→chocolade gibi)
+const TR_NL_NORM = Object.fromEntries(
+    Object.entries(TR_NL).map(([k,v]) => [trNorm(k), v])
+);
+
+function trCevir(q) {
+    const lower = q.toLowerCase().trim();
+    const norm  = trNorm(lower);
+    // Tam eşleşme (önce orijinal, sonra normalize)
+    if (TR_NL[lower])      return TR_NL[lower];
+    if (TR_NL_NORM[norm])  return TR_NL_NORM[norm];
+    // Kelime bazlı çeviri
+    const words = lower.split(/\s+/);
+    const translated = words.map(w => TR_NL[w] || TR_NL_NORM[trNorm(w)] || w);
+    if (translated.join(' ') !== lower) return translated.join(' ');
+    return null;
+}
+
+
+// ═══════════════════════════════════════════════════════════════════
+// MARKETLER
+// ═══════════════════════════════════════════════════════════════════
+async function loadMarketCards() {
+    const grid = document.getElementById('marketGrid');
+    if (!grid) return;
+    let statsMap = {};
+    if (sb) {
+        try {
+            // Her zincir için ürün sayısını say
+            for (const slug of SLUGS) {
+                const { count } = await sb
+                    .from('market_chain_products')
+                    .select('id', { count: 'exact', head: true })
+                    .eq('country_code','BE')
+                    .eq('chain_slug', slug);
+                const { data: latest } = await sb
+                    .from('market_chain_products')
+                    .select('captured_at')
+                    .eq('country_code','BE')
+                    .eq('chain_slug', slug)
+                    .order('captured_at', { ascending: false })
+                    .limit(1);
+                statsMap[slug] = {
+                    product_count: count || 0,
+                    last_captured_at: latest?.[0]?.captured_at || null
+                };
+            }
+        } catch {}
+    }
+
+    let total = 0;
+    const cards = Object.entries(CHAINS).map(([slug, cfg]) => {
+        const st = statsMap[slug];
+        const cnt = st ? Number(st.product_count||0) : null;
+        if (cnt) total += cnt;
+        return `<div class="market-card">
+            <div style="height:5px;background:${cfg.color}"></div>
+            <div class="p-4 flex items-center gap-4">
+                ${logoImg(slug, 14)}
+                <div class="flex-1 min-w-0">
+                    <div class="font-black text-slate-800 text-lg">${esc(cfg.label)}</div>
+                    <div class="text-slate-500 text-sm">${cnt!=null ? cnt.toLocaleString('tr-TR')+' ürün' : 'Veri bekleniyor'}</div>
+                    ${st?.last_captured_at ? `<div class="text-slate-400 text-xs mt-0.5">Son: ${fmtDateLong(st.last_captured_at)}</div>` : ''}
+                </div>
+                <a href="${cfg.brosur}" target="_blank" rel="noopener"
+                    class="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-white text-sm font-bold shadow-md"
+                    style="background:${cfg.color}">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>`;
+    }).join('');
+
+    grid.innerHTML = cards;
+
+    // Update hero stats
+    if (total > 0) {
+        document.getElementById('heroStats').innerHTML = `
+            <div class="stat-pill"><i class="fa-solid fa-box"></i>${total.toLocaleString('tr-TR')} ürün</div>
+            <div class="stat-pill"><i class="fa-solid fa-rotate"></i>Haftalık güncelleme</div>
+            <div class="stat-pill"><i class="fa-solid fa-store"></i>5 zincir</div>`;
+        const hn = document.getElementById('headerTotalNum');
+        if (hn) hn.textContent = total.toLocaleString('tr-TR')+' ürün';
+        const ht = document.getElementById('headerTotal');
+        if (ht) { ht.classList.remove('hidden'); setTimeout(()=>ht.style.opacity='1', 100); }
+    } else {
+        document.getElementById('heroStats').innerHTML = `
+            <div class="stat-pill"><i class="fa-solid fa-store"></i>5 büyük zincir</div>
+            <div class="stat-pill"><i class="fa-solid fa-rotate"></i>Haftalık güncelleme</div>`;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', async () => {
+    // Wizard kategori grid'ini render et
+    wizRenderCats();
+
+    // Wait for sb (defined in config.js)
+    let waited = 0;
+    while (typeof sb === 'undefined' && waited < 5000) {
+        await new Promise(r => setTimeout(r, 100));
+        waited += 100;
+    }
+
+    // Load in parallel
+    await Promise.all([loadPromos(), loadMarketCards()]);
+});
+</script>
 </body>
 </html>
