@@ -609,7 +609,7 @@ async function loadPromos() {
             .from('market_chain_products')
             .select('name,name_tr,price,promo_price,currency,chain_slug,in_promo,promo_valid_from,promo_valid_until,captured_at,image_url')
             .in('chain_slug', SLUGS)
-            .eq('in_promo', true)
+            .or('in_promo.eq.true,promo_price.not.is.null')
             .gt('price', 0)
             .order('captured_at',{ascending:false})
             .limit(1000);
@@ -693,27 +693,29 @@ async function loadUpcoming() {
 // ═══════════════════════════════════════════════════════════════════
 // WIZARD — Karşılaştır
 // ═══════════════════════════════════════════════════════════════════
+// nl: Hollandaca anahtar kelimeler — category_tr kolonuna bağımlılık yok,
+//     doğrudan ürün name alanında arama yapılır (daha güvenilir)
 const WIZ_CATS = [
-    {emoji:'🥛', label:'Süt',               db:'Süt Ürünleri'},
-    {emoji:'🧀', label:'Peynir & Yoğurt',   db:'Süt Ürünleri'},
-    {emoji:'🥩', label:'Et & Kıyma',        db:'Et & Şarküteri'},
-    {emoji:'🍗', label:'Tavuk',             db:'Tavuk & Kümes'},
-    {emoji:'🐟', label:'Balık',             db:'Balık & Deniz Ürünleri'},
-    {emoji:'🥦', label:'Sebze & Meyve',     db:'Sebze & Meyve'},
-    {emoji:'🍞', label:'Ekmek',             db:'Ekmek & Unlu Mamüller'},
-    {emoji:'🥚', label:'Yumurta',           db:'Yumurta'},
-    {emoji:'🍝', label:'Makarna & Pirinç',  db:'Tahıllar & Makarna'},
-    {emoji:'🧊', label:'Donmuş Ürünler',    db:'Donmuş Ürünler'},
-    {emoji:'🥫', label:'Konserve',          db:'Konserve & Hazır Yemek'},
-    {emoji:'🫙', label:'Yağ & Sos',         db:'Yağ, Sos & Baharat'},
-    {emoji:'🧃', label:'İçecekler',         db:'İçecekler'},
-    {emoji:'☕', label:'Kahve & Çay',       db:'Kahve & Çay'},
-    {emoji:'🍺', label:'Alkol',             db:'Alkol'},
-    {emoji:'🍫', label:'Atıştırmalık',      db:'Atıştırmalık & Tatlı'},
-    {emoji:'🧴', label:'Kişisel Bakım',     db:'Kişisel Bakım'},
-    {emoji:'🧹', label:'Temizlik',          db:'Temizlik & Ev Bakımı'},
-    {emoji:'🐾', label:'Evcil Hayvan',      db:'Evcil Hayvan'},
-    {emoji:'👶', label:'Bebek',             db:'Bebek Ürünleri'},
+    {emoji:'🥛', label:'Süt',              nl:['melk']},
+    {emoji:'🧀', label:'Peynir & Yoğurt', nl:['kaas','yoghurt','kwark']},
+    {emoji:'🥩', label:'Et & Kıyma',      nl:['vlees','gehakt','ham','salami','worst','bacon']},
+    {emoji:'🍗', label:'Tavuk',            nl:['kip','kipfilet','kippendij','gevogelte']},
+    {emoji:'🐟', label:'Balık',            nl:['vis','zalm','tonijn','garnalen','mosselen']},
+    {emoji:'🥦', label:'Sebze & Meyve',   nl:['tomaat','appel','banaan','wortel','sla','broccoli','paprika','komkommer','ui','aardappel']},
+    {emoji:'🍞', label:'Ekmek',            nl:['brood','baguette','toast','croissant']},
+    {emoji:'🥚', label:'Yumurta',          nl:['eieren','ei ']},
+    {emoji:'🍝', label:'Makarna & Pirinç', nl:['pasta','spaghetti','rijst','noedels']},
+    {emoji:'🧊', label:'Donmuş Ürünler',   nl:['diepvries','diepgevroren']},
+    {emoji:'🥫', label:'Konserve',         nl:['conserve','blik ','ingeblikte']},
+    {emoji:'🫙', label:'Yağ & Sos',        nl:['olie','saus','azijn','ketchup','mayonaise','mosterd']},
+    {emoji:'🧃', label:'İçecekler',        nl:['sap','frisdrank','water','cola','limonade']},
+    {emoji:'☕', label:'Kahve & Çay',      nl:['koffie','thee','cacao','cappuccino']},
+    {emoji:'🍺', label:'Alkol',            nl:['bier','wijn','whisky','vodka','gin ']},
+    {emoji:'🍫', label:'Atıştırmalık',     nl:['chocolade','chips','koek','snoep','noten','wafels']},
+    {emoji:'🧴', label:'Kişisel Bakım',    nl:['shampoo','zeep','tandpasta','deodorant','crème']},
+    {emoji:'🧹', label:'Temizlik',         nl:['wasmiddel','schoonmaakmiddel','afwasmiddel','toiletpapier']},
+    {emoji:'🐾', label:'Evcil Hayvan',     nl:['hondenvoer','kattenvoer','huisdier']},
+    {emoji:'👶', label:'Bebek',            nl:['luiers','babyvoeding','pampers']},
 ];
 
 let wiz = { step:0, catIdx:-1, product:null, catProducts:[] };
@@ -773,10 +775,12 @@ async function wizSelectCat(idx) {
 
     if (!sb) { chips.innerHTML = '<p class="text-white/40 text-xs">Bağlantı yok</p>'; return; }
     try {
+        // category_tr yerine Hollandaca anahtar kelimelerle name arama
+        const orFilter = cat.nl.map(k => `name.ilike.*${k}*`).join(',');
         const { data } = await sb
             .from('market_chain_products')
-            .select('name_tr,name,unit,price')
-            .eq('category_tr', cat.db)
+            .select('name_tr,name,unit,price,image_url')
+            .or(orFilter)
             .gt('price', 0)
             .limit(500);
         wiz.catProducts = data || [];
