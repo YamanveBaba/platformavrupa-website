@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- v4 -->
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
@@ -60,8 +59,12 @@
             overflow: hidden;
             box-shadow: 0 2px 16px rgba(0,0,0,0.07);
             transition: transform 0.28s cubic-bezier(.4,0,.2,1), box-shadow 0.28s ease;
+            display: flex;
+            flex-direction: column;
         }
         .promo-card:hover { transform: translateY(-4px); box-shadow: 0 10px 28px rgba(0,0,0,0.13); }
+        .promo-card .p-3 { flex:1; display:flex; flex-direction:column; }
+        .promo-card .p-3 > p { flex:1; }
 
         /* ── Badges ── */
         .badge-red  { background: linear-gradient(135deg,#ef4444,#dc2626); color:#fff; font-weight:800; font-size:.72rem; padding:3px 8px; border-radius:20px; white-space:nowrap; }
@@ -303,107 +306,56 @@
 <!-- ═══ TAB: KARŞILAŞTIR ══════════════════════════════════════════ -->
 <div id="sec-karsilastir" class="hidden px-4 max-w-7xl mx-auto space-y-4">
 
-    <!-- Mode toggle -->
-    <div class="glass-dark p-1.5 flex gap-1">
-        <button id="mode-ara-btn" onclick="showMode('ara')"
-            class="mode-btn active flex-1 py-2.5 flex items-center justify-center gap-1.5">
-            <i class="fa-solid fa-magnifying-glass text-emerald-400"></i> Ürün Ara
+    <!-- Geri + breadcrumb (Step 1, 2, 3'te görünür) -->
+    <div id="wiz-nav" class="hidden flex items-center gap-2">
+        <button onclick="wizBack()"
+            class="w-9 h-9 rounded-xl glass-dark flex items-center justify-center text-white/70 hover:text-white transition shrink-0">
+            <i class="fa-solid fa-arrow-left text-sm"></i>
         </button>
-        <button id="mode-kat-btn" onclick="showMode('kat')"
-            class="mode-btn flex-1 py-2.5 flex items-center justify-center gap-1.5">
-            <i class="fa-solid fa-th-large text-sky-400"></i> Kategoriler
-        </button>
+        <div class="flex items-center gap-1.5 text-xs overflow-hidden flex-1 min-w-0">
+            <span class="text-white/40 cursor-pointer hover:text-white/70 shrink-0 transition"
+                onclick="wizGoStep(0)">Kategoriler</span>
+            <span id="wiz-bc-1" class="hidden text-white/25 shrink-0">›</span>
+            <span id="wiz-bc-cat" class="hidden text-white/60 cursor-pointer hover:text-white/80 truncate transition"
+                onclick="wizGoStep(1)"></span>
+            <span id="wiz-bc-2" class="hidden text-white/25 shrink-0">›</span>
+            <span id="wiz-bc-prod" class="hidden text-white/80 font-semibold truncate"></span>
+        </div>
     </div>
 
-    <!-- ── ARA MODU ── -->
-    <div id="mode-ara-wrap">
-        <div class="glass-dark p-5">
-            <h3 class="text-white font-bold text-base mb-1 flex items-center gap-2">
-                <i class="fa-solid fa-magnifying-glass-chart text-emerald-400"></i> 5 Markette Fiyat Karşılaştır
-            </h3>
-            <p class="text-white/40 text-xs mb-4">Ürün adı yaz — tüm zincirlerdeki en iyi fiyatı görelim</p>
-            <div class="flex gap-3">
-                <input type="search" id="cmpInput"
-                    class="search-input flex-1 px-4 py-3.5 text-sm font-medium"
-                    placeholder="süt, ekmek, cola, elma…"
-                    autocomplete="off" />
-                <button id="cmpBtn"
-                    class="shrink-0 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold px-5 py-3.5 shadow-lg shadow-emerald-500/25 hover:opacity-90 active:scale-95 transition flex items-center gap-2">
-                    <i class="fa-solid fa-bolt"></i>
-                    <span class="hidden sm:inline">Karşılaştır</span>
-                </button>
-            </div>
-            <p class="text-white/25 text-xs mt-2.5">
-                <i class="fa-solid fa-circle-info mr-1"></i> Türkçe veya Hollandaca yazabilirsiniz.
+    <!-- ── STEP 0: Kategori seç ── -->
+    <div id="wiz-step0">
+        <p class="text-white/40 text-xs mb-3 flex items-center gap-1.5">
+            <i class="fa-solid fa-scale-balanced text-emerald-400"></i>
+            Hangi ürünü 5 markette karşılaştıralım?
+        </p>
+        <div id="wiz-cat-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2.5"></div>
+    </div>
+
+    <!-- ── STEP 1: Ürün seç ── -->
+    <div id="wiz-step1" class="hidden">
+        <div class="glass-dark p-4">
+            <p class="text-white/40 text-xs flex items-center gap-1.5 mb-3">
+                <i class="fa-solid fa-hand-pointer text-emerald-400"></i>
+                Hangi ürünü karşılaştıralım?
             </p>
+            <div id="wiz-prod-chips" class="flex flex-wrap gap-2">
+                <div class="shimmer h-8 w-24 rounded-full"></div>
+                <div class="shimmer h-8 w-20 rounded-full"></div>
+                <div class="shimmer h-8 w-28 rounded-full"></div>
+                <div class="shimmer h-8 w-16 rounded-full"></div>
+                <div class="shimmer h-8 w-24 rounded-full"></div>
+            </div>
         </div>
-        <div id="cmpLoading" class="hidden text-center py-10">
+    </div>
+
+    <!-- ── STEP 2: Karşılaştırma sonucu ── -->
+    <div id="wiz-step2" class="hidden space-y-3">
+        <div id="wiz-result-loading" class="hidden text-center py-10">
             <i class="fa-solid fa-spinner fa-spin text-3xl text-emerald-400 mb-3 block"></i>
             <p class="text-white/50 text-sm">5 markette aranıyor…</p>
         </div>
-        <div id="cmpError" class="hidden glass-dark rounded-2xl p-4 flex items-center gap-3 text-red-400 text-sm">
-            <i class="fa-solid fa-circle-exclamation text-lg"></i>
-            <span id="cmpErrMsg"></span>
-        </div>
-        <div id="cmpResults" class="hidden"></div>
-    </div>
-
-    <!-- ── KATEGORİLER MODU ── -->
-    <div id="mode-kat-wrap" class="hidden space-y-4">
-
-        <!-- Kategori grid -->
-        <div id="catGrid">
-            <p class="text-white/50 text-xs mb-3 flex items-center gap-1.5">
-                <i class="fa-solid fa-th-large text-sky-400"></i>
-                Bir kategori seç
-            </p>
-            <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2.5" id="catTileGrid"></div>
-        </div>
-
-        <!-- Kategori ürünleri (kategori seçince açılır) -->
-        <div id="catProdWrap" class="hidden space-y-3">
-
-            <!-- Başlık + geri -->
-            <div class="flex items-center gap-3">
-                <button onclick="backToCatGrid()"
-                    class="w-9 h-9 rounded-xl glass-dark flex items-center justify-center text-white/70 hover:text-white transition">
-                    <i class="fa-solid fa-arrow-left text-sm"></i>
-                </button>
-                <div>
-                    <h3 id="catProdTitle" class="text-white font-black text-base"></h3>
-                    <p id="catProdCount" class="text-white/40 text-xs"></p>
-                </div>
-            </div>
-
-            <!-- Arama (kategoride) -->
-            <div class="flex gap-2">
-                <input type="search" id="catSearch"
-                    class="search-input flex-1 px-4 py-3 text-sm font-medium"
-                    placeholder="İsimde ara…"
-                    autocomplete="off"
-                    oninput="filterCatProds()" />
-            </div>
-
-            <!-- Market filtresi -->
-            <div class="flex gap-2 overflow-x-auto no-scroll pb-1">
-                <button class="filter-chip active" data-cf="all" onclick="filterCatChain('all')">Tümü</button>
-                <button class="filter-chip" data-cf="colruyt_be"   onclick="filterCatChain('colruyt_be')">Colruyt</button>
-                <button class="filter-chip" data-cf="aldi_be"      onclick="filterCatChain('aldi_be')">ALDI</button>
-                <button class="filter-chip" data-cf="delhaize_be"  onclick="filterCatChain('delhaize_be')">Delhaize</button>
-                <button class="filter-chip" data-cf="lidl_be"      onclick="filterCatChain('lidl_be')">Lidl</button>
-                <button class="filter-chip" data-cf="carrefour_be" onclick="filterCatChain('carrefour_be')">Carrefour</button>
-            </div>
-
-            <!-- Yükleniyor -->
-            <div id="catProdLoading" class="hidden text-center py-8">
-                <i class="fa-solid fa-spinner fa-spin text-2xl text-emerald-400 mb-2 block"></i>
-                <p class="text-white/40 text-sm">Ürünler yükleniyor…</p>
-            </div>
-
-            <!-- Ürün listesi -->
-            <div id="catProdGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3"></div>
-
-        </div>
+        <div id="wiz-result-cards"></div>
     </div>
 
 </div>
@@ -512,6 +464,18 @@ function effPrice(row) {
     const p = Number(row.price);
     return (Number.isFinite(p) && p > 0) ? p : NaN;
 }
+// Akıllı isim: name_tr temiz ve anlamlıysa kullan, değilse name
+function bestName(row) {
+    const nt = (row.name_tr || '').split('\n')[0].replace(/\s+/g,' ').trim();
+    const nl = (row.name || '').trim();
+    if (!nt || nt.length < 3) return nl;
+    // Çok fazla nokta/tire = bozuk çeviri
+    const dots = (nt.match(/\./g)||[]).length;
+    const letters = (nt.match(/[a-zA-ZğüşöçıİĞÜŞÖÇ]/g)||[]).length;
+    if (dots >= 3 && letters < dots * 2) return nl;
+    return nt;
+}
+
 function logoImg(slug, size) {
     const cfg = CHAINS[slug];
     if (!cfg) return '';
@@ -525,19 +489,13 @@ function logoImg(slug, size) {
 // NAV BACK
 // ═══════════════════════════════════════════════════════════════════
 function navBack() {
-    const catProdWrap = document.getElementById('catProdWrap');
-    if (catProdWrap && !catProdWrap.classList.contains('hidden')) {
-        backToCatGrid();
-        return;
-    }
-    const cmpResults = document.getElementById('cmpResults');
-    if (cmpResults && !cmpResults.classList.contains('hidden') && _searchResults.length > 0) {
-        const inp = document.getElementById('cmpInput');
-        if (inp) { const q = inp.value; inp.value = q; }
-        runCompare();
-        return;
-    }
+    // Wizard adımındaysa bir geri git
     const secK = document.getElementById('sec-karsilastir');
+    if (secK && !secK.classList.contains('hidden') && wiz.step > 0) {
+        wizBack();
+        return;
+    }
+    // Karşılaştır sekmesindeyse → İndirimler'e
     if (secK && !secK.classList.contains('hidden')) {
         switchTab('indirimler');
         return;
@@ -568,35 +526,47 @@ function switchTab(tab) {
             sec.classList.add('hidden');
         }
     });
+    // Karşılaştır sekmesine geçince wizard başa dönsün
+    if (tab === 'karsilastir' && typeof wizShow === 'function') wizShow(0);
 }
 
 // ═══════════════════════════════════════════════════════════════════
 // İNDİRİMLER
 // ═══════════════════════════════════════════════════════════════════
 function buildPromoCard(row) {
-    const cfg = CHAINS[row.chain_slug] || {label:row.chain_slug, color:'#64748b', logo:''};
-    const pct  = row.in_promo && row.promo_price != null ? discPct(row.price, row.promo_price) : null;
-    const eff  = effPrice(row);
-    const until = fmtDate(row.promo_valid_until);
+    const cfg     = CHAINS[row.chain_slug] || {label:row.chain_slug, color:'#64748b', logo:''};
+    const pct     = row.promo_price != null ? discPct(row.price, row.promo_price) : null;
+    const eff     = effPrice(row);
+    const until   = fmtDate(row.promo_valid_until);
+    const display = bestName(row);
+    const imgUrl  = row.image_url || '';
 
     return `<div class="promo-card" data-chain="${esc(row.chain_slug)}">
-        <div style="height:4px;background:${cfg.color}"></div>
-        <div class="p-3">
-            <div class="flex items-center justify-between mb-2">
+        <div style="height:3px;background:${cfg.color}"></div>
+        ${imgUrl ? `
+        <div class="bg-white flex items-center justify-center relative" style="height:120px">
+            <img src="${esc(imgUrl)}" alt="${esc(display)}"
+                loading="lazy"
+                class="max-h-full max-w-full object-contain p-2"
+                onerror="this.closest('.promo-card-img')?.remove()">
+            ${pct ? `<span class="badge-red" style="position:absolute;top:6px;right:6px">-${pct}%</span>` : ''}
+        </div>` : ''}
+        <div class="p-3 flex flex-col flex-1">
+            <div class="flex items-center justify-between mb-1.5">
                 <div class="flex items-center gap-1.5">
-                    ${logoImg(row.chain_slug, 5)}
-                    <span class="text-xs font-bold text-slate-600">${esc(cfg.label)}</span>
+                    ${logoImg(row.chain_slug, 4)}
+                    <span class="text-xs font-bold text-slate-500">${esc(cfg.label)}</span>
                 </div>
-                ${pct ? `<span class="badge-red">-${pct}%</span>` : '<span class="badge-green text-[.65rem]">İndirimde</span>'}
+                ${pct ? `<span class="badge-red">-${pct}%</span>` : `<span class="badge-green" style="font-size:.62rem">İndirimde</span>`}
             </div>
-            <p class="text-slate-800 font-semibold text-sm leading-snug line-clamp-2 mb-2.5 min-h-[2.4rem]">${esc(row.name)}</p>
-            <div class="flex items-end justify-between">
+            <p class="text-slate-800 font-semibold text-sm leading-snug line-clamp-2 mb-auto min-h-[2.4rem]">${esc(display)}</p>
+            <div class="flex items-end justify-between mt-2">
                 <div>
-                    ${row.in_promo && row.promo_price != null && Number(row.price) !== Number(row.promo_price)
-                        ? `<div class="strike">${fmtP(row.price,row.currency)}</div>` : ''}
-                    <div class="text-[1.15rem] font-black leading-tight" style="color:${cfg.color}">${fmtP(eff,row.currency)}</div>
+                    ${row.promo_price != null && Number(row.price) > 0 && Number(row.price) !== Number(row.promo_price)
+                        ? `<div class="strike">${fmtP(row.price, row.currency)}</div>` : ''}
+                    <div class="text-[1.1rem] font-black leading-tight" style="color:${cfg.color}">${fmtP(eff, row.currency)}</div>
                 </div>
-                ${until ? `<div class="text-[.68rem] text-slate-400 text-right leading-tight">${until}<br>kadar</div>` : ''}
+                ${until ? `<div class="text-[.65rem] text-slate-400 text-right leading-tight">${until}<br>kadar</div>` : ''}
             </div>
         </div>
     </div>`;
@@ -637,16 +607,37 @@ async function loadPromos() {
     try {
         const { data, error } = await sb
             .from('market_chain_products')
-            .select('name,price,promo_price,currency,chain_slug,in_promo,promo_valid_from,promo_valid_until,captured_at')
-            .eq('country_code','BE')
-            .not('promo_price','is',null)
-            .gt('promo_price', 0)
+            .select('name,name_tr,price,promo_price,currency,chain_slug,in_promo,promo_valid_from,promo_valid_until,captured_at,image_url')
+            .in('chain_slug', SLUGS)
+            .eq('in_promo', true)
+            .gt('price', 0)
             .order('captured_at',{ascending:false})
-            .limit(300);
+            .limit(1000);
         if (error) throw error;
-        allPromos = (data||[]).filter(r => r.promo_price != null && Number(r.price) > Number(r.promo_price));
-        // Sort by discount % desc
-        allPromos.sort((a,b) => (discPct(b.price,b.promo_price)||0) - (discPct(a.price,a.promo_price)||0));
+        // Her marketten dengeli seç: her chain'den max 200 al, resimli önce
+        const byChain = {};
+        for (const r of (data||[])) {
+            if (!byChain[r.chain_slug]) byChain[r.chain_slug] = [];
+            byChain[r.chain_slug].push(r);
+        }
+        // Her chain içinde: resimli + indirimli önce
+        const balanced = [];
+        for (const slug of SLUGS) {
+            const arr = (byChain[slug]||[])
+                .sort((a,b) => {
+                    const ai = a.image_url ? 1 : 0, bi = b.image_url ? 1 : 0;
+                    if (bi !== ai) return bi - ai;
+                    return (discPct(b.price,b.promo_price)||0) - (discPct(a.price,a.promo_price)||0);
+                })
+                .slice(0, 200);
+            balanced.push(...arr);
+        }
+        // Tümü birlikte: resimli + indirimli önce, marketler arası karışık
+        allPromos = balanced.sort((a,b) => {
+            const ai = a.image_url ? 1 : 0, bi = b.image_url ? 1 : 0;
+            if (bi !== ai) return bi - ai;
+            return (discPct(b.price,b.promo_price)||0) - (discPct(a.price,a.promo_price)||0);
+        });
         renderPromos();
         document.getElementById('heroPromoNum').textContent = allPromos.length;
         await loadUpcoming();
@@ -663,8 +654,8 @@ async function loadUpcoming() {
     try {
         const { data, error } = await sb
             .from('market_chain_products')
-            .select('name,price,promo_price,currency,chain_slug,promo_valid_from,promo_valid_until')
-            .eq('country_code','BE')
+            .select('name,name_tr,price,promo_price,currency,chain_slug,promo_valid_from,promo_valid_until')
+            .in('chain_slug', SLUGS)
             .eq('in_promo', false)
             .gt('promo_valid_from', new Date().toISOString())
             .order('promo_valid_from',{ascending:true})
@@ -687,7 +678,7 @@ async function loadUpcoming() {
                         </div>
                         <span class="badge-amber">${days===0?'Bugün!':(days+' gün')}</span>
                     </div>
-                    <p class="text-slate-800 font-semibold text-sm leading-snug line-clamp-2 mb-2.5 min-h-[2.4rem]">${esc(row.name)}</p>
+                    <p class="text-slate-800 font-semibold text-sm leading-snug line-clamp-2 mb-2.5 min-h-[2.4rem]">${esc(bestName(row))}</p>
                     <div class="flex items-end justify-between">
                         <div class="text-[1.1rem] font-black text-slate-700">${fmtP(row.price,row.currency)}</div>
                         ${fromD ? `<div class="text-[.68rem] text-amber-500 font-semibold">${fromD}'den</div>` : ''}
@@ -700,165 +691,233 @@ async function loadUpcoming() {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// KATEGORİLER MODU
+// WIZARD — Karşılaştır
 // ═══════════════════════════════════════════════════════════════════
-const KAT_LIST = [
-    {emoji:'🥛', label:'Süt Ürünleri'},
-    {emoji:'🥩', label:'Et & Şarküteri'},
-    {emoji:'🍗', label:'Tavuk & Kümes'},
-    {emoji:'🐟', label:'Balık & Deniz Ürünleri'},
-    {emoji:'🥦', label:'Sebze & Meyve'},
-    {emoji:'🍞', label:'Ekmek & Unlu Mamüller'},
-    {emoji:'🧊', label:'Donmuş Ürünler'},
-    {emoji:'🥫', label:'Konserve & Hazır Yemek'},
-    {emoji:'🍝', label:'Tahıllar & Makarna'},
-    {emoji:'🫙', label:'Yağ, Sos & Baharat'},
-    {emoji:'🍿', label:'Atıştırmalık & Tatlı'},
-    {emoji:'🍦', label:'Dondurma & Tatlı'},
-    {emoji:'🧃', label:'İçecekler'},
-    {emoji:'☕', label:'Kahve & Çay'},
-    {emoji:'🍺', label:'Alkol'},
-    {emoji:'🥚', label:'Yumurta'},
-    {emoji:'👶', label:'Bebek Ürünleri'},
-    {emoji:'🧴', label:'Kişisel Bakım'},
-    {emoji:'🧹', label:'Temizlik & Ev Bakımı'},
-    {emoji:'🐾', label:'Evcil Hayvan'},
-    {emoji:'🧸', label:'Oyuncak & Çocuk'},
-    {emoji:'👕', label:'Giyim'},
-    {emoji:'🌿', label:'Ev & Bahçe'},
-    {emoji:'⛺', label:'Spor & Outdoor'},
-    {emoji:'📱', label:'Teknoloji'},
+const WIZ_CATS = [
+    {emoji:'🥛', label:'Süt',               db:'Süt Ürünleri'},
+    {emoji:'🧀', label:'Peynir & Yoğurt',   db:'Süt Ürünleri'},
+    {emoji:'🥩', label:'Et & Kıyma',        db:'Et & Şarküteri'},
+    {emoji:'🍗', label:'Tavuk',             db:'Tavuk & Kümes'},
+    {emoji:'🐟', label:'Balık',             db:'Balık & Deniz Ürünleri'},
+    {emoji:'🥦', label:'Sebze & Meyve',     db:'Sebze & Meyve'},
+    {emoji:'🍞', label:'Ekmek',             db:'Ekmek & Unlu Mamüller'},
+    {emoji:'🥚', label:'Yumurta',           db:'Yumurta'},
+    {emoji:'🍝', label:'Makarna & Pirinç',  db:'Tahıllar & Makarna'},
+    {emoji:'🧊', label:'Donmuş Ürünler',    db:'Donmuş Ürünler'},
+    {emoji:'🥫', label:'Konserve',          db:'Konserve & Hazır Yemek'},
+    {emoji:'🫙', label:'Yağ & Sos',         db:'Yağ, Sos & Baharat'},
+    {emoji:'🧃', label:'İçecekler',         db:'İçecekler'},
+    {emoji:'☕', label:'Kahve & Çay',       db:'Kahve & Çay'},
+    {emoji:'🍺', label:'Alkol',             db:'Alkol'},
+    {emoji:'🍫', label:'Atıştırmalık',      db:'Atıştırmalık & Tatlı'},
+    {emoji:'🧴', label:'Kişisel Bakım',     db:'Kişisel Bakım'},
+    {emoji:'🧹', label:'Temizlik',          db:'Temizlik & Ev Bakımı'},
+    {emoji:'🐾', label:'Evcil Hayvan',      db:'Evcil Hayvan'},
+    {emoji:'👶', label:'Bebek',             db:'Bebek Ürünleri'},
 ];
 
-let catAllProds = [];       // Seçili kategorinin tüm ürünleri
-let catChainFilter = 'all'; // Aktif market filtresi
+let wiz = { step:0, catIdx:-1, product:null, catProducts:[] };
 
-function showMode(mode) {
-    const isAra = mode === 'ara';
-    document.getElementById('mode-ara-btn').classList.toggle('active', isAra);
-    document.getElementById('mode-kat-btn').classList.toggle('active', !isAra);
-    document.getElementById('mode-ara-btn').classList.toggle('text-white/50', !isAra);
-    document.getElementById('mode-kat-btn').classList.toggle('text-white/50', isAra);
-    document.getElementById('mode-ara-wrap').classList.toggle('hidden', !isAra);
-    document.getElementById('mode-kat-wrap').classList.toggle('hidden', isAra);
-}
-
-function renderCatTiles() {
-    const grid = document.getElementById('catTileGrid');
+function wizRenderCats() {
+    const grid = document.getElementById('wiz-cat-grid');
     if (!grid) return;
-    grid.innerHTML = KAT_LIST.map((k, i) =>
-        `<div class="cat-tile" onclick="browseCat(${i})">
-            <span class="cat-emoji">${k.emoji}</span>
-            <span class="cat-name">${esc(k.label)}</span>
+    grid.innerHTML = WIZ_CATS.map((c,i) =>
+        `<div class="cat-tile" onclick="wizSelectCat(${i})">
+            <span class="cat-emoji">${c.emoji}</span>
+            <span class="cat-name">${esc(c.label)}</span>
         </div>`
     ).join('');
 }
 
-function backToCatGrid() {
-    document.getElementById('catGrid').classList.remove('hidden');
-    document.getElementById('catProdWrap').classList.add('hidden');
-    catAllProds = [];
-    catChainFilter = 'all';
-}
-
-function filterCatChain(chain) {
-    catChainFilter = chain;
-    document.querySelectorAll('[data-cf]').forEach(el => {
-        el.classList.toggle('active', el.dataset.cf === chain);
+function wizShow(step) {
+    [0,1,2].forEach(s => {
+        const el = document.getElementById('wiz-step'+s);
+        if (el) el.classList.toggle('hidden', s !== step);
     });
-    renderCatProdGrid();
+    const nav = document.getElementById('wiz-nav');
+    if (nav) nav.classList.toggle('hidden', step === 0);
+    // Breadcrumb
+    const bcCat  = document.getElementById('wiz-bc-cat');
+    const bcProd = document.getElementById('wiz-bc-prod');
+    const bc1    = document.getElementById('wiz-bc-1');
+    const bc2    = document.getElementById('wiz-bc-2');
+    if (step >= 1 && wiz.catIdx >= 0) {
+        const c = WIZ_CATS[wiz.catIdx];
+        if (bcCat)  { bcCat.textContent = c.emoji+' '+c.label; bcCat.classList.remove('hidden'); }
+        if (bc1)    bc1.classList.remove('hidden');
+    } else {
+        bcCat?.classList.add('hidden'); bc1?.classList.add('hidden');
+    }
+    if (step >= 2 && wiz.product) {
+        if (bcProd) { bcProd.textContent = wiz.product; bcProd.classList.remove('hidden'); }
+        if (bc2)    bc2.classList.remove('hidden');
+    } else {
+        bcProd?.classList.add('hidden');
+        bc2?.classList.add('hidden');
+    }
+    wiz.step = step;
+    window.scrollTo({top:0,behavior:'smooth'});
 }
 
-function filterCatProds() {
-    renderCatProdGrid();
+function wizBack()       { if (wiz.step > 0) wizShow(wiz.step - 1); }
+function wizGoStep(s)    { if (s < wiz.step) wizShow(s); }
+
+async function wizSelectCat(idx) {
+    wiz.catIdx = idx; wiz.product = null; wiz.catProducts = [];
+    wizShow(1);
+
+    const cat = WIZ_CATS[idx];
+    const chips = document.getElementById('wiz-prod-chips');
+    chips.innerHTML = [24,20,28,16,24,18].map(w =>
+        `<div class="shimmer h-8 rounded-full" style="width:${w*4}px"></div>`).join('');
+
+    if (!sb) { chips.innerHTML = '<p class="text-white/40 text-xs">Bağlantı yok</p>'; return; }
+    try {
+        const { data } = await sb
+            .from('market_chain_products')
+            .select('name_tr,name,unit,price')
+            .eq('category_tr', cat.db)
+            .gt('price', 0)
+            .limit(500);
+        wiz.catProducts = data || [];
+
+        // En sık geçen benzersiz isimler
+        // bestName kullan; ilk 2 kelime ile grupla
+        const freq = {};
+        for (const r of wiz.catProducts) {
+            const display = bestName(r);
+            if (!display || display.length < 2) continue;
+            const key = display.toLowerCase().split(/\s+/).slice(0,2).join(' ');
+            if (!freq[key]) freq[key] = { count:0, display, img: r.image_url || '' };
+            else freq[key].count++;
+            // resimli versiyonu tercih et
+            if (!freq[key].img && r.image_url) freq[key].img = r.image_url;
+        }
+        const topItems = Object.values(freq)
+            .sort((a,b) => b.count - a.count)
+            .slice(0, 30);
+
+        chips.innerHTML = topItems.length
+            ? topItems.map(item => {
+                const label = item.display.split(' ').slice(0,5).join(' ');
+                const imgHtml = item.img
+                    ? `<img src="${esc(item.img)}" class="w-6 h-6 object-contain rounded mr-1 shrink-0" loading="lazy" onerror="this.remove()">`
+                    : '';
+                return `<button class="filter-chip text-xs px-3 py-1.5 flex items-center"
+                    onclick="wizSelectProduct(${JSON.stringify(label)})">
+                    ${imgHtml}${esc(label)}
+                </button>`;
+              }).join('')
+            : '<p class="text-white/40 text-xs">Bu kategoride ürün bulunamadı.</p>';
+    } catch(e) {
+        chips.innerHTML = '<p class="text-red-400/60 text-xs">Yüklenemedi</p>';
+    }
 }
 
-function renderCatProdGrid() {
-    const grid = document.getElementById('catProdGrid');
-    if (!grid) return;
-    const search = (document.getElementById('catSearch')?.value || '').toLowerCase().trim();
-    let list = catAllProds;
-    if (catChainFilter !== 'all') list = list.filter(r => r.chain_slug === catChainFilter);
-    if (search) list = list.filter(r => (r.name||'').toLowerCase().includes(search));
-    document.getElementById('catProdCount').textContent = list.length + ' ürün';
-    if (list.length === 0) {
-        grid.innerHTML = `<div class="col-span-full text-center py-10">
-            <i class="fa-solid fa-box-open text-3xl text-white/15 mb-2 block"></i>
-            <p class="text-white/40 text-sm">Ürün bulunamadı</p>
+async function wizSelectProduct(productTerm) {
+    wiz.product = productTerm;
+    wizShow(2);
+    await wizShowResult();
+}
+
+async function wizShowResult() {
+    const loadEl  = document.getElementById('wiz-result-loading');
+    const cardsEl = document.getElementById('wiz-result-cards');
+    if (!loadEl || !cardsEl) return;
+    loadEl.classList.remove('hidden');
+    cardsEl.innerHTML = '';
+
+    const productTerm = wiz.product || '';
+    const nlTerm = trCevir(productTerm);
+    const queries = (nlTerm && nlTerm !== productTerm) ? [productTerm, nlTerm] : [productTerm];
+
+    let data = [];
+    try {
+        for (const term of queries) {
+            const { data:d } = await sb
+                .from('market_chain_products')
+                .select('name,name_tr,price,promo_price,currency,chain_slug,captured_at,in_promo,promo_valid_from,promo_valid_until,unit,image_url')
+                .in('chain_slug', SLUGS)
+                .or(`name.ilike.*${term}*,name_tr.ilike.*${term}*`)
+                .gt('price', 0)
+                .limit(200);
+            if (d) for (const r of d)
+                if (!data.some(x => x.name===r.name && x.chain_slug===r.chain_slug)) data.push(r);
+        }
+    } catch(e) { console.warn('wizShowResult error:', e); }
+    loadEl.classList.add('hidden');
+
+    if (!data.length) {
+        cardsEl.innerHTML = `<div class="glass-dark rounded-2xl p-8 text-center">
+            <i class="fa-solid fa-magnifying-glass text-3xl text-white/15 mb-3 block"></i>
+            <p class="text-white/50 text-sm mb-1">Ürün bulunamadı</p>
+            <p class="text-white/25 text-xs">Farklı boyut seç veya geri dön</p>
         </div>`;
         return;
     }
-    grid.innerHTML = list.map(row => {
-        const cfg = CHAINS[row.chain_slug] || {label:row.chain_slug, color:'#64748b', logo:''};
-        const pct = row.in_promo && row.promo_price != null ? discPct(row.price, row.promo_price) : null;
+
+    // Her market için en ucuz ürün
+    const best = {};
+    for (const row of data) {
+        if (!SLUGS.includes(row.chain_slug)) continue;
         const eff = effPrice(row);
-        return `<div class="cat-prod-row">
-            <div style="height:3px;background:${cfg.color}"></div>
-            <div class="p-3">
-                <div class="flex items-center justify-between mb-1.5">
-                    ${logoImg(row.chain_slug, 4)}
-                    ${pct ? `<span class="badge-red">-${pct}%</span>` : ''}
-                </div>
-                <p class="text-slate-800 font-semibold text-xs leading-snug line-clamp-3 mb-2 min-h-[2.8rem]">${esc(row.name)}</p>
-                <div class="flex items-center justify-between gap-1">
-                    <div>
-                        ${row.in_promo && row.promo_price != null && Number(row.price) !== Number(row.promo_price)
-                            ? `<div class="strike text-[.65rem]">${fmtP(row.price,row.currency)}</div>` : ''}
-                        <div class="font-black text-sm leading-tight" style="color:${cfg.color}">${fmtP(eff,row.currency)}</div>
+        if (!Number.isFinite(eff)) continue;
+        if (!best[row.chain_slug] || eff < effPrice(best[row.chain_slug])) best[row.chain_slug] = row;
+    }
+    let minP = Infinity, winner = null;
+    for (const [slug, row] of Object.entries(best)) {
+        const eff = effPrice(row);
+        if (eff < minP) { minP = eff; winner = slug; }
+    }
+
+    const cards = SLUGS.map(slug => {
+        const cfg  = CHAINS[slug];
+        const row  = best[slug];
+        const isW  = slug === winner && row != null;
+        const eff  = row ? effPrice(row) : NaN;
+        const pct  = row?.in_promo && row?.promo_price != null ? discPct(row.price, row.promo_price) : null;
+        const until= row?.promo_valid_until ? fmtDate(row.promo_valid_until) : null;
+        const img  = row?.image_url || '';
+        const name = row ? bestName(row) : '';
+        return `<div class="promo-card ${isW?'compare-winner':''} border-2 ${isW?'border-emerald-400':'border-transparent'}">
+            <div style="height:3px;background:${isW?'#10b981':cfg.color}"></div>
+            ${img ? `<div class="bg-slate-50 flex items-center justify-center" style="height:100px">
+                <img src="${esc(img)}" alt="${esc(name)}" loading="lazy"
+                    class="max-h-full max-w-full object-contain p-2"
+                    onerror="this.parentElement.style.display='none'">
+            </div>` : ''}
+            <div class="p-3 flex flex-col flex-1">
+                ${isW?`<div class="mb-1.5"><span class="badge-green text-[.65rem]"><i class="fa-solid fa-crown mr-1"></i>En Uygun</span></div>`:''}
+                <div class="flex items-center gap-1.5 mb-2">
+                    ${logoImg(slug,6)}
+                    <div class="flex-1 min-w-0">
+                        <div class="font-black text-slate-800 text-sm">${esc(cfg.label)}</div>
                     </div>
-                    <button onclick="compareFromCat('${esc(row.name).replace(/'/g,"\\'")}','${esc(row.chain_slug)}')"
-                        class="shrink-0 w-7 h-7 rounded-lg bg-emerald-500 flex items-center justify-center text-white hover:bg-emerald-600 transition"
-                        title="5 markette karşılaştır">
-                        <i class="fa-solid fa-scale-balanced text-[.6rem]"></i>
-                    </button>
+                    ${pct?`<span class="badge-red">-${pct}%</span>`:''}
                 </div>
+                ${row?`
+                    <p class="text-slate-600 text-xs leading-snug line-clamp-2 mb-2 flex-1">${esc(name)}</p>
+                    ${row.in_promo&&row.promo_price!=null&&Number(row.price)!==Number(row.promo_price)
+                        ?`<div class="strike text-xs mb-0.5">${fmtP(row.price,row.currency)}</div>`:''}
+                    <div class="text-xl font-black ${isW?'text-emerald-600':'text-slate-800'}">${fmtP(eff,row.currency)}</div>
+                    ${until?`<div class="text-[.65rem] text-slate-400 mt-1"><i class="fa-regular fa-clock mr-1"></i>${until} kadar</div>`:''}
+                `:`<div class="flex items-center justify-center flex-1 py-4">
+                    <p class="text-slate-300 text-xs text-center italic">Bu markette<br>bulunamadı</p>
+                </div>`}
             </div>
         </div>`;
     }).join('');
-}
 
-async function browseCat(idx) {
-    const k = KAT_LIST[idx];
-    if (!k) return;
-    const catLabel = k.label, catEmoji = k.emoji;
-    if (!sb) return;
-    // Grid → ürün listesi
-    document.getElementById('catGrid').classList.add('hidden');
-    const wrap = document.getElementById('catProdWrap');
-    wrap.classList.remove('hidden');
-    document.getElementById('catProdTitle').textContent = (catEmoji||'') + ' ' + catLabel;
-    document.getElementById('catProdCount').textContent = 'yükleniyor…';
-    document.getElementById('catSearch').value = '';
-    document.getElementById('catProdGrid').innerHTML = '';
-    document.getElementById('catProdLoading').classList.remove('hidden');
-    // Market filter sıfırla
-    catChainFilter = 'all';
-    document.querySelectorAll('[data-cf]').forEach(el => el.classList.toggle('active', el.dataset.cf === 'all'));
-
-    try {
-        const { data, error } = await sb
-            .from('market_chain_products')
-            .select('name,price,promo_price,currency,chain_slug,in_promo,promo_valid_until')
-            .eq('country_code','BE')
-            .eq('category_tr', catLabel)
-            .gt('price', 0)
-            .order('price', {ascending: true})
-            .limit(400);
-        if (error) throw error;
-        catAllProds = data || [];
-    } catch(e) {
-        catAllProds = [];
-    }
-    document.getElementById('catProdLoading').classList.add('hidden');
-    renderCatProdGrid();
-}
-
-function compareFromCat(productName, fromSlug) {
-    switchTab('karsilastir');
-    showMode('ara');
-    const inp = document.getElementById('cmpInput');
-    if (inp) inp.value = productName;
-    showCompareCards(productName);
+    cardsEl.innerHTML = `
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">${cards}</div>
+        ${Number.isFinite(minP)?`
+        <div class="glass-dark rounded-2xl p-4 flex items-center justify-center gap-3 flex-wrap mt-1">
+            <i class="fa-solid fa-trophy text-amber-400 text-xl"></i>
+            <span class="text-white font-semibold text-sm">En uygun:
+                <strong class="text-emerald-400">${esc(CHAINS[winner]?.label||winner)}</strong>
+                — ${minP.toFixed(2)} EUR
+            </span>
+        </div>`:''}`;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -933,224 +992,33 @@ const TR_NL = {
     'yumurta':'eieren','ekmek kızartması':'toast','kruvasan':'croissant',
 };
 
+// ASCII-normalize: ü→u, ç→c, ş→s, ı→i, ğ→g, ö→o
+function trNorm(s) {
+    return s.replace(/ü/g,'u').replace(/Ü/g,'u')
+             .replace(/ç/g,'c').replace(/Ç/g,'c')
+             .replace(/ş/g,'s').replace(/Ş/g,'s')
+             .replace(/ı/g,'i').replace(/İ/g,'i')
+             .replace(/ğ/g,'g').replace(/Ğ/g,'g')
+             .replace(/ö/g,'o').replace(/Ö/g,'o');
+}
+// Dict'in ASCII-normalize edilmiş kopyası (cikolata→chocolade gibi)
+const TR_NL_NORM = Object.fromEntries(
+    Object.entries(TR_NL).map(([k,v]) => [trNorm(k), v])
+);
+
 function trCevir(q) {
     const lower = q.toLowerCase().trim();
-    // Tam eşleşme
-    if (TR_NL[lower]) return TR_NL[lower];
-    // Kelime bazlı çeviri — her kelimeyi tek tek çevir
+    const norm  = trNorm(lower);
+    // Tam eşleşme (önce orijinal, sonra normalize)
+    if (TR_NL[lower])      return TR_NL[lower];
+    if (TR_NL_NORM[norm])  return TR_NL_NORM[norm];
+    // Kelime bazlı çeviri
     const words = lower.split(/\s+/);
-    const translated = words.map(w => TR_NL[w] || w);
+    const translated = words.map(w => TR_NL[w] || TR_NL_NORM[trNorm(w)] || w);
     if (translated.join(' ') !== lower) return translated.join(' ');
     return null;
 }
 
-// ── Arama sonuçları (ham veri) — ürün seçimi için tutuluyor
-let _searchResults = [];
-
-async function runCompare() {
-    const input = document.getElementById('cmpInput');
-    const resEl  = document.getElementById('cmpResults');
-    const errEl  = document.getElementById('cmpError');
-    const errMsg = document.getElementById('cmpErrMsg');
-    const loadEl = document.getElementById('cmpLoading');
-
-    const q = String(input?.value||'').trim().replace(/[^a-zA-Z0-9\u00C0-\u024F\s&.-]/g,'').slice(0,80);
-    errEl.classList.add('hidden');
-    resEl.classList.add('hidden');
-    resEl.innerHTML = '';
-    _searchResults = [];
-
-    if (q.length < 2) {
-        errMsg.textContent = 'En az 2 karakter yazın.';
-        errEl.classList.remove('hidden');
-        return;
-    }
-    if (!sb) {
-        errMsg.textContent = 'Supabase bağlantısı yok.';
-        errEl.classList.remove('hidden');
-        return;
-    }
-
-    const nlQ = trCevir(q);
-    const queries = nlQ && nlQ !== q ? [q, nlQ] : [q];
-
-    loadEl.classList.remove('hidden');
-    let data = [], error;
-    try {
-        for (const term of queries) {
-            const r = await sb
-                .from('market_chain_products')
-                .select('name,price,promo_price,currency,chain_slug,captured_at,in_promo,promo_valid_from,promo_valid_until')
-                .eq('country_code','BE')
-                .in('chain_slug', SLUGS)
-                .ilike('name', `%${term}%`)
-                .gt('price', 0)
-                .limit(200);
-            if (r.error) { error = r.error; break; }
-            if (r.data) data = data.concat(r.data);
-        }
-    } catch(e) { error = e; }
-    loadEl.classList.add('hidden');
-
-    if (error) {
-        errMsg.textContent = 'Arama başarısız. Lütfen tekrar deneyin.';
-        errEl.classList.remove('hidden');
-        return;
-    }
-    if (!data || data.length === 0) {
-        resEl.classList.remove('hidden');
-        resEl.innerHTML = `<div class="glass-dark rounded-2xl p-8 text-center">
-            <i class="fa-solid fa-magnifying-glass text-3xl text-white/15 mb-3 block"></i>
-            <p class="text-white/50 text-sm mb-1">Ürün bulunamadı</p>
-            <p class="text-white/25 text-xs">Arama terimini kısaltmayı deneyin</p>
-        </div>`;
-        return;
-    }
-
-    _searchResults = data;
-
-    // Benzersiz ürün adlarını çıkar (her chain'den en ucuz)
-    const nameMap = {};
-    for (const row of data) {
-        const key = row.name.toLowerCase().trim();
-        if (!nameMap[key] || effPrice(row) < effPrice(nameMap[key])) {
-            nameMap[key] = row;
-        }
-    }
-    const unique = Object.values(nameMap).sort((a,b) => effPrice(a)-effPrice(b)).slice(0,40);
-
-    resEl.classList.remove('hidden');
-    resEl.innerHTML = `
-        <div class="glass-dark rounded-2xl p-4">
-            <p class="text-white/50 text-xs mb-3 flex items-center gap-1.5">
-                <i class="fa-solid fa-hand-pointer text-emerald-400"></i>
-                Karşılaştırmak istediğin ürünü seç (${unique.length} sonuç)
-            </p>
-            <div class="space-y-2">
-                ${unique.map((row,i) => {
-                    const cfg = CHAINS[row.chain_slug] || {label:row.chain_slug,color:'#64748b'};
-                    const eff = effPrice(row);
-                    return `<button onclick="selectAndCompare(${i})"
-                        class="w-full text-left bg-white rounded-xl px-4 py-3 flex items-center gap-3 hover:bg-emerald-50 active:bg-emerald-100 transition border border-slate-100">
-                        <div style="width:4px;height:36px;background:${cfg.color};border-radius:4px;flex-shrink:0"></div>
-                        <div class="flex-1 min-w-0">
-                            <div class="text-slate-800 font-semibold text-sm leading-snug line-clamp-1">${esc(row.name)}</div>
-                            <div class="text-slate-500 text-xs mt-0.5">${esc(cfg.label)}</div>
-                        </div>
-                        <div class="text-slate-800 font-black text-sm shrink-0">${fmtP(eff,row.currency)}</div>
-                        <i class="fa-solid fa-chevron-right text-slate-300 text-xs shrink-0"></i>
-                    </button>`;
-                }).join('')}
-            </div>
-        </div>`;
-}
-
-function selectAndCompare(i) {
-    const row = Object.values((() => {
-        const nameMap = {};
-        for (const r of _searchResults) {
-            const key = r.name.toLowerCase().trim();
-            if (!nameMap[key] || effPrice(r) < effPrice(nameMap[key])) nameMap[key] = r;
-        }
-        return nameMap;
-    })()).sort((a,b) => effPrice(a)-effPrice(b)).slice(0,40)[i];
-    if (!row) return;
-    document.getElementById('cmpInput').value = row.name;
-    showCompareCards(row.name);
-}
-
-async function showCompareCards(productName) {
-    const resEl  = document.getElementById('cmpResults');
-    const errEl  = document.getElementById('cmpError');
-    const loadEl = document.getElementById('cmpLoading');
-
-    errEl.classList.add('hidden');
-    resEl.classList.add('hidden');
-    loadEl.classList.remove('hidden');
-
-    let data = [], error;
-    try {
-        const r = await sb
-            .from('market_chain_products')
-            .select('name,price,promo_price,currency,chain_slug,captured_at,in_promo,promo_valid_from,promo_valid_until')
-            .eq('country_code','BE')
-            .in('chain_slug', SLUGS)
-            .ilike('name', `%${productName.split(' ').slice(0,3).join(' ')}%`)
-            .gt('price', 0)
-            .limit(200);
-        if (r.error) error = r.error;
-        else data = r.data || [];
-    } catch(e) { error = e; }
-    loadEl.classList.add('hidden');
-
-    if (error || data.length === 0) {
-        resEl.classList.remove('hidden');
-        resEl.innerHTML = `<div class="glass-dark rounded-2xl p-8 text-center">
-            <p class="text-white/50 text-sm">Karşılaştırma verisi bulunamadı</p>
-        </div>`;
-        return;
-    }
-
-    const best = {};
-    for (const row of data) {
-        if (!SLUGS.includes(row.chain_slug)) continue;
-        const eff = effPrice(row);
-        if (!Number.isFinite(eff)) continue;
-        if (!best[row.chain_slug] || eff < effPrice(best[row.chain_slug]))
-            best[row.chain_slug] = row;
-    }
-    let minP = Infinity, winner = null;
-    for (const [slug, row] of Object.entries(best)) {
-        const eff = effPrice(row);
-        if (eff < minP) { minP = eff; winner = slug; }
-    }
-
-    const cards = SLUGS.map(slug => {
-        const cfg = CHAINS[slug];
-        const row = best[slug];
-        const isW = slug === winner && row != null;
-        const eff = row ? effPrice(row) : NaN;
-        const pct = row && row.in_promo && row.promo_price != null ? discPct(row.price,row.promo_price) : null;
-        const until = row?.promo_valid_until ? fmtDate(row.promo_valid_until) : null;
-
-        return `<div class="promo-card ${isW ? 'compare-winner' : ''} border-2 ${isW ? 'border-emerald-400' : 'border-transparent'} relative">
-            <div style="height:4px;background:${isW ? '#10b981' : cfg.color}"></div>
-            <div class="p-4">
-                ${isW ? `<div class="mb-2.5"><span class="badge-green text-[.7rem]"><i class="fa-solid fa-crown mr-1"></i>En Uygun</span></div>` : ''}
-                <div class="flex items-center gap-2 mb-3">
-                    ${logoImg(slug,8)}
-                    <div class="flex-1 min-w-0">
-                        <div class="font-black text-slate-800 text-sm">${esc(cfg.label)}</div>
-                    </div>
-                    ${pct ? `<span class="badge-red">-${pct}%</span>` : ''}
-                </div>
-                ${row ? `
-                    <p class="text-slate-700 text-sm font-medium leading-snug line-clamp-2 mb-3 min-h-[2.4rem]">${esc(row.name)}</p>
-                    ${row.in_promo && row.promo_price != null && Number(row.price)!==Number(row.promo_price)
-                        ? `<div class="strike text-xs mb-0.5">${fmtP(row.price,row.currency)}</div>` : ''}
-                    <div class="text-2xl font-black ${isW ? 'text-emerald-600' : 'text-slate-800'}">${fmtP(eff,row.currency)}</div>
-                    ${until ? `<div class="text-[.68rem] text-slate-400 mt-1"><i class="fa-regular fa-clock mr-1"></i>${until} kadar</div>` : ''}
-                    <div class="text-[.65rem] text-slate-400 mt-2">Veri: ${fmtDateLong(row.captured_at)}</div>
-                ` : `<p class="text-slate-400 text-sm text-center py-4">Bu markette bulunamadı</p>`}
-            </div>
-        </div>`;
-    }).join('');
-
-    resEl.classList.remove('hidden');
-    resEl.innerHTML = `
-        <button onclick="runCompare()" class="text-white/40 text-xs flex items-center gap-1.5 mb-2 hover:text-white/70 transition">
-            <i class="fa-solid fa-arrow-left text-xs"></i> Aramaya dön
-        </button>
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">${cards}</div>
-        ${Number.isFinite(minP) ? `
-        <div class="mt-4 glass-dark rounded-2xl p-4 flex items-center justify-center gap-3 flex-wrap">
-            <i class="fa-solid fa-trophy text-amber-400 text-xl"></i>
-            <span class="text-white font-semibold text-sm">En uygun:
-                <strong class="text-emerald-400">${esc(CHAINS[winner]?.label||winner)}</strong>
-                — ${minP.toFixed(2)} EUR
-            </span>
-        </div>` : ''}`;
-}
 
 // ═══════════════════════════════════════════════════════════════════
 // MARKETLER
@@ -1229,14 +1097,8 @@ async function loadMarketCards() {
 // INIT
 // ═══════════════════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', async () => {
-    // Compare bindings
-    document.getElementById('cmpBtn')?.addEventListener('click', runCompare);
-    document.getElementById('cmpInput')?.addEventListener('keydown', e => {
-        if (e.key === 'Enter') { e.preventDefault(); runCompare(); }
-    });
-
-    // Kategori tile'larını render et
-    renderCatTiles();
+    // Wizard kategori grid'ini render et
+    wizRenderCats();
 
     // Wait for sb (defined in config.js)
     let waited = 0;
