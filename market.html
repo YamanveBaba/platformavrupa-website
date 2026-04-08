@@ -770,7 +770,7 @@ async function wizSelectCat(idx) {
     try {
         const { data } = await sb
             .from('market_chain_products')
-            .select('name_tr,name,unit,price,image_url')
+            .select('name_tr,name,unit_or_content,price,image_url')
             .eq('category_tr', cat.db)
             .gt('price', 0)
             .limit(500);
@@ -831,7 +831,7 @@ async function wizShowResult() {
         for (const term of queries) {
             const { data:d } = await sb
                 .from('market_chain_products')
-                .select('name,name_tr,price,promo_price,currency,chain_slug,captured_at,in_promo,promo_valid_from,promo_valid_until,unit,image_url')
+                .select('name,name_tr,price,promo_price,currency,chain_slug,captured_at,in_promo,promo_valid_from,promo_valid_until,unit_or_content,image_url')
                 .in('chain_slug', SLUGS)
                 .or(`name.ilike.*${term}*,name_tr.ilike.*${term}*`)
                 .gt('price', 0)
