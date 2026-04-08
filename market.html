@@ -688,30 +688,139 @@ async function loadUpcoming() {
 // ═══════════════════════════════════════════════════════════════════
 // WIZARD — Karşılaştır
 // ═══════════════════════════════════════════════════════════════════
+// Her kategori: alt kategoriler listesi içerir
+// Her alt kategori: nl[] = Hollandaca arama kelimeleri (OR ile aranır, tüm markette eşleşir)
 const WIZ_CATS = [
-    {emoji:'🥛', label:'Süt',              db:'Süt Ürünleri'},
-    {emoji:'🧀', label:'Peynir & Yoğurt', db:'Süt Ürünleri'},
-    {emoji:'🥩', label:'Et & Kıyma',      db:'Et & Şarküteri'},
-    {emoji:'🍗', label:'Tavuk',            db:'Tavuk & Kümes'},
-    {emoji:'🐟', label:'Balık',            db:'Balık & Deniz Ürünleri'},
-    {emoji:'🥦', label:'Sebze & Meyve',   db:'Sebze & Meyve'},
-    {emoji:'🍞', label:'Ekmek',            db:'Ekmek & Unlu Mamüller'},
-    {emoji:'🥚', label:'Yumurta',          db:'Yumurta'},
-    {emoji:'🍝', label:'Makarna & Pirinç', db:'Tahıllar & Makarna'},
-    {emoji:'🧊', label:'Donmuş Ürünler',   db:'Donmuş Ürünler'},
-    {emoji:'🥫', label:'Konserve',         db:'Konserve & Hazır Yemek'},
-    {emoji:'🫙', label:'Yağ & Sos',        db:'Yağ, Sos & Baharat'},
-    {emoji:'🧃', label:'İçecekler',        db:'İçecekler'},
-    {emoji:'☕', label:'Kahve & Çay',      db:'Kahve & Çay'},
-    {emoji:'🍺', label:'Alkol',            db:'Alkol'},
-    {emoji:'🍫', label:'Atıştırmalık',     db:'Atıştırmalık & Tatlı'},
-    {emoji:'🧴', label:'Kişisel Bakım',    db:'Kişisel Bakım'},
-    {emoji:'🧹', label:'Temizlik',         db:'Temizlik & Ev Bakımı'},
-    {emoji:'🐾', label:'Evcil Hayvan',     db:'Evcil Hayvan'},
-    {emoji:'👶', label:'Bebek',            db:'Bebek Ürünleri'},
+  { emoji:'🥛', label:'Süt & Yoğurt', subs:[
+      { label:'Tam Yağlı Süt',    nl:['volle melk'] },
+      { label:'Yarım Yağlı Süt',  nl:['halfvolle melk'] },
+      { label:'Yağsız Süt',       nl:['magere melk','afgeroomde melk'] },
+      { label:'Soya Sütü',        nl:['sojamelk','soja drink'] },
+      { label:'Yoğurt',           nl:['yoghurt','yogurt'] },
+      { label:'Ayran',            nl:['karnemelk','kefir'] },
+      { label:'Krema',            nl:['slagroom','room ','kookroom'] },
+  ]},
+  { emoji:'🧀', label:'Peynir', subs:[
+      { label:'Gouda',            nl:['gouda'] },
+      { label:'Mozzarella',       nl:['mozzarella'] },
+      { label:'Beyaz Peynir',     nl:['feta','witte kaas'] },
+      { label:'Krem Peynir',      nl:['roomkaas','smeerkaas','philadelphia'] },
+      { label:'Parmesan',         nl:['parmesan','parmezaan'] },
+      { label:'Çedar',            nl:['cheddar'] },
+  ]},
+  { emoji:'🥚', label:'Yumurta', subs:[
+      { label:'Yumurta (6\'lı)',  nl:['eieren 6','eieren m','eieren l'] },
+      { label:'Yumurta (12\'li)', nl:['eieren 12','eieren xl'] },
+      { label:'Organik Yumurta',  nl:['biologische eieren','bio eieren'] },
+  ]},
+  { emoji:'🍞', label:'Ekmek', subs:[
+      { label:'Beyaz Ekmek',      nl:['wit brood','witte boterham'] },
+      { label:'Kepekli Ekmek',    nl:['volkorenbrood','volkoren brood'] },
+      { label:'Baget',            nl:['baguette','stokbrood'] },
+      { label:'Sandviç Ekmeği',   nl:['sandwich','sandwichbrood','boterham'] },
+      { label:'Kruvasan',         nl:['croissant'] },
+  ]},
+  { emoji:'🥩', label:'Et & Şarküteri', subs:[
+      { label:'Dana Kıyma',       nl:['rundergehakt','gehakt rund'] },
+      { label:'Karma Kıyma',      nl:['gemengd gehakt','half om half gehakt'] },
+      { label:'Tavuk Kıyma',      nl:['kipgehakt'] },
+      { label:'Jambon',           nl:['hesp','ham ','gekookte ham'] },
+      { label:'Salam/Sosis',      nl:['salami','droge worst','cervelaat'] },
+      { label:'Bacon',            nl:['bacon','spek'] },
+  ]},
+  { emoji:'🍗', label:'Tavuk', subs:[
+      { label:'Tavuk Göğsü',      nl:['kipfilet','kippenborstfilet','kippenfilet'] },
+      { label:'Tavuk Budu',       nl:['kippendij','kippenbout','drumstick'] },
+      { label:'Bütün Tavuk',      nl:['hele kip','volledige kip'] },
+      { label:'Tavuk Nugget',     nl:['kipnuggets','kipreepjes','kiplollies'] },
+  ]},
+  { emoji:'🐟', label:'Balık', subs:[
+      { label:'Somon',            nl:['zalm','zalmfilet'] },
+      { label:'Ton Balığı',       nl:['tonijn'] },
+      { label:'Karides',          nl:['garnalen'] },
+      { label:'Beyaz Balık',      nl:['kabeljauw','wijting','tilapia'] },
+      { label:'Midye',            nl:['mosselen'] },
+  ]},
+  { emoji:'🥦', label:'Sebze', subs:[
+      { label:'Domates',          nl:['tomaat','tomaten'] },
+      { label:'Salatalık',        nl:['komkommer'] },
+      { label:'Biber',            nl:['paprika'] },
+      { label:'Soğan',            nl:['ui ','uien'] },
+      { label:'Patates',          nl:['aardappel','aardappelen'] },
+      { label:'Havuç',            nl:['wortel','wortelen'] },
+      { label:'Brokoli',          nl:['broccoli'] },
+      { label:'Ispanak',          nl:['spinazie'] },
+  ]},
+  { emoji:'🍎', label:'Meyve', subs:[
+      { label:'Elma',             nl:['appel','appels'] },
+      { label:'Muz',              nl:['banaan','bananen'] },
+      { label:'Portakal',         nl:['sinaasappel','sinaasappelen'] },
+      { label:'Çilek',            nl:['aardbei','aardbeien'] },
+      { label:'Üzüm',             nl:['druiven'] },
+      { label:'Armut',            nl:['peer','peren'] },
+  ]},
+  { emoji:'🍝', label:'Makarna & Pirinç', subs:[
+      { label:'Spagetti',         nl:['spaghetti'] },
+      { label:'Penne',            nl:['penne'] },
+      { label:'Fusilli',          nl:['fusilli'] },
+      { label:'Beyaz Pirinç',     nl:['witte rijst','langkorrelrijst'] },
+      { label:'Basmati',          nl:['basmati'] },
+      { label:'Erişte',           nl:['noedels','mie '] },
+  ]},
+  { emoji:'🧃', label:'İçecekler', subs:[
+      { label:'Maden Suyu',       nl:['bruisend water','sparkling water','spa rood'] },
+      { label:'Su',               nl:['still water','plat water','evian','spa blauw'] },
+      { label:'Portakal Suyu',    nl:['sinaasappelsap','OJ '] },
+      { label:'Elma Suyu',        nl:['appelsap'] },
+      { label:'Cola',             nl:['coca-cola','pepsi cola'] },
+      { label:'Meyve Suyu',       nl:['fruitsap','vruchtensap'] },
+  ]},
+  { emoji:'☕', label:'Kahve & Çay', subs:[
+      { label:'Filtre Kahve',     nl:['filterkoffie','gemalen koffie'] },
+      { label:'Espresso',         nl:['espresso','koffiepads','koffiebonen'] },
+      { label:'Siyah Çay',        nl:['zwarte thee','english breakfast'] },
+      { label:'Yeşil Çay',        nl:['groene thee'] },
+      { label:'Bitki Çayı',       nl:['kruidenthee','kamille','munt thee'] },
+  ]},
+  { emoji:'🍫', label:'Atıştırmalık', subs:[
+      { label:'Sütlü Çikolata',   nl:['melkchocolade','chocolade melk'] },
+      { label:'Bitter Çikolata',  nl:['pure chocolade','donkere chocolade'] },
+      { label:'Cips',             nl:['chips ','lay\'s','pringles'] },
+      { label:'Bisküvi',          nl:['koekjes','biscuit'] },
+      { label:'Gofret',           nl:['wafels','wafers'] },
+      { label:'Kuruyemiş',        nl:['noten','amandelen','cashew'] },
+  ]},
+  { emoji:'🧴', label:'Kişisel Bakım', subs:[
+      { label:'Şampuan',          nl:['shampoo'] },
+      { label:'Duş Jeli',         nl:['douchegel','doucheschuim'] },
+      { label:'Sabun',            nl:['zeep','handzeep'] },
+      { label:'Diş Macunu',       nl:['tandpasta'] },
+      { label:'Deodorant',        nl:['deodorant','deo '] },
+  ]},
+  { emoji:'🧹', label:'Temizlik', subs:[
+      { label:'Çamaşır Deterjanı',nl:['waspoeder','vloeibaar wasmiddel','wasmiddel'] },
+      { label:'Yumuşatıcı',       nl:['wasverzachter'] },
+      { label:'Bulaşık Deterjanı',nl:['afwasmiddel','vaatwastabletten'] },
+      { label:'Tuvalet Kağıdı',   nl:['toiletpapier','wc papier'] },
+      { label:'Kağıt Havlu',      nl:['keukenpapier','keukenrol'] },
+  ]},
+  { emoji:'🥫', label:'Konserve & Sos', subs:[
+      { label:'Ketçap',           nl:['ketchup'] },
+      { label:'Mayonez',          nl:['mayonaise','mayo '] },
+      { label:'Hardal',           nl:['mosterd'] },
+      { label:'Salça',            nl:['tomatenpuree','geconcentreerde tomaten'] },
+      { label:'Mantar Konserve',  nl:['champignons blik','champignons pot'] },
+      { label:'Ton Konserve',     nl:['tonijn blik','tonijn in '] },
+  ]},
+  { emoji:'🫙', label:'Yağ', subs:[
+      { label:'Zeytinyağı',       nl:['olijfolie'] },
+      { label:'Ayçiçek Yağı',    nl:['zonnebloemolie'] },
+      { label:'Tereyağı',         nl:['boter ','roomboter'] },
+      { label:'Margarin',         nl:['margarine','halvarine'] },
+  ]},
 ];
 
-let wiz = { step:0, catIdx:-1, product:null, catProducts:[] };
+let wiz = { step:0, catIdx:-1, subIdx:-1 };
 
 function wizRenderCats() {
     const grid = document.getElementById('wiz-cat-grid');
@@ -743,8 +852,9 @@ function wizShow(step) {
     } else {
         bcCat?.classList.add('hidden'); bc1?.classList.add('hidden');
     }
-    if (step >= 2 && wiz.product) {
-        if (bcProd) { bcProd.textContent = wiz.product; bcProd.classList.remove('hidden'); }
+    if (step >= 2 && wiz.subIdx >= 0 && wiz.catIdx >= 0) {
+        const sub = WIZ_CATS[wiz.catIdx]?.subs?.[wiz.subIdx];
+        if (bcProd && sub) { bcProd.textContent = sub.label; bcProd.classList.remove('hidden'); }
         if (bc2)    bc2.classList.remove('hidden');
     } else {
         bcProd?.classList.add('hidden');
@@ -754,82 +864,38 @@ function wizShow(step) {
     window.scrollTo({top:0,behavior:'smooth'});
 }
 
-function wizBack()       { if (wiz.step > 0) wizShow(wiz.step - 1); }
+function wizBack() {
+    if (wiz.step > 0) {
+        if (wiz.step === 2) wiz.subIdx = -1;
+        wizShow(wiz.step - 1);
+    }
+}
 function wizGoStep(s)    { if (s < wiz.step) wizShow(s); }
 
-async function wizSelectCat(idx) {
-    wiz.catIdx = idx; wiz.product = null; wiz.catProducts = [];
+function wizSelectCat(idx) {
+    wiz.catIdx = idx; wiz.subIdx = -1;
     wizShow(1);
 
     const cat = WIZ_CATS[idx];
     const chips = document.getElementById('wiz-prod-chips');
-    chips.innerHTML = [24,20,28,16,24,18].map(w =>
-        `<div class="shimmer h-8 rounded-full" style="width:${w*4}px"></div>`).join('');
 
-    if (!sb) { chips.innerHTML = '<p class="text-white/40 text-xs">Bağlantı yok</p>'; return; }
-    try {
-        const { data } = await sb
-            .from('market_chain_products')
-            .select('name_tr,name,unit_or_content,price,image_url')
-            .eq('category_tr', cat.db)
-            .gt('price', 0)
-            .limit(500);
-        wiz.catProducts = data || [];
+    chips.innerHTML = cat.subs.map((sub, i) =>
+        `<button class="wiz-sub-chip filter-chip text-sm px-4 py-2 font-semibold" data-sub="${i}">
+            ${esc(sub.label)}
+        </button>`
+    ).join('');
 
-        // Hollandaca anahtar kelimelerle grupla (daha temiz chip'ler)
-        // İlk 2 anlamlı kelime = arama terimi (marka vs işlevsel kelime)
-        const STOP = new Set(['de','het','een','van','met','in','op','voor','bio','organic',
-                              'vers','fresh','extra','light','classic','original','natural',
-                              'carrefour','lidl','colruyt','delhaize','aldi','boni','selection',
-                              'the','market','collection','family']);
-        const freq = {};
-        for (const r of wiz.catProducts) {
-            // Hollandaca ismi kullan — arama terimi NL olmalı
-            const nl = (r.name || '').split('\n')[0].replace(/\s+/g,' ').trim();
-            if (!nl || nl.length < 3) continue;
-            // Durma kelimelerini filtrele, ilk 2 anlamlı kelimeyi al
-            const words = nl.toLowerCase().split(/[\s\-\/,]+/)
-                .filter(w => w.length > 2 && !STOP.has(w) && !/^\d/.test(w));
-            if (!words.length) continue;
-            const key = words.slice(0,2).join(' ');
-            const display = bestName(r); // Türkçe varsa Türkçe göster
-            if (!freq[key]) freq[key] = { count:0, display, searchKey: key, img: r.image_url||'' };
-            else freq[key].count++;
-            if (!freq[key].img && r.image_url) freq[key].img = r.image_url;
-        }
-        const topItems = Object.values(freq)
-            .sort((a,b) => b.count - a.count)
-            .slice(0, 24);
-
-        if (!topItems.length) {
-            chips.innerHTML = '<p class="text-white/40 text-xs">Bu kategoride ürün bulunamadı.</p>';
-        } else {
-            chips.innerHTML = topItems.map((item, idx) => {
-                const imgHtml = item.img
-                    ? `<img src="${esc(item.img)}" class="w-5 h-5 object-contain rounded shrink-0" loading="lazy" onerror="this.remove()">`
-                    : '';
-                // Gösterim için kısa label: Türkçe varsa Türkçe, yoksa NL key
-                const showLabel = item.display.split(' ').slice(0,4).join(' ');
-                return `<button class="wiz-prod-chip filter-chip text-xs px-3 py-1.5 flex items-center gap-1.5"
-                    data-idx="${idx}">
-                    ${imgHtml}<span>${esc(showLabel)}</span>
-                </button>`;
-            }).join('');
-            // Event delegation: data attribute ile — özel karakterler sorun yaratmaz
-            chips.querySelectorAll('.wiz-prod-chip').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const item = topItems[+btn.dataset.idx];
-                    if (item) wizSelectProduct(item.searchKey);
-                });
-            });
-        }
-    } catch(e) {
-        chips.innerHTML = '<p class="text-red-400/60 text-xs">Yüklenemedi</p>';
-    }
+    chips.querySelectorAll('.wiz-sub-chip').forEach(btn => {
+        btn.addEventListener('click', () => {
+            chips.querySelectorAll('.wiz-sub-chip').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            wizSelectSub(+btn.dataset.sub);
+        });
+    });
 }
 
-async function wizSelectProduct(productTerm) {
-    wiz.product = productTerm;
+async function wizSelectSub(subIdx) {
+    wiz.subIdx = subIdx;
     wizShow(2);
     await wizShowResult();
 }
@@ -841,17 +907,22 @@ async function wizShowResult() {
     loadEl.classList.remove('hidden');
     cardsEl.innerHTML = '';
 
-    const productTerm = wiz.product || '';
-    // searchKey her zaman Hollandaca anahtar kelime — sadece name alanında ara
+    const cat = WIZ_CATS[wiz.catIdx];
+    const sub = cat?.subs?.[wiz.subIdx];
+    if (!sub) { loadEl.classList.add('hidden'); cardsEl.innerHTML = '<p class="text-white/40 text-sm text-center py-8">Alt kategori seçilmedi</p>'; return; }
+
+    // Alt kategorinin TÜM keyword'lerini OR ile ara → tüm marketlerde eşleşir
+    const orFilter = sub.nl.map(k => `name.ilike.*${k}*`).join(',');
     let data = [];
     try {
-        const { data:d } = await sb
+        const { data:d, error } = await sb
             .from('market_chain_products')
             .select('name,name_tr,price,promo_price,currency,chain_slug,captured_at,in_promo,promo_valid_from,promo_valid_until,unit_or_content,image_url')
             .in('chain_slug', SLUGS)
-            .ilike('name', `*${productTerm}*`)
+            .or(orFilter)
             .gt('price', 0)
-            .limit(300);
+            .limit(500);
+        if (error) throw error;
         data = d || [];
     } catch(e) { console.warn('wizShowResult error:', e); }
     loadEl.classList.add('hidden');
