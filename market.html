@@ -776,34 +776,53 @@ async function wizSelectCat(idx) {
             .limit(500);
         wiz.catProducts = data || [];
 
-        // En sık geçen benzersiz isimler
-        // bestName kullan; ilk 2 kelime ile grupla
+        // Hollandaca anahtar kelimelerle grupla (daha temiz chip'ler)
+        // İlk 2 anlamlı kelime = arama terimi (marka vs işlevsel kelime)
+        const STOP = new Set(['de','het','een','van','met','in','op','voor','bio','organic',
+                              'vers','fresh','extra','light','classic','original','natural',
+                              'carrefour','lidl','colruyt','delhaize','aldi','boni','selection',
+                              'the','market','collection','family']);
         const freq = {};
         for (const r of wiz.catProducts) {
-            const display = bestName(r);
-            if (!display || display.length < 2) continue;
-            const key = display.toLowerCase().split(/\s+/).slice(0,2).join(' ');
-            if (!freq[key]) freq[key] = { count:0, display, img: r.image_url || '' };
+            // Hollandaca ismi kullan — arama terimi NL olmalı
+            const nl = (r.name || '').split('\n')[0].replace(/\s+/g,' ').trim();
+            if (!nl || nl.length < 3) continue;
+            // Durma kelimelerini filtrele, ilk 2 anlamlı kelimeyi al
+            const words = nl.toLowerCase().split(/[\s\-\/,]+/)
+                .filter(w => w.length > 2 && !STOP.has(w) && !/^\d/.test(w));
+            if (!words.length) continue;
+            const key = words.slice(0,2).join(' ');
+            const display = bestName(r); // Türkçe varsa Türkçe göster
+            if (!freq[key]) freq[key] = { count:0, display, searchKey: key, img: r.image_url||'' };
             else freq[key].count++;
-            // resimli versiyonu tercih et
             if (!freq[key].img && r.image_url) freq[key].img = r.image_url;
         }
         const topItems = Object.values(freq)
             .sort((a,b) => b.count - a.count)
-            .slice(0, 30);
+            .slice(0, 24);
 
-        chips.innerHTML = topItems.length
-            ? topItems.map(item => {
-                const label = item.display.split(' ').slice(0,5).join(' ');
+        if (!topItems.length) {
+            chips.innerHTML = '<p class="text-white/40 text-xs">Bu kategoride ürün bulunamadı.</p>';
+        } else {
+            chips.innerHTML = topItems.map((item, idx) => {
                 const imgHtml = item.img
-                    ? `<img src="${esc(item.img)}" class="w-6 h-6 object-contain rounded mr-1 shrink-0" loading="lazy" onerror="this.remove()">`
+                    ? `<img src="${esc(item.img)}" class="w-5 h-5 object-contain rounded shrink-0" loading="lazy" onerror="this.remove()">`
                     : '';
-                return `<button class="filter-chip text-xs px-3 py-1.5 flex items-center"
-                    onclick="wizSelectProduct(${JSON.stringify(label)})">
-                    ${imgHtml}${esc(label)}
+                // Gösterim için kısa label: Türkçe varsa Türkçe, yoksa NL key
+                const showLabel = item.display.split(' ').slice(0,4).join(' ');
+                return `<button class="wiz-prod-chip filter-chip text-xs px-3 py-1.5 flex items-center gap-1.5"
+                    data-idx="${idx}">
+                    ${imgHtml}<span>${esc(showLabel)}</span>
                 </button>`;
-              }).join('')
-            : '<p class="text-white/40 text-xs">Bu kategoride ürün bulunamadı.</p>';
+            }).join('');
+            // Event delegation: data attribute ile — özel karakterler sorun yaratmaz
+            chips.querySelectorAll('.wiz-prod-chip').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const item = topItems[+btn.dataset.idx];
+                    if (item) wizSelectProduct(item.searchKey);
+                });
+            });
+        }
     } catch(e) {
         chips.innerHTML = '<p class="text-red-400/60 text-xs">Yüklenemedi</p>';
     }
@@ -823,22 +842,17 @@ async function wizShowResult() {
     cardsEl.innerHTML = '';
 
     const productTerm = wiz.product || '';
-    const nlTerm = trCevir(productTerm);
-    const queries = (nlTerm && nlTerm !== productTerm) ? [productTerm, nlTerm] : [productTerm];
-
+    // searchKey her zaman Hollandaca anahtar kelime — sadece name alanında ara
     let data = [];
     try {
-        for (const term of queries) {
-            const { data:d } = await sb
-                .from('market_chain_products')
-                .select('name,name_tr,price,promo_price,currency,chain_slug,captured_at,in_promo,promo_valid_from,promo_valid_until,unit_or_content,image_url')
-                .in('chain_slug', SLUGS)
-                .or(`name.ilike.*${term}*,name_tr.ilike.*${term}*`)
-                .gt('price', 0)
-                .limit(200);
-            if (d) for (const r of d)
-                if (!data.some(x => x.name===r.name && x.chain_slug===r.chain_slug)) data.push(r);
-        }
+        const { data:d } = await sb
+            .from('market_chain_products')
+            .select('name,name_tr,price,promo_price,currency,chain_slug,captured_at,in_promo,promo_valid_from,promo_valid_until,unit_or_content,image_url')
+            .in('chain_slug', SLUGS)
+            .ilike('name', `*${productTerm}*`)
+            .gt('price', 0)
+            .limit(300);
+        data = d || [];
     } catch(e) { console.warn('wizShowResult error:', e); }
     loadEl.classList.add('hidden');
 
