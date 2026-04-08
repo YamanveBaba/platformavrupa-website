@@ -465,6 +465,16 @@ function effPrice(row) {
     return (Number.isFinite(p) && p > 0) ? p : NaN;
 }
 // Akıllı isim: name_tr temiz ve anlamlıysa kullan, değilse name
+function packSize(row) {
+    // unit_or_content varsa onu kullan
+    const u = (row.unit_or_content || '').trim();
+    if (u) return u;
+    // yoksa isimden sayı+birim çıkar: "6 Stuks", "12 Stuks", "6 eieren", "6st", "250g" vb.
+    const name = (row.name || '').split('\n')[0];
+    const m = name.match(/\b(\d+)\s*(stuks?|st\.?|eieren|g|kg|ml|cl|l\b)/i);
+    return m ? m[0] : '';
+}
+
 function bestName(row) {
     const nt = (row.name_tr || '').split('\n')[0].replace(/\s+/g,' ').trim();
     // Hollandaca ismi de \n'den temizle (Carrefour import sorunu)
@@ -474,6 +484,10 @@ function bestName(row) {
     const dots = (nt.match(/\./g)||[]).length;
     const letters = (nt.match(/[a-zA-ZğüşöçıİĞÜŞÖÇ]/g)||[]).length;
     if (dots >= 3 && letters < dots * 2) return nl;
+    // Türkçe sözcük oranı düşükse (çoğu İngilizce/Hollandaca kelime kalmış) Hollandacayı tercih et
+    const trWords = (nt.match(/[ğüşöçıİĞÜŞÖÇ]|(\b(ve|ile|için|bir|bu|de|da|mi|mu|mı|mü)\b)/gi)||[]).length;
+    const totalWords = nt.split(/\s+/).length;
+    if (totalWords > 3 && trWords === 0) return nl;
     return nt;
 }
 
@@ -709,9 +723,9 @@ const WIZ_CATS = [
       { label:'Çedar',            nl:['cheddar'] },
   ]},
   { emoji:'🥚', label:'Yumurta', subs:[
-      { label:'Serbest Dolaşım',  nl:['scharreleieren','vrije-uitloopeieren','eieren scharrel','eieren |','eieren large','eieren hennen','kipster-eieren','vrij uitloop eieren','vrije uitloop eieren'], ex:['pannenkoeken','pancake','mayonaise','mayo ','tagliatelle','noedels','wafel','paaseit','salade','pasta','kerstmis'] },
-      { label:'Standart Yumurta', nl:['vers eieren','verse eieren','eieren medium','eieren m ','eieren l ','eieren vers','eieren |'], ex:['pannenkoeken','pancake','mayonaise','mayo ','tagliatelle','noedels','wafel','paaseit','salade','chocolade'] },
-      { label:'Bio Yumurta',      nl:['bio-eieren','bio eieren','eieren bio','biologische eieren','eieren omega'], ex:['pannenkoeken','pancake','mayonaise','wafel','tagliatelle'] },
+      { label:'Serbest Dolaşım',  nl:['scharreleieren','vrije-uitloopeieren','eieren scharrel','eieren |','eieren large','eieren hennen','kipster-eieren','vrij uitloop eieren','vrije uitloop eieren'], ex:['pannenkoeken','pancake','mayonaise','mayo ','tagliatelle','noedels','wafel','paaseit','salade','pasta','kerstmis','hardgekookt','hardgekookte','gepeld','gekleurde','kwarteleieren','chocolade'] },
+      { label:'Standart Yumurta', nl:['vers eieren','verse eieren','eieren medium','eieren m ','eieren l ','eieren vers','eieren |'], ex:['pannenkoeken','pancake','mayonaise','mayo ','tagliatelle','noedels','wafel','paaseit','salade','chocolade','hardgekookt','hardgekookte','gepeld','kwarteleieren'] },
+      { label:'Bio Yumurta',      nl:['bio-eieren','bio eieren','eieren bio','biologische eieren','eieren omega'], ex:['pannenkoeken','pancake','mayonaise','wafel','tagliatelle','hardgekookt','gepeld'] },
   ]},
   { emoji:'🍞', label:'Ekmek', subs:[
       { label:'Beyaz Ekmek',      nl:['wit brood','witte boterham'] },
@@ -983,7 +997,8 @@ async function wizShowResult() {
                     ${pct?`<span class="badge-red">-${pct}%</span>`:''}
                 </div>
                 ${row?`
-                    <p class="text-slate-600 text-xs leading-snug line-clamp-2 mb-2 flex-1">${esc(name)}</p>
+                    <p class="text-slate-600 text-xs leading-snug line-clamp-2 mb-1 flex-1">${esc(name)}</p>
+                    ${(()=>{const ps=packSize(row);return ps?`<p class="text-slate-400 text-[.65rem] mb-1.5">${esc(ps)}</p>`:''})()}
                     ${row.in_promo&&row.promo_price!=null&&Number(row.price)!==Number(row.promo_price)
                         ?`<div class="strike text-xs mb-0.5">${fmtP(row.price,row.currency)}</div>`:''}
                     <div class="text-xl font-black ${isW?'text-emerald-600':'text-slate-800'}">${fmtP(eff,row.currency)}</div>
