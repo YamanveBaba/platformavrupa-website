@@ -709,9 +709,9 @@ const WIZ_CATS = [
       { label:'Çedar',            nl:['cheddar'] },
   ]},
   { emoji:'🥚', label:'Yumurta', subs:[
-      { label:'Yumurta (6\'lı)',  nl:['eieren 6','eieren m','eieren l'] },
-      { label:'Yumurta (12\'li)', nl:['eieren 12','eieren xl'] },
-      { label:'Organik Yumurta',  nl:['biologische eieren','bio eieren'] },
+      { label:'Serbest Dolaşım',  nl:['scharreleieren','vrije-uitloopeieren','eieren scharrel','eieren |','eieren large','eieren hennen','kipster-eieren','vrij uitloop eieren','vrije uitloop eieren'], ex:['pannenkoeken','pancake','mayonaise','mayo ','tagliatelle','noedels','wafel','paaseit','salade','pasta','kerstmis'] },
+      { label:'Standart Yumurta', nl:['vers eieren','verse eieren','eieren medium','eieren m ','eieren l ','eieren vers','eieren |'], ex:['pannenkoeken','pancake','mayonaise','mayo ','tagliatelle','noedels','wafel','paaseit','salade','chocolade'] },
+      { label:'Bio Yumurta',      nl:['bio-eieren','bio eieren','eieren bio','biologische eieren','eieren omega'], ex:['pannenkoeken','pancake','mayonaise','wafel','tagliatelle'] },
   ]},
   { emoji:'🍞', label:'Ekmek', subs:[
       { label:'Beyaz Ekmek',      nl:['wit brood','witte boterham'] },
@@ -925,6 +925,13 @@ async function wizShowResult() {
         if (error) throw error;
         data = d || [];
     } catch(e) { console.warn('wizShowResult error:', e); }
+    // Yanlış eşleşmeleri temizle (örn. yumurta aramasında pankek çıkmasın)
+    if (sub.ex && sub.ex.length) {
+        data = data.filter(row => {
+            const lname = (row.name || '').toLowerCase();
+            return !sub.ex.some(w => lname.includes(w));
+        });
+    }
     loadEl.classList.add('hidden');
 
     if (!data.length) {
