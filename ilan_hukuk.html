@@ -118,15 +118,7 @@
     </script>
 
     <script>
-        // Supabase Kurulumu
-        let supabase = null;
-        try {
-            if (typeof initSupabase === 'function') {
-                supabase = initSupabase();
-            }
-        } catch (err) {
-            console.error("Supabase hatası:", err);
-        }
+        // sb config.js tarafından tanımlandı
 
         // Başvuru Gönderme Fonksiyonu
         async function basvuruGonder(e) {
@@ -159,7 +151,7 @@
             };
 
             try {
-                const { error } = await supabase.from('ilanlar').insert([yeniBasvuru]);
+                const { error } = await sb.from('ilanlar').insert([yeniBasvuru]);
                 if (error) throw error;
                 
                 setTimeout(() => {

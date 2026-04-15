@@ -19,6 +19,7 @@
     <meta name="twitter:image" content="https://www.platformavrupa.com/og-image.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="utils.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -241,22 +242,22 @@
 
             if(sb) {
                 try {
-                    // SADECE DB'DEN ÇEKİYORUZ - "Hizmet" kategorisi
-                    const { data, error } = await sb.from('ilanlar').select('*').eq('category', 'Hizmet').order('created_at', { ascending: false });
+                    // SADECE DB'DEN ÇEKİYORUZ - "hizmet" kategorisi
+                    const { data, error } = await sb.from('ilanlar').select('*').eq('kategori', 'hizmet').order('created_at', { ascending: false });
 
                     if (!error && data) {
                         tumIlanlar = data.map(i => ({
                             id: i.id,
-                            role: i.sub_category === 'Veren' ? 'veren' : 'alan', // DB'de 'Veren' diye tutuluyorsa eşle
-                            sektor: i.detaylar?.sektor || 'Diğer',
-                            baslik: i.title,
-                            kisi: "Üye", // İsim yoksa
-                            konum: i.city,
-                            ulke: i.country || '',
-                            fiyat: i.price,
+                            role: i.role || 'veren',
+                            sektor: i.detaylar?.sektor || i.sektor || 'Diğer',
+                            baslik: i.baslik || 'Hizmet İlanı',
+                            kisi: "Üye",
+                            konum: i.konum || '',
+                            ulke: i.ulke || '',
+                            fiyat: i.fiyat || '',
                             tarih: formatDate(i.created_at, 'long'),
-                            lat: 48.0 + (Math.random() * 5),
-                            lon: 10.0 + (Math.random() * 5)
+                            lat: i.lat || (48.0 + (Math.random() * 5)),
+                            lon: i.lon || (10.0 + (Math.random() * 5))
                         }));
                     }
                 } catch (err) { console.error(err); }

@@ -247,6 +247,7 @@
     </div>
 
     <script src="config.js"></script>
+    <script src="auth.js"></script>
     <script src="utils.js"></script>
     <script>
         let allCategories = [];
@@ -267,6 +268,19 @@
 
         // Sayfa yüklendiğinde
         document.addEventListener('DOMContentLoaded', async function() {
+            // Auth kontrolü
+            if (sb) {
+                const { data: { session } } = await sb.auth.getSession();
+                if (!session) {
+                    localStorage.setItem('authRedirect', window.location.href);
+                    window.location.href = 'login.html';
+                    return;
+                }
+            } else if (!localStorage.getItem('isLoggedIn')) {
+                localStorage.setItem('authRedirect', window.location.href);
+                window.location.href = 'login.html';
+                return;
+            }
             await loadCategories();
             await loadVideos();
         });

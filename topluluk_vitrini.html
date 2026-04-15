@@ -19,6 +19,7 @@
     <meta name="twitter:image" content="https://www.platformavrupa.com/og-image.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="utils.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -109,10 +110,7 @@
 
     <script src="config.js"></script>
     <script>
-        // Supabase Bağlantısı
-        let sb = null;
-        try { if (typeof initSupabase === 'function') sb = initSupabase(); } catch (e) {}
-
+        // sb config.js tarafından tanımlandı
         let secilenResimBase64 = null;
 
         window.onload = function() {

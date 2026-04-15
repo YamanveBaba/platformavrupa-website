@@ -124,7 +124,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="md:col-span-2">
                         <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block ml-1">İlan Başlığı</label>
-                        <input type="text" id="baslik" placeholder="Örn: Tecrübeli Döner Ustası Aranıyor" class="modern-input">
+                        <input type="text" id="baslik" placeholder="Örn: Tecrübeli Döner Ustası Aranıyor" class="modern-input" required>
                     </div>
                     <div>
                         <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block ml-1">Maaş (Opsiyonel)</label>
@@ -144,7 +144,7 @@
 
                 <div>
                     <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block ml-1">İlan Açıklaması</label>
-                    <textarea id="aciklama" rows="5" placeholder="İş tanımı, aranan nitelikler ve diğer detaylar..." class="modern-textarea resize-none"></textarea>
+                    <textarea id="aciklama" rows="5" placeholder="İş tanımı, aranan nitelikler ve diğer detaylar..." class="modern-textarea resize-none" required></textarea>
                 </div>
 
                 <div class="pt-6">
@@ -160,11 +160,7 @@
     <script src="config.js"></script>
     <script src="genel_veriler.js"></script>
     <script>
-        // --- 1. GÜVENLİ SUPABASE ---
-        let sb = null;
-        if (typeof supabase !== 'undefined') sb = supabase;
-        else if (typeof createClient !== 'undefined' && typeof SUPABASE_URL !== 'undefined') sb = createClient(SUPABASE_URL, SUPABASE_KEY);
-        else if (typeof initSupabase === 'function') sb = initSupabase();
+        // sb config.js tarafından tanımlandı
 
         // --- 2. SAYFA YÜKLENİNCE ---
         window.onload = function() {

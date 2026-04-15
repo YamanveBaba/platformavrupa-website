@@ -42,6 +42,7 @@
         </div>
     </main>
 
+    <script src="utils.js"></script>
     <script>
         const SUPABASE_URL = 'https://vhietrqljahdmloazgpp.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoaWV0cnFsamFoZG1sb2F6Z3BwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTk5MTcsImV4cCI6MjA4MDYzNTkxN30.sxpUrTnR40XuEBPUeQXj352xMziGr_lDqdA8H69ejBA';
@@ -56,9 +57,9 @@
                 return;
             }
 
-            // DOĞRUDAN SUPABASE 'listings' TABLOSUNDAN ÇEKİYORUZ
+            // DOĞRUDAN SUPABASE 'ilanlar' TABLOSUNDAN ÇEKİYORUZ
             const { data, error } = await sb
-                .from('listings')
+                .from('ilanlar')
                 .select('*')
                 .eq('id', ilanId)
                 .single();
@@ -73,20 +74,20 @@
 
         function ilanGoster(ilan) {
             const container = document.getElementById('ilanDetayKutusu');
-            
-            // Veri Eşleştirme (Listings Tablosuna Göre)
-            const baslik = ilan.title || "Başlıksız İlan";
-            const fiyat = ilan.price || "Belirtilmedi";
-            const aciklama = ilan.description || "Açıklama girilmemiş.";
-            const konum = (ilan.city && ilan.country) ? `${ilan.city}, ${ilan.country}` : "Konum Belirtilmemiş";
+
+            // Veri Eşleştirme (ilanlar tablosuna göre - Türkçe alan adları)
+            const baslik = ilan.baslik || "Başlıksız İlan";
+            const fiyat = ilan.fiyat || "Belirtilmedi";
+            const aciklama = ilan.aciklama || "Açıklama girilmemiş.";
+            const konum = (ilan.konum && ilan.ulke) ? `${ilan.konum}, ${ilan.ulke}` : (ilan.konum || "Konum Belirtilmemiş");
             const tarih = formatDate(ilan.created_at, 'long');
-            const kategori = ilan.category || "Genel";
-            const sahip = ilan.owner_name || "Platform Üyesi";
-            
+            const kategori = ilan.kategori || "Genel";
+            const sahip = ilan.telefon ? `Tel: ${ilan.telefon}` : "Platform Üyesi";
+
             // Resim Kontrolü
             let resimHTML = "";
-            if (ilan.image_url) {
-                resimHTML = `<img src="${ilan.image_url}" class="w-full h-full object-cover">`;
+            if (ilan.resim) {
+                resimHTML = `<img src="${ilan.resim}" class="w-full h-full object-cover">`;
             } else {
                 // Kategoriye göre varsayılan ikon
                 let icon = 'fa-image';

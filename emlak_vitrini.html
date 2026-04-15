@@ -500,7 +500,7 @@
 
                     // SADECE DB'DEN ÇEKİYORUZ - "Emlak" kategorisi
 
-                    const { data, error } = await sb.from('ilanlar').select('*').eq('category', 'Emlak').order('created_at', { ascending: false });
+                    const { data, error } = await sb.from('ilanlar').select('*').eq('kategori', 'Emlak').order('created_at', { ascending: false });
 
 
 
@@ -510,27 +510,27 @@
 
                             id: i.id,
 
-                            islem: i.sub_category || 'Kiralık',
+                            islem: i.islem || 'Kiralık',
 
-                            tip: 'Daire', // İlerde DB'ye eklenebilir
+                            tip: i.tip || 'Daire',
 
-                            baslik: i.title,
+                            baslik: i.baslik || 'Emlak İlanı',
 
-                            fiyat: i.price,
+                            fiyat: i.fiyat || '',
 
-                            fiyatSayi: parseInt(i.price.replace(/[^0-9]/g, '')) || 0,
+                            fiyatSayi: parseInt((i.fiyat || '0').replace(/[^0-9]/g, '')) || 0,
 
-                            konum: i.city,
+                            konum: i.konum || '',
 
-                            ulke: i.country || '', // DB'de country varsa kullan
+                            ulke: i.ulke || '',
 
-                            oda: '2+1', // Varsayılan
+                            oda: i.oda || '2+1',
 
-                            resim: i.image,
+                            resim: i.resim || '',
 
-                            lat: 48.0 + (Math.random() * 5), // Harita boş kalmasın diye geçici random
+                            lat: i.lat || (48.0 + (Math.random() * 5)),
 
-                            lon: 10.0 + (Math.random() * 5)
+                            lon: i.lon || (10.0 + (Math.random() * 5))
 
                         }));
 

@@ -380,26 +380,26 @@
 
             if (sb) {
                 try {
-                    // SADECE DB - "Vasıta" kategorisi
-                    const { data, error } = await sb.from('ilanlar').select('*').eq('category', 'Vasıta').order('created_at', { ascending: false });
+                    // SADECE DB - "vasita" kategorisi
+                    const { data, error } = await sb.from('ilanlar').select('*').eq('kategori', 'vasita').order('created_at', { ascending: false });
 
                     if (!error && data) {
                         tumIlanlar = data.map(i => ({
                             id: i.id,
-                            baslik: i.title,
-                            marka: i.sub_category || 'Diğer',
-                            model: i.detaylar?.model || '',
-                            yakit: i.detaylar?.yakit || 'Benzin',
-                            vites: i.detaylar?.vites || 'Manuel',
+                            baslik: i.baslik || 'Araç İlanı',
+                            marka: i.marka || 'Diğer',
+                            model: i.model || i.detaylar?.model || '',
+                            yakit: i.yakit || i.detaylar?.yakit || 'Benzin',
+                            vites: i.vites || i.detaylar?.vites || 'Manuel',
                             yil: i.detaylar?.yil || '2023',
                             km: i.detaylar?.km || '0',
-                            fiyat: i.price,
-                            fiyatSayi: parseInt(i.price.replace(/[^0-9]/g, '')) || 0,
-                            konum: i.city,
-                            ulke: i.country || '',
-                            resim: i.image,
-                            lat: 48.0 + (Math.random() * 5), 
-                            lon: 10.0 + (Math.random() * 5)
+                            fiyat: i.fiyat || '',
+                            fiyatSayi: parseInt((i.fiyat || '0').replace(/[^0-9]/g, '')) || 0,
+                            konum: i.konum || '',
+                            ulke: i.ulke || '',
+                            resim: i.resim || '',
+                            lat: i.lat || (48.0 + (Math.random() * 5)),
+                            lon: i.lon || (10.0 + (Math.random() * 5))
                         }));
                     }
                 } catch (err) { console.error(err); }
