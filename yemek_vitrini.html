@@ -243,21 +243,21 @@
 
             if (sb) {
                 try {
-                    // SADECE DB - "Yemek" kategorisi
-                    const { data, error } = await sb.from('ilanlar').select('*').eq('category', 'Yemek').order('created_at', { ascending: false });
+                    // SADECE DB - "mutfak" kategorisi
+                    const { data, error } = await sb.from('ilanlar').select('*').eq('kategori', 'mutfak').order('created_at', { ascending: false });
 
                     if (!error && data) {
                         tumIlanlar = data.map(i => ({
                             id: i.id,
-                            kategori: i.altKategori || 'Diğer',
-                            baslik: i.title,
-                            konum: i.city,
-                            ulke: i.country || '',
-                            fiyat: i.price,
+                            kategori: i.detaylar?.tur || 'Diğer',
+                            baslik: i.baslik || 'Yemek İlanı',
+                            konum: i.konum || '',
+                            ulke: i.ulke || '',
+                            fiyat: i.fiyat || '',
                             teslimat: i.detaylar?.teslimat || 'Gel-Al',
-                            resim: i.image,
-                            lat: 48.0 + (Math.random() * 5), 
-                            lon: 10.0 + (Math.random() * 5)
+                            resim: i.resim || '',
+                            lat: i.lat || (48.0 + (Math.random() * 5)),
+                            lon: i.lon || (10.0 + (Math.random() * 5))
                         }));
                     }
                 } catch (err) { console.error(err); }

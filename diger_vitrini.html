@@ -249,19 +249,19 @@
                     const { data, error } = await sb
                         .from('ilanlar')
                         .select('*')
-                        .eq('category', 'Diğer')
+                        .eq('kategori', 'diger')
                         .order('created_at', { ascending: false });
 
                     if (!error && data) {
                         tumIlanlar = data.map(i => ({
                             id: i.id,
-                            kategori: i.sub_category || 'Diğer',
-                            baslik: i.title,
-                            konum: i.city,
-                            fiyat: i.price,
-                            resim: i.image,
-                            lat: 48.0 + (Math.random() * 5), 
-                            lon: 10.0 + (Math.random() * 5)
+                            kategori: i.detaylar?.tur || 'Diğer',
+                            baslik: i.baslik || 'İlan',
+                            konum: i.konum || '',
+                            fiyat: i.fiyat || '',
+                            resim: i.resim || '',
+                            lat: i.lat || (48.0 + (Math.random() * 5)),
+                            lon: i.lon || (10.0 + (Math.random() * 5))
                         }));
                     }
                 } catch (err) { console.error(err); }

@@ -309,27 +309,26 @@
 
             if(sb) {
                 try {
-                    // ARTIK 'listings' DEĞİL 'ilanlar' TABLOSUNDAN ÇEKİYORUZ!
+                    // 'ilanlar' TABLOSUNDAN - kategori: 'is'
                     const { data, error } = await sb.from('ilanlar')
-                        .select('id,title,city,country,owner_name,price,sektor,pozisyon,sub_category,source_url,source,created_at,lat,lon')
-                        .eq('category', 'İş İlanı')
-                        .eq('status', 'active')
+                        .select('id,baslik,konum,ulke,fiyat,sektor,pozisyon,role,aciklama,telefon,created_at,lat,lon')
+                        .eq('kategori', 'is')
                         .order('created_at', { ascending: false });
 
                     if (!error && data) {
                         tumIlanlar = data.map(i => ({
                             id: i.id,
-                            role: i.sub_category === 'İş Arıyorum' ? 'isci' : 'isveren',
+                            role: i.role || 'isveren',
                             sektor: i.sektor || 'Diğer',
-                            baslik: i.title,
-                            firma: i.owner_name || "Üye",
-                            konum: i.city || "Avrupa",
-                            ulke: i.country || '',
-                            fiyat: i.price || '',
+                            baslik: i.baslik || 'İş İlanı',
+                            firma: "Üye",
+                            konum: i.konum || "Avrupa",
+                            ulke: i.ulke || '',
+                            fiyat: i.fiyat || '',
                             pozisyon: i.pozisyon || "Tam Zamanlı",
                             tarih: formatDate(i.created_at, 'long'),
-                            source_url: i.source_url || '',
-                            source: i.source || 'user',
+                            source_url: '',
+                            source: 'user',
                             lat: i.lat || (48.0 + (Math.random() * 5)),
                             lon: i.lon || (10.0 + (Math.random() * 5))
                         }));

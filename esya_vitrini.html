@@ -273,20 +273,20 @@
 
             if (sb) {
                 try {
-                    const { data, error } = await sb.from('ilanlar').select('*').eq('category', 'Eşya').order('created_at', { ascending: false });
+                    const { data, error } = await sb.from('ilanlar').select('*').eq('kategori', 'esya').order('created_at', { ascending: false });
                     if (!error && data) {
                         tumIlanlar = data.map(i => ({
                             id: i.id,
-                            kategori: i.sub_category || "Diğer",
-                            baslik: i.title,
-                            durum: "İkinci El", // Varsayılan, veritabanında yoksa
-                            fiyat: i.price,
-                            fiyatSayi: parseInt(i.price.replace(/\./g, '')) || 0,
-                            sehir: i.city,
-                            ulke: i.country || '',
-                            resim: i.image, 
-                            lat: 48.0 + (Math.random() * 5), 
-                            lon: 10.0 + (Math.random() * 5)
+                            kategori: i.detaylar?.tur || "Diğer",
+                            baslik: i.baslik || 'Eşya İlanı',
+                            durum: "İkinci El",
+                            fiyat: i.fiyat || '',
+                            fiyatSayi: parseInt((i.fiyat || '0').replace(/[^0-9]/g, '')) || 0,
+                            sehir: i.konum || '',
+                            ulke: i.ulke || '',
+                            resim: i.resim || '',
+                            lat: i.lat || (48.0 + (Math.random() * 5)),
+                            lon: i.lon || (10.0 + (Math.random() * 5))
                         }));
                     }
                 } catch (err) {}
