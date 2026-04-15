@@ -178,10 +178,7 @@
     <script src="genel_veriler.js"></script>
 
     <script>
-        let sb = null;
-        if (typeof supabase !== 'undefined') sb = supabase;
-        else if (typeof createClient !== 'undefined' && typeof SUPABASE_URL !== 'undefined') sb = createClient(SUPABASE_URL, SUPABASE_KEY);
-        else if (typeof initSupabase === 'function') sb = initSupabase();
+        // sb config.js tarafından tanımlandı
 
         // ÇOKLU RESİM İÇİN DİZİ
         let secilenResimler = [];

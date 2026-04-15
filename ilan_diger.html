@@ -117,11 +117,7 @@
     <script src="config.js"></script>
     <script src="genel_veriler.js"></script>
     <script>
-        // --- 1. GÜVENLİ SUPABASE ---
-        let sb = null;
-        if (typeof supabase !== 'undefined') sb = supabase;
-        else if (typeof createClient !== 'undefined' && typeof SUPABASE_URL !== 'undefined') sb = createClient(SUPABASE_URL, SUPABASE_KEY);
-        else if (typeof initSupabase === 'function') sb = initSupabase();
+        // sb config.js tarafından tanımlandı
 
         let secilenResimBase64 = null;
 
