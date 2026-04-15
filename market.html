@@ -414,11 +414,11 @@
 // CONFIG
 // ═══════════════════════════════════════════════════════════════════
 const CHAINS = {
-    colruyt_be:   { label:'Colruyt',   color:'#E31E24', logo:'colruyt.com',   brosur:'https://www.colruyt.be/nl/aanbiedingen'         },
-    aldi_be:      { label:'ALDI',      color:'#003F7F', logo:'aldi.com',      brosur:'https://www.aldi.be/nl/aanbiedingen'            },
-    delhaize_be:  { label:'Delhaize',  color:'#E31837', logo:'delhaize.com',  brosur:'https://www.delhaize.be/nl/aanbiedingen'        },
-    lidl_be:      { label:'Lidl',      color:'#0050AA', logo:'lidl.com',      brosur:'https://www.lidl.be/nl/aanbiedingen.htm'        },
-    carrefour_be: { label:'Carrefour', color:'#007DC5', logo:'carrefour.com', brosur:'https://www.carrefour.be/nl/promoties'          },
+    colruyt_be:   { label:'Colruyt',   color:'#E31E24', logo:'colruyt.com',   brosur:'https://www.colruyt.be/nl/folders'              },
+    aldi_be:      { label:'ALDI',      color:'#003F7F', logo:'aldi.com',      brosur:'https://www.aldi.be/nl/onze-folders.html'       },
+    delhaize_be:  { label:'Delhaize',  color:'#E31837', logo:'delhaize.com',  brosur:'https://www.delhaize.be/nl/folder'             },
+    lidl_be:      { label:'Lidl',      color:'#0050AA', logo:'lidl.com',      brosur:'https://www.lidl.be/'                          },
+    carrefour_be: { label:'Carrefour', color:'#007DC5', logo:'carrefour.com', brosur:'https://www.carrefour.be/nl/folders'           },
 };
 const SLUGS = Object.keys(CHAINS);
 
@@ -469,9 +469,14 @@ function packSize(row) {
     // unit_or_content varsa onu kullan
     const u = (row.unit_or_content || '').trim();
     if (u) return u;
-    // yoksa isimden sayı+birim çıkar: "6 Stuks", "12 Stuks", "6 eieren", "6st", "250g" vb.
+    // yoksa isimden sayı+birim çıkar
     const name = (row.name || '').split('\n')[0];
-    const m = name.match(/\b(\d+)\s*(stuks?|st\.?|eieren|g|kg|ml|cl|l\b)/i);
+    const birim = '(?:stuks?|st\\.?|eieren|g|gr|gram|kg|kilo(?:gram)?|ml|cl|dl|l|liter|litre|lt|mg|rollen?|vel|pcs|pieces|portie[s]?)';
+    // çoklama: 6x100g, 2 x 1.5l
+    let m = name.match(new RegExp('\\b(\\d+(?:[.,]\\d+)?)\\s*[xX]\\s*(\\d+(?:[.,]\\d+)?)\\s*' + birim, 'i'));
+    if (m) return m[0];
+    // tek: 500ml, 1.5 liter, 1,5l, 250 gram
+    m = name.match(new RegExp('\\b(\\d+(?:[.,]\\d+)?)\\s*' + birim + '\\b', 'i'));
     return m ? m[0] : '';
 }
 
@@ -572,7 +577,7 @@ function buildPromoCard(row) {
                     ${logoImg(row.chain_slug, 4)}
                     <span class="text-xs font-bold text-slate-500">${esc(cfg.label)}</span>
                 </div>
-                ${pct ? `<span class="badge-red">-${pct}%</span>` : `<span class="badge-green" style="font-size:.62rem">İndirimde</span>`}
+                <span class="badge-green" style="font-size:.62rem">İndirimde</span>
             </div>
             <p class="text-slate-800 font-semibold text-sm leading-snug line-clamp-2 mb-auto min-h-[2.4rem]">${esc(display)}</p>
             <div class="flex items-end justify-between mt-2">
@@ -705,132 +710,403 @@ async function loadUpcoming() {
 // Her kategori: alt kategoriler listesi içerir
 // Her alt kategori: nl[] = Hollandaca arama kelimeleri (OR ile aranır, tüm markette eşleşir)
 const WIZ_CATS = [
+  // ── SÜT ÜRÜNLERİ ──────────────────────────────────────────────────────────
   { emoji:'🥛', label:'Süt & Yoğurt', subs:[
-      { label:'Tam Yağlı Süt',    nl:['volle melk'] },
-      { label:'Yarım Yağlı Süt',  nl:['halfvolle melk'] },
-      { label:'Yağsız Süt',       nl:['magere melk','afgeroomde melk'] },
-      { label:'Soya Sütü',        nl:['sojamelk','soja drink'] },
-      { label:'Yoğurt',           nl:['yoghurt','yogurt'] },
-      { label:'Ayran',            nl:['karnemelk','kefir'] },
-      { label:'Krema',            nl:['slagroom','room ','kookroom'] },
+      { label:'Tam Yağlı Süt',      nl:['volle melk'] },
+      { label:'Yarım Yağlı Süt',    nl:['halfvolle melk'] },
+      { label:'Yağsız Süt',         nl:['magere melk','afgeroomde melk'] },
+      { label:'Bitkisel Süt',       nl:['sojamelk','havermelk','amandelmelk','rijstmelk','plantaardige drink'] },
+      { label:'Yoğurt',             nl:['yoghurt','yogurt','griekse yoghurt','skyr'] },
+      { label:'Ayran / Kefir',      nl:['karnemelk','kefir'] },
+      { label:'Krema / Çırpılmış',  nl:['slagroom','kookroom','crème fraîche','zure room'] },
+      { label:'Kwark / Lor',        nl:['kwark','verse kaas','ricotta'] },
+      { label:'Süt Tozu',           nl:['melkpoeder','volle melkpoeder'] },
   ]},
+  // ── PEYNİR ────────────────────────────────────────────────────────────────
   { emoji:'🧀', label:'Peynir', subs:[
-      { label:'Gouda',            nl:['gouda'] },
-      { label:'Mozzarella',       nl:['mozzarella'] },
-      { label:'Beyaz Peynir',     nl:['feta','witte kaas'] },
-      { label:'Krem Peynir',      nl:['roomkaas','smeerkaas','philadelphia'] },
-      { label:'Parmesan',         nl:['parmesan','parmezaan'] },
-      { label:'Çedar',            nl:['cheddar'] },
+      { label:'Gouda',              nl:['gouda'] },
+      { label:'Mozzarella',         nl:['mozzarella'] },
+      { label:'Beyaz Peynir / Feta',nl:['feta','witte kaas'] },
+      { label:'Krem Peynir',        nl:['roomkaas','smeerkaas','philadelphia','boursin'] },
+      { label:'Parmesan',           nl:['parmesan','parmezaan','grana padano'] },
+      { label:'Çedar',              nl:['cheddar'] },
+      { label:'Brie / Camembert',   nl:['brie','camembert'] },
+      { label:'Keçi / Koyun',       nl:['geitenkaas','schapenkaas'] },
+      { label:'Mavi Peynir',        nl:['blauwaderkaas','roquefort','gorgonzola'] },
+      { label:'Rendelenmiş Peynir', nl:['geraspte kaas','geraspt','kaas mix'] },
+      { label:'Dilimli Peynir',     nl:['kaasplakken','gesneden kaas'] },
+      { label:'Eritme Peyniri',     nl:['smeltkaas','processed cheese'] },
   ]},
+  // ── YUMURTA ───────────────────────────────────────────────────────────────
   { emoji:'🥚', label:'Yumurta', subs:[
-      { label:'Serbest Dolaşım',  nl:['scharreleieren','vrije-uitloopeieren','eieren scharrel','eieren |','eieren large','eieren hennen','kipster-eieren','vrij uitloop eieren','vrije uitloop eieren'], ex:['pannenkoeken','pancake','mayonaise','mayo ','tagliatelle','noedels','wafel','paaseit','salade','pasta','kerstmis','hardgekookt','hardgekookte','gepeld','gekleurde','kwarteleieren','chocolade'] },
-      { label:'Standart Yumurta', nl:['vers eieren','verse eieren','eieren medium','eieren m ','eieren l ','eieren vers','eieren |'], ex:['pannenkoeken','pancake','mayonaise','mayo ','tagliatelle','noedels','wafel','paaseit','salade','chocolade','hardgekookt','hardgekookte','gepeld','kwarteleieren'] },
-      { label:'Bio Yumurta',      nl:['bio-eieren','bio eieren','eieren bio','biologische eieren','eieren omega'], ex:['pannenkoeken','pancake','mayonaise','wafel','tagliatelle','hardgekookt','gepeld'] },
+      { label:'Serbest Gezinen',    nl:['scharreleieren','vrije uitloop eieren','vrije-uitloopeieren'], ex:['pannenkoeken','mayonaise','chocolade','tagliatelle','pasta'] },
+      { label:'Standart Yumurta',   nl:['verse eieren','eieren medium','eieren l ','eieren m '], ex:['pannenkoeken','mayonaise','chocolade','tagliatelle'] },
+      { label:'Bio Yumurta',        nl:['biologische eieren','bio eieren','bio-eieren'], ex:['pannenkoeken','mayonaise','tagliatelle'] },
+      { label:'Bıldırcın Yumurtası',nl:['kwarteleieren'] },
   ]},
-  { emoji:'🍞', label:'Ekmek', subs:[
-      { label:'Beyaz Ekmek',      nl:['wit brood','witte boterham'] },
-      { label:'Kepekli Ekmek',    nl:['volkorenbrood','volkoren brood'] },
-      { label:'Baget',            nl:['baguette','stokbrood'] },
-      { label:'Sandviç Ekmeği',   nl:['sandwich','sandwichbrood','boterham'] },
-      { label:'Kruvasan',         nl:['croissant'] },
+  // ── EKMEK & UNLU MAMÜLLER ─────────────────────────────────────────────────
+  { emoji:'🍞', label:'Ekmek & Unlu', subs:[
+      { label:'Beyaz Ekmek',        nl:['wit brood','witte boterham','pistolet'] },
+      { label:'Kepekli Ekmek',      nl:['volkorenbrood','volkoren brood','meergranenbrood'] },
+      { label:'Baget',              nl:['baguette','stokbrood'] },
+      { label:'Sandviç Ekmeği',     nl:['sandwichbrood','boterham','toast'] },
+      { label:'Kruvasan',           nl:['croissant'] },
+      { label:'Brioche',            nl:['brioche'] },
+      { label:'Tortilla / Wrap',    nl:['tortilla','wraps','chapati'] },
+      { label:'Pide / Naan',        nl:['naan','pita','pitta'] },
+      { label:'Kraker / Besküvi',   nl:['crackers','beschuit','rijstwafels'] },
   ]},
-  { emoji:'🥩', label:'Et & Şarküteri', subs:[
-      { label:'Dana Kıyma',       nl:['rundergehakt','gehakt rund'] },
-      { label:'Karma Kıyma',      nl:['gemengd gehakt','half om half gehakt'] },
-      { label:'Tavuk Kıyma',      nl:['kipgehakt'] },
-      { label:'Jambon',           nl:['hesp','ham ','gekookte ham'] },
-      { label:'Salam/Sosis',      nl:['salami','droge worst','cervelaat'] },
-      { label:'Bacon',            nl:['bacon','spek'] },
+  // ── ET ────────────────────────────────────────────────────────────────────
+  { emoji:'🥩', label:'Sığır & Dana Eti', subs:[
+      { label:'Biftek',             nl:['biefstuk','entrecote','ribeye','ossenhaas'] },
+      { label:'Dana Kıyma',         nl:['rundergehakt','gehakt rund'] },
+      { label:'Rozbif / Döner',     nl:['rosbief','braadstuk rund','stoofvlees'] },
+      { label:'Sığır Kaburga',      nl:['rundsstoofvlees','short ribs','brisket'] },
   ]},
-  { emoji:'🍗', label:'Tavuk', subs:[
-      { label:'Tavuk Göğsü',      nl:['kipfilet','kippenborstfilet','kippenfilet'] },
-      { label:'Tavuk Budu',       nl:['kippendij','kippenbout','drumstick'] },
-      { label:'Bütün Tavuk',      nl:['hele kip','volledige kip'] },
-      { label:'Tavuk Nugget',     nl:['kipnuggets','kipreepjes','kiplollies'] },
+  { emoji:'🐷', label:'Domuz & Kuzu', subs:[
+      { label:'Karma Kıyma',        nl:['gemengd gehakt','half om half'] },
+      { label:'Domuz Eti',          nl:['varkenshaas','varkenskoteletten','varkensrib'] },
+      { label:'Kuzu Eti',           nl:['lamsvlees','lamskoteletten','lamsbout'] },
+      { label:'Dana Eti',           nl:['kalfsvlees','kalfsschnitzel','kalfsbiefstuk'] },
   ]},
-  { emoji:'🐟', label:'Balık', subs:[
-      { label:'Somon',            nl:['zalm','zalmfilet'] },
-      { label:'Ton Balığı',       nl:['tonijn'] },
-      { label:'Karides',          nl:['garnalen'] },
-      { label:'Beyaz Balık',      nl:['kabeljauw','wijting','tilapia'] },
-      { label:'Midye',            nl:['mosselen'] },
+  { emoji:'🍗', label:'Tavuk & Hindi', subs:[
+      { label:'Tavuk Göğsü',        nl:['kipfilet','kippenborstfilet','kippenfilet'] },
+      { label:'Tavuk Budu',         nl:['kippendij','kippenbout','drumstick'] },
+      { label:'Bütün Tavuk',        nl:['hele kip','volledige kip'] },
+      { label:'Tavuk Kıyma',        nl:['kipgehakt'] },
+      { label:'Tavuk Nugget',       nl:['kipnuggets','kipreepjes','kiplollies','kipschnitzel'] },
+      { label:'Hindi',              nl:['kalkoen','kalkoenfilet'] },
   ]},
+  { emoji:'🥓', label:'Şarküteri', subs:[
+      { label:'Jambon',             nl:['hesp','ham ','gekookte ham','rauwe ham'] },
+      { label:'Salam / Sosis',      nl:['salami','droge worst','cervelaat','chorizo'] },
+      { label:'Bacon / Pastırma',   nl:['bacon','spek','lardons'] },
+      { label:'Sucuk / Türk Sosis', nl:['worst','rookworst','braadworst'] },
+      { label:'Terrine / Paté',     nl:['paté','terrine','rillettes'] },
+  ]},
+  // ── BALIK & DENİZ ─────────────────────────────────────────────────────────
+  { emoji:'🐟', label:'Balık & Deniz Ürünleri', subs:[
+      { label:'Somon',              nl:['zalm','zalmfilet','gerookte zalm'] },
+      { label:'Ton Balığı',         nl:['tonijn'] },
+      { label:'Karides',            nl:['garnalen'] },
+      { label:'Beyaz Balık',        nl:['kabeljauw','wijting','tilapia','koolvis'] },
+      { label:'Ringa / Uskumru',    nl:['haring','makreel','sprot'] },
+      { label:'Alabalık / Levrek',  nl:['forel','zeebaars','dorade'] },
+      { label:'Midye / Kalamar',    nl:['mosselen','inktvis','calamari'] },
+      { label:'Balık Parmak',       nl:['vissticks','visfilet gepaneerd'] },
+      { label:'Füme Balık',         nl:['gerookte vis','gerookte makreel','gerookte forel'] },
+  ]},
+  // ── SEBZE ─────────────────────────────────────────────────────────────────
   { emoji:'🥦', label:'Sebze', subs:[
-      { label:'Domates',          nl:['tomaat','tomaten'] },
-      { label:'Salatalık',        nl:['komkommer'] },
-      { label:'Biber',            nl:['paprika'] },
-      { label:'Soğan',            nl:['ui ','uien'] },
-      { label:'Patates',          nl:['aardappel','aardappelen'] },
-      { label:'Havuç',            nl:['wortel','wortelen'] },
-      { label:'Brokoli',          nl:['broccoli'] },
-      { label:'Ispanak',          nl:['spinazie'] },
+      { label:'Domates',            nl:['tomaat','tomaten','cherrytomaat'] },
+      { label:'Salatalık',          nl:['komkommer'] },
+      { label:'Biber',              nl:['paprika','rode paprika','groene paprika','gele paprika'] },
+      { label:'Soğan / Sarımsak',   nl:['ui ','uien','knoflook','rode ui','sjalot'] },
+      { label:'Patates',            nl:['aardappel','aardappelen','krieltjes'] },
+      { label:'Havuç',              nl:['wortel','wortelen','winterwortel'] },
+      { label:'Brokoli / Karnabahar',nl:['broccoli','bloemkool','romanesco'] },
+      { label:'Ispanak / Marul',    nl:['spinazie','sla ','ijsbergsla','veldsla','rucola'] },
+      { label:'Pırasa / Kereviz',   nl:['prei','selder','knolselder'] },
+      { label:'Kabak / Patlıcan',   nl:['courgette','aubergine','pompoen'] },
+      { label:'Mantar',             nl:['champignons','paddestoelen','portobello'] },
+      { label:'Kuşkonmaz',          nl:['asperges'] },
+      { label:'Bezelye / Fasulye',  nl:['erwten','sperziebonen','boontjes'] },
+      { label:'Mısır',              nl:['mais','maïs','zoete maïs'] },
+      { label:'Turp / Pancar',      nl:['radijs','rode biet','raap'] },
   ]},
+  // ── MEYVE ─────────────────────────────────────────────────────────────────
   { emoji:'🍎', label:'Meyve', subs:[
-      { label:'Elma',             nl:['appel','appels'] },
-      { label:'Muz',              nl:['banaan','bananen'] },
-      { label:'Portakal',         nl:['sinaasappel','sinaasappelen'] },
-      { label:'Çilek',            nl:['aardbei','aardbeien'] },
-      { label:'Üzüm',             nl:['druiven'] },
-      { label:'Armut',            nl:['peer','peren'] },
+      { label:'Elma',               nl:['appel','appels','gala','granny smith','braeburn'] },
+      { label:'Muz',                nl:['banaan','bananen'] },
+      { label:'Portakal / Mandalina',nl:['sinaasappel','mandarijn','clementine'] },
+      { label:'Çilek',              nl:['aardbei','aardbeien'] },
+      { label:'Üzüm',               nl:['druiven'] },
+      { label:'Armut',              nl:['peer','peren','conference'] },
+      { label:'Kivi',               nl:['kiwi'] },
+      { label:'Mango / Ananas',     nl:['mango','ananas'] },
+      { label:'Şeftali / Kayısı',   nl:['perzik','nectarine','abrikoos'] },
+      { label:'Limon / Misket',     nl:['citroen','limoen','lime'] },
+      { label:'Karpuz / Kavun',     nl:['watermeloen','meloen'] },
+      { label:'Ahududu / Böğürtlen',nl:['frambozen','bramen','bosbessen'] },
+      { label:'Kuru Meyve',         nl:['gedroogde vruchten','rozijnen','dadels','vijgen','pruimen'] },
   ]},
-  { emoji:'🍝', label:'Makarna & Pirinç', subs:[
-      { label:'Spagetti',         nl:['spaghetti'] },
-      { label:'Penne',            nl:['penne'] },
-      { label:'Fusilli',          nl:['fusilli'] },
-      { label:'Beyaz Pirinç',     nl:['witte rijst','langkorrelrijst'] },
-      { label:'Basmati',          nl:['basmati'] },
-      { label:'Erişte',           nl:['noedels','mie '] },
+  // ── MAKARNA & PİRİNÇ ─────────────────────────────────────────────────────
+  { emoji:'🍝', label:'Makarna & Tahıl', subs:[
+      { label:'Spagetti',           nl:['spaghetti'] },
+      { label:'Penne / Fusilli',    nl:['penne','fusilli','rigatoni','farfalle'] },
+      { label:'Tagliatelle / Lasagne',nl:['tagliatelle','lasagne','pappardelle'] },
+      { label:'Tam Buğday Makarna', nl:['volkoren pasta','volkoren spaghetti'] },
+      { label:'Beyaz Pirinç',       nl:['witte rijst','langkorrelrijst'] },
+      { label:'Basmati',            nl:['basmati'] },
+      { label:'Tam Pirinç',         nl:['bruine rijst','zilvervliesrijst','volkoren rijst'] },
+      { label:'Kuskus / Bulgur',    nl:['couscous','bulgur'] },
+      { label:'Kinoa',              nl:['quinoa'] },
+      { label:'Erişte',             nl:['noedels','mie ','rijstnoedels'] },
   ]},
-  { emoji:'🧃', label:'İçecekler', subs:[
-      { label:'Maden Suyu',       nl:['bruisend water','sparkling water','spa rood'] },
-      { label:'Su',               nl:['still water','plat water','evian','spa blauw'] },
-      { label:'Portakal Suyu',    nl:['sinaasappelsap','OJ '] },
-      { label:'Elma Suyu',        nl:['appelsap'] },
-      { label:'Cola',             nl:['coca-cola','pepsi cola'] },
-      { label:'Meyve Suyu',       nl:['fruitsap','vruchtensap'] },
+  // ── İÇECEKLER ─────────────────────────────────────────────────────────────
+  { emoji:'💧', label:'Su & Meyve Suyu', subs:[
+      { label:'Maden Suyu',         nl:['bruisend water','spa rood','perrier','san pellegrino'] },
+      { label:'Doğal Su',           nl:['still water','plat water','evian','spa blauw','chaudfontaine'] },
+      { label:'Portakal Suyu',      nl:['sinaasappelsap','vers geperst'] },
+      { label:'Meyve Suyu',         nl:['fruitsap','appelsap','vruchtensap','multivitamine'] },
+      { label:'Smoothie',           nl:['smoothie'] },
   ]},
+  { emoji:'🥤', label:'Gazlı & Enerji', subs:[
+      { label:'Cola',               nl:['coca-cola','pepsi','cola zero','cola light'] },
+      { label:'Limonata / Fanta',   nl:['fanta','sprite','limonade','frisdrank'] },
+      { label:'Ice Tea',            nl:['ice tea','ijsthee','lipton ice'] },
+      { label:'Enerji İçeceği',     nl:['energiedrank','red bull','monster ','nalu'] },
+      { label:'Tonic / Bitter',     nl:['tonic','schweppes','bitter lemon'] },
+      { label:'Sırob / Konsantre',  nl:['siroop','sirop','vruchtensiroop'] },
+  ]},
+  // ── KAHVE & ÇAY ───────────────────────────────────────────────────────────
   { emoji:'☕', label:'Kahve & Çay', subs:[
-      { label:'Filtre Kahve',     nl:['filterkoffie','gemalen koffie'] },
-      { label:'Espresso',         nl:['espresso','koffiepads','koffiebonen'] },
-      { label:'Siyah Çay',        nl:['zwarte thee','english breakfast'] },
-      { label:'Yeşil Çay',        nl:['groene thee'] },
-      { label:'Bitki Çayı',       nl:['kruidenthee','kamille','munt thee'] },
+      { label:'Filtre Kahve',       nl:['filterkoffie','gemalen koffie'] },
+      { label:'Espresso / Fasulye', nl:['espresso','koffiebonen','grain de café'] },
+      { label:'Kapsül (Nespresso)', nl:['nespresso','koffiepads','dolce gusto','senseo'] },
+      { label:'Instant Kahve',      nl:['instantkoffie','oploskoffie','nescafé'] },
+      { label:'Siyah Çay',          nl:['zwarte thee','english breakfast','earl grey'] },
+      { label:'Yeşil Çay',          nl:['groene thee'] },
+      { label:'Bitki Çayı',         nl:['kruidenthee','kamille','munt thee','gember thee','rooibos'] },
+      { label:'Çay Bardağı (Poşet)',nl:['theezakjes','thee zakjes'] },
+      { label:'Kakao / Çikolatalı Süt',nl:['cacao','chocomelk','chocolademelk','ovomaltine'] },
   ]},
-  { emoji:'🍫', label:'Atıştırmalık', subs:[
-      { label:'Sütlü Çikolata',   nl:['melkchocolade','chocolade melk'] },
-      { label:'Bitter Çikolata',  nl:['pure chocolade','donkere chocolade'] },
-      { label:'Cips',             nl:['chips ','lay\'s','pringles'] },
-      { label:'Bisküvi',          nl:['koekjes','biscuit'] },
-      { label:'Gofret',           nl:['wafels','wafers'] },
-      { label:'Kuruyemiş',        nl:['noten','amandelen','cashew'] },
+  // ── ATIŞTIRRMALIK ─────────────────────────────────────────────────────────
+  { emoji:'🍫', label:'Çikolata & Şeker', subs:[
+      { label:'Sütlü Çikolata',     nl:['melkchocolade'] },
+      { label:'Bitter Çikolata',    nl:['pure chocolade','donkere chocolade','dark chocolate'] },
+      { label:'Beyaz Çikolata',     nl:['witte chocolade'] },
+      { label:'Çikolata Bar',       nl:['kitkat','snickers','mars ','twix','bounty'] },
+      { label:'Pralin / Trüf',      nl:['pralines','truffels','bonbons'] },
+      { label:'Şeker / Yumuşak',    nl:['snoep','drop','gummies','marshmallow'] },
   ]},
-  { emoji:'🧴', label:'Kişisel Bakım', subs:[
-      { label:'Şampuan',          nl:['shampoo'] },
-      { label:'Duş Jeli',         nl:['douchegel','doucheschuim'] },
-      { label:'Sabun',            nl:['zeep','handzeep'] },
-      { label:'Diş Macunu',       nl:['tandpasta'] },
-      { label:'Deodorant',        nl:['deodorant','deo '] },
+  { emoji:'🥨', label:'Cips & Kuruyemiş', subs:[
+      { label:'Cips',               nl:['chips ','lay\'s','pringles','tortilla chips'] },
+      { label:'Popcorn / Kraker',   nl:['popcorn','rijstwafels','crackers','soepstengels'] },
+      { label:'Fındık',             nl:['hazelnoten','hazelnootmix'] },
+      { label:'Badem',              nl:['amandelen'] },
+      { label:'Ceviz / Kaju',       nl:['walnoten','cashewnoten','macadamia'] },
+      { label:'Karışık Kuruyemiş',  nl:['noten mix','studentenhaver','nootjes'] },
+      { label:'Kuru Meyve Mix',     nl:['gedroogde vruchten mix','cranberry','abrikozen gedroogd'] },
   ]},
-  { emoji:'🧹', label:'Temizlik', subs:[
-      { label:'Çamaşır Deterjanı',nl:['waspoeder','vloeibaar wasmiddel','wasmiddel'] },
-      { label:'Yumuşatıcı',       nl:['wasverzachter'] },
-      { label:'Bulaşık Deterjanı',nl:['afwasmiddel','vaatwastabletten'] },
-      { label:'Tuvalet Kağıdı',   nl:['toiletpapier','wc papier'] },
-      { label:'Kağıt Havlu',      nl:['keukenpapier','keukenrol'] },
+  { emoji:'🍪', label:'Bisküvi & Kek', subs:[
+      { label:'Bisküvi',            nl:['koekjes','biscuit','petit beurre','speculaas'] },
+      { label:'Gofret',             nl:['wafels','wafers','gaufrette'] },
+      { label:'Kek / Tart',         nl:['cake','koek','brownie'] },
+      { label:'Muffin / Cupcake',   nl:['muffin','cupcake'] },
+      { label:'Çocuk Bisküvisi',    nl:['kindergoekjes','leibniz kids','oreo mini'] },
   ]},
+  // ── KİŞİSEL BAKIM ─────────────────────────────────────────────────────────
+  { emoji:'🧴', label:'Saç & Cilt Bakımı', subs:[
+      { label:'Şampuan',            nl:['shampoo'] },
+      { label:'Saç Kremi',          nl:['conditioner','haarmasker','haarbalsem'] },
+      { label:'Duş Jeli',           nl:['douchegel','doucheschuim','badschuim'] },
+      { label:'El / Vücut Kremi',   nl:['handcrème','bodylotion','body lotion','vochtinbrengende'] },
+      { label:'Güneş Kremi',        nl:['zonnebrandcrème','sunscreen','factor '] },
+      { label:'Yüz Bakımı',         nl:['gezichtscrème','cleanser','micellair','toner'] },
+  ]},
+  { emoji:'🪥', label:'Ağız & Diş Bakımı', subs:[
+      { label:'Diş Macunu',         nl:['tandpasta'] },
+      { label:'Diş Fırçası',        nl:['tandenborstel','elektrische tandenborstel'] },
+      { label:'Gargara',            nl:['mondwater','listerine'] },
+      { label:'Diş İpi',            nl:['tandzijde','floss'] },
+  ]},
+  { emoji:'🧼', label:'Sabun & Deodorant', subs:[
+      { label:'Sabun',              nl:['zeep','handzeep','savon'] },
+      { label:'Deodorant',          nl:['deodorant','deo ','antiperspirant'] },
+      { label:'Parfüm',             nl:['parfum','eau de toilette','eau de parfum'] },
+      { label:'Tras Ürünleri',      nl:['scheerschuim','scheergel','scheermesjes','gillette'] },
+  ]},
+  { emoji:'🩹', label:'Sağlık & Eczane', subs:[
+      { label:'Vitamin',            nl:['vitamine','multivitamine','vitamin c','vitamin d'] },
+      { label:'Ağrı Kesici',        nl:['paracetamol','ibuprofen','aspirine'] },
+      { label:'Soğuk Algınlığı',    nl:['hoestdrank','neusdruppels','keelspray'] },
+      { label:'Pansuman',           nl:['pleisters','verband','ontsmettingsmiddel'] },
+      { label:'Maske',              nl:['mondmasker','ffp2','chirurgisch masker'] },
+  ]},
+  { emoji:'🩸', label:'Kadın Hijyen', subs:[
+      { label:'Ped',                nl:['maandverband','inlegkruisjes','always'] },
+      { label:'Tampon',             nl:['tampons','o.b.','tampax'] },
+      { label:'Menstrual Kup',      nl:['menstruatiecup'] },
+  ]},
+  // ── TEMİZLİK ──────────────────────────────────────────────────────────────
+  { emoji:'🧺', label:'Çamaşır & Bulaşık', subs:[
+      { label:'Çamaşır Deterjanı',  nl:['waspoeder','vloeibaar wasmiddel','wasmiddel','ariel','persil'] },
+      { label:'Yumuşatıcı',         nl:['wasverzachter','lenor','silan'] },
+      { label:'Kuru Temizleme',     nl:['vlekkenverwijderaar','oxi','vanish'] },
+      { label:'Bulaşık Sıvısı',     nl:['afwasmiddel','fairy','handafwas'] },
+      { label:'Bulaşık Makinesi',   nl:['vaatwastabletten','vaatwasmiddel','finish','somat'] },
+  ]},
+  { emoji:'🧹', label:'Ev Temizliği', subs:[
+      { label:'Çok Amaçlı Temizlik',nl:['allesreiniger','mr proper','domestos'] },
+      { label:'Banyo / Tuvalet',    nl:['badkamerreiniger','toiletblok','wc-eend','wc reiniger'] },
+      { label:'Mutfak Temizliği',   nl:['keukenreiniger','ontvetter','afzuigreiniger'] },
+      { label:'Cam Temizliği',      nl:['glasreiniger','windex'] },
+      { label:'Kireç Çözücü',       nl:['ontkalker','kalkreiniger'] },
+      { label:'Çöp Torbası',        nl:['vuilniszakken','vuilniszakken','afvalzakken'] },
+      { label:'Tuvalet Kağıdı',     nl:['toiletpapier','wc papier'] },
+      { label:'Kağıt Havlu',        nl:['keukenpapier','keukenrol'] },
+      { label:'Mendil',             nl:['zakdoekjes','tissues','kleenex'] },
+  ]},
+  // ── KONSERVE & SOS ────────────────────────────────────────────────────────
   { emoji:'🥫', label:'Konserve & Sos', subs:[
-      { label:'Ketçap',           nl:['ketchup'] },
-      { label:'Mayonez',          nl:['mayonaise','mayo '] },
-      { label:'Hardal',           nl:['mosterd'] },
-      { label:'Salça',            nl:['tomatenpuree','geconcentreerde tomaten'] },
-      { label:'Mantar Konserve',  nl:['champignons blik','champignons pot'] },
-      { label:'Ton Konserve',     nl:['tonijn blik','tonijn in '] },
+      { label:'Domates Konserve',   nl:['tomaten blik','gepelde tomaten','passata'] },
+      { label:'Ton / Balık Konserve',nl:['tonijn blik','sardines blik','makreel blik'] },
+      { label:'Sebze Konserve',     nl:['mais blik','erwten blik','bonen blik','groenten blik'] },
+      { label:'Domates Sosu',       nl:['tomatensaus','tomatenpuree','bolognesesaus'] },
+      { label:'Pesto / Carbonara',  nl:['pesto','carbonara','arrabiata','napolitana'] },
+      { label:'Ketçap / Mayonez',   nl:['ketchup','mayonaise','mayo '] },
+      { label:'Hardal / Tabasco',   nl:['mosterd','tabasco','sambal','sriracha'] },
+      { label:'Soya / Worcestershire',nl:['sojasaus','worcestershire','ketjap'] },
+      { label:'Zeytin / Turşu',     nl:['olijven','augurken','zilveruitjes','kappers'] },
   ]},
-  { emoji:'🫙', label:'Yağ', subs:[
-      { label:'Zeytinyağı',       nl:['olijfolie'] },
-      { label:'Ayçiçek Yağı',    nl:['zonnebloemolie'] },
-      { label:'Tereyağı',         nl:['boter ','roomboter'] },
-      { label:'Margarin',         nl:['margarine','halvarine'] },
+  // ── YAĞ & BAHARAT ─────────────────────────────────────────────────────────
+  { emoji:'🫒', label:'Yağ & Baharat', subs:[
+      { label:'Zeytinyağı',         nl:['olijfolie'] },
+      { label:'Ayçiçek Yağı',       nl:['zonnebloemolie'] },
+      { label:'Tereyağı',           nl:['boter ','roomboter'] },
+      { label:'Margarin',           nl:['margarine','halvarine','flora'] },
+      { label:'Tuz / Karabiber',    nl:['keukenzout','zeezout','peper ','peperkorrels'] },
+      { label:'Kekik / Fesleğen',   nl:['oregano','basilicum','tijm','rozemarijn'] },
+      { label:'Köri / Kimyon',      nl:['kerrie','komijn','kurkuma','garam masala'] },
+      { label:'Tarçın / Vanilya',   nl:['kaneel','vanille','nootmuskaat'] },
+      { label:'Sirke',              nl:['azijn','witte azijn','balsamico'] },
+  ]},
+  // ── UN & PİŞİRME ─────────────────────────────────────────────────────────
+  { emoji:'🌾', label:'Un & Pişirme', subs:[
+      { label:'Beyaz Un',           nl:['bloem','witte bloem','zelfrijzend bakmeel'] },
+      { label:'Kepek Unu',          nl:['volkorenmeel','volkoren bloem'] },
+      { label:'Nişasta / Mısır Unu',nl:['maizena','zetmeel','rijstmeel'] },
+      { label:'Toz Şeker',          nl:['suiker','kristalsuiker','witte suiker'] },
+      { label:'Pudra / Vanilyalı',  nl:['poedersuiker','vanillesuiker','basterdsuiker'] },
+      { label:'Kabartma Tozu',      nl:['bakpoeder','baking soda','gist'] },
+      { label:'Çikolata Parçacığı', nl:['chocoladestukjes','druppels','cacao poeder'] },
+  ]},
+  // ── KAHVALTILIK GEVREK ────────────────────────────────────────────────────
+  { emoji:'🥣', label:'Kahvaltılık', subs:[
+      { label:'Corn Flakes',        nl:['cornflakes','corn flakes','kellog'] },
+      { label:'Müsli',              nl:['muesli'] },
+      { label:'Granola',            nl:['granola','crunchy'] },
+      { label:'Yulaf Ezmesi',       nl:['havermout','havermoutpap','haverflakes','oats'] },
+      { label:'Çocuk Gevrekleri',   nl:['choco pops','frosties','coco pops','honey nut','cheerios'] },
+      { label:'Protein Gevreği',    nl:['protein granola','high protein','eiwitrijk'] },
+  ]},
+  // ── REÇEL & SÜRÜLEBİLİR ─────────────────────────────────────────────────
+  { emoji:'🍯', label:'Reçel & Sürülebilir', subs:[
+      { label:'Çilek Reçeli',       nl:['aardbeienjam','aardbeienconfiture'] },
+      { label:'Diğer Reçeller',     nl:['abrikozenjam','frambozen jam','bosvruchten jam','confiture'] },
+      { label:'Bal',                nl:['honing','acacia honing','honing biologisch'] },
+      { label:'Fıstık Ezmesi',      nl:['pindakaas'] },
+      { label:'Nutella / Fındık',   nl:['nutella','chocopasta','hazelnootpasta'] },
+      { label:'Spekuloos Ezmesi',   nl:['speculoospasta','speculoos'] },
+      { label:'Pekmez / Diğer',     nl:['appelstroop','siroop'] },
+  ]},
+  // ── BAKLİYAT ─────────────────────────────────────────────────────────────
+  { emoji:'🫘', label:'Bakliyat', subs:[
+      { label:'Mercimek',           nl:['linzen','rode linzen','groene linzen'] },
+      { label:'Nohut',              nl:['kikkererwten','chickpeas'] },
+      { label:'Kuru Fasulye',       nl:['witte bonen','bruine bonen','rode nierbonen','kapucijners'] },
+      { label:'Bakla / Soya',       nl:['tuinbonen','sojaschroot','edamame'] },
+      { label:'Konserve Bakliyat',  nl:['linzen blik','kikkererwten blik','bonen pot','bonen blik'] },
+  ]},
+  // ── HAZIR YEMEK ───────────────────────────────────────────────────────────
+  { emoji:'🍲', label:'Hazır Yemek & Çorba', subs:[
+      { label:'Konserve Çorba',     nl:['soep blik','tomatensoep','groentesoep blik'] },
+      { label:'Hazır Çorba (Toz)',  nl:['soeppoeder','knorr soep','royco','cup-a-soup'] },
+      { label:'Hazır Makarna',      nl:['kant-en-klaar pasta','pastagerecht','spaghetti bolognese klaar'] },
+      { label:'Hazır Pirinç',       nl:['kant-en-klaar rijst','rijstschotel','nasi','bami'] },
+      { label:'Lazanya / Fırın',    nl:['lasagne','ovenschotel','gratin','quiche'] },
+      { label:'Stamppot / Stoof',   nl:['stamppot','stoofpot','hachee','vol-au-vent'] },
+      { label:'Sandviç Malzeme',    nl:['filet americain','tartaar','sandwichspread'] },
+      { label:'Salata Hazır',       nl:['salade mix','coleslaw','maaltijdsalade'] },
+  ]},
+  // ── DONDURULMUŞ ───────────────────────────────────────────────────────────
+  { emoji:'🧊', label:'Dondurulmuş', subs:[
+      { label:'Dondurulmuş Sebze',  nl:['diepvries groenten','diepvries spinazie','diepvries erwten','diepvries broccoli'] },
+      { label:'Dondurulmuş Pizza',  nl:['diepvries pizza','pizza margherita','pizza 4 '] },
+      { label:'Patates Kızartması', nl:['frieten','frietjes','diepvries friet','oven friet'] },
+      { label:'Dondurulmuş Et/Balık',nl:['diepvries kipfilet','diepvries vis','diepvries garnalen','diepvries vlees'] },
+      { label:'Dondurulmuş Hamur',  nl:['diepvries croissant','diepvries bladerdeeg','diepvries deeg'] },
+      { label:'Dondurulmuş Meyve',  nl:['diepvries fruit','diepvries bessen','diepvries aardbei'] },
+  ]},
+  // ── DONDURMA & TATLI ─────────────────────────────────────────────────────
+  { emoji:'🍦', label:'Dondurma & Tatlı', subs:[
+      { label:'Dondurma (Kutu)',    nl:['roomijs','vanille ijs','chocolade ijs','ijs 1l','bak ijs'] },
+      { label:'Dondurma (Bar)',     nl:['magnum','twix ijs','snickers ijs','cornetto','calippo'] },
+      { label:'Sorbe / Frozen',     nl:['sorbet','frozen yoghurt','ijslolly'] },
+      { label:'Puding / Vla',       nl:['pudding','vla ','chocoladevla','custard'] },
+      { label:'Tiramisu / Mousse',  nl:['tiramisu','panna cotta','mousse au chocolat','profiteroles'] },
+      { label:'Waffle / Pannenkoek',nl:['wafel klaar','pannenkoeken klaar','crêpe klaar'] },
+  ]},
+  // ── BİRA ─────────────────────────────────────────────────────────────────
+  { emoji:'🍺', label:'Bira', subs:[
+      { label:'Pilsner',            nl:['stella artois','jupiler','maes ','primus','cristal'] },
+      { label:'Abbaye / Trappist',  nl:['duvel','leffe','chimay','westmalle','orval','rochefort'] },
+      { label:'Beyaz / Meyveli',    nl:['witbier','fruitbier','hoegaarden','kriek','frambozen bier'] },
+      { label:'Alkolsüz Bira',      nl:['alcoholvrij bier','0.0 bier','buckler','tourtel'] },
+      { label:'Craft / Özel',       nl:['craft beer','ipa ','pale ale','stout'] },
+  ]},
+  // ── ŞARAP ─────────────────────────────────────────────────────────────────
+  { emoji:'🍷', label:'Şarap', subs:[
+      { label:'Kırmızı Şarap',      nl:['rode wijn','merlot','cabernet','shiraz','pinot noir'] },
+      { label:'Beyaz Şarap',        nl:['witte wijn','chardonnay','sauvignon blanc','riesling'] },
+      { label:'Rosé Şarap',         nl:['rosé','rose wijn'] },
+      { label:'Köpüklü / Prosecco', nl:['prosecco','cava','crémant','champagne','mousseux'] },
+      { label:'Bag-in-Box',         nl:['bag-in-box','wijn bag'] },
+  ]},
+  // ── ALKOL ─────────────────────────────────────────────────────────────────
+  { emoji:'🥃', label:'Sert İçki', subs:[
+      { label:'Viski',              nl:['whisky','whiskey','scotch','bourbon'] },
+      { label:'Votka',              nl:['vodka'] },
+      { label:'Cin',                nl:['gin ','london dry gin'] },
+      { label:'Rom',                nl:['rum '] },
+      { label:'Konyak / Brendi',    nl:['cognac','brandy','armagnac'] },
+      { label:'Likör',              nl:['likeur','baileys','amaretto','cointreau'] },
+      { label:'Aperitif',           nl:['aperitief','martini','campari','apérol'] },
+      { label:'Jenever (Hollanda)', nl:['jenever','genever'] },
+  ]},
+  // ── VEJETARİAN & VEGAN ───────────────────────────────────────────────────
+  { emoji:'🌱', label:'Vejetaryen & Vegan', subs:[
+      { label:'Tofu',               nl:['tofu','tempeh'] },
+      { label:'Bitkisel Burger',    nl:['vegaburger','plantaardige burger','beyond meat','the vegetarian'] },
+      { label:'Bitkisel Kıyma',     nl:['vleesvervangers','vegagehakt','plantaardig gehakt'] },
+      { label:'Bitkisel Sosis',     nl:['vegetarische worst','vega worst','vegasaucijzenbroodje'] },
+      { label:'Seitan / Quorn',     nl:['seitan','quorn','vivera'] },
+      { label:'Vegan Peynir',       nl:['vegan kaas','plantaardige kaas'] },
+      { label:'Vegan Süt',          nl:['vegan melk','havermelk','sojamelk','oatly'] },
+  ]},
+  // ── BEBEK ─────────────────────────────────────────────────────────────────
+  { emoji:'👶', label:'Bebek Ürünleri', subs:[
+      { label:'Bebek Maması',       nl:['babyvoeding','groentenpap','fruitpap','babygranen','pap '] },
+      { label:'Bebek Bisküvisi',    nl:['babykoekjes','melbatoast baby','biscuits bébé'] },
+      { label:'Bebek Formülü',      nl:['babymelk','opvolgmelk','peutermelk','nutrilon','nidal'] },
+      { label:'Bebek Bezi',         nl:['pampers','huggies','babyluier','luiers'] },
+      { label:'Islak Mendil',       nl:['babydoekjes','vochtige doekjes'] },
+      { label:'Bebek Şampuanı',     nl:['babyshampoo','babybad','johnson baby'] },
+  ]},
+  // ── EVCİL HAYVAN ─────────────────────────────────────────────────────────
+  { emoji:'🐾', label:'Evcil Hayvan', subs:[
+      { label:'Kedi Maması (Kuru)', nl:['kattenvoer droog','whiskas droog','purina cat chow','royal canin kat'] },
+      { label:'Kedi Maması (Yaş)',  nl:['whiskas','purina felix','sheba','gourmet','friskies'] },
+      { label:'Köpek Maması (Kuru)',nl:['hondenvoer droog','pedigree droog','royal canin hond'] },
+      { label:'Köpek Maması (Yaş)', nl:['hondenvoer nat','pedigree nat','cesar','butcher'] },
+      { label:'Kedi Kumu',          nl:['kattenbakvulling','kattenbak','kattengrind','everclean'] },
+      { label:'Evcil Hayvan Ödülü', nl:['kattensnacks','hondensnacks','dreamies','dentastix'] },
+  ]},
+  // ── SPOR & SAĞLIK ─────────────────────────────────────────────────────────
+  { emoji:'💪', label:'Spor & Sağlık', subs:[
+      { label:'Protein Tozu',       nl:['eiwitpoeder','protein poeder','whey','proteïne shake'] },
+      { label:'Enerji Bar',         nl:['energierepen','proteïnereep','clif bar','snickers protein'] },
+      { label:'Spor İçeceği',       nl:['sportdrank','isotone drank','aquarius','gatorade'] },
+      { label:'Vitamin / Supplement',nl:['vitamine supplement','omega 3','magnesium tablet','zink tablet'] },
+  ]},
+  // ── EV & MUTFAK ───────────────────────────────────────────────────────────
+  { emoji:'🏠', label:'Ev & Mutfak', subs:[
+      { label:'Pişirme Kağıdı',     nl:['bakpapier','aluminiumfolie','plastic folie','huishoudfolie'] },
+      { label:'Sıkma Torba / Poşet',nl:['diepvrieszakken','ziplock','boterhamzakjes'] },
+      { label:'Pil',                nl:['batterijen','aa batterij','aaa batterij','duracell'] },
+      { label:'Mum / Ateşleyici',   nl:['kaarsen','aanstekers','lucifers'] },
+      { label:'Temizlik Bezi',      nl:['doekjes','schoonmaakdoekjes','swiffer','vloeipapier'] },
   ]},
 ];
 
@@ -931,7 +1207,7 @@ async function wizShowResult() {
     try {
         const { data:d, error } = await sb
             .from('market_chain_products')
-            .select('name,name_tr,price,promo_price,currency,chain_slug,captured_at,in_promo,promo_valid_from,promo_valid_until,unit_or_content,image_url')
+            .select('name,name_tr,price,promo_price,currency,chain_slug,captured_at,in_promo,promo_valid_from,promo_valid_until,unit_or_content,image_url,match_group_id')
             .in('chain_slug', SLUGS)
             .or(orFilter)
             .gt('price', 0)
@@ -957,14 +1233,37 @@ async function wizShowResult() {
         return;
     }
 
-    // Her market için en ucuz ürün
-    const best = {};
+    // ── Eşleştirme: match_group_id olan ürünler önce değerlendirilir ──────────
+    // 1. Her match_group_id için hangi marketlerde ürün var → en çok marketteki grubu seç
+    // 2. Seçilen grubun ürünleri = elma-elma karşılaştırması
+    // 3. Grup yoksa eski yöntem: her marketten en ucuz ürün
+    const groups = {};
     for (const row of data) {
-        if (!SLUGS.includes(row.chain_slug)) continue;
+        if (!row.match_group_id || !SLUGS.includes(row.chain_slug)) continue;
         const eff = effPrice(row);
         if (!Number.isFinite(eff)) continue;
-        if (!best[row.chain_slug] || eff < effPrice(best[row.chain_slug])) best[row.chain_slug] = row;
+        if (!groups[row.match_group_id]) groups[row.match_group_id] = {};
+        const g = groups[row.match_group_id];
+        if (!g[row.chain_slug] || eff < effPrice(g[row.chain_slug])) g[row.chain_slug] = row;
     }
+    // En çok markette bulunan grubu seç (en az 2 market şartı)
+    let bestGroup = null, bestGroupSize = 0;
+    for (const [gid, markets] of Object.entries(groups)) {
+        const sz = Object.keys(markets).length;
+        if (sz > bestGroupSize) { bestGroupSize = sz; bestGroup = markets; }
+    }
+    // best: eşleşen grup varsa onu kullan, yoksa her marketten en ucuz
+    const best = (bestGroupSize >= 2) ? {...bestGroup} : {};
+    if (Object.keys(best).length < 2) {
+        // Fallback: her marketten en ucuz ürün
+        for (const row of data) {
+            if (!SLUGS.includes(row.chain_slug)) continue;
+            const eff = effPrice(row);
+            if (!Number.isFinite(eff)) continue;
+            if (!best[row.chain_slug] || eff < effPrice(best[row.chain_slug])) best[row.chain_slug] = row;
+        }
+    }
+    // ── Kazanan market (en ucuz) ──────────────────────────────────────────────
     let minP = Infinity, winner = null;
     for (const [slug, row] of Object.entries(best)) {
         const eff = effPrice(row);
@@ -1168,9 +1467,9 @@ async function loadMarketCards() {
                     ${st?.last_captured_at ? `<div class="text-slate-400 text-xs mt-0.5">Son: ${fmtDateLong(st.last_captured_at)}</div>` : ''}
                 </div>
                 <a href="${cfg.brosur}" target="_blank" rel="noopener"
-                    class="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-white text-sm font-bold shadow-md"
+                    class="shrink-0 px-3 h-10 rounded-xl flex items-center gap-1.5 text-white text-xs font-bold shadow-md"
                     style="background:${cfg.color}">
-                    <i class="fa-solid fa-arrow-right"></i>
+                    <i class="fa-solid fa-book-open text-xs"></i> Broşür
                 </a>
             </div>
         </div>`;

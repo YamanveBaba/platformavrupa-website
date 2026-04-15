@@ -1,0 +1,32 @@
+{
+	"schemaVersion": 1,
+	"id": "vanillatoggle",
+	"version": "${version}",
+	"name": "Vanilla Toggle",
+	"description": "Client-side toggle: one key switches between vanilla-style (this mod's features off) and mod features on. Bind your own features to VanillaModeState.",
+	"authors": [
+		"Vanilla Toggle contributors"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/"
+	},
+	"license": "MIT",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"com.seninmodu.vanillatoggle.VanillaToggleClient"
+		],
+		"modmenu": [
+			"com.seninmodu.vanillatoggle.integration.VanillaToggleModMenu"
+		]
+	},
+	"depends": {
+		"fabricloader": ">=0.18.2",
+		"minecraft": "~1.21.11",
+		"java": ">=21",
+		"fabric-api": "*",
+		"cloth-config": "*",
+		"modmenu": "*"
+	}
+}

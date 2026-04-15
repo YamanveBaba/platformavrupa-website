@@ -1,0 +1,13 @@
+{
+	"key.vanillatoggle.toggle": "Toggle vanilla mode",
+	"key.categories.vanillatoggle.main": "Vanilla Toggle",
+	"vanillatoggle.feedback.vanilla": "Vanilla mode: this mod's features are off",
+	"vanillatoggle.feedback.modded": "Mod mode: this mod's features are on",
+	"vanillatoggle.hud.mod_active": "[Mod features ON]",
+	"vanillatoggle.config.title": "Vanilla Toggle",
+	"vanillatoggle.config.category.general": "General",
+	"vanillatoggle.config.start_vanilla": "Start in vanilla mode",
+	"vanillatoggle.config.start_vanilla.tooltip": "When enabled, new sessions start with this mod's features off.",
+	"vanillatoggle.config.action_bar": "Feedback on action bar",
+	"vanillatoggle.config.action_bar.tooltip": "Show toggle feedback on the action bar instead of chat."
+}

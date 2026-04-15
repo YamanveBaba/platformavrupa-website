@@ -1,0 +1,57 @@
+{
+  "kaynak": "ALDI Belçika",
+  "kategori": "Bira",
+  "url": "https://www.aldi.be/nl/producten/assortiment/alcoholische-dranken/bier.html",
+  "cekilme_tarihi": "2026-03-15T15:53:47.639536",
+  "urun_sayisi": 6,
+  "urunler": [
+    {
+      "productID": "3013326",
+      "productName": "00 % coldgrip",
+      "brand": "STELLA ARTOIS®",
+      "priceWithTax": 7.99,
+      "inPromotion": false,
+      "category": "Port-alcoholvrij"
+    },
+    {
+      "productID": "3000639",
+      "productName": "Alcoholvrije pils",
+      "brand": "BUVAL®",
+      "priceWithTax": 0.5,
+      "inPromotion": false,
+      "category": "Bier"
+    },
+    {
+      "productID": "2093",
+      "productName": "Blond abdijbier 4 st.",
+      "brand": "ST. FEUILLIEN®",
+      "priceWithTax": 6.39,
+      "inPromotion": false,
+      "category": "Bier"
+    },
+    {
+      "productID": "3422",
+      "productName": "Blond abdijbier 4 st.",
+      "brand": "ST. MICHEL®",
+      "priceWithTax": 3.79,
+      "inPromotion": false,
+      "category": "Bier"
+    },
+    {
+      "productID": "3009343",
+      "productName": "Blond abdijbier 8 st.",
+      "brand": "LEFFE®",
+      "priceWithTax": 9.59,
+      "inPromotion": false,
+      "category": "Bier"
+    },
+    {
+      "productID": "3012728",
+      "productName": "Blond bier",
+      "brand": "LA CHOUFFE®",
+      "priceWithTax": 10.33,
+      "inPromotion": false,
+      "category": "Bier"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+========================================
+COOKIE NEDEN GÖRÜNMEYEBİLİR / CURL İLE ÇÖZÜM
+========================================
+
+NEDEN "COOKIE" GÖREMİYOR OLABİLİRSİNİZ?
+----------------------------------------
+1. İstek sayfayı açtıktan SONRA yapıldığı için listede geçmişte kalmış olabilir.
+2. İstek adı "product-search-prs" değil, farklı (örn. rakam, api, bff) yazıyor olabilir.
+3. Request Headers çok uzun; Cookie satırı aşağıda kayıyor olabilir.
+
+EN KOLAY YÖNTEM: CURL KOPYALA
+----------------------------------------
+1. colruyt.be'ye giriş yapın, mağaza seçin.
+2. F12 → Network sekmesini AÇIN (önemli: önce F12, sonra sayfa işlemi).
+3. https://www.colruyt.be/nl/producten sayfasına gidin VEYA sayfayı yenileyin (F5).
+4. Network listesinde apip.colruyt.be veya "product" / "search" geçen bir istek arayın.
+   İsteğe TIKLAYIN.
+5. Sağ tık yapın (isteğin üzerinde) → "Copy" → "Copy as cURL (bash)" seçin.
+   (Chrome/Edge'de böyle; bazen "Copy as cURL" veya "cURL olarak kopyala" yazar.)
+6. market_fiyat_cekici klasöründe "curl.txt" adlı bir dosya oluşturun
+   (yoksa Not Defteri ile yeni dosya, adı curl.txt).
+7. İçine Ctrl+V ile yapıştırın, kaydedin.
+8. calistir_colruyt_api.bat çalıştırın.
+
+Script, curl.txt içindeki komuttan Cookie'yi kendisi çıkaracak; siz ayrıca Cookie satırı aramayacaksınız.
+
+========================================
+CURL.TXT ÖRNEK (sadece görünüm; siz kendi kopyanızı yapıştırın)
+========================================
+curl 'https://apip.colruyt.be/gateway/.../product-search-prs?placeId=762&...' \
+  -H 'Cookie: JSESSIONID=xxx; BIGipServer=yyy; ...' \
+  -H 'Accept: application/json' \
+  ...
+
+Script sadece Cookie satırını okur, geri kalanını kullanmaz.

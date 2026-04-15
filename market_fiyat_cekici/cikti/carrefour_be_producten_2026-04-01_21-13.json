@@ -1,0 +1,469 @@
+{
+  "kaynak": "Carrefour BE — camoufox DOM + Einstein HTML parse",
+  "chain_slug": "carrefour_be",
+  "country_code": "BE",
+  "cekilme_tarihi": "2026-04-01T21:29:21.404560",
+  "urun_sayisi": 46,
+  "urunler": [
+    {
+      "carrefourPid": "06778085",
+      "name": "Classic' Gekweekte Champignons Heel 1^ste Keuze 390 g\n        Classic' Gekweekte Champignons Heel 1^ste Keuze 390 g",
+      "brand": "",
+      "topCategoryName": "promoties",
+      "basicPrice": 1.95,
+      "promoPrice": null,
+      "inPromo": true,
+      "imageUrl": "https://cdn.carrefour.eu/420_06778085_T1.webp"
+    },
+    {
+      "carrefourPid": "05676165",
+      "name": "Ongedierte Tegen Fruitvliegjes 20 ml\n        Ongedierte Tegen Fruitvliegjes 20 ml",
+      "brand": "",
+      "topCategoryName": "promoties",
+      "basicPrice": 7.79,
+      "promoPrice": null,
+      "inPromo": true,
+      "imageUrl": "https://cdn.carrefour.eu/420_05676165_T1.webp"
+    },
+    {
+      "carrefourPid": "05294082",
+      "name": "Creations Gemalen Koffie Moka Original 500g Vacuum Pack\n        Creations Gemalen Koffie Moka Original 500g Vacuum Pack",
+      "brand": "",
+      "topCategoryName": "promoties",
+      "basicPrice": 10.29,
+      "promoPrice": null,
+      "inPromo": true,
+      "imageUrl": "https://cdn.carrefour.eu/420_05294082_T597.webp"
+    },
+    {
+      "carrefourPid": "05832895",
+      "name": "Real Squeeze Mayonaise Original 430 ml\n        Real Squeeze Mayonaise Original 430 ml",
+      "brand": "",
+      "topCategoryName": "promoties",
+      "basicPrice": 4.09,
+      "promoPrice": null,
+      "inPromo": true,
+      "imageUrl": "https://cdn.carrefour.eu/420_05832895_T162.webp"
+    },
+    {
+      "carrefourPid": "05728389",
+      "name": "Sensation Smaak Vanille 180 g\n        Sensation Smaak Vanille 180 g",
+      "brand": "",
+      "topCategoryName": "promoties",
+      "basicPrice": 0.59,
+      "promoPrice": null,
+      "inPromo": true,
+      "imageUrl": "https://cdn.carrefour.eu/420_05728389_T1.webp"
+    },
+    {
+      "carrefourPid": "04507273",
+      "name": "Zoetstof refill 600PC\n        Zoetstof refill 600PC",
+      "brand": "",
+      "topCategoryName": "promoties",
+      "basicPrice": 8.29,
+      "promoPrice": null,
+      "inPromo": true,
+      "imageUrl": "https://cdn.carrefour.eu/420_04507273_07640110702994_C1N1_MPM.webp"
+    },
+    {
+      "carrefourPid": "05272554",
+      "name": "Zero Lactose Melk Dessert Smaak Chocolade 4 x 125 g\n        Zero Lactose Melk Dessert Smaak Chocolade 4 x 125 g",
+      "brand": "",
+      "topCategoryName": "promoties",
+      "basicPrice": 6.25,
+      "promoPrice": null,
+      "inPromo": true,
+      "imageUrl": "https://cdn.carrefour.eu/420_05272554_T1.webp"
+    },
+    {
+      "carrefourPid": "07081523",
+      "name": "Barista Kokosnootdrink 750 ml\n        Barista Kokosnootdrink 750 ml",
+      "brand": "",
+      "topCategoryName": "promoties",
+      "basicPrice": 2.39,
+      "promoPrice": null,
+      "inPromo": true,
+      "imageUrl": "https://cdn.carrefour.eu/420_07081523_T596.webp"
+    },
+    {
+      "carrefourPid": "06904050",
+      "name": "Crunchy Twist Poppy Seeds & Sea Salt 245 g\n        Crunchy Twist Poppy Seeds & Sea Salt 245 g",
+      "brand": "",
+      "topCategoryName": "promoties",
+      "basicPrice": 2.89,
+      "promoPrice": null,
+      "inPromo": true,
+      "imageUrl": "https://cdn.carrefour.eu/420_06904050_T596.webp"
+    },
+    {
+      "carrefourPid": "00130802",
+      "name": "Confituur Zwarte Kersen 450 g\n        Confituur Zwarte Kersen 450 g",
+      "brand": "",
+      "topCategoryName": "promoties",
+      "basicPrice": 5.29,
+      "promoPrice": null,
+      "inPromo": true,
+      "imageUrl": "https://cdn.carrefour.eu/420_00130802_T1.webp"
+    },
+    {
+      "carrefourPid": "04983161",
+      "name": "Mayonaise met Eieren 430 ml\n        Mayonaise met Eieren 430 ml",
+      "brand": "",
+      "topCategoryName": "promoties",
+      "basicPrice": 3.79,
+      "promoPrice": null,
+      "inPromo": true,
+      "imageUrl": "https://cdn.carrefour.eu/420_04983161_T162.webp"
+    },
+    {
+      "carrefourPid": "07093076",
+      "name": "Caffè Latte Espresso 230 ml\n        Caffè Latte Espresso 230 ml",
+      "brand": "",
+      "topCategoryName": "promoties",
+      "basicPrice": 1.99,
+      "promoPrice": null,
+      "inPromo": true,
+      "imageUrl": "https://cdn.carrefour.eu/420_07093076_M19_20250217.webp"
+    },
+    {
+      "carrefourPid": "06743345",
+      "name": "Culinaire Room 20% 25 cl\n        Culinaire Room 20% 25 cl",
+      "brand": "",
+      "topCategoryName": "promoties",
+      "basicPrice": 2.75,
+      "promoPrice": null,
+      "inPromo": true,
+      "imageUrl": "https://cdn.carrefour.eu/420_06743345_T1.webp"
+    },
+    {
+      "carrefourPid": "06943141",
+      "name": "Machinereiniger Duo 2x250ml\n        Machinereiniger Duo 2x250ml",
+      "brand": "",
+      "topCategoryName": "promoties",
+      "basicPrice": 8.59,
+      "promoPrice": null,
+      "inPromo": true,
+      "imageUrl": "https://cdn.carrefour.eu/420_06943141_T1.webp"
+    },
+    {
+      "carrefourPid": "05179042",
+      "name": "Sun Protect & Bronze 30 Hoog 200 ml\n        Sun Protect & Bronze 30 Hoog 200 ml",
+      "brand": "",
+      "topCategoryName": "promoties",
+      "basicPrice": 19.59,
+      "promoPrice": null,
+      "inPromo": true,
+      "imageUrl": "https://cdn.carrefour.eu/420_05179042_T1.webp"
+    },
+    {
+      "carrefourPid": "05489962",
+      "name": "Bio Spaghetti 500 g\n        Bio Spaghetti 500 g",
+      "brand": "",
+      "topCategoryName": "promoties",
+      "basicPrice": 0.99,
+      "promoPrice": null,
+      "inPromo": true,
+      "imageUrl": "https://cdn.carrefour.eu/420_05489962_T1.webp"
+    },
+    {
+      "carrefourPid": "05352792",
+      "name": "Dark Chocolate Amandeldrink 1 L\n        Dark Chocolate Amandeldrink 1 L",
+      "brand": "",
+      "topCategoryName": "promoties",
+      "basicPrice": 3.95,
+      "promoPrice": null,
+      "inPromo": true,
+      "imageUrl": "https://cdn.carrefour.eu/420_05352792_T1.webp"
+    },
+    {
+      "carrefourPid": "07033203",
+      "name": "100% Puur Sap Appel Mango 1 L\n        100% Puur Sap Appel Mango 1 L",
+      "brand": "",
+      "topCategoryName": "promoties",
+      "basicPrice": 2.85,
+      "promoPrice": null,
+      "inPromo": true,
+      "imageUrl": "https://cdn.carrefour.eu/420_07033203_T1.webp"
+    },
+    {
+      "carrefourPid": "06856121",
+      "name": "Balla Red F!ZZ 70 g\n        Balla Red F!ZZ 70 g",
+      "brand": "",
+      "topCategoryName": "promoties",
+      "basicPrice": 1.16,
+      "promoPrice": null,
+      "inPromo": true,
+      "imageUrl": "https://cdn.carrefour.eu/420_06856121_T596.webp"
+    },
+    {
+      "carrefourPid": "06085466",
+      "name": "Nuts & Fruits Gedroogde en Gesuikerde Grote Veenbessen 140g\n        Nuts & Fruits Gedroogde en Gesuikerde Grote Veenbessen 140g",
+      "brand": "",
+      "topCategoryName": "promoties",
+      "basicPrice": 3.5,
+      "promoPrice": null,
+      "inPromo": true,
+      "imageUrl": "https://cdn.carrefour.eu/420_06085466_T1.webp"
+    },
+    {
+      "carrefourPid": "05179043",
+      "name": "Sun Protect & Bronze Dual Effect 50 Hoog 200 ml\n        Sun Protect & Bronze Dual Effect 50 Hoog 200 ml",
+      "brand": "",
+      "topCategoryName": "promoties",
+      "basicPrice": 21.05,
+      "promoPrice": null,
+      "inPromo": true,
+      "imageUrl": "https://cdn.carrefour.eu/420_05179043_T1.webp"
+    },
+    {
+      "carrefourPid": "01396308",
+      "name": "Pesto Rosso 190 g\n        Pesto Rosso 190 g",
+      "brand": "",
+      "topCategoryName": "promoties",
+      "basicPrice": 4.25,
+      "promoPrice": null,
+      "inPromo": true,
+      "imageUrl": "https://cdn.carrefour.eu/420_01396308_T1.webp"
+    },
+    {
+      "carrefourPid": "06023850",
+      "name": "Original 90 g\n        Original 90 g",
+      "brand": "",
+      "topCategoryName": "promoties",
+      "basicPrice": 2.15,
+      "promoPrice": null,
+      "inPromo": true,
+      "imageUrl": "https://cdn.carrefour.eu/420_06023850_T597.webp"
+    },
+    {
+      "carrefourPid": "06659450",
+      "name": "Melk hagelslag (18) 390gm\n        Melk hagelslag (18) 390gm",
+      "brand": "",
+      "topCategoryName": "promoties",
+      "basicPrice": 4.55,
+      "promoPrice": null,
+      "inPromo": true,
+      "imageUrl": "https://cdn.carrefour.eu/420_06659450_T596.webp"
+    },
+    {
+      "carrefourPid": "07046406",
+      "name": "CARAMEL 320G\n        CARAMEL 320G",
+      "brand": "",
+      "topCategoryName": "promoties",
+      "basicPrice": 4.55,
+      "promoPrice": null,
+      "inPromo": true,
+      "imageUrl": "https://cdn.carrefour.eu/420_07046406_03664346300780_C1N1_MPM.webp"
+    },
+    {
+      "carrefourPid": "05456799",
+      "name": "la Brique Extra Smeuïg 220 g\n        la Brique Extra Smeuïg 220 g",
+      "brand": "",
+      "topCategoryName": "promoties",
+      "basicPrice": 4.25,
+      "promoPrice": null,
+      "inPromo": true,
+      "imageUrl": "https://cdn.carrefour.eu/420_05456799_T1.webp"
+    },
+    {
+      "carrefourPid": "06085699",
+      "name": "The Market Nuts & Fruits Mango Gedroogd & Gesuikerd 130 g\n        The Market Nuts & Fruits Mango Gedroogd & Gesuikerd 130 g",
+      "brand": "",
+      "topCategoryName": "promoties",
+      "basicPrice": 3.5,
+      "promoPrice": null,
+      "inPromo": true,
+      "imageUrl": "https://cdn.carrefour.eu/420_06085699_T1.webp"
+    },
+    {
+      "carrefourPid": "05319210",
+      "name": "Tonijn No Mayo 180 g\n        Tonijn No Mayo 180 g",
+      "brand": "",
+      "topCategoryName": "promoties",
+      "basicPrice": 3.55,
+      "promoPrice": null,
+      "inPromo": true,
+      "imageUrl": "https://cdn.carrefour.eu/420_05319210_T1.webp"
+    },
+    {
+      "carrefourPid": "06385740",
+      "name": "Koffie Capsules Espresso Delizioso Intensiteit 5 20 stuks\n        Koffie Capsules Espresso Delizioso Intensiteit 5 20 stuks",
+      "brand": "",
+      "topCategoryName": "promoties",
+      "basicPrice": 7.99,
+      "promoPrice": null,
+      "inPromo": true,
+      "imageUrl": "https://cdn.carrefour.eu/420_06385740_T597.webp"
+    },
+    {
+      "carrefourPid": "06459104",
+      "name": "Veggies Tartare 300 ml\n        Veggies Tartare 300 ml",
+      "brand": "",
+      "topCategoryName": "promoties",
+      "basicPrice": 3.45,
+      "promoPrice": null,
+      "inPromo": true,
+      "imageUrl": "https://cdn.carrefour.eu/420_06459104_T1.webp"
+    },
+    {
+      "carrefourPid": "06085604",
+      "name": "The Market Nuts & Fruits Amandelschilfers Baking 120 g\n        The Market Nuts & Fruits Amandelschilfers Baking 120 g",
+      "brand": "",
+      "topCategoryName": "promoties",
+      "basicPrice": 2.7,
+      "promoPrice": null,
+      "inPromo": true,
+      "imageUrl": "https://cdn.carrefour.eu/420_06085604_M1_20220926.webp"
+    },
+    {
+      "carrefourPid": "05585121",
+      "name": "SELECTION TOUCH OF LIME - 6 x 4 x 20 CLT\n        SELECTION TOUCH OF LIME - 6 x 4 x 20 CLT",
+      "brand": "",
+      "topCategoryName": "promoties",
+      "basicPrice": 36.49,
+      "promoPrice": null,
+      "inPromo": true,
+      "imageUrl": "https://cdn.carrefour.eu/420_05585121_main_20201222_03_PM.webp"
+    },
+    {
+      "carrefourPid": "07063160",
+      "name": "Flamin Hot Tortilla Chips 160 gr\n        Flamin Hot Tortilla Chips 160 gr",
+      "brand": "",
+      "topCategoryName": "promoties",
+      "basicPrice": 2.51,
+      "promoPrice": null,
+      "inPromo": true,
+      "imageUrl": "https://cdn.carrefour.eu/420_07063160_T596.webp"
+    },
+    {
+      "carrefourPid": "06192308",
+      "name": "Abdijbier Bruin Flessen 4 x 33 cl\n        Abdijbier Bruin Flessen 4 x 33 cl",
+      "brand": "",
+      "topCategoryName": "promoties",
+      "basicPrice": 5.05,
+      "promoPrice": null,
+      "inPromo": true,
+      "imageUrl": "https://cdn.carrefour.eu/420_06192308_T596.webp"
+    },
+    {
+      "carrefourPid": "07101311",
+      "name": "Micellair Water Skin Recharge 400 ml\n        Micellair Water Skin Recharge 400 ml",
+      "brand": "",
+      "topCategoryName": "promoties",
+      "basicPrice": 7.99,
+      "promoPrice": null,
+      "inPromo": true,
+      "imageUrl": "https://cdn.carrefour.eu/420_07101311_T1.webp"
+    },
+    {
+      "carrefourPid": "06948189",
+      "name": "Marrakesh Markets Mint, Cinnamon & Liquorice Organic Infusion 20 Zakjes 35 g\n        Marrakesh Markets Mint, Cinnamon & Liquorice Organic Infusion 20 Zakjes 35 g",
+      "brand": "",
+      "topCategoryName": "promoties",
+      "basicPrice": 4.05,
+      "promoPrice": null,
+      "inPromo": true,
+      "imageUrl": "https://cdn.carrefour.eu/420_06948189_T1.webp"
+    },
+    {
+      "carrefourPid": "05296187",
+      "name": "",
+      "brand": "",
+      "topCategoryName": "einstein",
+      "basicPrice": null,
+      "promoPrice": null,
+      "inPromo": false,
+      "imageUrl": ""
+    },
+    {
+      "carrefourPid": "06354919",
+      "name": "",
+      "brand": "",
+      "topCategoryName": "einstein",
+      "basicPrice": null,
+      "promoPrice": null,
+      "inPromo": false,
+      "imageUrl": ""
+    },
+    {
+      "carrefourPid": "06629991",
+      "name": "",
+      "brand": "",
+      "topCategoryName": "einstein",
+      "basicPrice": null,
+      "promoPrice": null,
+      "inPromo": false,
+      "imageUrl": ""
+    },
+    {
+      "carrefourPid": "06974517",
+      "name": "",
+      "brand": "",
+      "topCategoryName": "einstein",
+      "basicPrice": null,
+      "promoPrice": null,
+      "inPromo": false,
+      "imageUrl": ""
+    },
+    {
+      "carrefourPid": "06812275",
+      "name": "",
+      "brand": "",
+      "topCategoryName": "einstein",
+      "basicPrice": null,
+      "promoPrice": null,
+      "inPromo": false,
+      "imageUrl": ""
+    },
+    {
+      "carrefourPid": "00165431",
+      "name": "",
+      "brand": "",
+      "topCategoryName": "einstein",
+      "basicPrice": null,
+      "promoPrice": null,
+      "inPromo": false,
+      "imageUrl": ""
+    },
+    {
+      "carrefourPid": "06284471",
+      "name": "",
+      "brand": "",
+      "topCategoryName": "einstein",
+      "basicPrice": null,
+      "promoPrice": null,
+      "inPromo": false,
+      "imageUrl": ""
+    },
+    {
+      "carrefourPid": "05728719",
+      "name": "",
+      "brand": "",
+      "topCategoryName": "einstein",
+      "basicPrice": null,
+      "promoPrice": null,
+      "inPromo": false,
+      "imageUrl": ""
+    },
+    {
+      "carrefourPid": "05728636",
+      "name": "",
+      "brand": "",
+      "topCategoryName": "einstein",
+      "basicPrice": null,
+      "promoPrice": null,
+      "inPromo": false,
+      "imageUrl": ""
+    },
+    {
+      "carrefourPid": "06058587",
+      "name": "",
+      "brand": "",
+      "topCategoryName": "einstein",
+      "basicPrice": null,
+      "promoPrice": null,
+      "inPromo": false,
+      "imageUrl": ""
+    }
+  ]
+}
