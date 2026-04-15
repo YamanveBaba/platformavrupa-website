@@ -18,6 +18,11 @@ market_fiyat_cekici/cookie.txt
 market_fiyat_cekici/curl.txt
 market_fiyat_cekici/token.txt
 
+# Browser profil cache (büyük dosyalar)
+market_fiyat_cekici/colruyt_browser_profile/
+market_fiyat_cekici/cikti/
+market_fiyat_cekici/loglar/
+
 # IDE / editör
 .cursor/
 .vscode/
