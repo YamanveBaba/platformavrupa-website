@@ -15,13 +15,12 @@
     <meta property="og:locale" content="tr_TR">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="PlatformAvrupa | Dijital Yol Arkadaşınız">
-    <meta name="twitter:description" content="Avrupa'daki Türkler için tek platform: yol arkadaşı, kargo/emanet, iş ilanları, döviz, sağlık turizmi, eğitim videoları.">
+    <meta name="twitter:description" content="Avrupa'daki Türklerin buluşma noktası.">
     <meta name="twitter:image" content="https://www.platformavrupa.com/og-image.png">
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@300;500;700;900&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -29,663 +28,751 @@
     <script src="utils.js"></script>
     <script src="auth.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#09090b">
+
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'], display: ['Space Grotesk', 'sans-serif'] }
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif']
+                    },
+                    colors: {
+                        brand: '#5B5BD6',
+                        'brand-light': '#6E6EDE',
+                    }
                 }
             }
         }
-        // Supabase bağlantısı artık config.js'den geliyor
     </script>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#020617">
+
     <style>
-        html { scroll-behavior: smooth; scroll-padding-top: 100px; }
-        body { background-color: #020617; color: white; overflow-x: hidden; }
-        .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
-        .hover-card { transition: all 0.3s ease; border: 1px solid rgba(255, 255, 255, 0.1); background: #0f172a; }
-        .hover-card:hover { transform: translateY(-5px); border-color: rgba(255, 255, 255, 0.3); }
-        .group-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; color: #64748b; text-transform: uppercase; margin-bottom: 1rem; display: block; }
-        
-        /* Animations */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        :root {
+            --bg:       #09090b;
+            --surface:  #111113;
+            --surface2: #18181b;
+            --border:   rgba(255,255,255,0.08);
+            --border2:  rgba(255,255,255,0.14);
+            --text:     #fafafa;
+            --muted:    #71717a;
+            --brand:    #5B5BD6;
+            --brand-glow: rgba(91,91,214,0.25);
         }
-        
+
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── NOISE TEXTURE ── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+            opacity: .4;
+        }
+
+        /* ── NAV ── */
+        .nav-bar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            height: 64px;
+            background: rgba(9,9,11,0.85);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* ── HERO GLOW ── */
+        .hero-glow {
+            position: absolute;
+            top: -200px; left: 50%; transform: translateX(-50%);
+            width: 900px; height: 600px;
+            background: radial-gradient(ellipse at center, rgba(91,91,214,0.18) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        /* ── SECTION CARDS ── */
+        .section-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            transition: border-color .2s, transform .2s, box-shadow .2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .section-card::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .section-card:hover {
+            border-color: var(--border2);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+        .section-card:active { transform: translateY(0); }
+
+        /* ── ICON BADGE ── */
+        .icon-wrap {
+            width: 48px; height: 48px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+
+        /* ── FEATURE CARD (hero grid) ── */
+        .feat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 20px;
+            display: flex; flex-direction: column; gap: 12px;
+            transition: border-color .2s, transform .2s, box-shadow .2s;
+            text-decoration: none;
+            color: var(--text);
+            position: relative;
+            overflow: hidden;
+        }
+        .feat-card::after {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+        }
+        .feat-card:hover {
+            border-color: var(--border2);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+        }
+
+        /* ── PILL ── */
+        .pill {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 4px 10px;
+            border-radius: 100px;
+            font-size: 11px; font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        /* ── DIVIDER ── */
+        .section-divider {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 20px;
+        }
+        .section-divider .line { flex: 1; height: 1px; background: var(--border); }
+        .section-divider .label {
+            font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+            text-transform: uppercase; color: var(--muted);
+            white-space: nowrap;
+        }
+
+        /* ── CTA BUTTON ── */
+        .btn-primary {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 24px;
+            background: var(--brand);
+            color: white;
+            border-radius: 10px;
+            font-weight: 600; font-size: 14px;
+            transition: background .2s, transform .15s, box-shadow .2s;
+            text-decoration: none;
+            border: none; cursor: pointer;
+        }
+        .btn-primary:hover {
+            background: #6E6EDE;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px var(--brand-glow);
+        }
+
+        .btn-ghost {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 24px;
+            background: var(--surface2);
+            color: var(--text);
+            border-radius: 10px;
+            font-weight: 600; font-size: 14px;
+            transition: background .2s, transform .15s;
+            text-decoration: none;
+            border: 1px solid var(--border);
+        }
+        .btn-ghost:hover { background: rgba(255,255,255,0.06); transform: translateY(-1px); }
+
+        /* ── BOTTOM NAV (mobile) ── */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+            height: 64px;
+            background: rgba(9,9,11,0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-around;
+        }
+        .bnav-item {
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            color: var(--muted); font-size: 10px; font-weight: 600;
+            text-decoration: none; padding: 8px 12px; border-radius: 10px;
+            transition: color .2s;
+            letter-spacing: 0.03em;
+        }
+        .bnav-item.active, .bnav-item:hover { color: var(--text); }
+        .bnav-item i { font-size: 18px; }
+        .bnav-item.cta-item {
+            background: var(--brand);
+            color: white;
+            padding: 10px 16px;
+            border-radius: 12px;
+            margin-top: -20px;
+            box-shadow: 0 4px 20px var(--brand-glow);
+        }
+
+        /* ── MODAL ── */
+        .modal-overlay {
+            position: fixed; inset: 0; z-index: 999;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            display: none; align-items: center; justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            width: 92%; max-width: 680px; max-height: 85vh;
+            border-radius: 20px; overflow: hidden;
+            display: flex; flex-direction: column;
+            animation: slideUp .25s cubic-bezier(0.4,0,0.2,1);
+        }
+
+        /* ── ANIMATIONS ── */
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from { opacity: 0; } to { opacity: 1; }
         }
-        
-        .animate-fade-in-up {
-            animation: fadeInUp 0.6s ease-out forwards;
+
+        .fade-up { animation: slideUp .5s cubic-bezier(0.4,0,0.2,1) both; }
+        .delay-1 { animation-delay: .05s; }
+        .delay-2 { animation-delay: .1s; }
+        .delay-3 { animation-delay: .15s; }
+        .delay-4 { animation-delay: .2s; }
+
+        /* ── UTILITY ── */
+        .line-clamp-1 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; }
+        .line-clamp-2 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+
+        /* ── RESPONSIVE ── */
+        @media (min-width: 768px) {
+            .bottom-nav { display: none; }
+            body { padding-bottom: 0; }
         }
-        
-        .animate-fade-in {
-            animation: fadeIn 0.8s ease-out forwards;
+        @media (max-width: 767px) {
+            body { padding-bottom: 72px; }
         }
-        
-        /* Smooth transitions for all interactive elements */
-        * {
-            transition-property: transform, opacity, background-color, border-color, box-shadow;
-            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+
+        /* Reduce motion */
+        @media (prefers-reduced-motion: reduce) {
+            *, .fade-up { animation: none !important; transition-duration: .01ms !important; }
         }
-        
-        /* Modal */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px); z-index: 999; display: none; align-items: center; justify-content: center; }
-        .modal-overlay.active { display: flex; animation: fadeIn 0.3s ease-out; }
-        .modal-content { background: #0f172a; border: 1px solid rgba(255,255,255,0.1); width: 90%; max-width: 700px; max-height: 85vh; border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; animation: fadeInUp 0.4s ease-out; }
-        .line-clamp-1 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; line-clamp: 1; }
-        .line-clamp-2 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; }
     </style>
+
     <script type="application/ld+json">
-    {"@context":"https://schema.org","@graph":[{"@type":"Organization","name":"Platform Avrupa","url":"https://www.platformavrupa.com","logo":"https://www.platformavrupa.com/logo.png","description":"Avrupa'daki Türk diasporası için süper uygulama. Yol arkadaşı, kargo/emanet, iş ve eşya ilanları, döviz, sağlık turizmi, ücretsiz eğitim videoları."},{"@type":"WebSite","name":"Platform Avrupa","url":"https://www.platformavrupa.com","description":"Avrupa'daki Türklerin buluşma noktası. İlanlar, yol arkadaşı, döviz, sağlık turizmi ve daha fazlası.","publisher":{"@id":"https://www.platformavrupa.com/#organization"},"inLanguage":"tr"}]}
+    {"@context":"https://schema.org","@graph":[{"@type":"Organization","name":"Platform Avrupa","url":"https://www.platformavrupa.com","logo":"https://www.platformavrupa.com/logo.png","description":"Avrupa'daki Türk diasporası için süper uygulama."},{"@type":"WebSite","name":"Platform Avrupa","url":"https://www.platformavrupa.com","inLanguage":"tr"}]}
     </script>
 </head>
-<body class="antialiased">
+<body>
 
-    <nav class="fixed w-full z-50 glass-panel top-0">
-        <div class="max-w-[1600px] mx-auto px-6 h-20 flex justify-between items-center">
-            <a href="index.html" class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-white text-black rounded-lg flex items-center justify-center text-lg font-black">PA</div>
-                <span class="font-display font-bold text-xl">PlatformAvrupa</span>
-            </a>
-            <div class="hidden md:flex gap-8 text-sm font-medium text-slate-300">
-                <a href="#vitrin" class="hover:text-white transition">İlanlar</a>
-                <a href="#topluluk" class="hover:text-white transition">Topluluk</a>
-                <a href="#seyahat" class="hover:text-white transition">Seyahat</a>
+<!-- ════════════════════════════════════════════ NAV ══ -->
+<nav class="nav-bar">
+    <div class="max-w-5xl mx-auto px-4 h-full flex items-center justify-between">
+        <a href="index.html" class="flex items-center gap-2.5">
+            <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
+                <span class="text-black font-black text-sm leading-none">PA</span>
             </div>
-            <div class="flex items-center gap-4">
-                <a href="ilan_giris.html" class="hidden sm:flex bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2 rounded-lg font-bold text-sm transition">
-                    <i class="fa-solid fa-plus mr-2"></i> İlan Ver
-                </a>
-                <div id="authButtons">
-                    <a href="login.html" class="text-sm font-bold text-white hover:text-indigo-400">Giriş Yap</a>
-                </div>
-            </div>
+            <span class="font-display font-bold text-base text-white">PlatformAvrupa</span>
+        </a>
+        <div class="hidden md:flex items-center gap-1">
+            <a href="#hizmetler" class="px-3 py-1.5 text-sm text-zinc-400 hover:text-white rounded-lg hover:bg-white/5 transition">Hizmetler</a>
+            <a href="#ilanlar"   class="px-3 py-1.5 text-sm text-zinc-400 hover:text-white rounded-lg hover:bg-white/5 transition">İlanlar</a>
+            <a href="#topluluk"  class="px-3 py-1.5 text-sm text-zinc-400 hover:text-white rounded-lg hover:bg-white/5 transition">Topluluk</a>
         </div>
-    </nav>
-
-    <main class="pt-32 pb-20 px-4 relative overflow-hidden">
-        <!-- Gradient Background -->
-        <div class="absolute inset-0 bg-gradient-to-br from-indigo-900/20 via-purple-900/20 to-pink-900/20 pointer-events-none"></div>
-        
-        <div class="max-w-6xl mx-auto relative z-10">
-            <!-- Hero Section -->
-            <div class="text-center mb-20">
-                <div class="inline-block mb-6 px-4 py-2 bg-indigo-500/10 border border-indigo-500/30 rounded-full text-sm text-indigo-300 font-semibold backdrop-blur-sm">
-                    <i class="fa-solid fa-star mr-2"></i> Avrupa'nın En Kapsamlı Platformu
-                </div>
-                <h1 class="font-display text-6xl md:text-8xl font-black mb-6 tracking-tight leading-tight">
-                    Tüm Avrupa<br>
-                    <span class="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">Tek Platform</span>
-                </h1>
-                <p class="text-xl md:text-2xl text-slate-300 max-w-3xl mx-auto mb-10 leading-relaxed">
-                    Avrupadaki Türklerin Buluşma Noktası
-                    <span class="text-slate-400"></span>
-                </p>
-                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
-                    <a href="ilan_giris.html" class="group px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold rounded-xl transition-all duration-300 shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/50 hover:scale-105 flex items-center gap-2">
-                        <i class="fa-solid fa-plus"></i>
-                        <span>İlan Ver</span>
-                        <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
-                    </a>
-                    <a href="#vitrin" class="px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/20 text-white font-bold rounded-xl transition-all duration-300 backdrop-blur-sm flex items-center gap-2">
-                        <i class="fa-solid fa-compass"></i>
-                        <span>Keşfet</span>
-                    </a>
-                </div>
+        <div class="flex items-center gap-2">
+            <a href="ilan_giris.html" class="hidden sm:flex btn-primary text-sm py-2 px-4">
+                <i class="fa-solid fa-plus text-xs"></i> İlan Ver
+            </a>
+            <div id="authButtons">
+                <a href="login.html" class="text-sm font-semibold text-zinc-400 hover:text-white px-3 py-2 transition">Giriş</a>
             </div>
-            
-            <div class="max-w-5xl mx-auto mb-8 md:mb-12">
-                <div class="flex items-center gap-4 mb-4 md:mb-6">
-                    <div class="h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent flex-1"></div>
-                    <div class="flex items-center gap-3">
-                        <i class="fa-solid fa-route text-blue-400 text-xl"></i>
-                        <span class="group-title text-blue-300 text-xs md:text-sm">YOLCULUK & ACİL DURUM</span>
-                    </div>
-                    <div class="h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent flex-1"></div>
-                </div>
-                <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
-                    <a href="yol_arkadasi.html" class="group relative bg-gradient-to-br from-blue-900/20 to-blue-800/10 hover:from-blue-600/30 hover:to-blue-500/20 border border-blue-500/30 hover:border-blue-400/50 p-4 md:p-6 rounded-2xl transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-blue-500/20 flex flex-col items-center gap-2 md:gap-3">
-                        <div class="absolute top-2 right-2 text-xs bg-blue-500/20 text-blue-300 px-2 py-1 rounded-full font-semibold">Popüler</div>
-                        <div class="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-blue-500/20 to-blue-600/10 flex items-center justify-center mb-1 md:mb-2 group-hover:scale-110 transition-transform duration-300">
-                            <i class="fa-solid fa-car-side text-2xl md:text-3xl text-blue-400 group-hover:text-blue-300"></i>
-                        </div>
-                        <span class="font-bold text-white text-sm md:text-base line-clamp-2 text-center">Yol Arkadaşı</span>
-                        <span class="text-xs text-slate-400 text-center line-clamp-1 hidden md:block">Paylaşımlı yolculuk</span>
-                    </a>
-                    <a href="kargo_emanet.html" class="group relative bg-gradient-to-br from-amber-900/20 to-amber-800/10 hover:from-amber-600/30 hover:to-amber-500/20 border border-amber-500/30 hover:border-amber-400/50 p-4 md:p-6 rounded-2xl transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-amber-500/20 flex flex-col items-center gap-2 md:gap-3">
-                        <div class="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-amber-500/20 to-amber-600/10 flex items-center justify-center mb-1 md:mb-2 group-hover:scale-110 transition-transform duration-300">
-                            <i class="fa-solid fa-box-open text-2xl md:text-3xl text-amber-400 group-hover:text-amber-300"></i>
-                        </div>
-                        <span class="font-bold text-white text-sm md:text-base line-clamp-2 text-center">Kargo & Emanet</span>
-                        <span class="text-xs text-slate-400 text-center line-clamp-1 hidden md:block">Paket taşıma hizmeti</span>
-                    </a>
-                    <a href="yol_yardim.html" class="group relative bg-gradient-to-br from-red-900/20 to-red-800/10 hover:from-red-600/30 hover:to-red-500/20 border border-red-500/30 hover:border-red-400/50 p-4 md:p-6 rounded-2xl transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-red-500/20 flex flex-col items-center gap-2 md:gap-3">
-                        <div class="absolute top-2 right-2 text-xs bg-red-500/20 text-red-300 px-2 py-1 rounded-full font-semibold animate-pulse">Acil</div>
-                        <div class="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-red-500/20 to-red-600/10 flex items-center justify-center mb-1 md:mb-2 group-hover:scale-110 transition-transform duration-300">
-                            <i class="fa-solid fa-truck-medical text-2xl md:text-3xl text-red-400 group-hover:text-red-300"></i>
-                        </div>
-                        <span class="font-bold text-white text-sm md:text-base line-clamp-2 text-center">Yol Yardım</span>
-                        <span class="text-xs text-slate-400 text-center line-clamp-1 hidden md:block">Acil durum desteği</span>
-                    </a>
-                    <a href="sila_yolu.html" class="group relative bg-gradient-to-br from-purple-900/20 to-purple-800/10 hover:from-purple-600/30 hover:to-purple-500/20 border border-purple-500/30 hover:border-purple-400/50 p-4 md:p-6 rounded-2xl transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-purple-500/20 flex flex-col items-center gap-2 md:gap-3">
-                        <div class="absolute top-2 right-2 text-xs bg-purple-500/20 text-purple-300 px-2 py-1 rounded-full font-semibold">Canlı</div>
-                        <div class="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-purple-500/20 to-purple-600/10 flex items-center justify-center mb-1 md:mb-2 group-hover:scale-110 transition-transform duration-300">
-                            <i class="fa-solid fa-road text-2xl md:text-3xl text-purple-400 group-hover:text-purple-300"></i>
-                        </div>
-                        <span class="font-bold text-white text-sm md:text-base line-clamp-2 text-center">Sıla Yolu</span>
-                        <span class="text-xs text-slate-400 text-center line-clamp-1 hidden md:block">Gümrük kapıları, kameralar ve yol bildirimleri</span>
-                    </a>
-                </div>
-            </div>
-
-            <div class="max-w-5xl mx-auto mb-8 md:mb-12">
-                <div class="flex items-center gap-4 mb-4 md:mb-6">
-                    <div class="h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent flex-1"></div>
-                    <div class="flex items-center gap-3">
-                        <i class="fa-solid fa-chart-line text-emerald-400 text-xl"></i>
-                        <span class="group-title text-emerald-300 text-xs md:text-sm">EKONOMİ & FİNANS</span>
-                    </div>
-                    <div class="h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent flex-1"></div>
-                </div>
-                <div class="grid grid-cols-2 md:grid-cols-2 gap-3 md:gap-6">
-                    <a href="market.html" class="group relative bg-gradient-to-br from-emerald-900/20 to-emerald-800/10 hover:from-emerald-600/30 hover:to-emerald-500/20 border border-emerald-500/30 hover:border-emerald-400/50 p-4 md:p-6 rounded-2xl transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-emerald-500/20 flex flex-col items-center gap-2 md:gap-3 block">
-                        <div class="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 flex items-center justify-center mb-1 md:mb-2 group-hover:scale-110 transition-transform duration-300">
-                            <i class="fa-solid fa-basket-shopping text-2xl md:text-3xl text-emerald-400 group-hover:text-emerald-300"></i>
-                        </div>
-                        <span class="font-bold text-white text-sm md:text-base line-clamp-2 text-center">Market Fiyatları</span>
-                        <span class="text-xs text-slate-400 text-center line-clamp-1 hidden md:block">30 ülke, 100+ market</span>
-                    </a>
-                    <a href="doviz_altin.html" class="group relative bg-gradient-to-br from-yellow-900/20 to-yellow-800/10 hover:from-yellow-600/30 hover:to-yellow-500/20 border border-yellow-500/30 hover:border-yellow-400/50 p-4 md:p-6 rounded-2xl transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-yellow-500/20 flex flex-col items-center gap-2 md:gap-3">
-                        <div class="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-yellow-500/20 to-yellow-600/10 flex items-center justify-center mb-1 md:mb-2 group-hover:scale-110 transition-transform duration-300">
-                            <i class="fa-solid fa-coins text-2xl md:text-3xl text-yellow-400 group-hover:text-yellow-300"></i>
-                        </div>
-                        <span class="font-bold text-white text-sm md:text-base line-clamp-2 text-center">Döviz & Altın</span>
-                        <span class="text-xs text-slate-400 text-center line-clamp-1 hidden md:block">Canlı fiyatlar</span>
-                    </a>
-                </div>
-            </div>
-
-            <div class="max-w-5xl mx-auto mb-8 md:mb-12">
-                <div class="flex items-center gap-4 mb-4 md:mb-6">
-                    <div class="h-px bg-gradient-to-r from-transparent via-pink-500/50 to-transparent flex-1"></div>
-                    <div class="flex items-center gap-3">
-                        <i class="fa-solid fa-heart-pulse text-pink-400 text-xl"></i>
-                        <span class="group-title text-pink-300 text-xs md:text-sm">SAĞLIK & TURİZM</span>
-                    </div>
-                    <div class="h-px bg-gradient-to-r from-transparent via-pink-500/50 to-transparent flex-1"></div>
-                </div>
-                <div class="grid grid-cols-1 gap-3 md:gap-6">
-                    <a href="saglik_turizmi.html" class="group relative bg-gradient-to-br from-pink-900/20 to-pink-800/10 hover:from-pink-600/30 hover:to-pink-500/20 border border-pink-500/30 hover:border-pink-400/50 p-8 rounded-2xl transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-pink-500/20 flex flex-col items-center gap-4">
-                        <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-pink-500/20 to-pink-600/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300">
-                            <i class="fa-solid fa-heart-pulse text-4xl text-pink-400 group-hover:text-pink-300"></i>
-                        </div>
-                        <span class="font-bold text-white text-xl">Sağlık Turizmi</span>
-                        <span class="text-sm text-slate-400 text-center">Saç Ekimi, Diş, Estetik, Cinsel Sağlık</span>
-                    </a>
-                </div>
-            </div>
-
-            <div class="max-w-5xl mx-auto mb-8 md:mb-16">
-                <div class="flex items-center gap-4 mb-4 md:mb-6">
-                    <div class="h-px bg-gradient-to-r from-transparent via-slate-500/50 to-transparent flex-1"></div>
-                    <div class="flex items-center gap-3">
-                        <i class="fa-solid fa-book text-slate-400 text-xl"></i>
-                        <span class="group-title text-slate-300 text-xs md:text-sm">BİLGİ & REHBERLİK</span>
-                    </div>
-                    <div class="h-px bg-gradient-to-r from-transparent via-slate-500/50 to-transparent flex-1"></div>
-                </div>
-                <div class="grid grid-cols-2 md:grid-cols-2 gap-3 md:gap-6">
-                    <a href="hukuk_vitrini.html" class="group relative bg-gradient-to-br from-slate-800/50 to-slate-900/30 hover:from-slate-700/60 hover:to-slate-800/40 border border-slate-700/50 hover:border-slate-500/70 p-4 md:p-6 rounded-2xl transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-slate-500/20 flex flex-col items-center gap-2 md:gap-3">
-                        <div class="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-slate-600/20 to-slate-700/10 flex items-center justify-center mb-1 md:mb-2 group-hover:scale-110 transition-transform duration-300">
-                            <i class="fa-solid fa-scale-balanced text-2xl md:text-3xl text-slate-400 group-hover:text-slate-300"></i>
-                        </div>
-                        <span class="font-bold text-white text-sm md:text-base line-clamp-2 text-center">Hukuk & Danışma</span>
-                        <span class="text-xs text-slate-400 text-center line-clamp-1 hidden md:block">Hukuki destek</span>
-                    </a>
-                    <a href="akademi.html" class="group relative bg-gradient-to-br from-slate-800/50 to-slate-900/30 hover:from-slate-700/60 hover:to-slate-800/40 border border-slate-700/50 hover:border-slate-500/70 p-4 md:p-6 rounded-2xl transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-slate-500/20 flex flex-col items-center gap-2 md:gap-3">
-                        <div class="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-slate-600/20 to-slate-700/10 flex items-center justify-center mb-1 md:mb-2 group-hover:scale-110 transition-transform duration-300">
-                            <i class="fa-solid fa-graduation-cap text-2xl md:text-3xl text-slate-400 group-hover:text-slate-300"></i>
-                        </div>
-                        <span class="font-bold text-white text-sm md:text-base line-clamp-2 text-center">Akademi</span>
-                        <span class="text-xs text-slate-400 text-center line-clamp-1 hidden md:block">Eğitim ve gelişim</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <section id="vitrin" class="max-w-[1600px] mx-auto px-4 pb-16 md:pb-24 relative">
-        <div class="flex items-center gap-4 mb-4 md:mb-10">
-            <div class="h-px bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent flex-1"></div>
-            <div class="flex items-center gap-3">
-                <i class="fa-solid fa-th-large text-indigo-400 text-xl"></i>
-                <span class="text-slate-300 font-bold text-xs md:text-sm uppercase tracking-widest">İLAN KATEGORİLERİ</span>
-            </div>
-            <div class="h-px bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent flex-1"></div>
-        </div>
-        <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
-            <a href="is_vitrini.html" class="group relative bg-gradient-to-br from-indigo-900/20 to-indigo-800/10 hover:from-indigo-600/30 hover:to-indigo-500/20 border border-indigo-500/30 hover:border-indigo-400/50 rounded-2xl p-4 md:p-6 transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-indigo-500/20 flex items-center gap-3 md:gap-4">
-                <div class="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-gradient-to-br from-indigo-500/20 to-indigo-600/10 flex items-center justify-center text-indigo-400 text-xl md:text-2xl group-hover:scale-110 transition-transform duration-300 shrink-0"><i class="fa-solid fa-briefcase"></i></div>
-                <div class="flex-1 min-w-0">
-                    <h3 class="font-bold text-white text-sm md:text-lg mb-0.5 md:mb-1 group-hover:text-indigo-300 transition-colors line-clamp-2">İş İlanları</h3>
-                    <p class="text-xs md:text-sm text-slate-400 line-clamp-1">Avrupa geneli fırsatlar</p>
-                </div>
-                <i class="fa-solid fa-arrow-right text-slate-500 group-hover:text-indigo-400 group-hover:translate-x-1 transition-all hidden md:block shrink-0"></i>
-            </a>
-            <a href="emlak_vitrini.html" class="group relative bg-gradient-to-br from-blue-900/20 to-blue-800/10 hover:from-blue-600/30 hover:to-blue-500/20 border border-blue-500/30 hover:border-blue-400/50 rounded-2xl p-4 md:p-6 transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-blue-500/20 flex items-center gap-3 md:gap-4">
-                <div class="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-600/10 flex items-center justify-center text-blue-400 text-xl md:text-2xl group-hover:scale-110 transition-transform duration-300 shrink-0"><i class="fa-solid fa-house"></i></div>
-                <div class="flex-1 min-w-0">
-                    <h3 class="font-bold text-white text-sm md:text-lg mb-0.5 md:mb-1 group-hover:text-blue-300 transition-colors line-clamp-2">Emlak</h3>
-                    <p class="text-xs md:text-sm text-slate-400 line-clamp-1">Kiralık & Satılık Evler</p>
-                </div>
-                <i class="fa-solid fa-arrow-right text-slate-500 group-hover:text-blue-400 group-hover:translate-x-1 transition-all hidden md:block shrink-0"></i>
-            </a>
-            <a href="vasita_vitrini.html" class="group relative bg-gradient-to-br from-emerald-900/20 to-emerald-800/10 hover:from-emerald-600/30 hover:to-emerald-500/20 border border-emerald-500/30 hover:border-emerald-400/50 rounded-2xl p-4 md:p-6 transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-emerald-500/20 flex items-center gap-3 md:gap-4">
-                <div class="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 flex items-center justify-center text-emerald-400 text-xl md:text-2xl group-hover:scale-110 transition-transform duration-300 shrink-0"><i class="fa-solid fa-car"></i></div>
-                <div class="flex-1 min-w-0">
-                    <h3 class="font-bold text-white text-sm md:text-lg mb-0.5 md:mb-1 group-hover:text-emerald-300 transition-colors line-clamp-2">Vasıta</h3>
-                    <p class="text-xs md:text-sm text-slate-400 line-clamp-1">Sahibinden Araçlar</p>
-                </div>
-                <i class="fa-solid fa-arrow-right text-slate-500 group-hover:text-emerald-400 group-hover:translate-x-1 transition-all hidden md:block shrink-0"></i>
-            </a>
-            <a href="hizmet_vitrini.html" class="group relative bg-gradient-to-br from-cyan-900/20 to-cyan-800/10 hover:from-cyan-600/30 hover:to-cyan-500/20 border border-cyan-500/30 hover:border-cyan-400/50 rounded-2xl p-4 md:p-6 transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/20 flex items-center gap-3 md:gap-4">
-                <div class="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-gradient-to-br from-cyan-500/20 to-cyan-600/10 flex items-center justify-center text-cyan-400 text-xl md:text-2xl group-hover:scale-110 transition-transform duration-300 shrink-0"><i class="fa-solid fa-screwdriver-wrench"></i></div>
-                <div class="flex-1 min-w-0">
-                    <h3 class="font-bold text-white text-sm md:text-lg mb-0.5 md:mb-1 group-hover:text-cyan-300 transition-colors line-clamp-2">Hizmetler</h3>
-                    <p class="text-xs md:text-sm text-slate-400 line-clamp-1">Usta, Nakliye, Tamir</p>
-                </div>
-                <i class="fa-solid fa-arrow-right text-slate-500 group-hover:text-cyan-400 group-hover:translate-x-1 transition-all hidden md:block shrink-0"></i>
-            </a>
-            <a href="esya_vitrini.html" class="group relative bg-gradient-to-br from-yellow-900/20 to-yellow-800/10 hover:from-yellow-600/30 hover:to-yellow-500/20 border border-yellow-500/30 hover:border-yellow-400/50 rounded-2xl p-4 md:p-6 transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-yellow-500/20 flex items-center gap-3 md:gap-4">
-                <div class="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-gradient-to-br from-yellow-500/20 to-yellow-600/10 flex items-center justify-center text-yellow-400 text-xl md:text-2xl group-hover:scale-110 transition-transform duration-300 shrink-0"><i class="fa-solid fa-couch"></i></div>
-                <div class="flex-1 min-w-0">
-                    <h3 class="font-bold text-white text-sm md:text-lg mb-0.5 md:mb-1 group-hover:text-yellow-300 transition-colors line-clamp-2">İkinci El</h3>
-                    <p class="text-xs md:text-sm text-slate-400 line-clamp-1">Eşya Pazarı</p>
-                </div>
-                <i class="fa-solid fa-arrow-right text-slate-500 group-hover:text-yellow-400 group-hover:translate-x-1 transition-all hidden md:block shrink-0"></i>
-            </a>
-            <a href="yemek_vitrini.html" class="group relative bg-gradient-to-br from-orange-900/20 to-orange-800/10 hover:from-orange-600/30 hover:to-orange-500/20 border border-orange-500/30 hover:border-orange-400/50 rounded-2xl p-4 md:p-6 transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-orange-500/20 flex items-center gap-3 md:gap-4">
-                <div class="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-gradient-to-br from-orange-500/20 to-orange-600/10 flex items-center justify-center text-orange-400 text-xl md:text-2xl group-hover:scale-110 transition-transform duration-300 shrink-0"><i class="fa-solid fa-utensils"></i></div>
-                <div class="flex-1 min-w-0">
-                    <h3 class="font-bold text-white text-sm md:text-lg mb-0.5 md:mb-1 group-hover:text-orange-300 transition-colors line-clamp-2">Mutfak</h3>
-                    <p class="text-xs md:text-sm text-slate-400 line-clamp-1">Ev Yemekleri</p>
-                </div>
-                <i class="fa-solid fa-arrow-right text-slate-500 group-hover:text-orange-400 group-hover:translate-x-1 transition-all hidden md:block shrink-0"></i>
-            </a>
-        </div>
-    </section>
-
-    <section id="topluluk" class="max-w-[1600px] mx-auto px-4 pb-16 md:pb-24">
-        <div class="flex items-center gap-4 mb-4 md:mb-10">
-            <div class="h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent flex-1"></div>
-            <div class="flex items-center gap-3">
-                <i class="fa-solid fa-users text-purple-400 text-xl"></i>
-                <span class="text-slate-300 font-bold text-xs md:text-sm uppercase tracking-widest">TOPLULUK & İLETİŞİM</span>
-            </div>
-            <div class="h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent flex-1"></div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
-            <a href="duyurular.html" class="group relative overflow-hidden rounded-3xl p-10 bg-gradient-to-br from-indigo-900/30 to-indigo-800/20 border border-indigo-500/30 hover:border-indigo-400/50 transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-2xl hover:shadow-indigo-500/20">
-                <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500"></div>
-                <div class="relative z-10 flex items-center gap-6">
-                    <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500/30 to-indigo-600/20 flex items-center justify-center text-indigo-300 text-4xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
-                        <i class="fa-solid fa-bullhorn"></i>
-                    </div>
-                    <div class="flex-1">
-                        <h3 class="text-3xl font-black text-white mb-3 group-hover:text-indigo-300 transition-colors">Duyurular</h3>
-                        <p class="text-slate-300 text-lg leading-relaxed">Gündemden ve yeni özelliklerden haberdar olun.</p>
-                        <div class="mt-4 flex items-center gap-2 text-indigo-400 text-sm font-semibold">
-                            <span>Keşfet</span>
-                            <i class="fa-solid fa-arrow-right group-hover:translate-x-2 transition-transform"></i>
-                        </div>
-                    </div>
-                </div>
-            </a>
-            <a href="sohbet.html" class="group relative overflow-hidden rounded-3xl p-10 bg-gradient-to-br from-pink-900/30 to-pink-800/20 border border-pink-500/30 hover:border-pink-400/50 transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-2xl hover:shadow-pink-500/20">
-                <div class="absolute top-0 right-0 w-32 h-32 bg-pink-500/10 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500"></div>
-                <div class="relative z-10 flex items-center gap-6">
-                    <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-pink-500/30 to-pink-600/20 flex items-center justify-center text-pink-300 text-4xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
-                        <i class="fa-solid fa-comments"></i>
-                    </div>
-                    <div class="flex-1">
-                        <h3 class="text-3xl font-black text-white mb-3 group-hover:text-pink-300 transition-colors">Sohbet</h3>
-                        <p class="text-slate-300 text-lg leading-relaxed">Diğer gurbetçilerle tanışın ve konuşun.</p>
-                        <div class="mt-4 flex items-center gap-2 text-pink-400 text-sm font-semibold">
-                            <span>Katıl</span>
-                            <i class="fa-solid fa-arrow-right group-hover:translate-x-2 transition-transform"></i>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-    </section>
-
-    <section id="seyahat" class="max-w-[1600px] mx-auto px-4 pb-24">
-        <div class="flex items-center gap-4 mb-10">
-            <div class="h-px bg-gradient-to-r from-transparent via-teal-500/50 to-transparent flex-1"></div>
-            <div class="flex items-center gap-3">
-                <i class="fa-solid fa-suitcase-rolling text-teal-400 text-xl"></i>
-                <span class="text-slate-300 font-bold text-sm uppercase tracking-widest">SEYAHAT & TATİL</span>
-            </div>
-            <div class="h-px bg-gradient-to-r from-transparent via-teal-500/50 to-transparent flex-1"></div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <a href="ucak_bileti.html" class="group relative bg-gradient-to-br from-sky-900/20 to-sky-800/10 hover:from-sky-600/30 hover:to-sky-500/20 border border-sky-500/30 hover:border-sky-400/50 rounded-2xl p-8 text-center transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-sky-500/20">
-                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-sky-500/20 to-sky-600/10 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <i class="fa-solid fa-plane text-3xl text-sky-400 group-hover:text-sky-300"></i>
-                </div>
-                <h3 class="font-bold text-white text-lg mb-2 group-hover:text-sky-300 transition-colors">Uçak Bileti</h3>
-                <p class="text-sm text-slate-400">En uygun fiyatlar</p>
-            </a>
-            <a href="otel_rezervasyon.html" class="group relative bg-gradient-to-br from-amber-900/20 to-amber-800/10 hover:from-amber-600/30 hover:to-amber-500/20 border border-amber-500/30 hover:border-amber-400/50 rounded-2xl p-8 text-center transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-amber-500/20">
-                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500/20 to-amber-600/10 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <i class="fa-solid fa-hotel text-3xl text-amber-400 group-hover:text-amber-300"></i>
-                </div>
-                <h3 class="font-bold text-white text-lg mb-2 group-hover:text-amber-300 transition-colors">Otel Rezervasyon</h3>
-                <p class="text-sm text-slate-400">Güvenli konaklama</p>
-            </a>
-            <a href="arac_kiralama.html" class="group relative bg-gradient-to-br from-orange-900/20 to-orange-800/10 hover:from-orange-600/30 hover:to-orange-500/20 border border-orange-500/30 hover:border-orange-400/50 rounded-2xl p-8 text-center transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-orange-500/20">
-                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-500/20 to-orange-600/10 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <i class="fa-solid fa-car text-3xl text-orange-400 group-hover:text-orange-300"></i>
-                </div>
-                <h3 class="font-bold text-white text-lg mb-2 group-hover:text-orange-300 transition-colors">Araç Kiralama</h3>
-                <p class="text-sm text-slate-400">Sıla yolu özel</p>
-            </a>
-            <a href="tatil_paketleri.html" class="group relative bg-gradient-to-br from-teal-900/20 to-teal-800/10 hover:from-teal-600/30 hover:to-teal-500/20 border border-teal-500/30 hover:border-teal-400/50 rounded-2xl p-8 text-center transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-teal-500/20">
-                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-teal-500/20 to-teal-600/10 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <i class="fa-solid fa-umbrella-beach text-3xl text-teal-400 group-hover:text-teal-300"></i>
-                </div>
-                <h3 class="font-bold text-white text-lg mb-2 group-hover:text-teal-300 transition-colors">Tatil Paketleri</h3>
-                <p class="text-sm text-slate-400">Her şey dahil turlar</p>
-            </a>
-        </div>
-    </section>
-
-    <footer class="border-t border-white/5 bg-black py-8 text-center text-slate-500 text-xs">
-        &copy; 2025 Platform Avrupa. Tüm hakları saklıdır.
-    </footer>
-
-    <div id="universalModal" class="modal-overlay">
-        <div class="modal-content">
-            <div class="flex justify-between items-center p-5 border-b border-white/10 bg-[#0f172a]">
-                <h3 id="modalTitle" class="text-lg font-bold text-white">Başlık</h3>
-                <button onclick="closeModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
-            </div>
-            <div id="modalBody" class="p-6 overflow-y-auto max-h-[60vh] bg-[#020617]"></div>
         </div>
     </div>
+</nav>
 
-    <script>
-        // KULLANICI KONTROLÜ - Artık auth.js tarafından otomatik yapılıyor
-        // updateAuthUI() fonksiyonu sayfa yüklendiğinde çalışır
+<!-- ════════════════════════════════════════════ HERO ══ -->
+<main class="relative pt-24 pb-8 px-4 overflow-hidden">
+    <div class="hero-glow"></div>
+    <div class="max-w-5xl mx-auto relative z-10">
 
-        // MODAL İŞLEMLERİ
-        function closeModal() { document.getElementById('universalModal').classList.remove('active'); }
-        
-        async function openModal(type) {
-            const modal = document.getElementById('universalModal');
-            const title = document.getElementById('modalTitle');
-            const body = document.getElementById('modalBody');
-            
-            modal.classList.add('active');
-            body.innerHTML = '<div class="text-center py-10"><i class="fa-solid fa-spinner fa-spin text-3xl text-indigo-500"></i><p class="mt-4 text-slate-400">Yükleniyor...</p></div>';
+        <!-- Badge -->
+        <div class="flex justify-center mb-6 fade-up">
+            <div class="pill" style="background:rgba(91,91,214,0.12);color:#8B8BDF;border:1px solid rgba(91,91,214,0.25);">
+                <i class="fa-solid fa-globe text-xs"></i>
+                Avrupa'nın Türk Platformu
+            </div>
+        </div>
 
-                if (type === 'trip') {
-                title.innerHTML = '<i class="fa-solid fa-car-side text-blue-400 mr-2"></i> Yol Arkadaşı İlanları';
-                const { data } = await sb.from('trips').select('*').order('created_at', {ascending: false});
-                if(!data || data.length === 0) { body.innerHTML = '<p class="text-center text-slate-500">Henüz ilan yok.</p>'; return; }
-                // XSS KORUMASI: Tüm kullanıcı verilerini sanitize et
-                body.innerHTML = '<div class="grid gap-3">' + data.map(t => {
-                        const formattedDate = formatDate(t.travel_date, 'long');
-                        return `
-                    <div class="bg-white/5 p-4 rounded-xl border border-white/5 flex justify-between items-center">
+        <!-- Headline -->
+        <h1 class="text-center font-display font-black leading-[1.1] tracking-tight mb-4 fade-up delay-1"
+            style="font-size:clamp(2.2rem,8vw,4.5rem);">
+            Tüm Avrupa,<br>
+            <span style="background:linear-gradient(135deg,#8B8BDF 0%,#A78BFA 50%,#EC8FBF 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">
+                Tek Platform
+            </span>
+        </h1>
+
+        <p class="text-center text-zinc-400 mb-8 max-w-lg mx-auto leading-relaxed fade-up delay-2"
+           style="font-size:clamp(1rem,2.5vw,1.15rem);">
+            Avrupadaki Türklerin buluşma noktası — ilanlar, yolculuk, market, sağlık ve daha fazlası.
+        </p>
+
+        <!-- CTAs -->
+        <div class="flex flex-col sm:flex-row gap-3 justify-center mb-14 fade-up delay-3">
+            <a href="ilan_giris.html" class="btn-primary justify-center">
+                <i class="fa-solid fa-plus"></i> İlan Ver
+            </a>
+            <a href="#hizmetler" class="btn-ghost justify-center">
+                <i class="fa-solid fa-compass"></i> Keşfet
+            </a>
+        </div>
+
+        <!-- ─── HIZMETLER GRID ─── -->
+        <section id="hizmetler">
+
+            <!-- YOLCULUK -->
+            <div class="section-divider fade-up">
+                <div class="line"></div>
+                <span class="label"><i class="fa-solid fa-route mr-1.5 text-blue-500"></i>Yolculuk & Acil</span>
+                <div class="line"></div>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+                <a href="yol_arkadasi.html" class="feat-card fade-up delay-1">
+                    <div class="flex items-start justify-between">
+                        <div class="icon-wrap" style="background:rgba(59,130,246,0.12);">
+                            <i class="fa-solid fa-car-side text-blue-400 text-xl"></i>
+                        </div>
+                        <span class="pill" style="background:rgba(59,130,246,0.1);color:#60A5FA;">Popüler</span>
+                    </div>
+                    <div>
+                        <div class="font-semibold text-sm text-white leading-snug">Yol Arkadaşı</div>
+                        <div class="text-xs text-zinc-500 mt-0.5">Paylaşımlı yolculuk</div>
+                    </div>
+                </a>
+                <a href="kargo_emanet.html" class="feat-card fade-up delay-2">
+                    <div class="icon-wrap" style="background:rgba(245,158,11,0.12);">
+                        <i class="fa-solid fa-box-open text-amber-400 text-xl"></i>
+                    </div>
+                    <div>
+                        <div class="font-semibold text-sm text-white leading-snug">Kargo & Emanet</div>
+                        <div class="text-xs text-zinc-500 mt-0.5">Paket taşıma</div>
+                    </div>
+                </a>
+                <a href="yol_yardim.html" class="feat-card fade-up delay-3">
+                    <div class="flex items-start justify-between">
+                        <div class="icon-wrap" style="background:rgba(239,68,68,0.12);">
+                            <i class="fa-solid fa-truck-medical text-red-400 text-xl"></i>
+                        </div>
+                        <span class="pill" style="background:rgba(239,68,68,0.1);color:#F87171;">Acil</span>
+                    </div>
+                    <div>
+                        <div class="font-semibold text-sm text-white leading-snug">Yol Yardım</div>
+                        <div class="text-xs text-zinc-500 mt-0.5">Acil destek</div>
+                    </div>
+                </a>
+                <a href="sila_yolu.html" class="feat-card fade-up delay-4">
+                    <div class="flex items-start justify-between">
+                        <div class="icon-wrap" style="background:rgba(139,92,246,0.12);">
+                            <i class="fa-solid fa-road text-violet-400 text-xl"></i>
+                        </div>
+                        <span class="pill" style="background:rgba(139,92,246,0.1);color:#A78BFA;">Canlı</span>
+                    </div>
+                    <div>
+                        <div class="font-semibold text-sm text-white leading-snug">Sıla Yolu</div>
+                        <div class="text-xs text-zinc-500 mt-0.5">Gümrük & kameralar</div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- EKONOMİ -->
+            <div class="section-divider fade-up">
+                <div class="line"></div>
+                <span class="label"><i class="fa-solid fa-chart-line mr-1.5 text-emerald-500"></i>Ekonomi & Finans</span>
+                <div class="line"></div>
+            </div>
+            <div class="grid grid-cols-2 gap-3 mb-8">
+                <a href="market.html" class="feat-card fade-up delay-1" style="padding:24px;">
+                    <div class="flex items-center gap-3">
+                        <div class="icon-wrap" style="background:rgba(16,185,129,0.12);width:52px;height:52px;border-radius:14px;">
+                            <i class="fa-solid fa-basket-shopping text-emerald-400 text-2xl"></i>
+                        </div>
                         <div>
-                            <div class="text-white font-bold">${sanitize(t.from_city)} <i class="fa-solid fa-arrow-right text-xs mx-1 text-slate-500"></i> ${sanitize(t.to_city)}</div>
-                            <div class="text-xs text-slate-400 mt-1">${formattedDate} • ${sanitize(t.driver_name)}</div>
+                            <div class="font-bold text-base text-white">Market Fiyatları</div>
+                            <div class="text-xs text-zinc-500 mt-0.5">5 Belçika marketi karşılaştır</div>
                         </div>
-                        <div class="text-right">
-                            <div class="text-emerald-400 font-bold">${sanitize(t.price)}€</div>
-                            <div class="text-xs text-slate-500">${sanitize(t.seats_available)} Koltuk</div>
+                    </div>
+                    <div class="flex gap-2 flex-wrap mt-1">
+                        <span class="pill" style="background:rgba(16,185,129,0.08);color:#34D399;">Lidl</span>
+                        <span class="pill" style="background:rgba(16,185,129,0.08);color:#34D399;">Colruyt</span>
+                        <span class="pill" style="background:rgba(16,185,129,0.08);color:#34D399;">Delhaize</span>
+                        <span class="pill" style="background:rgba(16,185,129,0.08);color:#34D399;">+2</span>
+                    </div>
+                </a>
+                <a href="doviz_altin.html" class="feat-card fade-up delay-2" style="padding:24px;">
+                    <div class="flex items-center gap-3">
+                        <div class="icon-wrap" style="background:rgba(234,179,8,0.12);width:52px;height:52px;border-radius:14px;">
+                            <i class="fa-solid fa-coins text-yellow-400 text-2xl"></i>
                         </div>
-                    </div>`;
-                    }).join('') + '</div>';
-            
-            } else if (type === 'cargo') {
-                title.innerHTML = '<i class="fa-solid fa-box-open text-amber-400 mr-2"></i> Kargo & Emanet Talepleri';
-                const { data } = await sb.from('shipments').select('*').order('created_at', {ascending: false});
-                if(!data || data.length === 0) { body.innerHTML = '<p class="text-center text-slate-500">Talep yok.</p>'; return; }
-                // XSS KORUMASI: Tüm kullanıcı verilerini sanitize et
-                body.innerHTML = '<div class="grid gap-3">' + data.map(s => `
-                    <div class="bg-white/5 p-4 rounded-xl border border-white/5">
-                        <div class="flex justify-between mb-2"><span class="text-white font-bold">${sanitize(s.description)}</span> <span class="text-xs bg-amber-500/20 text-amber-400 px-2 py-1 rounded">Aranıyor</span></div>
-                        <div class="text-xs text-slate-400">${sanitize(s.from_city)} > ${sanitize(s.to_city)} • ${sanitize(s.sender_name)}</div>
-                    </div>`).join('') + '</div>';
-
-            } else if (type === 'sos') {
-                title.innerHTML = '<i class="fa-solid fa-truck-medical text-red-400 mr-2"></i> Yol Yardım & Hizmetler';
-                const { data } = await sb.from('services').select('*').order('created_at', {ascending: false});
-                if(!data || data.length === 0) { body.innerHTML = '<p class="text-center text-slate-500">Kayıt yok.</p>'; return; }
-                // XSS KORUMASI: Tüm kullanıcı verilerini sanitize et
-                body.innerHTML = '<div class="grid gap-3">' + data.map(s => `
-                    <div class="bg-white/5 p-4 rounded-xl border border-white/5 flex justify-between items-center">
-                        <div><h4 class="text-white font-bold">${sanitize(s.name)}</h4><div class="text-xs text-slate-400">${sanitize(s.country)} • ${sanitize(s.type)}</div></div>
-                        <a href="tel:${sanitizePhone(s.phone)}" class="bg-green-600 px-3 py-1 rounded text-white text-sm font-bold"><i class="fa-solid fa-phone"></i> Ara</a>
-                    </div>`).join('') + '</div>';
-            
-            } else if (type === 'doviz') {
-                title.innerHTML = '<i class="fa-solid fa-coins text-yellow-400 mr-2"></i> Döviz & Altın';
-                body.innerHTML = '<div class="text-center py-10"><i class="fa-solid fa-spinner fa-spin text-2xl text-yellow-400"></i><p class="text-slate-400 mt-2">Yükleniyor...</p></div>';
-                
-                // Gerçek zamanlı döviz kuru çek
-                try {
-                    const response = await fetch('https://api.exchangerate-api.com/v4/latest/EUR');
-                    const data = await response.json();
-                    const eurTry = data.rates.TRY.toFixed(2);
-                    const usdTry = data.rates.USD ? (data.rates.TRY / data.rates.USD).toFixed(2) : 'N/A';
-                    
-                    body.innerHTML = `
-                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-center">
-                            <div class="bg-white/5 p-4 rounded-xl border border-yellow-500/20">
-                                <div class="text-slate-400 text-xs">EURO / TL</div>
-                                <div class="text-2xl font-bold text-white mt-1">${eurTry} ₺</div>
-                                <div class="text-green-400 text-xs mt-1"><i class="fa-solid fa-chart-line"></i> Canlı</div>
-                            </div>
-                            <div class="bg-white/5 p-4 rounded-xl border border-yellow-500/20">
-                                <div class="text-slate-400 text-xs">DOLAR / TL</div>
-                                <div class="text-2xl font-bold text-white mt-1">${usdTry} ₺</div>
-                                <div class="text-green-400 text-xs mt-1"><i class="fa-solid fa-chart-line"></i> Canlı</div>
-                            </div>
-                            <div class="bg-white/5 p-4 rounded-xl border border-yellow-500/20">
-                                <div class="text-slate-400 text-xs">STERLIN / TL</div>
-                                <div class="text-2xl font-bold text-white mt-1">${(data.rates.TRY / data.rates.GBP).toFixed(2)} ₺</div>
-                                <div class="text-green-400 text-xs mt-1"><i class="fa-solid fa-chart-line"></i> Canlı</div>
-                            </div>
+                        <div>
+                            <div class="font-bold text-base text-white">Döviz & Altın</div>
+                            <div class="text-xs text-zinc-500 mt-0.5">Canlı EUR/TRY kurları</div>
                         </div>
-                        <p class="text-xs text-slate-500 mt-4 text-center">Altın fiyatları için <a href="https://www.doviz.com/altin-fiyatlari" target="_blank" class="text-yellow-400 hover:underline">doviz.com</a></p>`;
-                } catch (error) {
-                    body.innerHTML = '<p class="text-center text-red-400">Döviz kuru yüklenemedi.</p>';
-                }
+                    </div>
+                    <div class="flex gap-2 mt-1">
+                        <span class="pill" style="background:rgba(234,179,8,0.08);color:#FCD34D;">EUR</span>
+                        <span class="pill" style="background:rgba(234,179,8,0.08);color:#FCD34D;">USD</span>
+                        <span class="pill" style="background:rgba(234,179,8,0.08);color:#FCD34D;">Altın</span>
+                    </div>
+                </a>
+            </div>
 
-            }
+            <!-- SAĞLIK -->
+            <div class="section-divider fade-up">
+                <div class="line"></div>
+                <span class="label"><i class="fa-solid fa-heart-pulse mr-1.5 text-rose-500"></i>Sağlık & Turizm</span>
+                <div class="line"></div>
+            </div>
+            <div class="mb-8 fade-up">
+                <a href="saglik_turizmi.html" class="feat-card" style="padding:28px;flex-direction:row;align-items:center;gap:20px;">
+                    <div class="icon-wrap" style="background:rgba(244,63,94,0.12);width:60px;height:60px;border-radius:16px;flex-shrink:0;">
+                        <i class="fa-solid fa-heart-pulse text-rose-400 text-2xl"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="font-bold text-lg text-white mb-1">Sağlık Turizmi</div>
+                        <div class="text-sm text-zinc-400">Saç Ekimi · Diş · Estetik · Cinsel Sağlık</div>
+                    </div>
+                    <i class="fa-solid fa-arrow-right text-zinc-600 hidden md:block"></i>
+                </a>
+            </div>
+
+            <!-- BİLGİ -->
+            <div class="section-divider fade-up">
+                <div class="line"></div>
+                <span class="label"><i class="fa-solid fa-book mr-1.5 text-zinc-400"></i>Bilgi & Rehberlik</span>
+                <div class="line"></div>
+            </div>
+            <div class="grid grid-cols-2 gap-3 mb-8">
+                <a href="hukuk_vitrini.html" class="feat-card fade-up delay-1">
+                    <div class="icon-wrap" style="background:rgba(113,113,122,0.12);">
+                        <i class="fa-solid fa-scale-balanced text-zinc-400 text-xl"></i>
+                    </div>
+                    <div>
+                        <div class="font-semibold text-sm text-white">Hukuk & Danışma</div>
+                        <div class="text-xs text-zinc-500 mt-0.5">Hukuki destek</div>
+                    </div>
+                </a>
+                <a href="akademi.html" class="feat-card fade-up delay-2">
+                    <div class="icon-wrap" style="background:rgba(113,113,122,0.12);">
+                        <i class="fa-solid fa-graduation-cap text-zinc-400 text-xl"></i>
+                    </div>
+                    <div>
+                        <div class="font-semibold text-sm text-white">Akademi</div>
+                        <div class="text-xs text-zinc-500 mt-0.5">Eğitim videoları</div>
+                    </div>
+                </a>
+            </div>
+
+        </section>
+    </div>
+</main>
+
+<!-- ════════════════════════════════════════════ İLAN KATEGORİLERİ ══ -->
+<section id="ilanlar" class="max-w-5xl mx-auto px-4 pb-12">
+    <div class="section-divider fade-up">
+        <div class="line"></div>
+        <span class="label"><i class="fa-solid fa-layer-group mr-1.5 text-violet-400"></i>İlan Kategorileri</span>
+        <div class="line"></div>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <a href="is_vitrini.html"     class="section-card flex items-center gap-3 p-4 fade-up delay-1">
+            <div class="icon-wrap" style="background:rgba(91,91,214,0.12);">
+                <i class="fa-solid fa-briefcase text-indigo-400 text-lg"></i>
+            </div>
+            <div class="min-w-0">
+                <div class="font-semibold text-sm text-white">İş İlanları</div>
+                <div class="text-xs text-zinc-500 truncate">Avrupa geneli</div>
+            </div>
+            <i class="fa-solid fa-chevron-right text-zinc-700 text-xs ml-auto hidden md:block"></i>
+        </a>
+        <a href="emlak_vitrini.html"  class="section-card flex items-center gap-3 p-4 fade-up delay-2">
+            <div class="icon-wrap" style="background:rgba(59,130,246,0.12);">
+                <i class="fa-solid fa-house text-blue-400 text-lg"></i>
+            </div>
+            <div class="min-w-0">
+                <div class="font-semibold text-sm text-white">Emlak</div>
+                <div class="text-xs text-zinc-500 truncate">Kiralık & Satılık</div>
+            </div>
+            <i class="fa-solid fa-chevron-right text-zinc-700 text-xs ml-auto hidden md:block"></i>
+        </a>
+        <a href="vasita_vitrini.html" class="section-card flex items-center gap-3 p-4 fade-up delay-3">
+            <div class="icon-wrap" style="background:rgba(16,185,129,0.12);">
+                <i class="fa-solid fa-car text-emerald-400 text-lg"></i>
+            </div>
+            <div class="min-w-0">
+                <div class="font-semibold text-sm text-white">Vasıta</div>
+                <div class="text-xs text-zinc-500 truncate">Sahibinden araçlar</div>
+            </div>
+            <i class="fa-solid fa-chevron-right text-zinc-700 text-xs ml-auto hidden md:block"></i>
+        </a>
+        <a href="hizmet_vitrini.html" class="section-card flex items-center gap-3 p-4 fade-up delay-1">
+            <div class="icon-wrap" style="background:rgba(6,182,212,0.12);">
+                <i class="fa-solid fa-screwdriver-wrench text-cyan-400 text-lg"></i>
+            </div>
+            <div class="min-w-0">
+                <div class="font-semibold text-sm text-white">Hizmetler</div>
+                <div class="text-xs text-zinc-500 truncate">Usta, nakliye, tamir</div>
+            </div>
+            <i class="fa-solid fa-chevron-right text-zinc-700 text-xs ml-auto hidden md:block"></i>
+        </a>
+        <a href="esya_vitrini.html"   class="section-card flex items-center gap-3 p-4 fade-up delay-2">
+            <div class="icon-wrap" style="background:rgba(234,179,8,0.12);">
+                <i class="fa-solid fa-couch text-yellow-400 text-lg"></i>
+            </div>
+            <div class="min-w-0">
+                <div class="font-semibold text-sm text-white">İkinci El</div>
+                <div class="text-xs text-zinc-500 truncate">Eşya pazarı</div>
+            </div>
+            <i class="fa-solid fa-chevron-right text-zinc-700 text-xs ml-auto hidden md:block"></i>
+        </a>
+        <a href="yemek_vitrini.html"  class="section-card flex items-center gap-3 p-4 fade-up delay-3">
+            <div class="icon-wrap" style="background:rgba(249,115,22,0.12);">
+                <i class="fa-solid fa-utensils text-orange-400 text-lg"></i>
+            </div>
+            <div class="min-w-0">
+                <div class="font-semibold text-sm text-white">Mutfak</div>
+                <div class="text-xs text-zinc-500 truncate">Ev yemekleri</div>
+            </div>
+            <i class="fa-solid fa-chevron-right text-zinc-700 text-xs ml-auto hidden md:block"></i>
+        </a>
+    </div>
+</section>
+
+<!-- ════════════════════════════════════════════ TOPLULUK ══ -->
+<section id="topluluk" class="max-w-5xl mx-auto px-4 pb-12">
+    <div class="section-divider fade-up">
+        <div class="line"></div>
+        <span class="label"><i class="fa-solid fa-users mr-1.5 text-purple-400"></i>Topluluk</span>
+        <div class="line"></div>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <a href="duyurular.html" class="feat-card fade-up delay-1" style="padding:28px;flex-direction:row;align-items:center;gap:20px;">
+            <div class="icon-wrap" style="background:rgba(91,91,214,0.12);width:56px;height:56px;border-radius:16px;flex-shrink:0;">
+                <i class="fa-solid fa-bullhorn text-indigo-400 text-2xl"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+                <div class="font-bold text-base text-white mb-1">Duyurular</div>
+                <div class="text-sm text-zinc-500">Gündem ve yeni özellikler</div>
+            </div>
+            <i class="fa-solid fa-arrow-right text-zinc-600 hidden md:block"></i>
+        </a>
+        <a href="sohbet.html" class="feat-card fade-up delay-2" style="padding:28px;flex-direction:row;align-items:center;gap:20px;">
+            <div class="icon-wrap" style="background:rgba(168,85,247,0.12);width:56px;height:56px;border-radius:16px;flex-shrink:0;">
+                <i class="fa-solid fa-comments text-purple-400 text-2xl"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+                <div class="font-bold text-base text-white mb-1">Sohbet</div>
+                <div class="text-sm text-zinc-500">Gurbetçilerle tanış</div>
+            </div>
+            <i class="fa-solid fa-arrow-right text-zinc-600 hidden md:block"></i>
+        </a>
+    </div>
+</section>
+
+<!-- ════════════════════════════════════════════ SEYAHAT ══ -->
+<section id="seyahat" class="max-w-5xl mx-auto px-4 pb-16">
+    <div class="section-divider fade-up">
+        <div class="line"></div>
+        <span class="label"><i class="fa-solid fa-suitcase-rolling mr-1.5 text-teal-400"></i>Seyahat & Tatil</span>
+        <div class="line"></div>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <a href="ucak_bileti.html"      class="feat-card text-center fade-up delay-1" style="align-items:center;padding:24px 16px;">
+            <div class="icon-wrap mx-auto" style="background:rgba(14,165,233,0.12);border-radius:14px;">
+                <i class="fa-solid fa-plane text-sky-400 text-xl"></i>
+            </div>
+            <div class="font-semibold text-sm text-white mt-1">Uçak Bileti</div>
+            <div class="text-xs text-zinc-500">En uygun fiyat</div>
+        </a>
+        <a href="otel_rezervasyon.html" class="feat-card text-center fade-up delay-2" style="align-items:center;padding:24px 16px;">
+            <div class="icon-wrap mx-auto" style="background:rgba(245,158,11,0.12);border-radius:14px;">
+                <i class="fa-solid fa-hotel text-amber-400 text-xl"></i>
+            </div>
+            <div class="font-semibold text-sm text-white mt-1">Otel</div>
+            <div class="text-xs text-zinc-500">Güvenli konaklama</div>
+        </a>
+        <a href="arac_kiralama.html"    class="feat-card text-center fade-up delay-3" style="align-items:center;padding:24px 16px;">
+            <div class="icon-wrap mx-auto" style="background:rgba(249,115,22,0.12);border-radius:14px;">
+                <i class="fa-solid fa-car text-orange-400 text-xl"></i>
+            </div>
+            <div class="font-semibold text-sm text-white mt-1">Araç Kiralama</div>
+            <div class="text-xs text-zinc-500">Sıla yolu özel</div>
+        </a>
+        <a href="tatil_paketleri.html"  class="feat-card text-center fade-up delay-4" style="align-items:center;padding:24px 16px;">
+            <div class="icon-wrap mx-auto" style="background:rgba(20,184,166,0.12);border-radius:14px;">
+                <i class="fa-solid fa-umbrella-beach text-teal-400 text-xl"></i>
+            </div>
+            <div class="font-semibold text-sm text-white mt-1">Tatil Paketleri</div>
+            <div class="text-xs text-zinc-500">Her şey dahil</div>
+        </a>
+    </div>
+</section>
+
+<!-- ════════════════════════════════════════════ FOOTER ══ -->
+<footer style="border-top:1px solid var(--border);background:var(--surface);padding:24px 16px;">
+    <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-2">
+            <div class="w-6 h-6 bg-white rounded flex items-center justify-center">
+                <span class="text-black font-black text-xs">PA</span>
+            </div>
+            <span class="text-sm text-zinc-500 font-medium">Platform Avrupa</span>
+        </div>
+        <p class="text-xs text-zinc-600">&copy; 2025 Platform Avrupa. Tüm hakları saklıdır.</p>
+        <div class="flex gap-4 text-xs text-zinc-600">
+            <a href="ilanlar.html" class="hover:text-zinc-400 transition">İlanlar</a>
+            <a href="duyurular.html" class="hover:text-zinc-400 transition">Duyurular</a>
+            <a href="profil.html" class="hover:text-zinc-400 transition">Profil</a>
+        </div>
+    </div>
+</footer>
+
+<!-- ════════════════════════════════════════════ BOTTOM NAV (mobile) ══ -->
+<nav class="bottom-nav md:hidden">
+    <a href="index.html" class="bnav-item active">
+        <i class="fa-solid fa-house"></i>
+        <span>Ana Sayfa</span>
+    </a>
+    <a href="ilanlar.html" class="bnav-item">
+        <i class="fa-solid fa-list"></i>
+        <span>İlanlar</span>
+    </a>
+    <a href="ilan_giris.html" class="bnav-item cta-item">
+        <i class="fa-solid fa-plus text-xl"></i>
+    </a>
+    <a href="market.html" class="bnav-item">
+        <i class="fa-solid fa-basket-shopping"></i>
+        <span>Market</span>
+    </a>
+    <a href="profil.html" class="bnav-item">
+        <i class="fa-solid fa-user"></i>
+        <span>Profil</span>
+    </a>
+</nav>
+
+<!-- ════════════════════════════════════════════ MODAL ══ -->
+<div id="universalModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="flex justify-between items-center px-5 py-4 border-b" style="border-color:var(--border);">
+            <h3 id="modalTitle" class="font-bold text-white"></h3>
+            <button onclick="closeModal()" class="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-400 hover:text-white hover:bg-white/5 transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div id="modalBody" class="p-5 overflow-y-auto" style="max-height:65vh;background:var(--bg);"></div>
+    </div>
+</div>
+
+<script>
+    function closeModal() { document.getElementById('universalModal').classList.remove('active'); }
+
+    async function openModal(type) {
+        const modal = document.getElementById('universalModal');
+        const title = document.getElementById('modalTitle');
+        const body  = document.getElementById('modalBody');
+        modal.classList.add('active');
+        body.innerHTML = '<div class="flex items-center justify-center py-12 gap-3 text-zinc-500"><i class="fa-solid fa-spinner fa-spin text-lg"></i><span class="text-sm">Yükleniyor…</span></div>';
+
+        if (type === 'trip') {
+            title.innerHTML = '<i class="fa-solid fa-car-side text-blue-400 mr-2"></i>Yol Arkadaşı İlanları';
+            const { data } = await sb.from('trips').select('*').order('created_at', {ascending: false});
+            if (!data?.length) { body.innerHTML = '<p class="text-center text-zinc-500 py-10">Henüz ilan yok.</p>'; return; }
+            body.innerHTML = '<div class="flex flex-col gap-2">' + data.map(t => `
+                <div class="flex justify-between items-center p-4 rounded-xl" style="background:var(--surface2);border:1px solid var(--border);">
+                    <div>
+                        <div class="font-semibold text-white text-sm">${sanitize(t.from_city)} <i class="fa-solid fa-arrow-right text-xs mx-1 text-zinc-600"></i> ${sanitize(t.to_city)}</div>
+                        <div class="text-xs text-zinc-500 mt-0.5">${formatDate(t.travel_date,'long')} · ${sanitize(t.driver_name)}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-bold text-emerald-400">${sanitize(t.price)}€</div>
+                        <div class="text-xs text-zinc-600">${sanitize(t.seats_available)} koltuk</div>
+                    </div>
+                </div>`).join('') + '</div>';
+        } else if (type === 'cargo') {
+            title.innerHTML = '<i class="fa-solid fa-box-open text-amber-400 mr-2"></i>Kargo & Emanet';
+            const { data } = await sb.from('shipments').select('*').order('created_at', {ascending: false});
+            if (!data?.length) { body.innerHTML = '<p class="text-center text-zinc-500 py-10">Talep yok.</p>'; return; }
+            body.innerHTML = '<div class="flex flex-col gap-2">' + data.map(s => `
+                <div class="p-4 rounded-xl" style="background:var(--surface2);border:1px solid var(--border);">
+                    <div class="flex justify-between mb-1">
+                        <span class="font-semibold text-sm text-white">${sanitize(s.description)}</span>
+                        <span class="pill" style="background:rgba(245,158,11,0.1);color:#FBBF24;">Aranıyor</span>
+                    </div>
+                    <div class="text-xs text-zinc-500">${sanitize(s.from_city)} → ${sanitize(s.to_city)} · ${sanitize(s.sender_name)}</div>
+                </div>`).join('') + '</div>';
+        } else if (type === 'sos') {
+            title.innerHTML = '<i class="fa-solid fa-truck-medical text-red-400 mr-2"></i>Yol Yardım';
+            const { data } = await sb.from('services').select('*').order('created_at', {ascending: false});
+            if (!data?.length) { body.innerHTML = '<p class="text-center text-zinc-500 py-10">Kayıt yok.</p>'; return; }
+            body.innerHTML = '<div class="flex flex-col gap-2">' + data.map(s => `
+                <div class="flex justify-between items-center p-4 rounded-xl" style="background:var(--surface2);border:1px solid var(--border);">
+                    <div>
+                        <div class="font-semibold text-sm text-white">${sanitize(s.name)}</div>
+                        <div class="text-xs text-zinc-500">${sanitize(s.country)} · ${sanitize(s.type)}</div>
+                    </div>
+                    <a href="tel:${sanitizePhone(s.phone)}" class="btn-primary text-xs py-2 px-3">
+                        <i class="fa-solid fa-phone"></i> Ara
+                    </a>
+                </div>`).join('') + '</div>';
+        } else if (type === 'doviz') {
+            title.innerHTML = '<i class="fa-solid fa-coins text-yellow-400 mr-2"></i>Döviz & Altın';
+            try {
+                const res = await fetch('https://api.exchangerate-api.com/v4/latest/EUR');
+                const data = await res.json();
+                const r = data.rates;
+                body.innerHTML = `
+                    <div class="grid grid-cols-3 gap-3">
+                        ${[['EUR/TL', r.TRY.toFixed(2)+'₺'],['USD/TL',(r.TRY/r.USD).toFixed(2)+'₺'],['GBP/TL',(r.TRY/r.GBP).toFixed(2)+'₺']].map(([label,val])=>`
+                        <div class="p-4 rounded-xl text-center" style="background:var(--surface2);border:1px solid var(--border);">
+                            <div class="text-xs text-zinc-500 mb-1">${label}</div>
+                            <div class="font-bold text-white text-lg">${val}</div>
+                            <div class="text-xs text-emerald-400 mt-1">Canlı</div>
+                        </div>`).join('')}
+                    </div>
+                    <p class="text-xs text-zinc-600 mt-4 text-center">Altın için <a href="https://www.doviz.com/altin-fiyatlari" target="_blank" class="text-yellow-400 hover:underline">doviz.com</a></p>`;
+            } catch { body.innerHTML = '<p class="text-center text-red-400 py-10">Döviz kuru yüklenemedi.</p>'; }
         }
-
-        // --- WAZE BENZERİ BİLDİRİM SİSTEMİ ---
-        let reportLocation = { lat: null, lng: null, address: '' };
-        
-        async function reportIssue() {
-            // Önce konum al
-            Swal.fire({
-                title: 'Konum Tespit Ediliyor...',
-                html: '<i class="fa-solid fa-location-crosshairs fa-spin text-4xl text-blue-500"></i><p class="mt-4">Bildirimi konumunuzdan kaydedeceğiz</p>',
-                allowOutsideClick: false,
-                showConfirmButton: false,
-                didOpen: () => {
-                    if (navigator.geolocation) {
-                        navigator.geolocation.getCurrentPosition(
-                            async (position) => {
-                                reportLocation.lat = position.coords.latitude;
-                                reportLocation.lng = position.coords.longitude;
-                                
-                                // Reverse geocoding
-                                try {
-                                    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${reportLocation.lat}&lon=${reportLocation.lng}&format=json&accept-language=tr`);
-                                    const data = await res.json();
-                                    reportLocation.address = data.display_name || '';
-                                } catch(e) { console.log('Geocoding hatası'); }
-                                
-                                Swal.close();
-                                showReportForm();
-                            },
-                            (error) => {
-                                Swal.close();
-                                Swal.fire({
-                                    icon: 'warning',
-                                    title: 'Konum Alınamadı',
-                                    text: 'Konum izni verilmedi. Yine de bildirim yapabilirsiniz.',
-                                    confirmButtonText: 'Devam Et'
-                                }).then(() => showReportForm());
-                            },
-                            { enableHighAccuracy: true, timeout: 10000 }
-                        );
-                    } else {
-                        Swal.close();
-                        showReportForm();
-                    }
-                }
-            });
-        }
-        
-        async function showReportForm() {
-            // Bildirim türleri seçenekleri oluştur
-            let typeOptions = '';
-            if (typeof bildirimTurleri !== 'undefined') {
-                bildirimTurleri.forEach(t => {
-                    typeOptions += `<option value="${t.id}">${t.emoji} ${t.isim}</option>`;
-                });
-            } else {
-                typeOptions = `
-                    <option value="radar">📸 Radar / Hız Kamerası</option>
-                    <option value="kaza">💥 Kaza</option>
-                    <option value="polis">👮 Polis Kontrolü</option>
-                    <option value="yol_calismasi">🚧 Yol Çalışması</option>
-                    <option value="trafik">🚦 Trafik Yoğunluğu</option>
-                    <option value="benzin">⛽ Ucuz Benzin</option>
-                    <option value="mola">☕ İyi Mola Yeri</option>
-                    <option value="rusvet">💸 Rüşvet Uyarısı</option>
-                    <option value="tehlike">⚠️ Yolda Tehlike</option>
-                    <option value="kapali_yol">🚫 Kapalı Yol</option>
-                `;
-            }
-            
-            const locationText = reportLocation.address 
-                ? `<p class="text-sm text-green-600 mb-3"><i class="fa-solid fa-check-circle mr-1"></i> ${reportLocation.address.substring(0, 50)}...</p>`
-                : (reportLocation.lat ? `<p class="text-sm text-blue-600 mb-3"><i class="fa-solid fa-map-pin mr-1"></i> ${reportLocation.lat.toFixed(4)}, ${reportLocation.lng.toFixed(4)}</p>` : '<p class="text-sm text-orange-500 mb-3"><i class="fa-solid fa-exclamation-triangle mr-1"></i> Konum alınamadı</p>');
-            
-            const { value: formValues } = await Swal.fire({
-                title: '<i class="fa-solid fa-bullhorn text-purple-500 mr-2"></i> Yol Bildirimi',
-                html: `
-                    ${locationText}
-                    <select id="swal-type" class="swal2-input" style="margin-bottom: 10px;">
-                        ${typeOptions}
-                    </select>
-                    <input id="swal-desc" class="swal2-input" placeholder="Detay (Örn: Sofya girişi gizli radar)" style="margin-bottom: 10px;">
-                    <p class="text-xs text-gray-500 mt-2">Bildiriminiz haritada gösterilecek ve diğer yolcuları uyaracak.</p>
-                `,
-                showCancelButton: true,
-                confirmButtonText: '<i class="fa-solid fa-paper-plane mr-1"></i> Bildir',
-                cancelButtonText: 'İptal',
-                confirmButtonColor: '#8b5cf6',
-                focusConfirm: false,
-                preConfirm: () => {
-                    const type = document.getElementById('swal-type').value;
-                    const desc = document.getElementById('swal-desc').value;
-                    if (!desc) {
-                        Swal.showValidationMessage('Lütfen bir açıklama girin');
-                        return false;
-                    }
-                    return { type, desc };
-                }
-            });
-
-            if (formValues) {
-                try {
-                    // Geçerlilik süresini hesapla
-                    let expiresAt = null;
-                    if (typeof hesaplaGecerlilik === 'function') {
-                        expiresAt = hesaplaGecerlilik(formValues.type);
-                    }
-                    
-                    // Ülke kodunu koordinatlardan çıkar
-                    let countryCode = '';
-                    if (reportLocation.address) {
-                        const parts = reportLocation.address.split(',');
-                        countryCode = parts[parts.length - 1]?.trim() || '';
-                    }
-                    
-                    await sb.from('road_reports').insert([{
-                        report_type: sanitize(formValues.type), 
-                        description: sanitize(formValues.desc), 
-                        country_code: sanitize(countryCode),
-                        lat: reportLocation.lat || 0, 
-                        lng: reportLocation.lng || 0,
-                        address: sanitize(reportLocation.address),
-                        expires_at: expiresAt ? expiresAt.toISOString() : null,
-                        is_active: true,
-                        user_id: currentUser?.id || null,
-                        user_name: sanitize(currentProfile?.full_name || currentUser?.email || 'Misafir')
-                    }]);
-                    
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Teşekkürler!',
-                        html: `
-                            <p>Bildiriminiz kaydedildi ve haritaya eklendi.</p>
-                            <p class="text-sm text-gray-500 mt-2">Diğer yolcular artık bu uyarıyı görebilir.</p>
-                        `,
-                        confirmButtonText: 'Tamam'
-                    });
-                    
-                    // Konumu sıfırla
-                    reportLocation = { lat: null, lng: null, address: '' };
-                    
-                } catch (err) {
-                    console.error('Bildirim hatası:', err);
-                    Swal.fire('Hata', 'Bildirim kaydedilemedi.', 'error');
-                }
-            }
-        }
-
-        // window.onload artık gerekli değil - auth.js otomatik çalışıyor
-
-        // OAuth dönüşü sonrasında URL'deki hash parametrelerini temizle
-        document.addEventListener('DOMContentLoaded', function () {
-            if (window.location.hash && window.location.hash.includes('access_token')) {
-                history.replaceState(null, '', window.location.pathname + window.location.search);
-            }
-        });
-    </script>
-    <script>
-    // PWA Service Worker Kaydı
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('service-worker.js')
-                .then(reg => console.log('PWA Hazır: ', reg.scope))
-                .catch(err => console.log('PWA Hatası: ', err));
-        });
     }
+
+    // Close on overlay click
+    document.getElementById('universalModal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
 </script>
 </body>
 </html>
