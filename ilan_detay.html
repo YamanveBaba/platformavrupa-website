@@ -108,15 +108,13 @@
             // Buton
             let butonHTML = '';
             if (source === 'actiris') {
-                // Actiris: başlıkla arama URL'si oluştur
-                const keywords = encodeURIComponent(title.replace(/[<>"]/g,'').trim().slice(0, 60));
-                const actirisAraURL = `https://www.actiris.brussels/fr/citoyens/offres-d-emploi/?texte=${keywords}`;
+                const actirisURL = `https://www.actiris.brussels/fr/citoyens/offres-d-emploi/?Messsage=${encodeURIComponent(sourceId)}&localisation=Tout&page=1&tabParam=1&EnseigneType=Type-Partout`;
                 butonHTML = `
-                <a href="${actirisAraURL}" target="_blank" rel="noopener"
+                <a href="${actirisURL}" target="_blank" rel="noopener"
                    class="flex items-center justify-center gap-2 w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 rounded-2xl transition shadow-lg shadow-purple-200">
                     <i class="fa-solid fa-arrow-up-right-from-square"></i> Actiris'te Başvur
                 </a>
-                <p class="text-xs text-slate-400 text-center mt-2">Actiris sitesi bu ilanı başlığa göre arayacak. Ref: <span class="font-mono">${sourceId}</span></p>`;
+                <p class="text-xs text-slate-400 text-center mt-2">Ref: <span class="font-mono font-semibold">${sourceId}</span></p>`;
             } else if (source === 'forem' && sourceUrl) {
                 butonHTML = `
                 <a href="${sourceUrl}" target="_blank" rel="noopener"
