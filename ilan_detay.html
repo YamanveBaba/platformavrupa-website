@@ -108,17 +108,13 @@
             // Buton
             let butonHTML = '';
             if (source === 'actiris') {
-                const googleQ = encodeURIComponent((title + ' ' + owner + ' actiris.brussels').trim());
+                const googleQ = encodeURIComponent('"Ref. ' + sourceId + '" site:actiris.brussels');
                 butonHTML = `
                 <a href="https://www.google.com/search?q=${googleQ}" target="_blank" rel="noopener"
-                   class="flex items-center justify-center gap-2 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-2xl transition shadow-lg shadow-indigo-200">
-                    <i class="fa-brands fa-google"></i> Google'da Bu İlanı Bul
+                   class="flex items-center justify-center gap-2 w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 rounded-2xl transition shadow-lg shadow-purple-200">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> İlanı Actiris'te Aç
                 </a>
-                <a href="https://www.actiris.brussels/fr/citoyens/offres-d-emploi/" target="_blank" rel="noopener"
-                   class="flex items-center justify-center gap-2 w-full bg-purple-100 hover:bg-purple-200 text-purple-700 font-bold py-3 rounded-2xl transition border border-purple-200 text-sm mt-2">
-                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Actiris'te Ara
-                </a>
-                <p class="text-xs text-slate-400 text-center mt-2">Actiris bireysel ilan linki sunmuyor. Google genellikle direkt sayfayı buluyor.</p>`;
+                <p class="text-xs text-slate-400 text-center mt-2">Google üzerinden direkt bu ilanın sayfasına gideceksiniz.</p>`;
             } else if (source === 'forem' && sourceUrl) {
                 butonHTML = `
                 <a href="${sourceUrl}" target="_blank" rel="noopener"
