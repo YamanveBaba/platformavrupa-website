@@ -4,43 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>İlan Detayı | PlatformAvrupa</title>
-    <meta name="description" content="İlan detayı. Platform Avrupa ilan vitrini - iş, eşya, emlak, araç ve hizmet ilanları.">
+    <meta name="description" content="İlan detayı. Platform Avrupa ilan vitrini.">
     <link rel="canonical" href="https://www.platformavrupa.com/ilan_detay.html">
-    <meta property="og:title" content="İlan Detayı | PlatformAvrupa">
-    <meta property="og:description" content="İlan detayı. Platform Avrupa ilanları.">
-    <meta property="og:url" content="https://www.platformavrupa.com/ilan_detay.html">
-    <meta property="og:type" content="website">
-    <meta property="og:site_name" content="Platform Avrupa">
-    <meta property="og:image" content="https://www.platformavrupa.com/og-image.png">
-    <meta property="og:locale" content="tr_TR">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="İlan Detayı | PlatformAvrupa">
-    <meta name="twitter:description" content="İlan detayı.">
-    <meta name="twitter:image" content="https://www.platformavrupa.com/og-image.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }</style>
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #f1f5f9; }
+        .badge { display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:700; padding:5px 12px; border-radius:99px; }
+    </style>
 </head>
-<body class="text-slate-800">
+<body class="text-slate-800 min-h-screen">
 
-    <nav class="bg-white border-b border-slate-200 sticky top-0 z-50 px-4 py-4 shadow-sm">
-        <div class="max-w-4xl mx-auto flex justify-between items-center">
-            <a href="javascript:history.back()" class="flex items-center gap-2 text-slate-600 hover:text-slate-900 font-bold">
+    <!-- NAV -->
+    <nav class="bg-[#020617] text-white sticky top-0 z-50 shadow-xl border-b border-white/10">
+        <div class="max-w-5xl mx-auto px-4 flex items-center justify-between h-16">
+            <a href="javascript:history.back()" class="flex items-center gap-2 text-slate-300 hover:text-white font-semibold text-sm transition">
                 <i class="fa-solid fa-arrow-left"></i> Geri Dön
             </a>
-            <span class="font-bold text-lg text-indigo-600">İLAN DETAYI</span>
-            <div class="w-20"></div>
+            <a href="index.html" class="flex items-center gap-2 font-extrabold text-lg">
+                <div class="w-7 h-7 bg-indigo-600 rounded-lg flex items-center justify-center"><i class="fa-solid fa-paper-plane text-xs"></i></div>
+                Platform<span class="text-indigo-400">Avrupa</span>
+            </a>
+            <div class="w-24"></div>
         </div>
     </nav>
 
-    <main class="max-w-4xl mx-auto px-4 py-8" id="ilanDetayKutusu">
-        <div class="text-center py-20 text-slate-400">
-            <i class="fa-solid fa-circle-notch fa-spin text-3xl mb-4 text-indigo-300"></i>
-            <p>İlan bilgileri yükleniyor...</p>
-        </div>
-    </main>
+    <!-- LOADING -->
+    <div id="loading" class="flex flex-col items-center justify-center py-32 text-slate-400">
+        <i class="fa-solid fa-circle-notch fa-spin text-4xl text-indigo-400 mb-4"></i>
+        <p class="font-medium">Yükleniyor...</p>
+    </div>
+
+    <!-- CONTENT -->
+    <main id="content" class="hidden max-w-5xl mx-auto px-4 py-8"></main>
 
     <script src="utils.js"></script>
     <script>
@@ -48,162 +46,174 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoaWV0cnFsamFoZG1sb2F6Z3BwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTk5MTcsImV4cCI6MjA4MDYzNTkxN30.sxpUrTnR40XuEBPUeQXj352xMziGr_lDqdA8H69ejBA';
         const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        window.onload = async function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const ilanId = urlParams.get('id');
-
-            if (!ilanId) {
-                document.getElementById('ilanDetayKutusu').innerHTML = '<div class="text-center py-10 text-red-500 font-bold">Hata: İlan ID bulunamadı!</div>';
-                return;
-            }
-
-            // DOĞRUDAN SUPABASE 'ilanlar' TABLOSUNDAN ÇEKİYORUZ
-            const { data, error } = await sb
-                .from('ilanlar')
-                .select('*')
-                .eq('id', ilanId)
-                .single();
-
-            if (error || !data) {
-                console.error(error);
-                document.getElementById('ilanDetayKutusu').innerHTML = '<div class="text-center py-10 text-red-500 font-bold">İlan bulunamadı veya silinmiş.</div>';
-            } else {
-                ilanGoster(data);
-            }
+        const KAYNAK_ETIKET = {
+            'forem':   { label:'FOREM', color:'bg-orange-100 text-orange-700', icon:'fa-briefcase' },
+            'actiris': { label:'Actiris', color:'bg-purple-100 text-purple-700', icon:'fa-briefcase' },
+            'vdab':    { label:'VDAB', color:'bg-blue-100 text-blue-700', icon:'fa-briefcase' },
+            'user':    { label:'Üye İlanı', color:'bg-green-100 text-green-700', icon:'fa-user' },
         };
 
-        function ilanGoster(ilan) {
-            const container = document.getElementById('ilanDetayKutusu');
+        const KAT_ICON = {
+            'Is Ilani':'fa-briefcase', 'İş İlanı':'fa-briefcase',
+            'Emlak':'fa-house', 'Vasita':'fa-car', 'Vasıta':'fa-car',
+            'Esya':'fa-box', 'Hizmet':'fa-handshake', 'Yemek':'fa-utensils',
+        };
 
-            // Veri Eşleştirme (ilanlar tablosundaki gerçek sütun adları)
-            const baslik = ilan.title || "Başlıksız İlan";
-            const fiyat = ilan.price || "Belirtilmedi";
-            const aciklama = ilan.description || "Açıklama girilmemiş.";
-            const konum = (ilan.city && ilan.country) ? `${ilan.city}, ${ilan.country}` : (ilan.city || ilan.country || "Konum Belirtilmemiş");
-            const tarih = formatDate(ilan.created_at, 'long');
-            const kategori = ilan.category || "Genel";
-            const sahip = ilan.owner_name || "Platform Üyesi";
+        window.onload = async function() {
+            const id = new URLSearchParams(window.location.search).get('id');
+            if (!id) { showError('İlan ID bulunamadı.'); return; }
 
-            // Resim Kontrolü
-            let resimHTML = "";
-            if (ilan.image) {
-                resimHTML = `<img src="${ilan.image}" class="w-full h-full object-cover">`;
-            } else {
-                // Kategoriye göre varsayılan ikon
-                let icon = 'fa-image';
-                if(kategori.includes('Is Ilani') || kategori.includes('İş')) icon = 'fa-briefcase';
-                else if(kategori.includes('Emlak')) icon = 'fa-house';
-                else if(kategori.includes('Vasita') || kategori.includes('Vasıta')) icon = 'fa-car';
+            const { data, error } = await sb.from('ilanlar').select('*').eq('id', id).single();
 
-                resimHTML = `
-                    <div class="w-full h-full flex flex-col items-center justify-center bg-slate-100 text-slate-300">
-                        <i class="fa-solid ${icon} text-6xl mb-3"></i>
-                        <span class="text-sm font-semibold text-slate-400">Görsel Yok</span>
-                    </div>
-                `;
-            }
+            document.getElementById('loading').classList.add('hidden');
+            if (error || !data) { showError('İlan bulunamadı veya kaldırılmış.'); return; }
+            render(data);
+        };
 
-            // Kategoriye Göre Renkler
-            let badgeClass = "bg-indigo-600";
-            if(kategori === 'Emlak') badgeClass = "bg-blue-600";
-            if(kategori === 'Vasıta') badgeClass = "bg-green-600";
-            if(kategori === 'İş İlanları') badgeClass = "bg-purple-600";
-
-            container.innerHTML = `
-                <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-200">
-                    <div class="h-[300px] md:h-[400px] relative group">
-                        ${resimHTML}
-                        <span class="absolute top-6 right-6 ${badgeClass} text-white px-4 py-2 rounded-full font-bold shadow-lg text-sm uppercase tracking-wide border-2 border-white/20">
-                            ${kategori}
-                        </span>
-                        
-                        <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 via-black/40 to-transparent p-6 md:p-8 pt-20">
-                            <h1 class="text-2xl md:text-4xl font-extrabold text-white shadow-sm leading-tight">${baslik}</h1>
-                            <div class="flex items-center gap-4 text-white/90 font-medium text-sm mt-3">
-                                <span class="flex items-center gap-1 bg-white/20 px-3 py-1 rounded-lg backdrop-blur-sm"><i class="fa-solid fa-location-dot"></i> ${konum}</span>
-                                <span class="flex items-center gap-1 bg-white/20 px-3 py-1 rounded-lg backdrop-blur-sm"><i class="fa-regular fa-calendar"></i> ${tarih}</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="p-6 md:p-10 grid grid-cols-1 lg:grid-cols-3 gap-10">
-                        
-                        <div class="lg:col-span-2 space-y-8">
-                            <div class="lg:hidden bg-slate-50 p-4 rounded-2xl border border-slate-100 flex justify-between items-center">
-                                <span class="text-slate-500 font-bold text-sm uppercase">Fiyat / Ücret</span>
-                                <span class="text-2xl font-black text-slate-800">${fiyat}</span>
-                            </div>
-
-                            <div>
-                                <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                                    <i class="fa-solid fa-align-left text-indigo-500"></i> İlan Açıklaması
-                                </h3>
-                                <div class="prose prose-slate max-w-none text-slate-600 leading-relaxed whitespace-pre-line bg-slate-50/50 p-6 rounded-2xl border border-slate-100">
-                                    ${aciklama}
-                                </div>
-                            </div>
-
-                            <div class="bg-amber-50 border border-amber-100 rounded-xl p-4 flex gap-3 items-start">
-                                <i class="fa-solid fa-shield-halved text-amber-500 text-xl mt-1"></i>
-                                <div>
-                                    <h4 class="font-bold text-amber-800 text-sm">Güvenli Alışveriş İpuçları</h4>
-                                    <p class="text-xs text-amber-700 mt-1">Kapora ödemeyin. Ürünü görmeden veya hizmeti almadan para göndermeyin. Şüpheli durumları bize bildirin.</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="lg:col-span-1">
-                            <div class="sticky top-24 space-y-6">
-                                
-                                <div class="hidden lg:block bg-slate-900 text-white p-6 rounded-2xl shadow-lg relative overflow-hidden">
-                                    <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-10 -mt-10 blur-2xl"></div>
-                                    <span class="block text-slate-400 text-xs font-bold uppercase mb-1">Değer / Ücret</span>
-                                    <div class="text-4xl font-black tracking-tight">${fiyat}</div>
-                                </div>
-
-                                <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm">
-                                    <div class="flex items-center gap-4 mb-6">
-                                        <div class="w-14 h-14 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-xl font-bold border-2 border-white shadow-md">
-                                            ${sahip.charAt(0).toUpperCase()}
-                                        </div>
-                                        <div>
-                                            <p class="text-xs text-slate-400 font-bold uppercase">İlan Sahibi</p>
-                                            <h4 class="font-bold text-slate-900 text-lg">${sahip}</h4>
-                                        </div>
-                                    </div>
-
-                                    <div class="space-y-3">
-                                        ${ilan.source_url ? `
-                                        <a href="${ilan.source_url}" target="_blank" rel="noopener" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-indigo-200 transition flex items-center justify-center gap-2">
-                                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                                            <span>Orijinal İlana Git</span>
-                                        </a>` : `
-                                        <button onclick="mesajGonder()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-green-200 transition flex items-center justify-center gap-2 group">
-                                            <i class="fa-brands fa-whatsapp text-2xl group-hover:scale-110 transition"></i>
-                                            <span>WhatsApp ile Yaz</span>
-                                        </button>
-                                        <button onclick="alert('Numara gizli veya belirtilmemiş.')" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-200 transition flex items-center justify-center gap-2">
-                                            <i class="fa-solid fa-phone"></i>
-                                            <span>Hemen Ara</span>
-                                        </button>`}
-                                    </div>
-                                </div>
-
-                                <button onclick="navigator.share({title: '${baslik}', url: window.location.href})" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 rounded-xl transition flex items-center justify-center gap-2">
-                                    <i class="fa-solid fa-share-nodes"></i> İlanı Paylaş
-                                </button>
-
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            `;
+        function showError(msg) {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('content').classList.remove('hidden');
+            document.getElementById('content').innerHTML = `
+                <div class="text-center py-20">
+                    <i class="fa-solid fa-circle-exclamation text-5xl text-red-300 mb-4"></i>
+                    <p class="font-bold text-slate-600">${msg}</p>
+                    <a href="javascript:history.back()" class="mt-6 inline-block px-6 py-2 bg-indigo-600 text-white rounded-xl font-bold">Geri Dön</a>
+                </div>`;
         }
 
-        function mesajGonder() {
-            // Şimdilik demo
-            alert("Bu özellik yakında aktif olacak! (Gerçek ilanlarda satıcının numarasına yönlendirir)");
+        function render(d) {
+            const content = document.getElementById('content');
+            content.classList.remove('hidden');
+
+            const title    = d.title || 'Başlıksız İlan';
+            const desc     = d.description || '';
+            const price    = d.price || '';
+            const city     = d.city || '';
+            const country  = d.country || '';
+            const category = d.category || 'Genel';
+            const owner    = d.owner_name || '';
+            const sourceUrl= d.source_url || '';
+            const source   = d.source || 'user';
+            const sektor   = d.sektor || '';
+            const pozisyon = d.pozisyon || '';
+            const tarih    = d.created_at ? new Date(d.created_at).toLocaleDateString('tr-TR', {day:'numeric', month:'long', year:'numeric'}) : '';
+
+            const konum = [city, country].filter(Boolean).join(', ') || 'Belirtilmemiş';
+            const icon  = KAT_ICON[category] || 'fa-tag';
+            const src   = KAYNAK_ETIKET[source] || KAYNAK_ETIKET['user'];
+
+            // Buton
+            let butonHTML = '';
+            if (sourceUrl) {
+                const isActiris = sourceUrl.includes('actiris.brussels');
+                butonHTML = `
+                <a href="${sourceUrl}" target="_blank" rel="noopener"
+                   class="flex items-center justify-center gap-2 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-2xl transition shadow-lg shadow-indigo-200">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                    ${isActiris ? 'Actiris\'te Ara' : 'Orijinal İlana Git'}
+                </a>
+                ${isActiris ? '<p class="text-xs text-slate-400 text-center mt-2">Actiris sitesinde benzer ilanları bulabilirsiniz.</p>' : ''}`;
+            } else {
+                butonHTML = `
+                <button onclick="alert('Bu ilan için iletişim bilgisi mevcut değil.')"
+                   class="flex items-center justify-center gap-2 w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-4 rounded-2xl transition">
+                    <i class="fa-solid fa-envelope"></i> İletişime Geç
+                </button>`;
+            }
+
+            content.innerHTML = `
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                <!-- SOL / ANA İÇERİK -->
+                <div class="lg:col-span-2 space-y-4">
+
+                    <!-- Başlık kartı -->
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                        <div class="flex items-start gap-4">
+                            <div class="w-14 h-14 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-500 text-2xl flex-shrink-0">
+                                <i class="fa-solid ${icon}"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex flex-wrap gap-2 mb-2">
+                                    <span class="badge ${src.color}"><i class="fa-solid ${src.icon}"></i>${src.label}</span>
+                                    ${sektor ? `<span class="badge bg-slate-100 text-slate-600">${sektor}</span>` : ''}
+                                    ${pozisyon ? `<span class="badge bg-slate-100 text-slate-600">${pozisyon}</span>` : ''}
+                                </div>
+                                <h1 class="text-xl font-bold text-slate-900 leading-snug">${title}</h1>
+                                ${owner ? `<p class="text-sm text-slate-500 mt-1 font-medium"><i class="fa-solid fa-building mr-1 text-slate-300"></i>${owner}</p>` : ''}
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap gap-4 mt-5 pt-5 border-t border-slate-100 text-sm text-slate-500 font-medium">
+                            <span class="flex items-center gap-2"><i class="fa-solid fa-location-dot text-indigo-400"></i>${konum}</span>
+                            ${tarih ? `<span class="flex items-center gap-2"><i class="fa-regular fa-calendar text-indigo-400"></i>${tarih}</span>` : ''}
+                            ${price ? `<span class="flex items-center gap-2 text-indigo-600 font-bold"><i class="fa-solid fa-tag text-indigo-400"></i>${price}</span>` : ''}
+                        </div>
+                    </div>
+
+                    <!-- Açıklama -->
+                    ${desc ? `
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                        <h2 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-align-left text-indigo-400"></i> İlan Açıklaması
+                        </h2>
+                        <p class="text-slate-600 leading-relaxed whitespace-pre-line text-sm">${desc}</p>
+                    </div>` : ''}
+
+                    <!-- Güvenlik uyarısı — sadece kullanıcı ilanlarında -->
+                    ${source === 'user' ? `
+                    <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex gap-3">
+                        <i class="fa-solid fa-shield-halved text-amber-500 text-xl mt-0.5"></i>
+                        <div>
+                            <p class="font-bold text-amber-800 text-sm">Güvenli Alışveriş İpuçları</p>
+                            <p class="text-xs text-amber-700 mt-1">Kapora ödemeyin. Ürünü görmeden para göndermeyin. Şüpheli durumları bildirin.</p>
+                        </div>
+                    </div>` : ''}
+                </div>
+
+                <!-- SAĞ / PANEL -->
+                <div class="space-y-4">
+
+                    <!-- Başvur kartı -->
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                        ${owner ? `
+                        <div class="flex items-center gap-3 mb-5 pb-5 border-b border-slate-100">
+                            <div class="w-11 h-11 rounded-full bg-indigo-100 text-indigo-600 font-bold text-lg flex items-center justify-center">
+                                ${owner.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-400 font-semibold uppercase tracking-wide">İlan Sahibi</p>
+                                <p class="font-bold text-slate-800 text-sm leading-tight">${owner}</p>
+                            </div>
+                        </div>` : ''}
+                        ${butonHTML}
+                    </div>
+
+                    <!-- İlan bilgileri -->
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 space-y-3">
+                        <h3 class="font-bold text-slate-700 text-sm uppercase tracking-wide">İlan Bilgileri</h3>
+                        ${[
+                            ['Kategori', category],
+                            ['Sektör', sektor],
+                            ['Çalışma Şekli', pozisyon],
+                            ['Ülke', country],
+                            ['Şehir', city],
+                            ['Tarih', tarih],
+                        ].filter(([,v]) => v).map(([k,v]) => `
+                        <div class="flex justify-between text-sm">
+                            <span class="text-slate-400 font-medium">${k}</span>
+                            <span class="text-slate-700 font-semibold text-right">${v}</span>
+                        </div>`).join('')}
+                    </div>
+
+                    <!-- Paylaş -->
+                    <button onclick="navigator.share ? navigator.share({title:'${title.replace(/'/g,"\\'")}', url:window.location.href}) : navigator.clipboard.writeText(window.location.href).then(()=>alert('Link kopyalandı!'))"
+                        class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 rounded-2xl transition flex items-center justify-center gap-2 text-sm">
+                        <i class="fa-solid fa-share-nodes"></i> İlanı Paylaş
+                    </button>
+
+                </div>
+            </div>`;
         }
     </script>
 </body>
