@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m pytest test_02_page_load.py test_03_auth.py test_04_vitrins.py test_05_forms.py test_06_modules.py test_07_performance.py test_08_security.py --tb=line --no-header -p no:timeout -q --ignore-glob=\"*conftest*\")"
+    ]
+  }
+}

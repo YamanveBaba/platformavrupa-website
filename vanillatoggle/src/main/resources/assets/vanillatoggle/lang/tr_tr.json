@@ -1,0 +1,13 @@
+{
+	"key.vanillatoggle.toggle": "Vanilla modunu değiştir",
+	"key.categories.vanillatoggle.main": "Vanilla Toggle",
+	"vanillatoggle.feedback.vanilla": "Vanilla modu: bu modun özellikleri kapalı",
+	"vanillatoggle.feedback.modded": "Mod modu: özellikler açık",
+	"vanillatoggle.hud.mod_active": "[Mod özellikleri AÇIK]",
+	"vanillatoggle.config.title": "Vanilla Toggle",
+	"vanillatoggle.config.category.general": "Genel",
+	"vanillatoggle.config.start_vanilla": "Vanilla modunda başlat",
+	"vanillatoggle.config.start_vanilla.tooltip": "Açıkken yeni oturumlarda bu modun özellikleri kapalı başlar.",
+	"vanillatoggle.config.action_bar": "Geri bildirim: aksiyon çubuğu",
+	"vanillatoggle.config.action_bar.tooltip": "Sohbet yerine aksiyon çubuğunda göster."
+}

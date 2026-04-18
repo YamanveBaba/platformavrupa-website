@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- Topluluk Vitrini v2 -->
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
@@ -110,10 +111,7 @@
 
     <script src="config.js"></script>
     <script>
-        // Supabase Bağlantısı
-        let sb = null;
-        try { if (typeof initSupabase === 'function') sb = initSupabase(); } catch (e) {}
-
+        // sb config.js tarafından tanımlandı
         let secilenResimBase64 = null;
 
         window.onload = function() {

@@ -48,14 +48,44 @@
     </div>
 
     <main class="max-w-7xl mx-auto px-6 py-12">
-        
+
+        <!-- Filtreler -->
+        <div class="flex flex-wrap gap-3 mb-8 items-center">
+            <select id="kategoriFiltre" onchange="ilanYukle()" class="border border-slate-200 rounded-xl px-4 py-2 text-sm font-medium bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                <option value="">Tüm Kategoriler</option>
+                <option value="Is Ilani">İş İlanları</option>
+                <option value="Emlak">Emlak</option>
+                <option value="Vasita">Vasıta</option>
+                <option value="Esya">Eşya</option>
+                <option value="Hizmet">Hizmet</option>
+                <option value="Yemek">Yemek</option>
+                <option value="Hukuk">Hukuk</option>
+                <option value="Diger">Diğer</option>
+            </select>
+            <select id="ulkeFiltre" onchange="ilanYukle()" class="border border-slate-200 rounded-xl px-4 py-2 text-sm font-medium bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                <option value="">Tüm Ülkeler</option>
+                <option value="BE">Belçika</option>
+                <option value="DE">Almanya</option>
+                <option value="NL">Hollanda</option>
+                <option value="FR">Fransa</option>
+                <option value="AT">Avusturya</option>
+                <option value="CH">İsviçre</option>
+            </select>
+            <span class="text-sm text-slate-400 ml-auto">67.000+ aktif ilan</span>
+        </div>
+
         <div id="loading" class="text-center py-20">
             <i class="fa-solid fa-circle-notch fa-spin text-4xl text-indigo-600"></i>
             <p class="text-slate-500 mt-4">İlanlar yükleniyor...</p>
         </div>
 
-        <div id="ilanGrid" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8 hidden">
-            </div>
+        <div id="ilanGrid" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8 hidden"></div>
+
+        <div class="text-center mt-10">
+            <button id="dahaFazlaBtn" onclick="sayfaArt()" class="hidden px-8 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition">
+                Daha Fazla Göster
+            </button>
+        </div>
 
     </main>
 
@@ -64,50 +94,99 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoaWV0cnFsamFoZG1sb2F6Z3BwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTk5MTcsImV4cCI6MjA4MDYzNTkxN30.sxpUrTnR40XuEBPUeQXj352xMziGr_lDqdA8H69ejBA';
         const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        window.onload = async function() {
-            const grid = document.getElementById('ilanGrid');
-            const loading = document.getElementById('loading');
+        const SAYFA_BOYUTU = 48;
+        let mevcutSayfa = 0;
+        let toplamIlan = 0;
 
-            // İlanları Çek
-            const { data, error } = await sb
-                .from('ilanlar')
-                .select('*')
-                .order('created_at', { ascending: false });
+        const KATEGORI_RENK = {
+            'Is Ilani': 'bg-blue-100 text-blue-700',
+            'Emlak':    'bg-green-100 text-green-700',
+            'Vasita':   'bg-orange-100 text-orange-700',
+            'Esya':     'bg-purple-100 text-purple-700',
+            'Hizmet':   'bg-pink-100 text-pink-700',
+            'Yemek':    'bg-yellow-100 text-yellow-700',
+            'Hukuk':    'bg-red-100 text-red-700',
+        };
 
-            loading.classList.add('hidden');
-            grid.classList.remove('hidden');
+        function ilanKartHTML(ilan) {
+            const renk = KATEGORI_RENK[ilan.category] || 'bg-slate-100 text-slate-600';
+            const resim = ilan.image || 'https://via.placeholder.com/400x300/e2e8f0/94a3b8?text=' + encodeURIComponent(ilan.category || 'İlan');
+            const sehir = [ilan.city, ilan.country].filter(Boolean).join(', ');
+            return `
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-xl transition group h-full flex flex-col">
+                <div class="h-40 overflow-hidden relative bg-slate-100">
+                    <img src="${resim}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='https://via.placeholder.com/400x300/e2e8f0/94a3b8?text=İlan'">
+                    <div class="absolute top-3 left-3 ${renk} text-xs font-bold px-2 py-1 rounded-md shadow-sm">
+                        ${ilan.category || 'Genel'}
+                    </div>
+                </div>
+                <div class="p-4 flex-1 flex flex-col">
+                    <h3 class="font-bold text-slate-900 line-clamp-2 text-sm mb-1">${ilan.title || 'İlan'}</h3>
+                    ${ilan.owner_name ? `<p class="text-xs text-slate-400 mb-1 line-clamp-1"><i class="fa-solid fa-building mr-1"></i>${ilan.owner_name}</p>` : ''}
+                    <p class="text-xs text-slate-500 flex items-center gap-1 mb-3">
+                        <i class="fa-solid fa-location-dot text-indigo-400"></i> ${sehir || '—'}
+                    </p>
+                    ${ilan.price ? `<p class="text-indigo-600 font-bold text-sm mb-2">${ilan.price}</p>` : ''}
+                    <a href="${ilan.source_url || ('ilan_detay.html?id=' + ilan.id)}" target="${ilan.source_url ? '_blank' : '_self'}"
+                       class="mt-auto w-full py-2 border border-indigo-600 text-indigo-600 font-bold rounded-xl hover:bg-indigo-600 hover:text-white transition text-sm text-center block">
+                        İncele
+                    </a>
+                </div>
+            </div>`;
+        }
 
-            if (!data || data.length === 0) {
-                grid.innerHTML = '<p class="text-center text-slate-500 col-span-full">Henüz hiç ilan yok.</p>';
+        async function ilanYukle(ekle = false) {
+            if (!ekle) {
+                mevcutSayfa = 0;
+                document.getElementById('ilanGrid').innerHTML = '';
+            }
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('ilanGrid').classList.add('hidden');
+            document.getElementById('dahaFazlaBtn').classList.add('hidden');
+
+            const kategori = document.getElementById('kategoriFiltre').value;
+            const ulke = document.getElementById('ulkeFiltre').value;
+
+            let sorgu = sb.from('ilanlar')
+                .select('id,title,category,city,country,image,price,owner_name,source_url')
+                .eq('status', 'active')
+                .order('created_at', { ascending: false })
+                .range(mevcutSayfa * SAYFA_BOYUTU, (mevcutSayfa + 1) * SAYFA_BOYUTU - 1);
+
+            if (kategori) sorgu = sorgu.eq('category', kategori);
+            if (ulke)    sorgu = sorgu.eq('country', ulke);
+
+            const { data, error } = await sorgu;
+
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('ilanGrid').classList.remove('hidden');
+
+            if (error || !data) {
+                document.getElementById('ilanGrid').innerHTML = '<p class="text-center text-red-500 col-span-full">Yüklenirken hata oluştu: ' + (error?.message || '') + '</p>';
                 return;
             }
 
-            // İlanları Listele
+            if (!ekle && data.length === 0) {
+                document.getElementById('ilanGrid').innerHTML = '<p class="text-center text-slate-500 col-span-full py-16">Bu kategoride ilan bulunamadı.</p>';
+                return;
+            }
+
             data.forEach(ilan => {
-                const html = `
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-xl transition group h-full flex flex-col">
-                    <div class="h-48 overflow-hidden relative bg-slate-100">
-                        <img src="${ilan.resim || 'https://via.placeholder.com/400x300?text=Resim+Yok'}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
-                        <div class="absolute top-3 left-3 bg-white/90 backdrop-blur text-xs font-bold px-2 py-1 rounded-md shadow-sm">
-                            ${ilan.kategori || 'Genel'}
-                        </div>
-                    </div>
-                    <div class="p-5 flex-1 flex flex-col">
-                        <div class="flex justify-between items-start mb-2">
-                            <h3 class="font-bold text-slate-900 line-clamp-1">${ilan.baslik || 'İlan'}</h3>
-                            <span class="text-indigo-600 font-bold bg-indigo-50 px-2 py-1 rounded-md text-sm whitespace-nowrap">${ilan.fiyat || ''}</span>
-                        </div>
-                        <p class="text-xs text-slate-500 flex items-center gap-1 mb-4">
-                            <i class="fa-solid fa-location-dot"></i> ${ilan.konum || ''}
-                        </p>
-                        <button onclick="window.location.href='ilan_detay.html?id=${ilan.id}'" class="mt-auto w-full py-2 border border-indigo-600 text-indigo-600 font-bold rounded-xl hover:bg-indigo-600 hover:text-white transition text-sm">
-                            İncele
-                        </button>
-                    </div>
-                </div>`;
-                grid.insertAdjacentHTML('beforeend', html);
+                document.getElementById('ilanGrid').insertAdjacentHTML('beforeend', ilanKartHTML(ilan));
             });
-        };
+
+            // Tam sayfa geldiyse daha fazla olabilir
+            if (data.length === SAYFA_BOYUTU) {
+                document.getElementById('dahaFazlaBtn').classList.remove('hidden');
+            }
+        }
+
+        function sayfaArt() {
+            mevcutSayfa++;
+            ilanYukle(true);
+        }
+
+        window.onload = () => ilanYukle();
     </script>
 </body>
 </html>
