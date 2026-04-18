@@ -500,7 +500,7 @@
 
                     // SADECE DB'DEN ÇEKİYORUZ - "Emlak" kategorisi
 
-                    const { data, error } = await sb.from('ilanlar').select('*').eq('kategori', 'Emlak').order('created_at', { ascending: false });
+                    const { data, error } = await sb.from('ilanlar').select('*').eq('category', 'Emlak').eq('status', 'active').order('created_at', { ascending: false });
 
 
 

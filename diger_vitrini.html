@@ -249,7 +249,7 @@
                     const { data, error } = await sb
                         .from('ilanlar')
                         .select('*')
-                        .eq('kategori', 'diger')
+                        .eq('category', 'Diger').eq('status', 'active')
                         .order('created_at', { ascending: false });
 
                     if (!error && data) {

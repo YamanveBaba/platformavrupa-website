@@ -261,7 +261,7 @@
             let supabaseData = [];
             if(sb) {
                 try {
-                    const { data } = await sb.from('ilanlar').select('*').eq('kategori', 'Topluluk').order('created_at', { ascending: false });
+                    const { data } = await sb.from('ilanlar').select('*').eq('category', 'Topluluk').eq('status', 'active').order('created_at', { ascending: false });
                     if(data) supabaseData = data;
                 } catch(e) {}
             }
