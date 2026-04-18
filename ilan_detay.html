@@ -110,11 +110,11 @@
             if (source === 'actiris') {
                 const googleQ = encodeURIComponent('"Ref. ' + sourceId + '" site:actiris.brussels');
                 butonHTML = `
-                <a href="https://www.google.com/search?q=${googleQ}" target="_blank" rel="noopener"
+                <a href="https://www.google.com/search?q=${googleQ}&btnI=1" target="_blank" rel="noopener"
                    class="flex items-center justify-center gap-2 w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 rounded-2xl transition shadow-lg shadow-purple-200">
-                    <i class="fa-solid fa-arrow-up-right-from-square"></i> İlanı Actiris'te Aç
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Actiris'te Başvur
                 </a>
-                <p class="text-xs text-slate-400 text-center mt-2">Google üzerinden direkt bu ilanın sayfasına gideceksiniz.</p>`;
+                <p class="text-xs text-slate-400 text-center mt-2">Direkt bu ilanın Actiris sayfasına yönlendirileceksiniz.</p>`;
             } else if (source === 'forem' && sourceUrl) {
                 butonHTML = `
                 <a href="${sourceUrl}" target="_blank" rel="noopener"
