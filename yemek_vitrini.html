@@ -244,7 +244,7 @@
             if (sb) {
                 try {
                     // SADECE DB - "mutfak" kategorisi
-                    const { data, error } = await sb.from('ilanlar').select('*').eq('kategori', 'mutfak').order('created_at', { ascending: false });
+                    const { data, error } = await sb.from('ilanlar').select('*').eq('category', 'Yemek').eq('status', 'active').order('created_at', { ascending: false });
 
                     if (!error && data) {
                         tumIlanlar = data.map(i => ({

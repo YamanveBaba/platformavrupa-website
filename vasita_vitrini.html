@@ -381,7 +381,7 @@
             if (sb) {
                 try {
                     // SADECE DB - "vasita" kategorisi
-                    const { data, error } = await sb.from('ilanlar').select('*').eq('kategori', 'vasita').order('created_at', { ascending: false });
+                    const { data, error } = await sb.from('ilanlar').select('*').eq('category', 'Vasita').eq('status', 'active').order('created_at', { ascending: false });
 
                     if (!error && data) {
                         tumIlanlar = data.map(i => ({

@@ -273,7 +273,7 @@
 
             if (sb) {
                 try {
-                    const { data, error } = await sb.from('ilanlar').select('*').eq('kategori', 'esya').order('created_at', { ascending: false });
+                    const { data, error } = await sb.from('ilanlar').select('*').eq('category', 'Esya').eq('status', 'active').order('created_at', { ascending: false });
                     if (!error && data) {
                         tumIlanlar = data.map(i => ({
                             id: i.id,

@@ -309,28 +309,30 @@
 
             if(sb) {
                 try {
-                    // 'ilanlar' TABLOSUNDAN - kategori: 'is'
+                    // 'ilanlar' TABLOSUNDAN - category: 'Is Ilani'
                     const { data, error } = await sb.from('ilanlar')
-                        .select('id,baslik,konum,ulke,fiyat,sektor,pozisyon,role,aciklama,telefon,created_at,lat,lon')
-                        .eq('kategori', 'is')
-                        .order('created_at', { ascending: false });
+                        .select('id,title,city,country,price,sektor,pozisyon,description,created_at,lat,lon,source_url,owner_name')
+                        .eq('category', 'Is Ilani')
+                        .eq('status', 'active')
+                        .order('created_at', { ascending: false })
+                        .limit(500);
 
                     if (!error && data) {
                         tumIlanlar = data.map(i => ({
                             id: i.id,
-                            role: i.role || 'isveren',
+                            role: 'isveren',
                             sektor: i.sektor || 'Diğer',
-                            baslik: i.baslik || 'İş İlanı',
-                            firma: "Üye",
-                            konum: i.konum || "Avrupa",
-                            ulke: i.ulke || '',
-                            fiyat: i.fiyat || '',
-                            pozisyon: i.pozisyon || "Tam Zamanlı",
+                            baslik: i.title || 'İş İlanı',
+                            firma: i.owner_name || '',
+                            konum: i.city || 'Avrupa',
+                            ulke: i.country || '',
+                            fiyat: i.price || '',
+                            pozisyon: i.pozisyon || 'Tam Zamanlı',
                             tarih: formatDate(i.created_at, 'long'),
-                            source_url: '',
-                            source: 'user',
-                            lat: i.lat || (48.0 + (Math.random() * 5)),
-                            lon: i.lon || (10.0 + (Math.random() * 5))
+                            source_url: i.source_url || '',
+                            source: 'auto',
+                            lat: i.lat || null,
+                            lon: i.lon || null
                         }));
                     }
                 } catch (err) { console.error(err); }
@@ -354,7 +356,7 @@
             filters.sektor = document.getElementById('sektorSelect').value;
 
             const suzulen = tumIlanlar.filter(ilan => {
-                const rolUyumu = (filters.rol === 'Hepsi') || (filters.rol === ilan.role);
+                const rolUyumu = true;
                 const ulkeUyumu = (filters.country === "") || (ilan.ulke === filters.country);
                 const sehirUyumu = (filters.city === "") || (ilan.konum === filters.city);
                 const sektorUyumu = (filters.sektor === "") || (ilan.sektor === 'Genel') || (ilan.sektor && ilan.sektor.includes(filters.sektor));
@@ -432,7 +434,7 @@
                     const iconHtml = `<div style="background:${iconColor}; width:14px; height:14px; border-radius:50%; border:2px solid white; box-shadow:0 2px 4px rgba(0,0,0,0.3);"></div>`;
                     const icon = L.divIcon({ className: '', html: iconHtml, iconSize: [14, 14] });
                     const marker = L.marker([item.lat, item.lon], {icon: icon}).addTo(map);
-                    marker.bindPopup(`<b>${item.baslik}</b><br>${item.konum}`);
+                    marker.bindPopup(`<b>${item.baslik}</b><br>${item.konum}, ${item.ulke}`);
                     markers.push(marker);
                 }
             });
