@@ -75,25 +75,25 @@
         function ilanGoster(ilan) {
             const container = document.getElementById('ilanDetayKutusu');
 
-            // Veri Eşleştirme (ilanlar tablosuna göre - Türkçe alan adları)
-            const baslik = ilan.baslik || "Başlıksız İlan";
-            const fiyat = ilan.fiyat || "Belirtilmedi";
-            const aciklama = ilan.aciklama || "Açıklama girilmemiş.";
-            const konum = (ilan.konum && ilan.ulke) ? `${ilan.konum}, ${ilan.ulke}` : (ilan.konum || "Konum Belirtilmemiş");
+            // Veri Eşleştirme (ilanlar tablosundaki gerçek sütun adları)
+            const baslik = ilan.title || "Başlıksız İlan";
+            const fiyat = ilan.price || "Belirtilmedi";
+            const aciklama = ilan.description || "Açıklama girilmemiş.";
+            const konum = (ilan.city && ilan.country) ? `${ilan.city}, ${ilan.country}` : (ilan.city || ilan.country || "Konum Belirtilmemiş");
             const tarih = formatDate(ilan.created_at, 'long');
-            const kategori = ilan.kategori || "Genel";
-            const sahip = ilan.telefon ? `Tel: ${ilan.telefon}` : "Platform Üyesi";
+            const kategori = ilan.category || "Genel";
+            const sahip = ilan.owner_name || "Platform Üyesi";
 
             // Resim Kontrolü
             let resimHTML = "";
-            if (ilan.resim) {
-                resimHTML = `<img src="${ilan.resim}" class="w-full h-full object-cover">`;
+            if (ilan.image) {
+                resimHTML = `<img src="${ilan.image}" class="w-full h-full object-cover">`;
             } else {
                 // Kategoriye göre varsayılan ikon
                 let icon = 'fa-image';
-                if(kategori.includes('İş')) icon = 'fa-briefcase';
+                if(kategori.includes('Is Ilani') || kategori.includes('İş')) icon = 'fa-briefcase';
                 else if(kategori.includes('Emlak')) icon = 'fa-house';
-                else if(kategori.includes('Vasıta')) icon = 'fa-car';
+                else if(kategori.includes('Vasita') || kategori.includes('Vasıta')) icon = 'fa-car';
 
                 resimHTML = `
                     <div class="w-full h-full flex flex-col items-center justify-center bg-slate-100 text-slate-300">
@@ -173,14 +173,19 @@
                                     </div>
 
                                     <div class="space-y-3">
+                                        ${ilan.source_url ? `
+                                        <a href="${ilan.source_url}" target="_blank" rel="noopener" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-indigo-200 transition flex items-center justify-center gap-2">
+                                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                            <span>Orijinal İlana Git</span>
+                                        </a>` : `
                                         <button onclick="mesajGonder()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-green-200 transition flex items-center justify-center gap-2 group">
-                                            <i class="fa-brands fa-whatsapp text-2xl group-hover:scale-110 transition"></i> 
+                                            <i class="fa-brands fa-whatsapp text-2xl group-hover:scale-110 transition"></i>
                                             <span>WhatsApp ile Yaz</span>
                                         </button>
                                         <button onclick="alert('Numara gizli veya belirtilmemiş.')" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-200 transition flex items-center justify-center gap-2">
                                             <i class="fa-solid fa-phone"></i>
                                             <span>Hemen Ara</span>
-                                        </button>
+                                        </button>`}
                                     </div>
                                 </div>
 
