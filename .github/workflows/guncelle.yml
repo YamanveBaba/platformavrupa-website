@@ -1,0 +1,41 @@
+name: Belcika Is Ilanlari Guncelle
+
+on:
+  schedule:
+    - cron: '0 4 * * *'   # 04:00 UTC = 06:00 Bruksel (yaz saati)
+  workflow_dispatch:        # GitHub UI'dan manuel tetikleme
+
+jobs:
+  guncelle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+    steps:
+      - name: Kodu al
+        uses: actions/checkout@v4
+
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: ilan_cekici/requirements.txt
+
+      - name: Bagimliliklar yukle
+        run: pip install -r ilan_cekici/requirements.txt
+
+      - name: Playwright chromium yukle
+        run: python -m playwright install chromium --with-deps
+
+      - name: FOREM cek (Valoniya, ~8 dk)
+        run: python -X utf8 ilan_cekici/forem_cek.py --temizle
+
+      - name: Actiris cek (Bruksel, ~15 dk)
+        run: python -X utf8 ilan_cekici/actiris_cek.py --temizle
+
+      - name: VDAB cek (Flandriya, ~10 dk)
+        run: python -X utf8 ilan_cekici/vdab_cek.py --max 2000
