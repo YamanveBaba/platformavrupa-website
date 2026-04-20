@@ -13,5 +13,8 @@ python -X utf8 forem_cek.py --temizle >> "%~dp0guncelleme_log.txt" 2>&1
 :: Actiris (Brüksel) — ~15 dakika
 python -X utf8 actiris_cek.py --temizle >> "%~dp0guncelleme_log.txt" 2>&1
 
+:: VDAB (Flandriya) — ~10 dakika
+python -X utf8 vdab_cek.py --max 2000 >> "%~dp0guncelleme_log.txt" 2>&1
+
 echo [%date% %time%] Guncelleme tamamlandi. >> "%~dp0guncelleme_log.txt"
 echo Tamamlandi.

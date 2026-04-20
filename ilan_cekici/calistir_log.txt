@@ -82,3 +82,10 @@ operable program or batch file.
 operable program or batch file.
 [Cmt 18.04.2026  3:00:01,48] Tamamlandi. 
  
+[Paz 19.04.2026  3:00:01,44] Ilan cekici basliyor... 
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+[Paz 19.04.2026  3:00:01,47] Tamamlandi. 
+ 
