@@ -2,17 +2,20 @@ name: Belcika Is Ilanlari Guncelle
 
 on:
   schedule:
-    - cron: '0 4 * * *'   # 04:00 UTC = 06:00 Bruksel (yaz saati)
-  workflow_dispatch:        # GitHub UI'dan manuel tetikleme
+    - cron: '0 4 * * 1-6'   # Pazartesi-Cumartesi 04:00 UTC (06:00 Bruksel)
+    - cron: '0 2 * * 0'      # Pazar 02:00 UTC — haftalik tam cekum
+  workflow_dispatch:
 
 jobs:
   guncelle:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 360
 
     env:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
 
     steps:
       - name: Kodu al
@@ -31,11 +34,26 @@ jobs:
       - name: Playwright chromium yukle
         run: python -m playwright install chromium --with-deps
 
-      - name: FOREM cek (Valoniya, ~8 dk)
+      - name: Rastgele baslangic gecikmesi (0-25 dk)
+        run: |
+          DELAY=$((RANDOM % 1500))
+          echo "Baslangic gecikmesi: ${DELAY} saniye"
+          sleep $DELAY
+
+      - name: FOREM cek (Valoniya)
         run: python -X utf8 ilan_cekici/forem_cek.py --temizle
 
-      - name: Actiris cek (Bruksel, ~15 dk)
+      - name: Actiris cek (Bruksel)
         run: python -X utf8 ilan_cekici/actiris_cek.py --temizle
 
-      - name: VDAB cek (Flandriya, ~10 dk)
-        run: python -X utf8 ilan_cekici/vdab_cek.py --max 2000
+      - name: VDAB gunluk cek (Pazartesi-Cumartesi)
+        if: github.event.schedule == '0 4 * * 1-6' || github.event_name == 'workflow_dispatch'
+        run: python -X utf8 ilan_cekici/vdab_cek.py --gunler 1 --max 5000
+
+      - name: VDAB haftalik tam cek (Pazar)
+        if: github.event.schedule == '0 2 * * 0'
+        run: python -X utf8 ilan_cekici/vdab_cek.py --max 300000
+
+      - name: Telegram bildirimi gonder
+        if: always()
+        run: python -X utf8 ilan_cekici/bildir.py
