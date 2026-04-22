@@ -1,11 +1,46 @@
 User-agent: *
 Allow: /
 
-# Admin ve yönetim sayfaları arama sonuçlarında çıkmasın (isteğe bağlı)
+# Admin ve yönetim sayfaları arama sonuçlarında çıkmasın
 Disallow: /admin.html
 Disallow: /admin_listings.html
 Disallow: /admin_chat.html
 Disallow: /video_yonetim.html
 Disallow: /sifre_yenile.html
 
+# AI Arama Botları — Açıkça izin ver
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: Gemini
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
+User-agent: meta-externalagent
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
 Sitemap: https://www.platformavrupa.com/sitemap.xml
+Sitemap: https://www.platformavrupa.com/llms.txt

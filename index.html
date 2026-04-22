@@ -20,15 +20,19 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@300;500;700;900&display=swap" rel="stylesheet">
-    
+    <!-- Sadece kullanılan weightler -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@700;900&display=swap" rel="stylesheet">
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Font Awesome defer ile yükle — render bloklamaması için -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"></noscript>
+
     <script src="config.js"></script>
     <script src="utils.js"></script>
-    <script src="auth.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script defer src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script defer src="auth.js"></script>
     
     <script>
         tailwind.config = {
@@ -42,6 +46,105 @@
     </script>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#020617">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://www.platformavrupa.com/#website",
+      "url": "https://www.platformavrupa.com/",
+      "name": "Platform Avrupa",
+      "description": "Avrupa'daki Türkler için tek platform: iş ilanları, yol arkadaşı, market fiyatları, döviz, sağlık turizmi ve eğitim.",
+      "inLanguage": "tr",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://www.platformavrupa.com/ilanlar.html?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://www.platformavrupa.com/#organization",
+      "name": "Platform Avrupa",
+      "url": "https://www.platformavrupa.com/",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://www.platformavrupa.com/og-image.png"
+      },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "email": "info@platformavrupa.com",
+        "contactType": "customer support",
+        "availableLanguage": "Turkish"
+      },
+      "description": "Belçika ve Avrupa'daki Türk diasporası için kapsamlı dijital platform. İş ilanları, yol arkadaşı, market fiyatları, döviz ve sağlık turizmi hizmetleri.",
+      "areaServed": ["BE", "DE", "FR", "NL", "AT", "CH"],
+      "knowsLanguage": "tr"
+    },
+    {
+      "@type": "WebApplication",
+      "@id": "https://www.platformavrupa.com/#webapp",
+      "name": "Platform Avrupa",
+      "url": "https://www.platformavrupa.com/",
+      "applicationCategory": "LifestyleApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "EUR"
+      },
+      "featureList": [
+        "İş ilanları (Actiris, FOREM, VDAB)",
+        "Yol arkadaşı ve kargo",
+        "Belçika market fiyatları",
+        "Döviz ve altın fiyatları",
+        "Sağlık turizmi",
+        "Ücretsiz eğitim videoları",
+        "Sıla yolu haritası"
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Platform Avrupa nedir?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Platform Avrupa, Belçika ve Avrupa'daki Türk diasporası için geliştirilmiş kapsamlı bir dijital platformdur. İş ilanları, yol arkadaşı, kargo, market fiyatları, döviz/altın, sağlık turizmi ve eğitim gibi hizmetleri tek çatı altında sunar."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Belçika'da Türkçe iş ilanları nerede bulunur?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Platform Avrupa'da Actiris (Brüksel), FOREM (Valoniya) ve VDAB (Flandriya) kaynaklarından günlük güncellenen 100.000'den fazla iş ilanına ulaşabilirsiniz."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Belçika market fiyatları nasıl karşılaştırılır?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Platform Avrupa'nın market sayfasında Colruyt, Delhaize, Lidl, Carrefour ve Aldi marketlerinin güncel ürün fiyatlarını karşılaştırabilirsiniz."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Türkiye'ye yol arkadaşı nasıl bulunur?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Platform Avrupa'nın Yol Arkadaşı sayfasında Belçika'dan Türkiye'ye giden sürücüler ile koltuk arayanları buluşturan ilanlar yer almaktadır."
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
     <style>
         html { scroll-behavior: smooth; scroll-padding-top: 100px; }
         body { background-color: #020617; color: white; overflow-x: hidden; }
@@ -75,11 +178,8 @@
             animation: fadeIn 0.8s ease-out forwards;
         }
         
-        /* Smooth transitions for all interactive elements */
-        * {
-            transition-property: transform, opacity, background-color, border-color, box-shadow;
-            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-        }
+        /* Sadece interaktif elemanlar — hepsine değil */
+        a, button { transition: transform .15s ease, border-color .15s ease, background-color .15s ease, box-shadow .15s ease; }
         
         /* Modal */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px); z-index: 999; display: none; align-items: center; justify-content: center; }
@@ -157,33 +257,33 @@
                     <div class="h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent flex-1"></div>
                 </div>
                 <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
-                    <a href="yol_arkadasi.html" class="group relative bg-gradient-to-br from-blue-900/20 to-blue-800/10 hover:from-blue-600/30 hover:to-blue-500/20 border border-blue-500/30 hover:border-blue-400/50 p-4 md:p-6 rounded-2xl transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-blue-500/20 flex flex-col items-center gap-2 md:gap-3">
+                    <a href="yol_arkadasi.html" class="group relative bg-gradient-to-br from-blue-900/20 to-blue-800/10 hover:from-blue-600/30 hover:to-blue-500/20 border border-blue-500/30 hover:border-blue-400/50 p-3 md:p-4 rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/20 flex flex-col items-center gap-1.5 md:gap-2">
                         <div class="absolute top-2 right-2 text-xs bg-blue-500/20 text-blue-300 px-2 py-1 rounded-full font-semibold">Popüler</div>
-                        <div class="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-blue-500/20 to-blue-600/10 flex items-center justify-center mb-1 md:mb-2 group-hover:scale-110 transition-transform duration-300">
-                            <i class="fa-solid fa-car-side text-2xl md:text-3xl text-blue-400 group-hover:text-blue-300"></i>
+                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-600/10 flex items-center justify-center mb-1 md:mb-2 group-hover:scale-110 transition-transform duration-300">
+                            <i class="fa-solid fa-car-side text-xl md:text-2xl text-blue-400 group-hover:text-blue-300"></i>
                         </div>
                         <span class="font-bold text-white text-sm md:text-base line-clamp-2 text-center">Yol Arkadaşı</span>
                         <span class="text-xs text-slate-400 text-center line-clamp-1 hidden md:block">Paylaşımlı yolculuk</span>
                     </a>
-                    <a href="kargo_emanet.html" class="group relative bg-gradient-to-br from-amber-900/20 to-amber-800/10 hover:from-amber-600/30 hover:to-amber-500/20 border border-amber-500/30 hover:border-amber-400/50 p-4 md:p-6 rounded-2xl transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-amber-500/20 flex flex-col items-center gap-2 md:gap-3">
-                        <div class="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-amber-500/20 to-amber-600/10 flex items-center justify-center mb-1 md:mb-2 group-hover:scale-110 transition-transform duration-300">
-                            <i class="fa-solid fa-box-open text-2xl md:text-3xl text-amber-400 group-hover:text-amber-300"></i>
+                    <a href="kargo_emanet.html" class="group relative bg-gradient-to-br from-amber-900/20 to-amber-800/10 hover:from-amber-600/30 hover:to-amber-500/20 border border-amber-500/30 hover:border-amber-400/50 p-3 md:p-4 rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-amber-500/20 flex flex-col items-center gap-1.5 md:gap-2">
+                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-600/10 flex items-center justify-center mb-1 md:mb-2 group-hover:scale-110 transition-transform duration-300">
+                            <i class="fa-solid fa-box-open text-xl md:text-2xl text-amber-400 group-hover:text-amber-300"></i>
                         </div>
                         <span class="font-bold text-white text-sm md:text-base line-clamp-2 text-center">Kargo & Emanet</span>
                         <span class="text-xs text-slate-400 text-center line-clamp-1 hidden md:block">Paket taşıma hizmeti</span>
                     </a>
-                    <a href="yol_yardim.html" class="group relative bg-gradient-to-br from-red-900/20 to-red-800/10 hover:from-red-600/30 hover:to-red-500/20 border border-red-500/30 hover:border-red-400/50 p-4 md:p-6 rounded-2xl transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-red-500/20 flex flex-col items-center gap-2 md:gap-3">
+                    <a href="yol_yardim.html" class="group relative bg-gradient-to-br from-red-900/20 to-red-800/10 hover:from-red-600/30 hover:to-red-500/20 border border-red-500/30 hover:border-red-400/50 p-3 md:p-4 rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-red-500/20 flex flex-col items-center gap-1.5 md:gap-2">
                         <div class="absolute top-2 right-2 text-xs bg-red-500/20 text-red-300 px-2 py-1 rounded-full font-semibold animate-pulse">Acil</div>
-                        <div class="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-red-500/20 to-red-600/10 flex items-center justify-center mb-1 md:mb-2 group-hover:scale-110 transition-transform duration-300">
-                            <i class="fa-solid fa-truck-medical text-2xl md:text-3xl text-red-400 group-hover:text-red-300"></i>
+                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-red-500/20 to-red-600/10 flex items-center justify-center mb-1 md:mb-2 group-hover:scale-110 transition-transform duration-300">
+                            <i class="fa-solid fa-truck-medical text-xl md:text-2xl text-red-400 group-hover:text-red-300"></i>
                         </div>
                         <span class="font-bold text-white text-sm md:text-base line-clamp-2 text-center">Yol Yardım</span>
                         <span class="text-xs text-slate-400 text-center line-clamp-1 hidden md:block">Acil durum desteği</span>
                     </a>
-                    <a href="sila_yolu.html" class="group relative bg-gradient-to-br from-purple-900/20 to-purple-800/10 hover:from-purple-600/30 hover:to-purple-500/20 border border-purple-500/30 hover:border-purple-400/50 p-4 md:p-6 rounded-2xl transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-purple-500/20 flex flex-col items-center gap-2 md:gap-3">
+                    <a href="sila_yolu.html" class="group relative bg-gradient-to-br from-purple-900/20 to-purple-800/10 hover:from-purple-600/30 hover:to-purple-500/20 border border-purple-500/30 hover:border-purple-400/50 p-3 md:p-4 rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-purple-500/20 flex flex-col items-center gap-1.5 md:gap-2">
                         <div class="absolute top-2 right-2 text-xs bg-purple-500/20 text-purple-300 px-2 py-1 rounded-full font-semibold">Canlı</div>
-                        <div class="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-purple-500/20 to-purple-600/10 flex items-center justify-center mb-1 md:mb-2 group-hover:scale-110 transition-transform duration-300">
-                            <i class="fa-solid fa-road text-2xl md:text-3xl text-purple-400 group-hover:text-purple-300"></i>
+                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-purple-500/20 to-purple-600/10 flex items-center justify-center mb-1 md:mb-2 group-hover:scale-110 transition-transform duration-300">
+                            <i class="fa-solid fa-road text-xl md:text-2xl text-purple-400 group-hover:text-purple-300"></i>
                         </div>
                         <span class="font-bold text-white text-sm md:text-base line-clamp-2 text-center">Sıla Yolu</span>
                         <span class="text-xs text-slate-400 text-center line-clamp-1 hidden md:block">Gümrük kapıları, kameralar ve yol bildirimleri</span>
@@ -201,16 +301,16 @@
                     <div class="h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent flex-1"></div>
                 </div>
                 <div class="grid grid-cols-2 md:grid-cols-2 gap-3 md:gap-6">
-                    <a href="market.html" class="group relative bg-gradient-to-br from-emerald-900/20 to-emerald-800/10 hover:from-emerald-600/30 hover:to-emerald-500/20 border border-emerald-500/30 hover:border-emerald-400/50 p-4 md:p-6 rounded-2xl transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-emerald-500/20 flex flex-col items-center gap-2 md:gap-3 block">
-                        <div class="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 flex items-center justify-center mb-1 md:mb-2 group-hover:scale-110 transition-transform duration-300">
-                            <i class="fa-solid fa-basket-shopping text-2xl md:text-3xl text-emerald-400 group-hover:text-emerald-300"></i>
+                    <a href="market.html" class="group relative bg-gradient-to-br from-emerald-900/20 to-emerald-800/10 hover:from-emerald-600/30 hover:to-emerald-500/20 border border-emerald-500/30 hover:border-emerald-400/50 p-3 md:p-4 rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-emerald-500/20 flex flex-col items-center gap-1.5 md:gap-2 block">
+                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 flex items-center justify-center mb-1 md:mb-2 group-hover:scale-110 transition-transform duration-300">
+                            <i class="fa-solid fa-basket-shopping text-xl md:text-2xl text-emerald-400 group-hover:text-emerald-300"></i>
                         </div>
                         <span class="font-bold text-white text-sm md:text-base line-clamp-2 text-center">Market Fiyatları</span>
                         <span class="text-xs text-slate-400 text-center line-clamp-1 hidden md:block">30 ülke, 100+ market</span>
                     </a>
-                    <a href="doviz_altin.html" class="group relative bg-gradient-to-br from-yellow-900/20 to-yellow-800/10 hover:from-yellow-600/30 hover:to-yellow-500/20 border border-yellow-500/30 hover:border-yellow-400/50 p-4 md:p-6 rounded-2xl transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-yellow-500/20 flex flex-col items-center gap-2 md:gap-3">
-                        <div class="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-yellow-500/20 to-yellow-600/10 flex items-center justify-center mb-1 md:mb-2 group-hover:scale-110 transition-transform duration-300">
-                            <i class="fa-solid fa-coins text-2xl md:text-3xl text-yellow-400 group-hover:text-yellow-300"></i>
+                    <a href="doviz_altin.html" class="group relative bg-gradient-to-br from-yellow-900/20 to-yellow-800/10 hover:from-yellow-600/30 hover:to-yellow-500/20 border border-yellow-500/30 hover:border-yellow-400/50 p-3 md:p-4 rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-yellow-500/20 flex flex-col items-center gap-1.5 md:gap-2">
+                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-yellow-500/20 to-yellow-600/10 flex items-center justify-center mb-1 md:mb-2 group-hover:scale-110 transition-transform duration-300">
+                            <i class="fa-solid fa-coins text-xl md:text-2xl text-yellow-400 group-hover:text-yellow-300"></i>
                         </div>
                         <span class="font-bold text-white text-sm md:text-base line-clamp-2 text-center">Döviz & Altın</span>
                         <span class="text-xs text-slate-400 text-center line-clamp-1 hidden md:block">Canlı fiyatlar</span>
@@ -228,7 +328,7 @@
                     <div class="h-px bg-gradient-to-r from-transparent via-pink-500/50 to-transparent flex-1"></div>
                 </div>
                 <div class="grid grid-cols-1 gap-3 md:gap-6">
-                    <a href="saglik_turizmi.html" class="group relative bg-gradient-to-br from-pink-900/20 to-pink-800/10 hover:from-pink-600/30 hover:to-pink-500/20 border border-pink-500/30 hover:border-pink-400/50 p-8 rounded-2xl transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-pink-500/20 flex flex-col items-center gap-4">
+                    <a href="saglik_turizmi.html" class="group relative bg-gradient-to-br from-pink-900/20 to-pink-800/10 hover:from-pink-600/30 hover:to-pink-500/20 border border-pink-500/30 hover:border-pink-400/50 p-8 rounded-2xl transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-pink-500/20 flex flex-col items-center gap-4">
                         <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-pink-500/20 to-pink-600/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300">
                             <i class="fa-solid fa-heart-pulse text-4xl text-pink-400 group-hover:text-pink-300"></i>
                         </div>
@@ -248,16 +348,16 @@
                     <div class="h-px bg-gradient-to-r from-transparent via-slate-500/50 to-transparent flex-1"></div>
                 </div>
                 <div class="grid grid-cols-2 md:grid-cols-2 gap-3 md:gap-6">
-                    <a href="hukuk_vitrini.html" class="group relative bg-gradient-to-br from-slate-800/50 to-slate-900/30 hover:from-slate-700/60 hover:to-slate-800/40 border border-slate-700/50 hover:border-slate-500/70 p-4 md:p-6 rounded-2xl transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-slate-500/20 flex flex-col items-center gap-2 md:gap-3">
-                        <div class="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-slate-600/20 to-slate-700/10 flex items-center justify-center mb-1 md:mb-2 group-hover:scale-110 transition-transform duration-300">
-                            <i class="fa-solid fa-scale-balanced text-2xl md:text-3xl text-slate-400 group-hover:text-slate-300"></i>
+                    <a href="hukuk_vitrini.html" class="group relative bg-gradient-to-br from-slate-800/50 to-slate-900/30 hover:from-slate-700/60 hover:to-slate-800/40 border border-slate-700/50 hover:border-slate-500/70 p-4 md:p-6 rounded-2xl transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-slate-500/20 flex flex-col items-center gap-2 md:gap-3">
+                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-slate-600/20 to-slate-700/10 flex items-center justify-center mb-1 md:mb-2 group-hover:scale-110 transition-transform duration-300">
+                            <i class="fa-solid fa-scale-balanced text-xl md:text-2xl text-slate-400 group-hover:text-slate-300"></i>
                         </div>
                         <span class="font-bold text-white text-sm md:text-base line-clamp-2 text-center">Hukuk & Danışma</span>
                         <span class="text-xs text-slate-400 text-center line-clamp-1 hidden md:block">Hukuki destek</span>
                     </a>
-                    <a href="akademi.html" class="group relative bg-gradient-to-br from-slate-800/50 to-slate-900/30 hover:from-slate-700/60 hover:to-slate-800/40 border border-slate-700/50 hover:border-slate-500/70 p-4 md:p-6 rounded-2xl transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-slate-500/20 flex flex-col items-center gap-2 md:gap-3">
-                        <div class="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-slate-600/20 to-slate-700/10 flex items-center justify-center mb-1 md:mb-2 group-hover:scale-110 transition-transform duration-300">
-                            <i class="fa-solid fa-graduation-cap text-2xl md:text-3xl text-slate-400 group-hover:text-slate-300"></i>
+                    <a href="akademi.html" class="group relative bg-gradient-to-br from-slate-800/50 to-slate-900/30 hover:from-slate-700/60 hover:to-slate-800/40 border border-slate-700/50 hover:border-slate-500/70 p-4 md:p-6 rounded-2xl transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-slate-500/20 flex flex-col items-center gap-2 md:gap-3">
+                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-slate-600/20 to-slate-700/10 flex items-center justify-center mb-1 md:mb-2 group-hover:scale-110 transition-transform duration-300">
+                            <i class="fa-solid fa-graduation-cap text-xl md:text-2xl text-slate-400 group-hover:text-slate-300"></i>
                         </div>
                         <span class="font-bold text-white text-sm md:text-base line-clamp-2 text-center">Akademi</span>
                         <span class="text-xs text-slate-400 text-center line-clamp-1 hidden md:block">Eğitim ve gelişim</span>
@@ -277,7 +377,7 @@
             <div class="h-px bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent flex-1"></div>
         </div>
         <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
-            <a href="is_vitrini.html" class="group relative bg-gradient-to-br from-indigo-900/20 to-indigo-800/10 hover:from-indigo-600/30 hover:to-indigo-500/20 border border-indigo-500/30 hover:border-indigo-400/50 rounded-2xl p-4 md:p-6 transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-indigo-500/20 flex items-center gap-3 md:gap-4">
+            <a href="is_vitrini.html" class="group relative bg-gradient-to-br from-indigo-900/20 to-indigo-800/10 hover:from-indigo-600/30 hover:to-indigo-500/20 border border-indigo-500/30 hover:border-indigo-400/50 rounded-2xl p-4 md:p-6 transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-indigo-500/20 flex items-center gap-3 md:gap-4">
                 <div class="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-gradient-to-br from-indigo-500/20 to-indigo-600/10 flex items-center justify-center text-indigo-400 text-xl md:text-2xl group-hover:scale-110 transition-transform duration-300 shrink-0"><i class="fa-solid fa-briefcase"></i></div>
                 <div class="flex-1 min-w-0">
                     <h3 class="font-bold text-white text-sm md:text-lg mb-0.5 md:mb-1 group-hover:text-indigo-300 transition-colors line-clamp-2">İş İlanları</h3>
@@ -285,7 +385,7 @@
                 </div>
                 <i class="fa-solid fa-arrow-right text-slate-500 group-hover:text-indigo-400 group-hover:translate-x-1 transition-all hidden md:block shrink-0"></i>
             </a>
-            <a href="emlak_vitrini.html" class="group relative bg-gradient-to-br from-blue-900/20 to-blue-800/10 hover:from-blue-600/30 hover:to-blue-500/20 border border-blue-500/30 hover:border-blue-400/50 rounded-2xl p-4 md:p-6 transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-blue-500/20 flex items-center gap-3 md:gap-4">
+            <a href="emlak_vitrini.html" class="group relative bg-gradient-to-br from-blue-900/20 to-blue-800/10 hover:from-blue-600/30 hover:to-blue-500/20 border border-blue-500/30 hover:border-blue-400/50 rounded-2xl p-4 md:p-6 transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/20 flex items-center gap-3 md:gap-4">
                 <div class="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-600/10 flex items-center justify-center text-blue-400 text-xl md:text-2xl group-hover:scale-110 transition-transform duration-300 shrink-0"><i class="fa-solid fa-house"></i></div>
                 <div class="flex-1 min-w-0">
                     <h3 class="font-bold text-white text-sm md:text-lg mb-0.5 md:mb-1 group-hover:text-blue-300 transition-colors line-clamp-2">Emlak</h3>
@@ -293,7 +393,7 @@
                 </div>
                 <i class="fa-solid fa-arrow-right text-slate-500 group-hover:text-blue-400 group-hover:translate-x-1 transition-all hidden md:block shrink-0"></i>
             </a>
-            <a href="vasita_vitrini.html" class="group relative bg-gradient-to-br from-emerald-900/20 to-emerald-800/10 hover:from-emerald-600/30 hover:to-emerald-500/20 border border-emerald-500/30 hover:border-emerald-400/50 rounded-2xl p-4 md:p-6 transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-emerald-500/20 flex items-center gap-3 md:gap-4">
+            <a href="vasita_vitrini.html" class="group relative bg-gradient-to-br from-emerald-900/20 to-emerald-800/10 hover:from-emerald-600/30 hover:to-emerald-500/20 border border-emerald-500/30 hover:border-emerald-400/50 rounded-2xl p-4 md:p-6 transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-emerald-500/20 flex items-center gap-3 md:gap-4">
                 <div class="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 flex items-center justify-center text-emerald-400 text-xl md:text-2xl group-hover:scale-110 transition-transform duration-300 shrink-0"><i class="fa-solid fa-car"></i></div>
                 <div class="flex-1 min-w-0">
                     <h3 class="font-bold text-white text-sm md:text-lg mb-0.5 md:mb-1 group-hover:text-emerald-300 transition-colors line-clamp-2">Vasıta</h3>
@@ -301,7 +401,7 @@
                 </div>
                 <i class="fa-solid fa-arrow-right text-slate-500 group-hover:text-emerald-400 group-hover:translate-x-1 transition-all hidden md:block shrink-0"></i>
             </a>
-            <a href="hizmet_vitrini.html" class="group relative bg-gradient-to-br from-cyan-900/20 to-cyan-800/10 hover:from-cyan-600/30 hover:to-cyan-500/20 border border-cyan-500/30 hover:border-cyan-400/50 rounded-2xl p-4 md:p-6 transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/20 flex items-center gap-3 md:gap-4">
+            <a href="hizmet_vitrini.html" class="group relative bg-gradient-to-br from-cyan-900/20 to-cyan-800/10 hover:from-cyan-600/30 hover:to-cyan-500/20 border border-cyan-500/30 hover:border-cyan-400/50 rounded-2xl p-4 md:p-6 transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/20 flex items-center gap-3 md:gap-4">
                 <div class="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-gradient-to-br from-cyan-500/20 to-cyan-600/10 flex items-center justify-center text-cyan-400 text-xl md:text-2xl group-hover:scale-110 transition-transform duration-300 shrink-0"><i class="fa-solid fa-screwdriver-wrench"></i></div>
                 <div class="flex-1 min-w-0">
                     <h3 class="font-bold text-white text-sm md:text-lg mb-0.5 md:mb-1 group-hover:text-cyan-300 transition-colors line-clamp-2">Hizmetler</h3>
@@ -309,7 +409,7 @@
                 </div>
                 <i class="fa-solid fa-arrow-right text-slate-500 group-hover:text-cyan-400 group-hover:translate-x-1 transition-all hidden md:block shrink-0"></i>
             </a>
-            <a href="esya_vitrini.html" class="group relative bg-gradient-to-br from-yellow-900/20 to-yellow-800/10 hover:from-yellow-600/30 hover:to-yellow-500/20 border border-yellow-500/30 hover:border-yellow-400/50 rounded-2xl p-4 md:p-6 transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-yellow-500/20 flex items-center gap-3 md:gap-4">
+            <a href="esya_vitrini.html" class="group relative bg-gradient-to-br from-yellow-900/20 to-yellow-800/10 hover:from-yellow-600/30 hover:to-yellow-500/20 border border-yellow-500/30 hover:border-yellow-400/50 rounded-2xl p-4 md:p-6 transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-yellow-500/20 flex items-center gap-3 md:gap-4">
                 <div class="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-gradient-to-br from-yellow-500/20 to-yellow-600/10 flex items-center justify-center text-yellow-400 text-xl md:text-2xl group-hover:scale-110 transition-transform duration-300 shrink-0"><i class="fa-solid fa-couch"></i></div>
                 <div class="flex-1 min-w-0">
                     <h3 class="font-bold text-white text-sm md:text-lg mb-0.5 md:mb-1 group-hover:text-yellow-300 transition-colors line-clamp-2">İkinci El</h3>
@@ -317,7 +417,7 @@
                 </div>
                 <i class="fa-solid fa-arrow-right text-slate-500 group-hover:text-yellow-400 group-hover:translate-x-1 transition-all hidden md:block shrink-0"></i>
             </a>
-            <a href="yemek_vitrini.html" class="group relative bg-gradient-to-br from-orange-900/20 to-orange-800/10 hover:from-orange-600/30 hover:to-orange-500/20 border border-orange-500/30 hover:border-orange-400/50 rounded-2xl p-4 md:p-6 transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-orange-500/20 flex items-center gap-3 md:gap-4">
+            <a href="yemek_vitrini.html" class="group relative bg-gradient-to-br from-orange-900/20 to-orange-800/10 hover:from-orange-600/30 hover:to-orange-500/20 border border-orange-500/30 hover:border-orange-400/50 rounded-2xl p-4 md:p-6 transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-orange-500/20 flex items-center gap-3 md:gap-4">
                 <div class="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-gradient-to-br from-orange-500/20 to-orange-600/10 flex items-center justify-center text-orange-400 text-xl md:text-2xl group-hover:scale-110 transition-transform duration-300 shrink-0"><i class="fa-solid fa-utensils"></i></div>
                 <div class="flex-1 min-w-0">
                     <h3 class="font-bold text-white text-sm md:text-lg mb-0.5 md:mb-1 group-hover:text-orange-300 transition-colors line-clamp-2">Mutfak</h3>
@@ -338,7 +438,7 @@
             <div class="h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent flex-1"></div>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
-            <a href="duyurular.html" class="group relative overflow-hidden rounded-3xl p-10 bg-gradient-to-br from-indigo-900/30 to-indigo-800/20 border border-indigo-500/30 hover:border-indigo-400/50 transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-2xl hover:shadow-indigo-500/20">
+            <a href="duyurular.html" class="group relative overflow-hidden rounded-3xl p-10 bg-gradient-to-br from-indigo-900/30 to-indigo-800/20 border border-indigo-500/30 hover:border-indigo-400/50 transition-all duration-200 hover:scale-105 hover:shadow-2xl hover:shadow-indigo-500/20">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500"></div>
                 <div class="relative z-10 flex items-center gap-6">
                     <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500/30 to-indigo-600/20 flex items-center justify-center text-indigo-300 text-4xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
@@ -354,7 +454,7 @@
                     </div>
                 </div>
             </a>
-            <a href="sohbet.html" class="group relative overflow-hidden rounded-3xl p-10 bg-gradient-to-br from-pink-900/30 to-pink-800/20 border border-pink-500/30 hover:border-pink-400/50 transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-2xl hover:shadow-pink-500/20">
+            <a href="sohbet.html" class="group relative overflow-hidden rounded-3xl p-10 bg-gradient-to-br from-pink-900/30 to-pink-800/20 border border-pink-500/30 hover:border-pink-400/50 transition-all duration-200 hover:scale-105 hover:shadow-2xl hover:shadow-pink-500/20">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-pink-500/10 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500"></div>
                 <div class="relative z-10 flex items-center gap-6">
                     <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-pink-500/30 to-pink-600/20 flex items-center justify-center text-pink-300 text-4xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
@@ -383,28 +483,28 @@
             <div class="h-px bg-gradient-to-r from-transparent via-teal-500/50 to-transparent flex-1"></div>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <a href="ucak_bileti.html" class="group relative bg-gradient-to-br from-sky-900/20 to-sky-800/10 hover:from-sky-600/30 hover:to-sky-500/20 border border-sky-500/30 hover:border-sky-400/50 rounded-2xl p-8 text-center transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-sky-500/20">
+            <a href="ucak_bileti.html" class="group relative bg-gradient-to-br from-sky-900/20 to-sky-800/10 hover:from-sky-600/30 hover:to-sky-500/20 border border-sky-500/30 hover:border-sky-400/50 rounded-2xl p-8 text-center transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-sky-500/20">
                 <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-sky-500/20 to-sky-600/10 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                     <i class="fa-solid fa-plane text-3xl text-sky-400 group-hover:text-sky-300"></i>
                 </div>
                 <h3 class="font-bold text-white text-lg mb-2 group-hover:text-sky-300 transition-colors">Uçak Bileti</h3>
                 <p class="text-sm text-slate-400">En uygun fiyatlar</p>
             </a>
-            <a href="otel_rezervasyon.html" class="group relative bg-gradient-to-br from-amber-900/20 to-amber-800/10 hover:from-amber-600/30 hover:to-amber-500/20 border border-amber-500/30 hover:border-amber-400/50 rounded-2xl p-8 text-center transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-amber-500/20">
+            <a href="otel_rezervasyon.html" class="group relative bg-gradient-to-br from-amber-900/20 to-amber-800/10 hover:from-amber-600/30 hover:to-amber-500/20 border border-amber-500/30 hover:border-amber-400/50 rounded-2xl p-8 text-center transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-amber-500/20">
                 <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500/20 to-amber-600/10 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                     <i class="fa-solid fa-hotel text-3xl text-amber-400 group-hover:text-amber-300"></i>
                 </div>
                 <h3 class="font-bold text-white text-lg mb-2 group-hover:text-amber-300 transition-colors">Otel Rezervasyon</h3>
                 <p class="text-sm text-slate-400">Güvenli konaklama</p>
             </a>
-            <a href="arac_kiralama.html" class="group relative bg-gradient-to-br from-orange-900/20 to-orange-800/10 hover:from-orange-600/30 hover:to-orange-500/20 border border-orange-500/30 hover:border-orange-400/50 rounded-2xl p-8 text-center transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-orange-500/20">
+            <a href="arac_kiralama.html" class="group relative bg-gradient-to-br from-orange-900/20 to-orange-800/10 hover:from-orange-600/30 hover:to-orange-500/20 border border-orange-500/30 hover:border-orange-400/50 rounded-2xl p-8 text-center transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-orange-500/20">
                 <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-500/20 to-orange-600/10 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                     <i class="fa-solid fa-car text-3xl text-orange-400 group-hover:text-orange-300"></i>
                 </div>
                 <h3 class="font-bold text-white text-lg mb-2 group-hover:text-orange-300 transition-colors">Araç Kiralama</h3>
                 <p class="text-sm text-slate-400">Sıla yolu özel</p>
             </a>
-            <a href="tatil_paketleri.html" class="group relative bg-gradient-to-br from-teal-900/20 to-teal-800/10 hover:from-teal-600/30 hover:to-teal-500/20 border border-teal-500/30 hover:border-teal-400/50 rounded-2xl p-8 text-center transition-all duration-300 backdrop-blur-sm hover:scale-105 hover:shadow-lg hover:shadow-teal-500/20">
+            <a href="tatil_paketleri.html" class="group relative bg-gradient-to-br from-teal-900/20 to-teal-800/10 hover:from-teal-600/30 hover:to-teal-500/20 border border-teal-500/30 hover:border-teal-400/50 rounded-2xl p-8 text-center transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-teal-500/20">
                 <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-teal-500/20 to-teal-600/10 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                     <i class="fa-solid fa-umbrella-beach text-3xl text-teal-400 group-hover:text-teal-300"></i>
                 </div>
