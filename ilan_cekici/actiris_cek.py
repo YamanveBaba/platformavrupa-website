@@ -42,32 +42,66 @@ PAGE_SIZE = 50   # API 100'e kadar destekler, 50 daha kararlı
 # ─── SEKTÖR EŞLEMELERİ (Fransızca / Flemenkçe — Brüksel ağırlıklı) ───────────
 
 SEKTOR_ESLEME = {
-    "Restoran":  ["cuisinier", "chef", "cuisine", "restaurant", "horeca", "boulanger",
-                  "boucher", "traiteur", "serveur", "catering", "kok", "keukenhulp"],
-    "Insaat":    ["construction", "electricien", "plombier", "monteur", "architecte",
-                  "charpentier", "maçon", "couvreur", "carreleur", "soudeur"],
+    # Öncelik sırasına göre — ilk eşleşen kazanır
+    "Restoran":  ["cuisinier", "chef de cuisine", "cuisine", "restaurant", "horeca",
+                  "boulanger", "boucher", "traiteur", "serveur", "catering",
+                  "kok", "keukenhulp", "kelner", "barman", "pizzaiolo",
+                  "desosseur", "boucherie", "charcutier", "slager", "bakker"],
+    "Saglik":    ["infirmier", "infirmiere", "soins", "medecin", "docteur", "pharmacien",
+                  "kinesitherapeute", "aide soignant", "auxiliaire", "sage-femme",
+                  "paramedic", "verpleeg", "verpleegkundige", "zorgkundige",
+                  "zorg", "arts", "psychologue", "logopede", "ergotherapeute",
+                  "aide familiale", "aide menagere", "thuisverpleeg", "verzorging"],
+    "Bilisim":   ["developpeur", "logiciel", "informatique", "data analyst", "data engineer",
+                  "cloud", "programmeur", "analyste", "ingenieur it", "devops",
+                  "ict", "software", "developer", "frontend", "backend",
+                  "fullstack", "cybersecurite", "architect it", "scrum", "erp", "sap"],
+    "Teknik":    ["technicien", "technieker", "technisch medewerker", "technisch",
+                  "electricien", "elektricien", "elektrisch",
+                  "mecanique", "mecanicien", "mekanieker", "automaticien", "automatisatie",
+                  "frigoriste", "chauffagiste", "plombier", "installateur",
+                  "soudeur", "lasser", "monteur", "maintenance", "depannage",
+                  "storingstechnieker", "onderhoud", "instrumentiste",
+                  "pneumatique", "hydraulique", "cnc", "usinage",
+                  "operateur", "operator", "conducteur de ligne",
+                  "usineur", "tourneur", "fraiseur", "metallier",
+                  "ingenieur", "engineer", "quality engineer", "reliability",
+                  "controleur qualite", "kwaliteitscontroleur",
+                  "ontwerper", "mecanisch ontwerper", "elektrotechnisch"],
+    "Insaat":    ["construction", "charpentier", "macon", "couvreur",
+                  "carreleur", "architecte", "geometre", "conducteur de travaux",
+                  "chef de chantier", "metselaar", "timmerman",
+                  "dakwerker", "tegelzetter", "bouw", "renovatie", "gros oeuvre",
+                  "schrijnwerker", "ruwbouw", "peintre en batiment",
+                  "schilder", "voirie", "wegwerker", "platrier"],
     "Lojistik":  ["chauffeur", "transport", "logistique", "magasinier", "entrepot",
-                  "coursier", "livreur", "cariste", "manutentionnaire"],
-    "Temizlik":  ["nettoyage", "agent d'entretien", "proprete", "schoonmaak", "poetsen"],
-    "Saglik":    ["infirmier", "soins", "medecin", "docteur", "pharmacien",
-                  "kinesitherapeute", "aide soignant", "verpleeg", "zorg", "arts"],
-    "Satis":     ["vendeur", "vente", "commercial", "magasin", "retail",
-                  "conseiller vente", "verkoop", "verkoops"],
-    "Bilisim":   ["developpeur", "logiciel", "informatique", "data", "cloud",
-                  "programmeur", "analyste", "ingenieur it", "devops", "ict",
-                  "software", "developer", "cybersecurite"],
-    "Guvenlik":  ["securite", "gardien", "agent de securite", "vigile", "bewaking"],
+                  "coursier", "livreur", "cariste", "manutentionnaire",
+                  "preparateur de commandes", "dispatcher", "vrachtwagen",
+                  "bestuurder", "chauffeur poids lourds", "magazijnier",
+                  "demenageur", "verhuizer", "expediteur", "reapprovisionneur",
+                  "gestionnaire de stock", "chargeur", "dechargeur"],
+    "Temizlik":  ["nettoyage", "agent d'entretien", "proprete", "entretien menager",
+                  "schoonmaak", "schoonmaker", "poetsen", "nettoyeur",
+                  "technicien de surface", "femme de chambre", "agent de proprete"],
     "Ofis":      ["administratif", "secretaire", "comptable", "ressources humaines",
-                  "manager", "directeur", "assistant", "receptionniste",
-                  "juriste", "coordinateur", "charge de", "administrateur"],
-    "Egitim":    ["enseignant", "professeur", "formateur", "educateur", "animateur",
-                  "instituteur", "leerkracht", "leraar", "begeleider"],
-    "Uretim":    ["production", "operateur", "usine", "assemblage", "soudeur",
-                  "controleur qualite", "technicien de production"],
+                  "manager", "directeur", "assistant", "office manager",
+                  "receptionniste", "juriste", "coordinateur", "charge de",
+                  "administrateur", "responsable", "gestionnaire", "conseiller",
+                  "commercieel", "commercial", "vendeur", "vente", "verkoop",
+                  "winkelbediende", "winkelmedewerker", "verkoopmedewerker",
+                  "marketing", "communicatie", "chef de projet", "projectleider",
+                  "acheteur", "aankoper", "payroll", "accountant",
+                  "business developer", "account manager", "product manager",
+                  "planificateur", "planner", "team leader", "teamleider",
+                  "recruteur", "recruiter", "auditeur"],
 }
 
+def _normalize(text: str) -> str:
+    import unicodedata
+    return unicodedata.normalize('NFD', text.lower()).encode('ascii', 'ignore').decode('ascii')
+
 def sektor_bul(text: str) -> str:
-    t = text.lower()
+    t = _normalize(text)
     for sektor, kelimeler in SEKTOR_ESLEME.items():
         if any(k in t for k in kelimeler):
             return sektor
@@ -218,8 +252,21 @@ def _ilan_donustur(item: dict) -> Optional[dict]:
     type_cont = (item.get("typeContratLibelle") or item.get("typeContrat") or "").strip()
     regime = (item.get("regimeTravail") or "").strip()
 
-    # URL
-    source_url = ACTIRIS_SEARCH
+    # URL — direkt ilan sayfası
+    source_url = f"https://www.actiris.brussels/nl/burgers/jobadvertentie/?reference={ref}"
+
+    # Yayın tarihi
+    date_creation = (item.get("dateCreation") or "").strip()
+    try:
+        if date_creation:
+            dt = datetime.fromisoformat(date_creation)
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            yayın_tarihi = dt.isoformat()
+        else:
+            yayın_tarihi = datetime.now(timezone.utc).isoformat()
+    except Exception:
+        yayın_tarihi = datetime.now(timezone.utc).isoformat()
 
     # Açıklama
     aciklama_parts = []
@@ -245,7 +292,7 @@ def _ilan_donustur(item: dict) -> Optional[dict]:
         "sektor":       sektor_bul(baslik + " " + firma),
         "pozisyon":     pozisyon_bul(type_cont, regime),
         "price":        "",
-        "created_at":   datetime.now(timezone.utc).isoformat(),
+        "created_at":   yayın_tarihi,
         "expires_at":   (datetime.now(timezone.utc) + timedelta(days=EXPIRY_GUN)).isoformat(),
     }
 
@@ -294,7 +341,11 @@ def actiris_cek(max_ilan: int = 40000) -> list[dict]:
         if toplam_api is None:
             toplam_api = data.get("total", 0)
             print(f"  Actiris toplam ilan: {toplam_api:,}")
-
+            # Tarih alanlarını tespit et (sadece ilk çağrıda)
+            if data.get("items"):
+                ilk = data["items"][0]
+                tarih_alanlari = [k for k in ilk.keys() if "date" in k.lower() or "datum" in k.lower() or "creat" in k.lower()]
+    
         items = data.get("items", [])
         if not items:
             print("  Öğe kalmadı, tamamlandı.")

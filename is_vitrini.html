@@ -68,6 +68,10 @@
         <h1 class="text-lg font-extrabold tracking-tight text-purple-700 hidden md:block">İŞ VE KARİYER</h1>
         
         <div class="flex items-center gap-3">
+            <button onclick="window.open('https://translate.google.com/translate?sl=auto&tl=tr&u='+encodeURIComponent(window.location.href),'_blank')"
+                class="flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-purple-600 bg-slate-100 hover:bg-purple-50 border border-slate-200 px-3 py-2 rounded-lg transition">
+                <i class="fa-solid fa-language"></i> <span class="hidden sm:inline">Türkçe</span>
+            </button>
             <div class="view-toggle">
                 <button onclick="setView('liste')" id="btnListe" class="view-btn active"><i class="fa-solid fa-list"></i> Liste</button>
                 <button onclick="setView('harita')" id="btnHarita" class="view-btn"><i class="fa-solid fa-map"></i> Harita</button>
@@ -129,17 +133,14 @@
                     <select id="sektorSelect" onchange="filtrele()" class="modern-select">
                         <option value="">Tümü</option>
                         <option value="Restoran">Restoran / Mutfak</option>
-                        <option value="İnşaat">İnşaat / Tadilat</option>
+                        <option value="Saglik">Sağlık / Bakım</option>
+                        <option value="Bilisim">Bilişim / Yazılım</option>
+                        <option value="Teknik">Teknik / Elektrik</option>
+                        <option value="Insaat">İnşaat / Tadilat</option>
                         <option value="Lojistik">Lojistik / Şoför</option>
                         <option value="Temizlik">Temizlik</option>
-                        <option value="Sağlık">Sağlık / Bakım</option>
-                        <option value="Satış">Satış / Market</option>
-                        <option value="Bilişim">Bilişim / Yazılım</option>
-                        <option value="Güvenlik">Güvenlik</option>
                         <option value="Ofis">Ofis / Yönetim</option>
-                        <option value="Eğitim">Eğitim</option>
-                        <option value="Serbest">Serbest Meslek</option>
-                        <option value="Diğer">Diğer</option>
+                        <option value="Diger">Diğer</option>
                     </select>
                 </div>
 
@@ -300,22 +301,36 @@
             }
         }
 
-        // *** GÜNCELLENEN KISIM: DOĞRU TABLO (ilanlar) ***
+        const CACHE_KEY = 'is_vitrini_cache';
+        const CACHE_TTL = 5 * 60 * 1000; // 5 dakika
+
         async function veriCek() {
             const listDiv = document.getElementById('listView');
+
+            // SessionStorage cache kontrolü
+            try {
+                const raw = sessionStorage.getItem(CACHE_KEY);
+                if (raw) {
+                    const { ts, data } = JSON.parse(raw);
+                    if (Date.now() - ts < CACHE_TTL) {
+                        tumIlanlar = data;
+                        filtrele();
+                        return;
+                    }
+                }
+            } catch(e) {}
+
             listDiv.innerHTML = '<div class="col-span-full text-center py-20 opacity-50"><i class="fa-solid fa-circle-notch fa-spin text-purple-600 text-3xl"></i></div>';
-            
             tumIlanlar = [];
 
             if(sb) {
                 try {
-                    // 'ilanlar' TABLOSUNDAN - category: 'Is Ilani'
                     const { data, error } = await sb.from('ilanlar')
                         .select('id,title,city,country,price,sektor,pozisyon,description,created_at,lat,lon,source_url,owner_name')
                         .eq('category', 'Is Ilani')
                         .eq('status', 'active')
                         .order('created_at', { ascending: false })
-                        .limit(500);
+                        .limit(100);
 
                     if (!error && data) {
                         tumIlanlar = data.map(i => ({
@@ -328,12 +343,16 @@
                             ulke: i.country || '',
                             fiyat: i.price || '',
                             pozisyon: i.pozisyon || 'Tam Zamanlı',
-                            tarih: formatDate(i.created_at, 'long'),
+                            tarih: formatDate(i.created_at),
                             source_url: i.source_url || '',
                             source: 'auto',
                             lat: i.lat || null,
                             lon: i.lon || null
                         }));
+                        // Cache'e kaydet
+                        try {
+                            sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: tumIlanlar }));
+                        } catch(e) {}
                     }
                 } catch (err) { console.error(err); }
             }
@@ -411,7 +430,7 @@
                     </div>
                     <div class="flex flex-wrap gap-2 text-xs font-medium text-gray-500 mb-3">
                         <span class="bg-gray-50 px-2 py-1 rounded border border-gray-200">${item.sektor}</span>
-                        <span class="bg-gray-50 px-2 py-1 rounded border border-gray-200">${item.pozisyon}</span>
+                        ${item.pozisyon && item.pozisyon !== item.sektor && item.pozisyon !== 'Ofis' ? `<span class="bg-gray-50 px-2 py-1 rounded border border-gray-200">${item.pozisyon}</span>` : ''}
                     </div>
                     <div class="flex justify-between items-center pt-3 border-t border-gray-50">
                          <span class="text-xs text-gray-400 flex items-center gap-1"><i class="fa-solid fa-location-dot"></i> ${item.ulke}</span>

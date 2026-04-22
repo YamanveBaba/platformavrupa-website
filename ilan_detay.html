@@ -27,7 +27,10 @@
                 <div class="w-7 h-7 bg-indigo-600 rounded-lg flex items-center justify-center"><i class="fa-solid fa-paper-plane text-xs"></i></div>
                 Platform<span class="text-indigo-400">Avrupa</span>
             </a>
-            <div class="w-24"></div>
+            <button onclick="window.open('https://translate.google.com/translate?sl=auto&tl=tr&u='+encodeURIComponent(window.location.href),'_blank')"
+                class="flex items-center gap-1.5 text-xs font-bold text-slate-400 hover:text-white bg-white/10 hover:bg-white/20 px-3 py-2 rounded-lg transition">
+                <i class="fa-solid fa-language"></i> Türkçe
+            </button>
         </div>
     </nav>
 
@@ -94,9 +97,12 @@
             const owner    = d.owner_name || '';
             const sourceUrl= d.source_url || '';
             const source   = d.source || 'user';
+            const sourceId = d.source_id || '';
             const sektor   = d.sektor || '';
             const pozisyon = d.pozisyon || '';
             const tarih    = d.created_at ? new Date(d.created_at).toLocaleDateString('tr-TR', {day:'numeric', month:'long', year:'numeric'}) : '';
+            const phone    = d.phone || '';
+            const email    = d.email || '';
 
             const konum = [city, country].filter(Boolean).join(', ') || 'Belirtilmemiş';
             const icon  = KAT_ICON[category] || 'fa-tag';
@@ -104,21 +110,60 @@
 
             // Buton
             let butonHTML = '';
-            if (sourceUrl) {
-                const isActiris = sourceUrl.includes('actiris.brussels');
+            if (source === 'actiris') {
+                const actirisDirectURL = `https://www.actiris.brussels/nl/burgers/jobadvertentie/?reference=${sourceId}`;
+                butonHTML = `
+                <a href="${actirisDirectURL}" target="_blank" rel="noopener"
+                   class="flex items-center justify-center gap-2 w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 rounded-2xl transition shadow-lg shadow-purple-200">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Actiris'te Başvur
+                </a>
+                <p class="text-xs text-slate-400 text-center mt-2">İlan doldurulmuşsa Actiris "bulunamadı" sayfası gösterebilir.</p>`;
+            } else if (source === 'forem' && sourceUrl) {
+                butonHTML = `
+                <a href="${sourceUrl}" target="_blank" rel="noopener"
+                   class="flex items-center justify-center gap-2 w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 rounded-2xl transition shadow-lg shadow-orange-200">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> FOREM'de Başvur
+                </a>
+                <p class="text-xs text-slate-400 text-center mt-2">FOREM'in resmi ilan sayfasına yönlendirileceksiniz.</p>`;
+            } else if (source === 'vdab' && sourceUrl) {
+                butonHTML = `
+                <a href="${sourceUrl}" target="_blank" rel="noopener"
+                   class="flex items-center justify-center gap-2 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl transition shadow-lg shadow-blue-200">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> VDAB'da Başvur
+                </a>`;
+            } else if (source === 'user') {
+                // Kullanıcı ilanı — iletişim bilgileri
+                if (phone) {
+                    butonHTML = `
+                    <a href="tel:${phone}" class="flex items-center justify-center gap-2 w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-2xl transition shadow-lg shadow-green-200">
+                        <i class="fa-solid fa-phone"></i> ${phone}
+                    </a>
+                    <a href="https://wa.me/${phone.replace(/[\s+\-]/g,'')}" target="_blank" rel="noopener"
+                       class="flex items-center justify-center gap-2 w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-2xl transition mt-2">
+                        <i class="fa-brands fa-whatsapp"></i> WhatsApp ile Yaz
+                    </a>`;
+                } else if (email) {
+                    butonHTML = `
+                    <a href="mailto:${email}" class="flex items-center justify-center gap-2 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-2xl transition shadow-lg shadow-indigo-200">
+                        <i class="fa-solid fa-envelope"></i> E-posta Gönder
+                    </a>`;
+                } else {
+                    butonHTML = `
+                    <div class="w-full bg-slate-100 text-slate-500 font-medium py-4 rounded-2xl text-center text-sm">
+                        <i class="fa-solid fa-circle-info mr-2 text-slate-400"></i>İletişim bilgisi eklenmemiş
+                    </div>`;
+                }
+            } else if (sourceUrl) {
                 butonHTML = `
                 <a href="${sourceUrl}" target="_blank" rel="noopener"
                    class="flex items-center justify-center gap-2 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-2xl transition shadow-lg shadow-indigo-200">
-                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                    ${isActiris ? 'Actiris\'te Ara' : 'Orijinal İlana Git'}
-                </a>
-                ${isActiris ? '<p class="text-xs text-slate-400 text-center mt-2">Actiris sitesinde benzer ilanları bulabilirsiniz.</p>' : ''}`;
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Orijinal İlana Git
+                </a>`;
             } else {
                 butonHTML = `
-                <button onclick="alert('Bu ilan için iletişim bilgisi mevcut değil.')"
-                   class="flex items-center justify-center gap-2 w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-4 rounded-2xl transition">
-                    <i class="fa-solid fa-envelope"></i> İletişime Geç
-                </button>`;
+                <div class="w-full bg-slate-100 text-slate-500 font-medium py-4 rounded-2xl text-center text-sm">
+                    <i class="fa-solid fa-circle-info mr-2 text-slate-400"></i>İletişim bilgisi mevcut değil
+                </div>`;
             }
 
             content.innerHTML = `

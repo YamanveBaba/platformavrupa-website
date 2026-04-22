@@ -1,0 +1,65 @@
+name: Belcika Is Ilanlari Guncelle
+
+on:
+  schedule:
+    - cron: '0 4 * * 1-6'   # Pazartesi-Cumartesi 04:00 UTC (06:00 Bruksel)
+    - cron: '0 2 * * 0'      # Pazar 02:00 UTC — haftalik tam cekum
+  workflow_dispatch:
+
+jobs:
+  guncelle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
+    steps:
+      - name: Kodu al
+        uses: actions/checkout@v4
+
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: ilan_cekici/requirements.txt
+
+      - name: Bagimliliklar yukle
+        run: pip install -r ilan_cekici/requirements.txt
+
+      - name: Playwright chromium yukle
+        run: python -m playwright install chromium --with-deps
+
+      - name: Rastgele baslangic gecikmesi (0-25 dk)
+        run: |
+          DELAY=$((RANDOM % 1500))
+          echo "Baslangic gecikmesi: ${DELAY} saniye"
+          sleep $DELAY
+
+      - name: FOREM cek (Valoniya)
+        run: python -X utf8 ilan_cekici/forem_cek.py --temizle
+
+      - name: Actiris cek (Bruksel)
+        run: python -X utf8 ilan_cekici/actiris_cek.py --temizle
+
+      - name: VDAB gunluk cek (Pazartesi-Cumartesi)
+        if: github.event.schedule == '0 4 * * 1-6' || github.event_name == 'workflow_dispatch'
+        run: python -X utf8 ilan_cekici/vdab_cek.py --gunler 1 --max 5000
+
+      - name: VDAB haftalik tam cek (Pazar)
+        if: github.event.schedule == '0 2 * * 0'
+        run: python -X utf8 ilan_cekici/vdab_cek.py --max 300000
+
+      - name: Haber cek (Avrupa Turkleri)
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python -X utf8 ilan_cekici/haber_cek.py
+
+      - name: Telegram bildirimi gonder
+        if: always()
+        run: python -X utf8 ilan_cekici/bildir.py
