@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-VDAB is ilani cekici - Playwright ile API intercept eder, requests ile sayfalama yapar.
+VDAB is ilani cekici - Playwright ile API intercept eder, jobdomein filtresi
+ile 3k sayfalama limitini aser, tum ilanları ceker.
 
 Kullanim:
-  python vdab_cek.py --max 2000
+  python vdab_cek.py --max 200000
+  python vdab_cek.py --gunler 1 --max 5000   # gunluk
+  python vdab_cek.py --gunler 6              # haftalik (tum kategoriler)
   python vdab_cek.py --max 500 --dry-run
 """
 from __future__ import annotations
@@ -15,6 +18,7 @@ import sys
 import time
 import unicodedata
 import random
+import json
 from datetime import datetime, timezone, timedelta
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 
@@ -84,7 +88,6 @@ def load_secrets() -> tuple[str, str]:
 def upsert_ilanlar(sb_url: str, sb_key: str, rows: list[dict], dry_run: bool) -> int:
     if dry_run or not rows:
         return len(rows)
-    # Batch içi duplicate source_id temizle
     seen = set()
     unique_rows = []
     for r in rows:
@@ -138,22 +141,149 @@ def parse_ilan(job: dict) -> dict | None:
     }
 
 def _build_page_url(base_url: str, sayfa: int) -> str:
-    """base_url'deki pagina parametresini guncelle."""
     parsed = urlparse(base_url)
     params = parse_qs(parsed.query, keep_blank_values=True)
     params["pagina"] = [str(sayfa)]
     new_query = urlencode({k: v[0] for k, v in params.items()})
     return urlunparse(parsed._replace(query=new_query))
 
+LIMIT = 2800  # 3000'e yakin ama guvenli sinir — asildiysa alt filtrele
+
+def _cek_sayfalar(ctx, req_url, req_headers, method, body_template,
+                  etiket, hedef, goruldu, tum_ilanlar, pending_save, start, page) -> int:
+    """Verilen body ile tum sayfalari ceker. Yeni ilan sayisini dondurur."""
+    yeni = 0
+    sayfa = 1
+    bos_sayaci = 0
+
+    while len(tum_ilanlar) < hedef:
+        try:
+            if sayfa > 1:
+                bekleme = int(random.uniform(600, 1500)) if sayfa % 20 != 0 else int(random.uniform(4000, 8000))
+                page.wait_for_timeout(bekleme)
+
+            body = json.loads(json.dumps(body_template))
+            body["pagina"] = sayfa
+
+            if method == "POST":
+                api_resp = ctx.request.post(req_url, data=json.dumps(body),
+                                            headers={**req_headers, "content-type": "application/json"})
+            else:
+                api_resp = ctx.request.get(_build_page_url(req_url, sayfa), headers=req_headers)
+
+            if api_resp.status != 200:
+                print(f"    HTTP {api_resp.status} — atlandi.")
+                break
+
+            data = api_resp.json()
+            resultaten = data.get("resultaten", []) if isinstance(data, dict) else []
+            if not resultaten:
+                break
+
+            onceki = len(tum_ilanlar)
+            for job in resultaten:
+                if len(tum_ilanlar) >= hedef:
+                    break
+                ilan = parse_ilan(job)
+                if ilan and ilan["source_id"] not in goruldu:
+                    goruldu.add(ilan["source_id"])
+                    tum_ilanlar.append(ilan)
+                    pending_save.append(ilan)
+                    yeni += 1
+
+            sayfa_yeni = len(tum_ilanlar) - onceki
+            bos_sayaci = 0 if sayfa_yeni > 0 else bos_sayaci + 1
+            if bos_sayaci >= 5:
+                break
+
+            print(f"    [{etiket}] Sayfa {sayfa}: {len(resultaten)} | yeni: {yeni} | toplam: {len(tum_ilanlar):,}")
+            sayfa += 1
+
+        except Exception as e:
+            print(f"    [{etiket}] Hata: {str(e)[:60]}")
+            break
+
+    return yeni
+
+
+def _body_ile(base_body, jobdomein=None, arbeidsduur=None, ervaring=None) -> dict:
+    body = json.loads(json.dumps(base_body))
+    criteria = body.get("criteria", body)
+    if jobdomein:
+        criteria["jobdomeinCodes"] = [jobdomein]
+    if arbeidsduur:
+        criteria["arbeidsduurCodes"] = [arbeidsduur]
+    if ervaring is not None:
+        criteria["ervaringCodes"] = [str(ervaring)]
+    return body
+
+
+def cek_kategori(ctx, req_url, req_headers, method, base_body,
+                 jobdomein_code, jobdomein_naam, tahmini_adet,
+                 hedef, goruldu, tum_ilanlar, pending_save, start, page) -> int:
+    """
+    Kategoriyi ceker. Buyuk kategorileri arbeidsduur ve ervaring ile boler.
+    """
+    ARBEIDSDUUR = ["V", "D"]           # Voltijds, Deeltijds
+    ERVARINGEN  = ["0", "1", "2", "3", "4"]
+
+    yeni_toplam = 0
+
+    if tahmini_adet <= LIMIT:
+        # Kucuk kategori — direkt cek
+        body = _body_ile(base_body, jobdomein=jobdomein_code)
+        yeni_toplam += _cek_sayfalar(ctx, req_url, req_headers, method, body,
+                                     jobdomein_naam, hedef, goruldu,
+                                     tum_ilanlar, pending_save, start, page)
+    else:
+        # Buyuk kategori — arbeidsduur ile bol
+        for ad in ARBEIDSDUUR:
+            if len(tum_ilanlar) >= hedef:
+                break
+            etiket = f"{jobdomein_naam}/{ad}"
+
+            # Bu alt-kombinasyonun tahmini boyutunu bulmak icin 1 sorgu at
+            body = _body_ile(base_body, jobdomein=jobdomein_code, arbeidsduur=ad)
+            body["pagina"] = 1
+            try:
+                if method == "POST":
+                    r = ctx.request.post(req_url, data=json.dumps(body),
+                                         headers={**req_headers, "content-type": "application/json"})
+                else:
+                    r = ctx.request.get(_build_page_url(req_url, 1), headers=req_headers)
+                alt_adet = r.json().get("totaalAantal", 0) if r.status == 200 else 0
+            except Exception:
+                alt_adet = 0
+
+            if alt_adet <= LIMIT:
+                yeni_toplam += _cek_sayfalar(ctx, req_url, req_headers, method, body,
+                                              etiket, hedef, goruldu,
+                                              tum_ilanlar, pending_save, start, page)
+            else:
+                # Hala buyuk — ervaring ile de bol
+                for erv in ERVARINGEN:
+                    if len(tum_ilanlar) >= hedef:
+                        break
+                    body2 = _body_ile(base_body, jobdomein=jobdomein_code,
+                                      arbeidsduur=ad, ervaring=erv)
+                    etiket2 = f"{jobdomein_naam}/{ad}/erv{erv}"
+                    yeni_toplam += _cek_sayfalar(ctx, req_url, req_headers, method, body2,
+                                                  etiket2, hedef, goruldu,
+                                                  tum_ilanlar, pending_save, start, page)
+                    page.wait_for_timeout(int(random.uniform(1000, 2000)))
+
+            page.wait_for_timeout(int(random.uniform(1500, 3000)))
+
+    return yeni_toplam
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--max", type=int, default=2000)
+    parser.add_argument("--max", type=int, default=200000)
     parser.add_argument("--gunler", type=int, default=0,
-                        help="0=hepsi, 1=bugun/dun, 7=gecen hafta")
+                        help="0=hepsi, 1=bugun/dun, 6=gecen hafta")
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
 
-    # onlineSindsCode: 0/9000=hepsi, 1=bugun+dun, 7=gecen hafta
     ONLINE_SINDS_CODE = "9000" if args.gunler == 0 else str(args.gunler)
 
     sb_url, sb_key = load_secrets()
@@ -163,7 +293,7 @@ def main():
 
     tum_ilanlar: list[dict] = []
     pending_save: list[dict] = []
-    goruldu: set = set()  # Global duplicate takibi
+    goruldu: set = set()
     basarili_yazilan = 0
     start = time.time()
 
@@ -200,7 +330,6 @@ def main():
         page.goto("https://www.vdab.be/vindeenjob/vacatures", wait_until="domcontentloaded", timeout=45000)
         page.wait_for_timeout(5000)
 
-        # Cookie banner kapat
         for selector in [
             "button#uc-accept-all-button",
             "button[data-testid='uc-accept-all-button']",
@@ -223,122 +352,69 @@ def main():
             browser.close()
             sys.exit(1)
 
-        base_url = captured_url["url"]
         toplam_vdab = first_data.get("totaalAantal", 0)
         sayfa_boyutu = first_data.get("paginaGrootte", 15) or 15
         print(f"VDAB toplam ilan: {toplam_vdab:,} | Sayfa boyutu: {sayfa_boyutu}")
 
         hedef = min(args.max, toplam_vdab) if toplam_vdab else args.max
-        print(f"Cekilecek: {hedef:,}\n")
+        print(f"Hedef: {hedef:,}\n")
 
-        # İlk sayfayı işle
-        for job in first_data.get("resultaten", []):
-            if len(tum_ilanlar) >= hedef:
-                break
-            ilan = parse_ilan(job)
-            if ilan and ilan["source_id"] not in goruldu:
-                goruldu.add(ilan["source_id"])
-                tum_ilanlar.append(ilan)
-                pending_save.append(ilan)
+        # Jobdomein kategorilerini al
+        kategoriler = first_data.get("filters", {}).get("jobdomein", [])
+        if not kategoriler:
+            print("HATA: Jobdomein filtreleri alinamadi.")
+            browser.close()
+            sys.exit(1)
 
-        print(f"  Sayfa 1: {len(first_data.get('resultaten', []))} ilan | Toplam: {len(tum_ilanlar)}/{hedef}")
-
-        # --- Kalan sayfaları ctx.request ile çek (Playwright API client, cookie+session paylaşır) ---
-        import json as _json
+        print(f"{len(kategoriler)} jobdomein kategorisi bulundu:\n")
+        for k in kategoriler:
+            print(f"  {k['omschrijving']}: {k['aantalResultaten']:,}")
+        print()
 
         method = captured_url.get("method", "GET").upper()
         req_url = captured_url["url"]
         req_headers = captured_url.get("req_headers", {})
         post_data_raw = captured_url.get("post_data")
 
-        # POST body varsa parse et (pagination + filtre parametrelerini değiştireceğiz)
-        post_body: dict | None = None
+        base_body: dict = {}
         if method == "POST" and post_data_raw:
             try:
-                post_body = _json.loads(post_data_raw)
-                # Tarih filtresini uygula
-                if post_body.get("criteria"):
-                    post_body["criteria"]["onlineSindsCode"] = ONLINE_SINDS_CODE
+                base_body = json.loads(post_data_raw)
+                if base_body.get("criteria") is not None:
+                    base_body["criteria"]["onlineSindsCode"] = ONLINE_SINDS_CODE
+                else:
+                    base_body["onlineSindsCode"] = ONLINE_SINDS_CODE
             except Exception:
-                post_body = None
+                base_body = {"criteria": {"onlineSindsCode": ONLINE_SINDS_CODE}}
 
-        sayfa = 2
-        deneme = 0
-        max_sayfa = (hedef // sayfa_boyutu) + 2
+        # Her kategori icin ayri cekis
+        for i, kategori in enumerate(kategoriler):
+            if len(tum_ilanlar) >= hedef:
+                break
 
-        while len(tum_ilanlar) < hedef and sayfa <= max_sayfa:
-            try:
-                # Gunluk cekimde insan gibi uzun bekle, bulk cekimde kisa tut
-                if args.gunler > 0:
-                    # Gunluk: insana yakin, her 15 sayfada uzun mola
-                    if sayfa % 15 == 0:
-                        bekleme = int(random.uniform(10000, 25000))  # 10-25 sn
-                    else:
-                        bekleme = int(random.uniform(2000, 5000))    # 2-5 sn
-                else:
-                    # Bulk: hizli ama yine de rastgele
-                    if sayfa % 50 == 0:
-                        bekleme = int(random.uniform(5000, 10000))   # 5-10 sn
-                    else:
-                        bekleme = int(random.uniform(800, 2000))     # 0.8-2 sn
-                page.wait_for_timeout(bekleme)
+            kod = kategori["code"]
+            naam = kategori["omschrijving"]
+            tahmini = kategori["aantalResultaten"]
 
-                if method == "POST" and post_body is not None:
-                    # POST body'de pagina güncelle
-                    body = dict(post_body)
-                    body["pagina"] = sayfa
-                    api_resp = ctx.request.post(
-                        req_url,
-                        data=_json.dumps(body),
-                        headers={**req_headers, "content-type": "application/json"},
-                    )
-                else:
-                    # GET ile URL'de pagina güncelle
-                    url = _build_page_url(req_url, sayfa)
-                    api_resp = ctx.request.get(url, headers=req_headers)
+            print(f"[{i+1}/{len(kategoriler)}] {naam} (~{tahmini:,} ilan)...")
 
-                if api_resp.status != 200:
-                    print(f"  UYARI: Sayfa {sayfa} HTTP {api_resp.status} — duruldu.")
-                    break
+            yeni = cek_kategori(
+                ctx, req_url, req_headers, method, base_body,
+                kod, naam, tahmini,
+                hedef, goruldu, tum_ilanlar, pending_save, start, page
+            )
 
-                data = api_resp.json()
-                resultaten = data.get("resultaten", []) if isinstance(data, dict) else []
-                if not resultaten:
-                    print(f"  Sayfa {sayfa}: sonuc yok, duruldu.")
-                    break
+            print(f"  --> {naam}: {yeni} yeni benzersiz ilan | Toplam: {len(tum_ilanlar):,}\n")
 
-                for job in resultaten:
-                    if len(tum_ilanlar) >= hedef:
-                        break
-                    ilan = parse_ilan(job)
-                    if ilan and ilan["source_id"] not in goruldu:
-                        goruldu.add(ilan["source_id"])
-                        tum_ilanlar.append(ilan)
-                        pending_save.append(ilan)
+            if len(pending_save) >= 500:
+                yazilan = upsert_ilanlar(sb_url, sb_key, pending_save, args.dry_run)
+                if not args.dry_run:
+                    basarili_yazilan += yazilan
+                    print(f"  --> DB'ye {yazilan} ilan yazildi. (toplam: {basarili_yazilan:,})\n")
+                pending_save = []
 
-                elapsed = time.time() - start
-                rate = len(tum_ilanlar) / max(elapsed, 1)
-                kalan_dk = (hedef - len(tum_ilanlar)) / max(rate, 1) / 60
-                print(f"  Sayfa {sayfa}: {len(resultaten)} ilan | Toplam: {len(tum_ilanlar)}/{hedef} | ~{kalan_dk:.0f} dk kaldi")
-
-                if len(pending_save) >= 500:
-                    yazilan = upsert_ilanlar(sb_url, sb_key, pending_save, args.dry_run)
-                    if not args.dry_run:
-                        basarili_yazilan += yazilan
-                        print(f"  --> DB'ye {yazilan} ilan yazildi. (toplam: {basarili_yazilan:,})")
-                    pending_save = []
-
-            except Exception as e:
-                deneme += 1
-                if deneme >= 3:
-                    print(f"  HATA sayfa {sayfa} (3 deneme basti): {str(e)[:80]}")
-                    break
-                print(f"  Sayfa {sayfa} hata (deneme {deneme}/3), tekrar deneniyor...")
-                page.wait_for_timeout(3000)
-                continue
-
-            deneme = 0
-            sayfa += 1
+            # Kategoriler arasi kisa mola
+            page.wait_for_timeout(int(random.uniform(2000, 5000)))
 
         browser.close()
 
@@ -349,7 +425,8 @@ def main():
             print(f"  --> DB'ye {yazilan} ilan yazildi.")
 
     elapsed = time.time() - start
-    print(f"\nTamamlandi. {len(tum_ilanlar)} benzersiz ilan cekildi, {basarili_yazilan:,} DB'ye yazildi, {elapsed/60:.1f} dakika.")
+    print(f"\nTamamlandi. {len(tum_ilanlar):,} benzersiz ilan cekildi, "
+          f"{basarili_yazilan:,} DB'ye yazildi, {elapsed/60:.1f} dakika.")
 
 if __name__ == "__main__":
     main()
