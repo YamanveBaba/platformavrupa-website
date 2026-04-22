@@ -1,86 +1,106 @@
 # Platform Avrupa
 
-> Avrupa'daki Türk topluluğu için kapsamlı dijital platform. İş ilanları, yol arkadaşı, market fiyatları, sağlık turizmi, döviz/altın ve eğitim hizmetleri sunar.
+> Belçika ve Avrupa'daki Türk diasporası için kapsamlı dijital platform. İş ilanları, yol arkadaşı, market fiyatları, döviz/altın, sağlık turizmi ve eğitim hizmetleri tek çatı altında.
 
-## Platform Hakkında
+## Genel Bakış
 
-Platform Avrupa (platformavrupa.com), Belçika başta olmak üzere Avrupa'daki Türk diasporasına yönelik geliştirilmiş çok işlevli bir web platformudur. Günlük hayatı kolaylaştıran araçları tek çatı altında toplar.
+Platform Avrupa (platformavrupa.com), Belçika başta olmak üzere Avrupa'daki Türklerin günlük ihtiyaçlarını karşılamak için geliştirilmiş ücretsiz bir dijital platformdur. Günlük olarak güncellenen 100.000'den fazla iş ilanı, 5 farklı market zincirinin fiyat karşılaştırması ve topluluk hizmetleri sunar.
 
-## Temel Hizmetler
-
-### İş İlanları
-Belçika'daki Türkçe konuşan topluluk için iş ilanı arama ve yayınlama hizmeti. Actiris (Brüksel), FOREM (Valoniya) ve VDAB (Flandriya) kaynaklarından günlük otomatik güncellenen 100.000+ aktif ilan.
-
+- [Ana Sayfa](https://www.platformavrupa.com/)
 - [İş İlanları](https://www.platformavrupa.com/ilanlar.html)
-- [İş Vitrini](https://www.platformavrupa.com/is_vitrini.html)
-
-### Yol Arkadaşı & Kargo
-Türkiye–Belçika ve Avrupa içi yolculuklarda koltuk paylaşımı ve kargo/emanet hizmeti.
-
+- [Market Fiyatları](https://www.platformavrupa.com/market.html)
+- [Döviz & Altın](https://www.platformavrupa.com/doviz_altin.html)
 - [Yol Arkadaşı](https://www.platformavrupa.com/yol_arkadasi.html)
-- [Kargo Emanet](https://www.platformavrupa.com/kargo_emanet.html)
-- [Kargo Talep](https://www.platformavrupa.com/kargo_talep.html)
+- [Sağlık Turizmi](https://www.platformavrupa.com/saglik_turizmi.html)
+- [Akademi](https://www.platformavrupa.com/akademi.html)
+- [Duyurular](https://www.platformavrupa.com/duyurular.html)
 
-### Market & Fiyat Takibi
-Belçika'nın önde gelen market zincirlerinin (Colruyt, Delhaize, Lidl, Carrefour, Aldi) güncel ürün fiyatları.
+## İş İlanları
+
+Belçika'daki 3 resmi iş kurumundan günlük otomatik çekilen ilanlar:
+
+- **Actiris** — Brüksel Bölgesi iş ilanları
+- **FOREM** — Valoniya Bölgesi iş ilanları
+- **VDAB** — Flandriya Bölgesi iş ilanları (123.000+ aktif ilan)
+
+Toplam 100.000'den fazla aktif ilan her gün güncellenir. Kategori, şehir ve sektöre göre filtreleme yapılabilir.
+
+- [İş Vitrini](https://www.platformavrupa.com/is_vitrini.html)
+- [Tüm İlanlar](https://www.platformavrupa.com/ilanlar.html)
+
+## Yol Arkadaşı & Kargo
+
+Türkiye–Belçika ve Avrupa içi yolculuklarda:
+
+- Koltuk paylaşımı (sürücü ve yolcu ilanları)
+- Kargo ve emanet taşımacılığı
+- Sıla yolu harita ve gümrük bilgileri
+
+- [Yol Arkadaşı İlanları](https://www.platformavrupa.com/yol_arkadasi.html)
+- [Kargo Emanet](https://www.platformavrupa.com/kargo_emanet.html)
+- [Sıla Yolu Haritası](https://www.platformavrupa.com/sila_yolu.html)
+
+## Market & Fiyat Karşılaştırma
+
+Belçika'nın 5 büyük market zincirinin haftalık güncellenen fiyatları:
+
+- **Colruyt** — Discount süpermarket
+- **Delhaize** — Süpermarket zinciri
+- **Lidl** — Discount market
+- **Carrefour** — Hipermarket
+- **Aldi** — Discount market
 
 - [Market Fiyatları](https://www.platformavrupa.com/market.html)
 
-### Döviz & Altın
-EUR/TRY, USD/TRY başta olmak üzere güncel döviz ve altın fiyatları.
+## Döviz & Altın
 
-- [Döviz & Altın](https://www.platformavrupa.com/doviz_altin.html)
+EUR/TRY, USD/TRY, GBP/TRY başta olmak üzere güncel döviz ve altın fiyatları.
 
-### Sağlık Turizmi
-Türkiye'de sağlık hizmeti almak isteyen Avrupa Türkleri için klinik ve tedavi bilgileri.
+- [Döviz & Altın Fiyatları](https://www.platformavrupa.com/doviz_altin.html)
+
+## Sağlık Turizmi
+
+Türkiye'de tedavi almak isteyen Avrupa Türkleri için:
+
+- Klinik ve hastane bilgileri
+- Tedavi türleri ve fiyat aralıkları
+- WhatsApp ile doğrudan iletişim
 
 - [Sağlık Turizmi](https://www.platformavrupa.com/saglik_turizmi.html)
 
-### Eğitim & Akademi
-Ücretsiz video eğitimler ve kurs içerikleri.
+## Ücretsiz İlanlar
+
+Tüm kategorilerde ücretsiz ilan verme ve arama:
+
+- [Emlak İlanları](https://www.platformavrupa.com/emlak_vitrini.html)
+- [Araç & Vasıta](https://www.platformavrupa.com/vasita_vitrini.html)
+- [Eşya & Elektronik](https://www.platformavrupa.com/esya_vitrini.html)
+- [Hizmet İlanları](https://www.platformavrupa.com/hizmet_vitrini.html)
+- [Yemek & Catering](https://www.platformavrupa.com/yemek_vitrini.html)
+- [Hukuk Hizmetleri](https://www.platformavrupa.com/hukuk_vitrini.html)
+
+## Eğitim & Akademi
+
+Ücretsiz video eğitimler, kurs içerikleri ve pratik rehberler.
 
 - [Akademi](https://www.platformavrupa.com/akademi.html)
 
-### İlanlar
-Emlak, araç, eşya, hizmet, hukuk ve yemek kategorilerinde ücretsiz ilan verme ve arama.
-
-- [Tüm İlanlar](https://www.platformavrupa.com/ilanlar.html)
-- [Emlak Vitrini](https://www.platformavrupa.com/emlak_vitrini.html)
-- [Araç Vitrini](https://www.platformavrupa.com/vasita_vitrini.html)
-- [Eşya Vitrini](https://www.platformavrupa.com/esya_vitrini.html)
-- [Hizmet Vitrini](https://www.platformavrupa.com/hizmet_vitrini.html)
-
-### Seyahat
-Otel rezervasyon, uçak bileti ve araç kiralama hizmetleri.
+## Seyahat
 
 - [Otel Rezervasyon](https://www.platformavrupa.com/otel_rezervasyon.html)
 - [Uçak Bileti](https://www.platformavrupa.com/ucak_bileti.html)
 - [Araç Kiralama](https://www.platformavrupa.com/arac_kiralama.html)
-
-### Sıla Yolu
-Türkiye'ye gidiş yolu için gümrük kapısı bilgileri, trafik ve yol durumu haritası.
-
-- [Sıla Yolu](https://www.platformavrupa.com/sila_yolu.html)
-
-### Topluluk & Sohbet
-Şehir bazlı sohbet odaları ve topluluk ilanları.
-
-- [Sohbet](https://www.platformavrupa.com/sohbet.html)
-- [Topluluk Vitrini](https://www.platformavrupa.com/topluluk_vitrini.html)
-
-### Duyurular & Haberler
-Avrupa Türk toplumu için güncel haberler ve duyurular.
-
-- [Duyurular](https://www.platformavrupa.com/duyurular.html)
+- [Tatil Paketleri](https://www.platformavrupa.com/tatil_paketleri.html)
 
 ## Teknik Bilgiler
 
 - **Hedef Kitle:** Belçika ve Avrupa'daki Türk diasporası
 - **Dil:** Türkçe
-- **İş İlanı Kaynakları:** Actiris, FOREM, VDAB (günlük otomatik güncelleme)
-- **Market Verileri:** Colruyt, Delhaize, Lidl, Carrefour, Aldi (haftalık güncelleme)
+- **Güncelleme Sıklığı:** İş ilanları günlük, market fiyatları haftalık
 - **İletişim:** info@platformavrupa.com
+- **Sitemap:** https://www.platformavrupa.com/sitemap.xml
 
 ## Optional
 
-- [Sitemap](https://www.platformavrupa.com/sitemap.xml)
+- [Sitemap XML](https://www.platformavrupa.com/sitemap.xml)
+- [AI Özet](https://www.platformavrupa.com/ai/summary.json)

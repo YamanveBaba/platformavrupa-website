@@ -1,0 +1,43 @@
+{
+  "name": "Platform Avrupa",
+  "url": "https://www.platformavrupa.com",
+  "description": "Belçika ve Avrupa'daki Türk diasporası için kapsamlı dijital platform. İş ilanları, yol arkadaşı, market fiyatları, döviz/altın, sağlık turizmi ve eğitim hizmetleri.",
+  "language": "tr",
+  "audience": "Turkish diaspora in Belgium and Europe",
+  "region": ["BE", "DE", "FR", "NL", "AT", "CH"],
+  "contact": "info@platformavrupa.com",
+  "services": [
+    {
+      "name": "İş İlanları",
+      "description": "Actiris, FOREM ve VDAB kaynaklarından 100.000+ günlük güncellenen Belçika iş ilanları",
+      "url": "https://www.platformavrupa.com/ilanlar.html"
+    },
+    {
+      "name": "Yol Arkadaşı",
+      "description": "Türkiye-Belçika arası koltuk paylaşımı ilanları",
+      "url": "https://www.platformavrupa.com/yol_arkadasi.html"
+    },
+    {
+      "name": "Market Fiyatları",
+      "description": "Colruyt, Delhaize, Lidl, Carrefour, Aldi güncel fiyat karşılaştırması",
+      "url": "https://www.platformavrupa.com/market.html"
+    },
+    {
+      "name": "Döviz & Altın",
+      "description": "EUR/TRY, USD/TRY ve altın fiyatları",
+      "url": "https://www.platformavrupa.com/doviz_altin.html"
+    },
+    {
+      "name": "Sağlık Turizmi",
+      "description": "Türkiye'de sağlık hizmeti için klinik bilgileri",
+      "url": "https://www.platformavrupa.com/saglik_turizmi.html"
+    },
+    {
+      "name": "Sıla Yolu",
+      "description": "Türkiye yolu gümrük ve trafik haritası",
+      "url": "https://www.platformavrupa.com/sila_yolu.html"
+    }
+  ],
+  "sitemap": "https://www.platformavrupa.com/sitemap.xml",
+  "llms_txt": "https://www.platformavrupa.com/llms.txt"
+}
