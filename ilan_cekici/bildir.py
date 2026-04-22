@@ -1,14 +1,9 @@
 # -*- coding: utf-8 -*-
 """
 Cekum tamamlandiktan sonra Telegram bildirimi gonder.
-Supabase'den kaynak bazli ilan sayilarini ceker.
-
-Kullanim:
-  python bildir.py --mesaj "FOREM bitti" --kaynak forem --yeni 1240
+Is ilanlari, market urunleri ve haber sayilarini Supabase'den cekip ozet gonderir.
 """
-import argparse
 import os
-import sys
 import requests
 from datetime import datetime, timezone
 
@@ -19,13 +14,12 @@ def load_secrets():
     tg_chat = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
     return sb_url.rstrip("/"), sb_key, tg_token, tg_chat
 
-def supabase_say(sb_url, sb_key, kaynak):
-    """Supabase'den kaynak bazli aktif ilan sayisini cek."""
+def supabase_say(sb_url, sb_key, tablo, filtre=""):
     if not sb_url or not sb_key:
         return "?"
     headers = {"apikey": sb_key, "Authorization": f"Bearer {sb_key}",
                 "Range-Unit": "items", "Range": "0-0", "Prefer": "count=exact"}
-    r = requests.get(f"{sb_url}/rest/v1/ilanlar?select=id&source=eq.{kaynak}&status=eq.active",
+    r = requests.get(f"{sb_url}/rest/v1/{tablo}?select=id{filtre}",
                      headers=headers, timeout=15)
     cr = r.headers.get("Content-Range", "")
     try:
@@ -45,34 +39,57 @@ def telegram_gonder(token, chat_id, mesaj):
         print(f"Telegram hata: {r.status_code} {r.text[:100]}")
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--ozet", default="", help="Ek ozet satiri")
-    args = parser.parse_args()
-
     sb_url, sb_key, tg_token, tg_chat = load_secrets()
 
-    actiris = supabase_say(sb_url, sb_key, "actiris")
-    forem   = supabase_say(sb_url, sb_key, "forem")
-    vdab    = supabase_say(sb_url, sb_key, "vdab")
-
+    # Is ilanlari
+    actiris = supabase_say(sb_url, sb_key, "ilanlar", "&source=eq.actiris&status=eq.active")
+    forem   = supabase_say(sb_url, sb_key, "ilanlar", "&source=eq.forem&status=eq.active")
+    vdab    = supabase_say(sb_url, sb_key, "ilanlar", "&source=eq.vdab&status=eq.active")
     try:
-        toplam = actiris + forem + vdab
+        ilan_toplam = actiris + forem + vdab
     except Exception:
-        toplam = "?"
+        ilan_toplam = "?"
+
+    # Market urunleri
+    colruyt  = supabase_say(sb_url, sb_key, "market_chain_products", "&chain=eq.colruyt")
+    delhaize = supabase_say(sb_url, sb_key, "market_chain_products", "&chain=eq.delhaize")
+    lidl     = supabase_say(sb_url, sb_key, "market_chain_products", "&chain=eq.lidl")
+    carrefour= supabase_say(sb_url, sb_key, "market_chain_products", "&chain=eq.carrefour")
+    aldi     = supabase_say(sb_url, sb_key, "market_chain_products", "&chain=eq.aldi")
+    try:
+        market_toplam = colruyt + delhaize + lidl + carrefour + aldi
+    except Exception:
+        market_toplam = "?"
+
+    # Haberler
+    haber_toplam = supabase_say(sb_url, sb_key, "announcements", "&source=eq.otomatik")
 
     saat = datetime.now(timezone.utc).strftime("%d.%m.%Y %H:%M UTC")
+
+    def fmt(v):
+        try:
+            return f"{v:,}"
+        except Exception:
+            return str(v)
 
     mesaj = (
         f"✅ <b>Platform Avrupa — Günlük Güncelleme</b>\n"
         f"📅 {saat}\n\n"
-        f"🟦 Actiris (Brüksel): <b>{actiris:,}</b> ilan\n"
-        f"🟩 FOREM (Valoniya):  <b>{forem:,}</b> ilan\n"
-        f"🟧 VDAB (Flandriya):  <b>{vdab:,}</b> ilan\n"
-        f"────────────────────\n"
-        f"📊 Toplam DB: <b>{toplam:,}</b> ilan\n"
+        f"💼 <b>İş İlanları</b>\n"
+        f"  🟦 Actiris (Brüksel):  <b>{fmt(actiris)}</b>\n"
+        f"  🟩 FOREM (Valoniya):   <b>{fmt(forem)}</b>\n"
+        f"  🟧 VDAB (Flandriya):   <b>{fmt(vdab)}</b>\n"
+        f"  📊 Toplam:             <b>{fmt(ilan_toplam)}</b>\n\n"
+        f"🛒 <b>Market Ürünleri</b>\n"
+        f"  Colruyt:   <b>{fmt(colruyt)}</b>\n"
+        f"  Delhaize:  <b>{fmt(delhaize)}</b>\n"
+        f"  Lidl:      <b>{fmt(lidl)}</b>\n"
+        f"  Carrefour: <b>{fmt(carrefour)}</b>\n"
+        f"  Aldi:      <b>{fmt(aldi)}</b>\n"
+        f"  📊 Toplam: <b>{fmt(market_toplam)}</b>\n\n"
+        f"📰 <b>Haberler</b>\n"
+        f"  Otomatik:  <b>{fmt(haber_toplam)}</b>\n"
     )
-    if args.ozet:
-        mesaj += f"\n📝 {args.ozet}"
 
     print(mesaj)
     telegram_gonder(tg_token, tg_chat, mesaj)
