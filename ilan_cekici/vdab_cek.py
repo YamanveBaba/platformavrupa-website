@@ -84,13 +84,22 @@ def load_secrets() -> tuple[str, str]:
 def upsert_ilanlar(sb_url: str, sb_key: str, rows: list[dict], dry_run: bool) -> int:
     if dry_run or not rows:
         return len(rows)
+    # Batch içi duplicate source_id temizle
+    seen = set()
+    unique_rows = []
+    for r in rows:
+        key = r.get("source_id", "")
+        if key not in seen:
+            seen.add(key)
+            unique_rows.append(r)
+    rows = unique_rows
     headers = {
         "apikey": sb_key,
         "Authorization": f"Bearer {sb_key}",
         "Content-Type": "application/json",
         "Prefer": "resolution=merge-duplicates,return=minimal",
     }
-    r = requests.post(f"{sb_url}/rest/v1/ilanlar", json=rows, headers=headers, timeout=60)
+    r = requests.post(f"{sb_url}/rest/v1/ilanlar?on_conflict=source,source_id", json=rows, headers=headers, timeout=60)
     if r.status_code not in (200, 201, 204):
         print(f"  UYARI: upsert hatasi {r.status_code}: {r.text[:200]}")
         return 0
@@ -139,8 +148,13 @@ def _build_page_url(base_url: str, sayfa: int) -> str:
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--max", type=int, default=2000)
+    parser.add_argument("--gunler", type=int, default=0,
+                        help="0=hepsi, 1=bugun/dun, 7=gecen hafta")
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
+
+    # onlineSindsCode: 0/9000=hepsi, 1=bugun+dun, 7=gecen hafta
+    ONLINE_SINDS_CODE = "9000" if args.gunler == 0 else str(args.gunler)
 
     sb_url, sb_key = load_secrets()
     print(f"Supabase: {sb_url}")
@@ -149,6 +163,8 @@ def main():
 
     tum_ilanlar: list[dict] = []
     pending_save: list[dict] = []
+    goruldu: set = set()  # Global duplicate takibi
+    basarili_yazilan = 0
     start = time.time()
 
     captured_url: dict = {}
@@ -220,7 +236,8 @@ def main():
             if len(tum_ilanlar) >= hedef:
                 break
             ilan = parse_ilan(job)
-            if ilan:
+            if ilan and ilan["source_id"] not in goruldu:
+                goruldu.add(ilan["source_id"])
                 tum_ilanlar.append(ilan)
                 pending_save.append(ilan)
 
@@ -234,11 +251,14 @@ def main():
         req_headers = captured_url.get("req_headers", {})
         post_data_raw = captured_url.get("post_data")
 
-        # POST body varsa parse et (pagination parametresini değiştireceğiz)
+        # POST body varsa parse et (pagination + filtre parametrelerini değiştireceğiz)
         post_body: dict | None = None
         if method == "POST" and post_data_raw:
             try:
                 post_body = _json.loads(post_data_raw)
+                # Tarih filtresini uygula
+                if post_body.get("criteria"):
+                    post_body["criteria"]["onlineSindsCode"] = ONLINE_SINDS_CODE
             except Exception:
                 post_body = None
 
@@ -248,7 +268,20 @@ def main():
 
         while len(tum_ilanlar) < hedef and sayfa <= max_sayfa:
             try:
-                page.wait_for_timeout(int(random.uniform(1200, 2500)))
+                # Gunluk cekimde insan gibi uzun bekle, bulk cekimde kisa tut
+                if args.gunler > 0:
+                    # Gunluk: insana yakin, her 15 sayfada uzun mola
+                    if sayfa % 15 == 0:
+                        bekleme = int(random.uniform(10000, 25000))  # 10-25 sn
+                    else:
+                        bekleme = int(random.uniform(2000, 5000))    # 2-5 sn
+                else:
+                    # Bulk: hizli ama yine de rastgele
+                    if sayfa % 50 == 0:
+                        bekleme = int(random.uniform(5000, 10000))   # 5-10 sn
+                    else:
+                        bekleme = int(random.uniform(800, 2000))     # 0.8-2 sn
+                page.wait_for_timeout(bekleme)
 
                 if method == "POST" and post_body is not None:
                     # POST body'de pagina güncelle
@@ -278,7 +311,8 @@ def main():
                     if len(tum_ilanlar) >= hedef:
                         break
                     ilan = parse_ilan(job)
-                    if ilan:
+                    if ilan and ilan["source_id"] not in goruldu:
+                        goruldu.add(ilan["source_id"])
                         tum_ilanlar.append(ilan)
                         pending_save.append(ilan)
 
@@ -288,9 +322,10 @@ def main():
                 print(f"  Sayfa {sayfa}: {len(resultaten)} ilan | Toplam: {len(tum_ilanlar)}/{hedef} | ~{kalan_dk:.0f} dk kaldi")
 
                 if len(pending_save) >= 500:
-                    upsert_ilanlar(sb_url, sb_key, pending_save, args.dry_run)
+                    yazilan = upsert_ilanlar(sb_url, sb_key, pending_save, args.dry_run)
                     if not args.dry_run:
-                        print(f"  --> DB'ye {len(pending_save)} ilan yazildi.")
+                        basarili_yazilan += yazilan
+                        print(f"  --> DB'ye {yazilan} ilan yazildi. (toplam: {basarili_yazilan:,})")
                     pending_save = []
 
             except Exception as e:
@@ -308,12 +343,13 @@ def main():
         browser.close()
 
     if pending_save:
-        upsert_ilanlar(sb_url, sb_key, pending_save, args.dry_run)
+        yazilan = upsert_ilanlar(sb_url, sb_key, pending_save, args.dry_run)
         if not args.dry_run:
-            print(f"  --> DB'ye {len(pending_save)} ilan yazildi.")
+            basarili_yazilan += yazilan
+            print(f"  --> DB'ye {yazilan} ilan yazildi.")
 
     elapsed = time.time() - start
-    print(f"\nTamamlandi. {len(tum_ilanlar)} ilan cekildi, {elapsed/60:.1f} dakika.")
+    print(f"\nTamamlandi. {len(tum_ilanlar)} benzersiz ilan cekildi, {basarili_yazilan:,} DB'ye yazildi, {elapsed/60:.1f} dakika.")
 
 if __name__ == "__main__":
     main()
