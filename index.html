@@ -46,6 +46,105 @@
     </script>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#020617">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://www.platformavrupa.com/#website",
+      "url": "https://www.platformavrupa.com/",
+      "name": "Platform Avrupa",
+      "description": "Avrupa'daki Türkler için tek platform: iş ilanları, yol arkadaşı, market fiyatları, döviz, sağlık turizmi ve eğitim.",
+      "inLanguage": "tr",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://www.platformavrupa.com/ilanlar.html?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://www.platformavrupa.com/#organization",
+      "name": "Platform Avrupa",
+      "url": "https://www.platformavrupa.com/",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://www.platformavrupa.com/og-image.png"
+      },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "email": "info@platformavrupa.com",
+        "contactType": "customer support",
+        "availableLanguage": "Turkish"
+      },
+      "description": "Belçika ve Avrupa'daki Türk diasporası için kapsamlı dijital platform. İş ilanları, yol arkadaşı, market fiyatları, döviz ve sağlık turizmi hizmetleri.",
+      "areaServed": ["BE", "DE", "FR", "NL", "AT", "CH"],
+      "knowsLanguage": "tr"
+    },
+    {
+      "@type": "WebApplication",
+      "@id": "https://www.platformavrupa.com/#webapp",
+      "name": "Platform Avrupa",
+      "url": "https://www.platformavrupa.com/",
+      "applicationCategory": "LifestyleApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "EUR"
+      },
+      "featureList": [
+        "İş ilanları (Actiris, FOREM, VDAB)",
+        "Yol arkadaşı ve kargo",
+        "Belçika market fiyatları",
+        "Döviz ve altın fiyatları",
+        "Sağlık turizmi",
+        "Ücretsiz eğitim videoları",
+        "Sıla yolu haritası"
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Platform Avrupa nedir?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Platform Avrupa, Belçika ve Avrupa'daki Türk diasporası için geliştirilmiş kapsamlı bir dijital platformdur. İş ilanları, yol arkadaşı, kargo, market fiyatları, döviz/altın, sağlık turizmi ve eğitim gibi hizmetleri tek çatı altında sunar."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Belçika'da Türkçe iş ilanları nerede bulunur?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Platform Avrupa'da Actiris (Brüksel), FOREM (Valoniya) ve VDAB (Flandriya) kaynaklarından günlük güncellenen 100.000'den fazla iş ilanına ulaşabilirsiniz."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Belçika market fiyatları nasıl karşılaştırılır?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Platform Avrupa'nın market sayfasında Colruyt, Delhaize, Lidl, Carrefour ve Aldi marketlerinin güncel ürün fiyatlarını karşılaştırabilirsiniz."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Türkiye'ye yol arkadaşı nasıl bulunur?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Platform Avrupa'nın Yol Arkadaşı sayfasında Belçika'dan Türkiye'ye giden sürücüler ile koltuk arayanları buluşturan ilanlar yer almaktadır."
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
     <style>
         html { scroll-behavior: smooth; scroll-padding-top: 100px; }
         body { background-color: #020617; color: white; overflow-x: hidden; }

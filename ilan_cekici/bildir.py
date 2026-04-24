@@ -72,6 +72,23 @@ def main():
         except Exception:
             return str(v)
 
+    # Bekleyen ilanlar detayi
+    pending_count = supabase_say(sb_url, sb_key, "listings", "&status=eq.pending")
+    pending_detay = ""
+    if sb_url and sb_key and isinstance(pending_count, int) and pending_count > 0:
+        headers = {"apikey": sb_key, "Authorization": f"Bearer {sb_key}"}
+        try:
+            r = requests.get(
+                f"{sb_url}/rest/v1/listings?status=eq.pending&select=id,title,city&limit=5&order=created_at.asc",
+                headers=headers, timeout=15
+            )
+            if r.status_code == 200:
+                for ilan in r.json():
+                    pending_detay += f"\n  ▸ #{ilan.get('id','')} {ilan.get('title','')[:40]} ({ilan.get('city','')})"
+                    pending_detay += f"\n    /onayla_{ilan.get('id','')}  /reddet_{ilan.get('id','')}"
+        except Exception:
+            pass
+
     mesaj = (
         f"✅ <b>Platform Avrupa — Günlük Güncelleme</b>\n"
         f"📅 {saat}\n\n"
@@ -90,6 +107,13 @@ def main():
         f"📰 <b>Haberler</b>\n"
         f"  Otomatik:  <b>{fmt(haber_toplam)}</b>\n"
     )
+
+    if isinstance(pending_count, int) and pending_count > 0:
+        mesaj += (
+            f"\n⚠️ <b>Onay Bekleyen İlanlar: {pending_count}</b>"
+            f"{pending_detay}\n"
+            f"\n<i>Onaylamak için komutu Telegram'a gönderin.</i>"
+        )
 
     print(mesaj)
     telegram_gonder(tg_token, tg_chat, mesaj)

@@ -1,0 +1,106 @@
+# Platform Avrupa
+
+> Belçika ve Avrupa'daki Türk diasporası için kapsamlı dijital platform. İş ilanları, yol arkadaşı, market fiyatları, döviz/altın, sağlık turizmi ve eğitim hizmetleri tek çatı altında.
+
+## Genel Bakış
+
+Platform Avrupa (platformavrupa.com), Belçika başta olmak üzere Avrupa'daki Türklerin günlük ihtiyaçlarını karşılamak için geliştirilmiş ücretsiz bir dijital platformdur. Günlük olarak güncellenen 100.000'den fazla iş ilanı, 5 farklı market zincirinin fiyat karşılaştırması ve topluluk hizmetleri sunar.
+
+- [Ana Sayfa](https://www.platformavrupa.com/)
+- [İş İlanları](https://www.platformavrupa.com/ilanlar.html)
+- [Market Fiyatları](https://www.platformavrupa.com/market.html)
+- [Döviz & Altın](https://www.platformavrupa.com/doviz_altin.html)
+- [Yol Arkadaşı](https://www.platformavrupa.com/yol_arkadasi.html)
+- [Sağlık Turizmi](https://www.platformavrupa.com/saglik_turizmi.html)
+- [Akademi](https://www.platformavrupa.com/akademi.html)
+- [Duyurular](https://www.platformavrupa.com/duyurular.html)
+
+## İş İlanları
+
+Belçika'daki 3 resmi iş kurumundan günlük otomatik çekilen ilanlar:
+
+- **Actiris** — Brüksel Bölgesi iş ilanları
+- **FOREM** — Valoniya Bölgesi iş ilanları
+- **VDAB** — Flandriya Bölgesi iş ilanları (123.000+ aktif ilan)
+
+Toplam 100.000'den fazla aktif ilan her gün güncellenir. Kategori, şehir ve sektöre göre filtreleme yapılabilir.
+
+- [İş Vitrini](https://www.platformavrupa.com/is_vitrini.html)
+- [Tüm İlanlar](https://www.platformavrupa.com/ilanlar.html)
+
+## Yol Arkadaşı & Kargo
+
+Türkiye–Belçika ve Avrupa içi yolculuklarda:
+
+- Koltuk paylaşımı (sürücü ve yolcu ilanları)
+- Kargo ve emanet taşımacılığı
+- Sıla yolu harita ve gümrük bilgileri
+
+- [Yol Arkadaşı İlanları](https://www.platformavrupa.com/yol_arkadasi.html)
+- [Kargo Emanet](https://www.platformavrupa.com/kargo_emanet.html)
+- [Sıla Yolu Haritası](https://www.platformavrupa.com/sila_yolu.html)
+
+## Market & Fiyat Karşılaştırma
+
+Belçika'nın 5 büyük market zincirinin haftalık güncellenen fiyatları:
+
+- **Colruyt** — Discount süpermarket
+- **Delhaize** — Süpermarket zinciri
+- **Lidl** — Discount market
+- **Carrefour** — Hipermarket
+- **Aldi** — Discount market
+
+- [Market Fiyatları](https://www.platformavrupa.com/market.html)
+
+## Döviz & Altın
+
+EUR/TRY, USD/TRY, GBP/TRY başta olmak üzere güncel döviz ve altın fiyatları.
+
+- [Döviz & Altın Fiyatları](https://www.platformavrupa.com/doviz_altin.html)
+
+## Sağlık Turizmi
+
+Türkiye'de tedavi almak isteyen Avrupa Türkleri için:
+
+- Klinik ve hastane bilgileri
+- Tedavi türleri ve fiyat aralıkları
+- WhatsApp ile doğrudan iletişim
+
+- [Sağlık Turizmi](https://www.platformavrupa.com/saglik_turizmi.html)
+
+## Ücretsiz İlanlar
+
+Tüm kategorilerde ücretsiz ilan verme ve arama:
+
+- [Emlak İlanları](https://www.platformavrupa.com/emlak_vitrini.html)
+- [Araç & Vasıta](https://www.platformavrupa.com/vasita_vitrini.html)
+- [Eşya & Elektronik](https://www.platformavrupa.com/esya_vitrini.html)
+- [Hizmet İlanları](https://www.platformavrupa.com/hizmet_vitrini.html)
+- [Yemek & Catering](https://www.platformavrupa.com/yemek_vitrini.html)
+- [Hukuk Hizmetleri](https://www.platformavrupa.com/hukuk_vitrini.html)
+
+## Eğitim & Akademi
+
+Ücretsiz video eğitimler, kurs içerikleri ve pratik rehberler.
+
+- [Akademi](https://www.platformavrupa.com/akademi.html)
+
+## Seyahat
+
+- [Otel Rezervasyon](https://www.platformavrupa.com/otel_rezervasyon.html)
+- [Uçak Bileti](https://www.platformavrupa.com/ucak_bileti.html)
+- [Araç Kiralama](https://www.platformavrupa.com/arac_kiralama.html)
+- [Tatil Paketleri](https://www.platformavrupa.com/tatil_paketleri.html)
+
+## Teknik Bilgiler
+
+- **Hedef Kitle:** Belçika ve Avrupa'daki Türk diasporası
+- **Dil:** Türkçe
+- **Güncelleme Sıklığı:** İş ilanları günlük, market fiyatları haftalık
+- **İletişim:** info@platformavrupa.com
+- **Sitemap:** https://www.platformavrupa.com/sitemap.xml
+
+## Optional
+
+- [Sitemap XML](https://www.platformavrupa.com/sitemap.xml)
+- [AI Özet](https://www.platformavrupa.com/ai/summary.json)

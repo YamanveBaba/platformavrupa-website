@@ -1,0 +1,13 @@
+{
+  "kaynak": "Colruyt Belçika",
+  "chain_slug": "colruyt_be",
+  "country_code": "BE",
+  "yontem": "product-search-prs API",
+  "placeId": "762",
+  "cekilme_tarihi": "2026-03-25T00:12:12.984205",
+  "sure_dakika": 4.1,
+  "urun_sayisi": 0,
+  "not_fiyat_gecerliligi": "Fiyatlar activationDate ile güncellenir; mağaza (placeId) bazlıdır.",
+  "not_indirim": "inPromo / isPromoActive; promoPublicationStart / promoPublicationEnd kampanya geçerlilik başlangıç ve bitiş (API alan adlarına bağlı).",
+  "urunler": []
+}

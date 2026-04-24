@@ -1,0 +1,232 @@
+{
+  "kaynak": "Delhaize Belçika GraphQL",
+  "chain_slug": "delhaize_be",
+  "country_code": "BE",
+  "cekilme_tarihi": "2026-03-22T17:02:45.422910",
+  "kategori_sayisi": 1,
+  "urun_sayisi": 20,
+  "dry_run": false,
+  "hata_sayisi": 0,
+  "urunler": [
+    {
+      "productCode": "S2016071903660020099",
+      "name": "Indian Tonic Water | Light",
+      "brand": "Fentimans",
+      "basicPrice": 6.59,
+      "promoPrice": null,
+      "inPromo": false,
+      "topCategoryName": "Bieren,Alcohol & Alcoholvrij",
+      "unitContent": "8,24 €/l 4 x 20 cl",
+      "url": "/nl/shop/Bieren-Alcohol-and-Alcoholvrij/Tonic-and-Premium-Mixers/Indian-Tonic-Water-Light/p/S2016071903660020099"
+    },
+    {
+      "productCode": "S1995053000195820000",
+      "name": "Blond Bier | Pils | 5,2% alc. | Bak",
+      "brand": "Jupiler",
+      "basicPrice": 15.99,
+      "promoPrice": null,
+      "inPromo": false,
+      "topCategoryName": "Bieren,Alcohol & Alcoholvrij",
+      "unitContent": "2,67 €/l 24 x 25 cl",
+      "url": "/nl/shop/Bieren-Alcohol-and-Alcoholvrij/Bieren/Pils-and-Tafelbieren/Blond-Bier-Pils-5-2-alc-Bak/p/S1995053000195820000"
+    },
+    {
+      "productCode": "S2002070900195850000",
+      "name": "Blond Bier | Pils | 5,2% alc. | Jumbo | Bak",
+      "brand": "Jupiler",
+      "basicPrice": 19.39,
+      "promoPrice": null,
+      "inPromo": false,
+      "topCategoryName": "Bieren,Alcohol & Alcoholvrij",
+      "unitContent": "2,45 €/l 24 x 33 cl",
+      "url": "/nl/shop/Bieren-Alcohol-and-Alcoholvrij/Bieren/Pils-and-Tafelbieren/Blond-Bier-Pils-5-2-alc-Jumbo-Bak/p/S2002070900195850000"
+    },
+    {
+      "productCode": "S2020031000405710099",
+      "name": "Blond bier | Tripel | 8,4% alc. |  Fles",
+      "brand": "Tripel Karmeliet",
+      "basicPrice": 9.35,
+      "promoPrice": null,
+      "inPromo": false,
+      "topCategoryName": "Bieren,Alcohol & Alcoholvrij",
+      "unitContent": "4,72 €/l 6 x 33 cl",
+      "url": "/nl/shop/Bieren-Alcohol-and-Alcoholvrij/Bieren/Degustatie-Bieren/Blond-Bieren/Blond-bier-Tripel-8-4-alc-Fles/p/S2020031000405710099"
+    },
+    {
+      "productCode": "S2019120300331960099",
+      "name": "Blond bier | 8,5%",
+      "brand": "Duvel",
+      "basicPrice": 8.99,
+      "promoPrice": null,
+      "inPromo": false,
+      "topCategoryName": "Bieren,Alcohol & Alcoholvrij",
+      "unitContent": "4,54 €/l 6 x 33 cl",
+      "url": "/nl/shop/Bieren-Alcohol-and-Alcoholvrij/Bieren/Degustatie-Bieren/Blond-Bieren/Blond-bier-8-5-/p/S2019120300331960099"
+    },
+    {
+      "productCode": "S2011041300195940001",
+      "name": "Blond Bier | Pils | 5,2% alc. | Blik",
+      "brand": "Jupiler",
+      "basicPrice": 10.85,
+      "promoPrice": null,
+      "inPromo": false,
+      "topCategoryName": "Bieren,Alcohol & Alcoholvrij",
+      "unitContent": "2,71 €/l 8 x 50 cl",
+      "url": "/nl/shop/Bieren-Alcohol-and-Alcoholvrij/Bieren/Pils-and-Tafelbieren/Blond-Bier-Pils-5-2-alc-Blik/p/S2011041300195940001"
+    },
+    {
+      "productCode": "S1975011500195900000",
+      "name": "Blond Bier | Pils | 5,2% Alc. | Bak",
+      "brand": "Stella Artois",
+      "basicPrice": 15.99,
+      "promoPrice": null,
+      "inPromo": false,
+      "topCategoryName": "Bieren,Alcohol & Alcoholvrij",
+      "unitContent": "2,67 €/l 24 x 25 cl",
+      "url": "/nl/shop/Bieren-Alcohol-and-Alcoholvrij/Bieren/Pils-and-Tafelbieren/Blond-Bier-Pils-5-2-Alc-Bak/p/S1975011500195900000"
+    },
+    {
+      "productCode": "S2019061900263780000",
+      "name": "Blond Bier | Pils | 5,2% Alc. | Blik",
+      "brand": "Stella Artois",
+      "basicPrice": 12.19,
+      "promoPrice": null,
+      "inPromo": false,
+      "topCategoryName": "Bieren,Alcohol & Alcoholvrij",
+      "unitContent": "3,08 €/l 12 x 33 cl",
+      "url": "/nl/shop/Bieren-Alcohol-and-Alcoholvrij/Bieren/Pils-and-Tafelbieren/Blond-Bier-Pils-5-2-Alc-Blik/p/S2019061900263780000"
+    },
+    {
+      "productCode": "S2016021603631620099",
+      "name": "Bier | Pils | 5,2% ALC. | Blik",
+      "brand": "Maes",
+      "basicPrice": 11.49,
+      "promoPrice": null,
+      "inPromo": false,
+      "topCategoryName": "Bieren,Alcohol & Alcoholvrij",
+      "unitContent": "2,90 €/l 12 x 33 cl",
+      "url": "/nl/shop/Bieren-Alcohol-and-Alcoholvrij/Bieren/Pils-and-Tafelbieren/Bier-Pils-5-2-ALC-Blik/p/S2016021603631620099"
+    },
+    {
+      "productCode": "S2019052100255620099",
+      "name": "Abdijbier | Blond | 6,6% alc | Fles",
+      "brand": "Leffe",
+      "basicPrice": 9.89,
+      "promoPrice": null,
+      "inPromo": false,
+      "topCategoryName": "Bieren,Alcohol & Alcoholvrij",
+      "unitContent": "3,75 €/l 8 x 33 cl",
+      "url": "/nl/shop/Bieren-Alcohol-and-Alcoholvrij/Bieren/Degustatie-Bieren/Blond-Bieren/Abdijbier-Blond-6-6-alc-Fles/p/S2019052100255620099"
+    },
+    {
+      "productCode": "S2022030300611200099",
+      "name": "Blond bier | 8,5% Alc. | Fles",
+      "brand": "Victoria",
+      "basicPrice": 7.75,
+      "promoPrice": null,
+      "inPromo": false,
+      "topCategoryName": "Bieren,Alcohol & Alcoholvrij",
+      "unitContent": "3,91 €/l 6 x 33 cl",
+      "url": "/nl/shop/Bieren-Alcohol-and-Alcoholvrij/Bieren/Degustatie-Bieren/Blond-Bieren/Blond-bier-8-5-Alc-Fles/p/S2022030300611200099"
+    },
+    {
+      "productCode": "S1974022000252450000",
+      "name": "Whisky | Scotch | 40% ALC.",
+      "brand": "J&B",
+      "basicPrice": 18.95,
+      "promoPrice": null,
+      "inPromo": false,
+      "topCategoryName": "Bieren,Alcohol & Alcoholvrij",
+      "unitContent": "27,07 €/l 70 cl",
+      "url": "/nl/shop/Bieren-Alcohol-and-Alcoholvrij/Aperitieven-and-Spirits/Spirits/Whisky/Whisky-Scotch-40-ALC-/p/S1974022000252450000"
+    },
+    {
+      "productCode": "S2021010400484860099",
+      "name": "Blond Bier | Pils | 5,2% alc. | Blik",
+      "brand": "Jupiler",
+      "basicPrice": 5.79,
+      "promoPrice": null,
+      "inPromo": false,
+      "topCategoryName": "Bieren,Alcohol & Alcoholvrij",
+      "unitContent": "3,86 €/l 6 x 25 cl",
+      "url": "/nl/shop/Bieren-Alcohol-and-Alcoholvrij/Bieren/Pils-and-Tafelbieren/Blond-Bier-Pils-5-2-alc-Blik/p/S2021010400484860099"
+    },
+    {
+      "productCode": "S2014043000245000000",
+      "name": "Bellini | Sprankelend Cocktail | Rosé",
+      "brand": "Martini",
+      "basicPrice": 8.49,
+      "promoPrice": null,
+      "inPromo": false,
+      "topCategoryName": "Bieren,Alcohol & Alcoholvrij",
+      "unitContent": "11,32 €/l 75 cl",
+      "url": "/nl/shop/Bieren-Alcohol-and-Alcoholvrij/Aperitieven-and-Spirits/Aperitieven/Bellini-Sprankelend-Cocktail-Rose/p/S2014043000245000000"
+    },
+    {
+      "productCode": "S2016102403676630099",
+      "name": "Blond Bier | Pils | alcoholvrij | 0% alc. | Blik",
+      "brand": "Jupiler",
+      "basicPrice": 6.99,
+      "promoPrice": null,
+      "inPromo": false,
+      "topCategoryName": "Bieren,Alcohol & Alcoholvrij",
+      "unitContent": "3,53 €/l 6 x 33 cl",
+      "url": "/nl/shop/Bieren-Alcohol-and-Alcoholvrij/Alcoholvrije-Bieren/Blond-Bier-Pils-alcoholvrij-0-alc-Blik/p/S2016102403676630099"
+    },
+    {
+      "productCode": "S2000050900259460000",
+      "name": "Vodka | Wit | 37,5% ALC.",
+      "brand": "Eristoff",
+      "basicPrice": 15.99,
+      "promoPrice": null,
+      "inPromo": false,
+      "topCategoryName": "Bieren,Alcohol & Alcoholvrij",
+      "unitContent": "22,84 €/l 70 cl",
+      "url": "/nl/shop/Bieren-Alcohol-and-Alcoholvrij/Aperitieven-and-Spirits/Spirits/Vodka/Vodka-Wit-37-5-ALC-/p/S2000050900259460000"
+    },
+    {
+      "productCode": "S1991101800251700000",
+      "name": "Whisky | Scotch | Blended | 40% ALC.",
+      "brand": "William Lawson's",
+      "basicPrice": 16.79,
+      "promoPrice": null,
+      "inPromo": false,
+      "topCategoryName": "Bieren,Alcohol & Alcoholvrij",
+      "unitContent": "23,99 €/l 70 cl",
+      "url": "/nl/shop/Bieren-Alcohol-and-Alcoholvrij/Aperitieven-and-Spirits/Spirits/Whisky/Whisky-Scotch-Blended-40-ALC-/p/S1991101800251700000"
+    },
+    {
+      "productCode": "S2020032500413260000",
+      "name": "Gin | London dry | 37,5% ALC.",
+      "brand": "Gordon's",
+      "basicPrice": 16.99,
+      "promoPrice": null,
+      "inPromo": false,
+      "topCategoryName": "Bieren,Alcohol & Alcoholvrij",
+      "unitContent": "24,27 €/l 70 cl",
+      "url": "/nl/shop/Bieren-Alcohol-and-Alcoholvrij/Aperitieven-and-Spirits/Spirits/Gin/Gin-London-dry-37-5-ALC-/p/S2020032500413260000"
+    },
+    {
+      "productCode": "S1978102600237000000",
+      "name": "Likeur | Irish Cream | 17% ALC.",
+      "brand": "Baileys",
+      "basicPrice": 14.69,
+      "promoPrice": null,
+      "inPromo": false,
+      "topCategoryName": "Bieren,Alcohol & Alcoholvrij",
+      "unitContent": "20,99 €/l 70 cl",
+      "url": "/nl/shop/Bieren-Alcohol-and-Alcoholvrij/Aperitieven-and-Spirits/Spirits/Liqueurs/Likeur-Irish-Cream-17-ALC-/p/S1978102600237000000"
+    },
+    {
+      "productCode": "S2016021103629690099",
+      "name": "Abdijbier | Blond | 6,6% alc | Blik",
+      "brand": "Leffe",
+      "basicPrice": 9.39,
+      "promoPrice": null,
+      "inPromo": false,
+      "topCategoryName": "Bieren,Alcohol & Alcoholvrij",
+      "unitContent": "4,74 €/l 6 x 33 cl",
+      "url": "/nl/shop/Bieren-Alcohol-and-Alcoholvrij/Bieren/Degustatie-Bieren/Blond-Bieren/Abdijbier-Blond-6-6-alc-Blik/p/S2016021103629690099"
+    }
+  ]
+}

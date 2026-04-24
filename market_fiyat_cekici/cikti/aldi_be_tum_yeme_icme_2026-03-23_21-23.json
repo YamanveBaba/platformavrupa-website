@@ -1,0 +1,18 @@
+{
+  "kaynak": "ALDI Belçika",
+  "chain_slug": "aldi_be",
+  "country_code": "BE",
+  "kapsam": "Tüm producten ağacı (nl/producten, kara liste filtreli; assortiment + verse producten vb.)",
+  "tohum_url_listesi": [
+    "https://www.aldi.be/nl/producten.html",
+    "https://www.aldi.be/nl/producten/assortiment.html"
+  ],
+  "cekilme_tarihi": "2026-03-23T21:23:52.668198",
+  "taranan_sayfa_sayisi": 3,
+  "urun_sayisi": 0,
+  "kara_liste_atlanan_link_tahmini": 0,
+  "insansı_mod": true,
+  "not_fiyat_gecerliligi": "ALDI Belçika fiyatları genelde haftalık broşürle (Pazartesi-Cumartesi) güncellenir. Bu veri çekim anındaki sitedeki fiyatlardır; pratikte çekim yapılan hafta için geçerli kabul edilebilir.",
+  "not_indirim": "Her üründe 'inPromotion': true/false alanı vardır. true = sitede kampanya/indirim işaretli, false = normal fiyat. Broşürdeki ürünler sitede listeleniyorsa dahildir.",
+  "urunler": []
+}

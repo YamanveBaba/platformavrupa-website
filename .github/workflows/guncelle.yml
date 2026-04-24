@@ -16,6 +16,7 @@ jobs:
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
     steps:
       - name: Kodu al
@@ -53,6 +54,11 @@ jobs:
       - name: VDAB haftalik tam cek (Pazar)
         if: github.event.schedule == '0 2 * * 0'
         run: python -X utf8 ilan_cekici/vdab_cek.py --max 300000
+
+      - name: Haber cek (Avrupa Turkleri)
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python -X utf8 ilan_cekici/haber_cek.py
 
       - name: Telegram bildirimi gonder
         if: always()

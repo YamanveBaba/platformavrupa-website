@@ -1,11 +1,103 @@
 User-agent: *
 Allow: /
 
-# Admin ve yönetim sayfaları arama sonuçlarında çıkmasın (isteğe bağlı)
+# Admin sayfaları arama sonuçlarında çıkmasın
 Disallow: /admin.html
 Disallow: /admin_listings.html
 Disallow: /admin_chat.html
 Disallow: /video_yonetim.html
 Disallow: /sifre_yenile.html
+
+# OpenAI
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+# Anthropic / Claude
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: claude-web
+Allow: /
+
+# Perplexity
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+# Google
+User-agent: Googlebot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Google-CloudVertexBot
+Allow: /
+
+# Microsoft / Bing
+User-agent: Bingbot
+Allow: /
+
+# Meta
+User-agent: meta-externalagent
+Allow: /
+
+User-agent: Meta-ExternalFetcher
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
+
+# Apple
+User-agent: Applebot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+# Cohere
+User-agent: cohere-ai
+Allow: /
+
+# Amazon
+User-agent: Amazonbot
+Allow: /
+
+# xAI / Grok
+User-agent: xAI-Bot
+Allow: /
+
+# Common Crawl (AI eğitim verisi)
+User-agent: CCBot
+Allow: /
+
+# Bytedance
+User-agent: Bytespider
+Allow: /
+
+# AI2
+User-agent: AI2Bot
+Allow: /
+
+User-agent: AI2Bot-Dolma
+Allow: /
+
+# DuckDuckGo AI
+User-agent: DuckAssistBot
+Allow: /
 
 Sitemap: https://www.platformavrupa.com/sitemap.xml

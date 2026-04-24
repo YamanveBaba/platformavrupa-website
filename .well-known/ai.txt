@@ -1,0 +1,9 @@
+Platform Avrupa — Avrupa Türkleri için dijital platform
+URL: https://www.platformavrupa.com/
+Language: tr
+Topics: iş ilanları, yol arkadaşı, kargo, market fiyatları, döviz, sağlık turizmi, eğitim
+Region: Belgium, Europe
+Audience: Turkish diaspora in Europe
+Contact: info@platformavrupa.com
+llms.txt: https://www.platformavrupa.com/llms.txt
+Sitemap: https://www.platformavrupa.com/sitemap.xml
