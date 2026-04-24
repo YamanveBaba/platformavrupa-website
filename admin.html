@@ -1066,7 +1066,6 @@ textarea.form-control { resize: vertical; min-height: 100px; }
 
 <script>
 // ─── GLOBALS ──────────────────────────────────────────────────────────────────
-let sb;
 const SECTIONS = ['dashboard','approval','listings','announcements','messages','members','trips','health','academy','market','settings'];
 const PAGE_TITLES = {
   dashboard: 'Genel Bakış', approval: 'İlan Onayı', listings: 'Tüm İlanlar',
@@ -1079,9 +1078,6 @@ let currentSection = 'dashboard';
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
-  // Init Supabase
-  sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
   // Auth check
   const isAdminUser = await isAdmin();
   if (!isAdminUser) {
