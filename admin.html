@@ -610,6 +610,7 @@ textarea.form-control { resize: vertical; min-height: 100px; }
         <a class="nav-item" onclick="goto('approval')"><i class="icon fa-solid fa-circle-check"></i> İlan Onayı <span class="badge" id="pendingBadge">0</span></a>
         <a class="nav-item" onclick="goto('listings')"><i class="icon fa-solid fa-layer-group"></i> Tüm İlanlar</a>
         <a class="nav-item" onclick="goto('announcements')"><i class="icon fa-solid fa-bullhorn"></i> Duyurular</a>
+        <a class="nav-item" onclick="goto('haberler')"><i class="icon fa-solid fa-newspaper"></i> Haber Kuyruğu <span class="badge" id="haberBadge" style="display:none">0</span></a>
 
         <div class="nav-section-label">Topluluk</div>
         <a class="nav-item" onclick="goto('messages')"><i class="icon fa-solid fa-comments"></i> Sohbet & Yorumlar</a>
@@ -848,6 +849,44 @@ textarea.form-control { resize: vertical; min-height: 100px; }
           </div>
         </div>
 
+        <!-- ══ HABER KUYRUĞU ══════════════════════════════ -->
+        <div class="section" id="s-haberler">
+          <div class="card mb-16">
+            <div class="card-header">
+              <span class="card-title"><i class="fa-solid fa-newspaper" style="color:var(--accent)"></i> Haber Kuyruğu</span>
+              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                <span class="badge badge-warning" id="haberCount">0 bekliyor</span>
+                <select class="form-control" style="width:auto;padding:6px 12px" id="haberKategoriFilter" onchange="loadHaberKuyrugu()">
+                  <option value="">Tüm Kategoriler</option>
+                  <option value="vize_ikamet">Vize & İkamet</option>
+                  <option value="vatandaslik">Vatandaşlık</option>
+                  <option value="egitim_burs">Eğitim & Burs</option>
+                  <option value="is_ekonomi">İş & Ekonomi</option>
+                  <option value="kultur_toplum">Kültür & Toplum</option>
+                  <option value="turkiye">Türkiye</option>
+                  <option value="avrupa_politika">Avrupa Politika</option>
+                  <option value="genel">Genel</option>
+                </select>
+                <select class="form-control" style="width:auto;padding:6px 12px" id="haberUlkeFilter" onchange="loadHaberKuyrugu()">
+                  <option value="">Tüm Ülkeler</option>
+                  <option value="DE">🇩🇪 Almanya</option>
+                  <option value="NL">🇳🇱 Hollanda</option>
+                  <option value="BE">🇧🇪 Belçika</option>
+                  <option value="FR">🇫🇷 Fransa</option>
+                </select>
+                <button class="btn btn-ghost btn-sm" onclick="loadHaberKuyrugu()"><i class="fa-solid fa-rotate"></i></button>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+              <button class="btn btn-success btn-sm" onclick="haberTumunuOnayla()"><i class="fa-solid fa-check-double"></i> Tümünü Yayınla</button>
+              <button class="btn btn-danger btn-sm" onclick="haberDusukSkoriSil()"><i class="fa-solid fa-trash"></i> Düşük Skoru Sil (&lt;5)</button>
+            </div>
+            <div id="haberKuyruguList">
+              <div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><p>Yükleniyor...</p></div>
+            </div>
+          </div>
+        </div>
+
         <!-- ══ MESSAGES ════════════════════════════════════ -->
         <div class="section" id="s-messages">
           <div class="card">
@@ -1069,12 +1108,12 @@ textarea.form-control { resize: vertical; min-height: 100px; }
 
 <script>
 // ─── GLOBALS ──────────────────────────────────────────────────────────────────
-const SECTIONS = ['dashboard','approval','listings','announcements','messages','members','trips','health','academy','market','settings'];
+const SECTIONS = ['dashboard','approval','listings','announcements','haberler','messages','members','trips','health','academy','market','settings'];
 const PAGE_TITLES = {
   dashboard: 'Genel Bakış', approval: 'İlan Onayı', listings: 'Tüm İlanlar',
-  announcements: 'Duyurular', messages: 'Sohbet & Yorumlar', members: 'Üye Yönetimi',
-  trips: 'Yolculuk & Kargo', health: 'Sağlık Turizmi', academy: 'Akademi',
-  market: 'Market & Katalog', settings: 'Ayarlar'
+  announcements: 'Duyurular', haberler: 'Haber Kuyruğu', messages: 'Sohbet & Yorumlar',
+  members: 'Üye Yönetimi', trips: 'Yolculuk & Kargo', health: 'Sağlık Turizmi',
+  academy: 'Akademi', market: 'Market & Katalog', settings: 'Ayarlar'
 };
 let pendingApprovals = [];
 let currentSection = 'dashboard';
@@ -1135,6 +1174,7 @@ function goto(section) {
     approval: loadApproval,
     listings: loadListings,
     announcements: loadAnnouncements,
+    haberler: loadHaberKuyrugu,
     messages: loadMessages,
     members: loadMembers,
     trips: loadTrips,
@@ -1188,6 +1228,17 @@ async function loadDashboard() {
     setKPI('kpiHealth', getCount(health));
 
     const pendingCount = getCount(pending);
+
+    // Draft haber badge
+    try {
+      const { count: draftCount } = await sb.from('announcements')
+        .select('id', { count: 'exact' }).eq('source', 'otomatik').eq('status', 'draft');
+      const haberBadge = document.getElementById('haberBadge');
+      if (haberBadge) {
+        haberBadge.textContent = draftCount || 0;
+        haberBadge.style.display = (draftCount || 0) > 0 ? '' : 'none';
+      }
+    } catch (e) {}
 
     // Update pending badges
     document.getElementById('pendingBadge').textContent = pendingCount;
@@ -1611,6 +1662,130 @@ async function deleteAnnouncement(id) {
   await sb.from('announcements').delete().eq('id', id);
   toast('Duyuru silindi', 'success');
   loadAnnouncements();
+}
+
+// ─── HABER KUYRUĞU ────────────────────────────────────────────────────────────
+const KATEGORI_LABEL = {
+  vize_ikamet: 'Vize & İkamet', vatandaslik: 'Vatandaşlık', egitim_burs: 'Eğitim & Burs',
+  is_ekonomi: 'İş & Ekonomi', kultur_toplum: 'Kültür & Toplum', turkiye: 'Türkiye',
+  avrupa_politika: 'Avrupa Politika', genel: 'Genel',
+};
+const ULKE_BAYRAK = { DE: '🇩🇪', NL: '🇳🇱', BE: '🇧🇪', FR: '🇫🇷', AT: '🇦🇹', GB: '🇬🇧', IT: '🇮🇹', ES: '🇪🇸' };
+
+async function loadHaberKuyrugu() {
+  const el = document.getElementById('haberKuyruguList');
+  el.innerHTML = '<div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><p>Yükleniyor...</p></div>';
+
+  const kategori = document.getElementById('haberKategoriFilter')?.value;
+  const ulke     = document.getElementById('haberUlkeFilter')?.value;
+
+  let q = sb.from('announcements')
+    .select('*', { count: 'exact' })
+    .eq('source', 'otomatik')
+    .eq('status', 'draft')
+    .order('ai_skor', { ascending: false })
+    .limit(50);
+
+  if (kategori) q = q.eq('kategori', kategori);
+  if (ulke)     q = q.eq('country_code', ulke);
+
+  const { data, count } = await q;
+  const total = count || 0;
+
+  document.getElementById('haberCount').textContent = `${total} bekliyor`;
+  const badge = document.getElementById('haberBadge');
+  badge.textContent = total;
+  badge.style.display = total > 0 ? '' : 'none';
+
+  if (!data?.length) {
+    el.innerHTML = '<div class="empty-state"><i class="fa-solid fa-check-circle" style="color:var(--success)"></i><p>Onay bekleyen haber yok</p></div>';
+    return;
+  }
+
+  el.innerHTML = data.map(h => {
+    const skor = h.ai_skor || 0;
+    const skorRenk = skor >= 8 ? 'var(--danger)' : skor >= 5 ? 'var(--warning)' : 'var(--text-muted)';
+    const yildiz = '★'.repeat(Math.min(Math.round(skor/2), 5)) + '☆'.repeat(5 - Math.min(Math.round(skor/2), 5));
+    const bayrak = h.country_code ? (ULKE_BAYRAK[h.country_code] || '') + ' ' : '';
+    const kategoriText = KATEGORI_LABEL[h.kategori] || h.kategori || '—';
+
+    return `
+    <div id="haber-row-${h.id}" style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px">
+      <div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:200px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+            <span style="color:${skorRenk};font-size:13px;font-weight:700" title="AI Skoru: ${skor}/10">${yildiz}</span>
+            <span class="badge badge-muted" style="font-size:10px">${kategoriText}</span>
+            ${h.country_code ? `<span class="badge badge-info" style="font-size:10px">${bayrak}${h.country_code}</span>` : ''}
+            ${skor >= 8 ? '<span class="badge badge-danger" style="font-size:10px">ÖNEMLİ</span>' : ''}
+          </div>
+          <strong style="color:var(--text-primary);font-size:14px;display:block;margin-bottom:4px">${escHtml(h.title || '—')}</strong>
+          <p style="font-size:12px;color:var(--text-muted);line-height:1.5;margin-bottom:4px">${escHtml((h.content || '').replace(/<[^>]+>/g,'').slice(0,150))}...</p>
+          <span style="font-size:11px;color:var(--text-muted);font-family:'JetBrains Mono',monospace">${relTime(h.created_at)}</span>
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap">
+          <button class="btn btn-success btn-sm" onclick="haberOnayla(${h.id})"><i class="fa-solid fa-check"></i> Yayınla</button>
+          ${h.source_url ? `<a class="btn btn-ghost btn-sm" href="${escHtml(h.source_url)}" target="_blank" rel="noopener"><i class="fa-solid fa-external-link-alt"></i></a>` : ''}
+          <button class="btn btn-danger btn-sm btn-icon" onclick="haberSil(${h.id})" title="Sil"><i class="fa-solid fa-trash"></i></button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function haberOnayla(id) {
+  const { error } = await sb.from('announcements').update({ status: 'published' }).eq('id', id);
+  if (!error) {
+    document.getElementById('haber-row-' + id)?.remove();
+    toast('Haber yayınlandı', 'success');
+    // Badge güncelle
+    const current = parseInt(document.getElementById('haberBadge').textContent || '0');
+    const yeni = Math.max(0, current - 1);
+    document.getElementById('haberBadge').textContent = yeni;
+    document.getElementById('haberBadge').style.display = yeni > 0 ? '' : 'none';
+    document.getElementById('haberCount').textContent = `${yeni} bekliyor`;
+  } else {
+    toast('Hata: ' + error.message, 'error');
+  }
+}
+
+async function haberSil(id) {
+  if (!confirm('Bu haber silinsin mi?')) return;
+  const { error } = await sb.from('announcements').delete().eq('id', id);
+  if (!error) {
+    document.getElementById('haber-row-' + id)?.remove();
+    toast('Haber silindi', 'success');
+  }
+}
+
+async function haberTumunuOnayla() {
+  if (!confirm('Listedeki tüm haberler yayınlansın mı?')) return;
+  const rows = document.querySelectorAll('[id^="haber-row-"]');
+  const ids = Array.from(rows).map(r => parseInt(r.id.replace('haber-row-', '')));
+  if (!ids.length) { toast('Yayınlanacak haber yok', 'error'); return; }
+
+  const { error } = await sb.from('announcements').update({ status: 'published' })
+    .eq('source', 'otomatik').eq('status', 'draft');
+
+  if (!error) {
+    toast(`${ids.length} haber yayınlandı`, 'success');
+    loadHaberKuyrugu();
+  } else {
+    toast('Hata: ' + error.message, 'error');
+  }
+}
+
+async function haberDusukSkoriSil() {
+  if (!confirm('Skoru 5\'in altındaki tüm draft haberler silinsin mi?')) return;
+  const { error } = await sb.from('announcements').delete()
+    .eq('source', 'otomatik').eq('status', 'draft').lt('ai_skor', 5);
+
+  if (!error) {
+    toast('Düşük skorlu haberler silindi', 'success');
+    loadHaberKuyrugu();
+  } else {
+    toast('Hata: ' + error.message, 'error');
+  }
 }
 
 // ─── MESSAGES ─────────────────────────────────────────────────────────────────
