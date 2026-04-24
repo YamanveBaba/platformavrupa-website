@@ -529,8 +529,11 @@ textarea.form-control { resize: vertical; min-height: 100px; }
 }
 
 @media (max-width: 480px) {
-  .kpi-grid { grid-template-columns: 1fr; }
-  .content { padding: 16px; }
+  .kpi-grid { grid-template-columns: 1fr 1fr; }
+  .content { padding: 12px; }
+  .kpi-card { padding: 14px; }
+  .kpi-value { font-size: 22px; }
+  .kpi-icon { width: 36px; height: 36px; font-size: 14px; }
 }
 
 /* ─── ANNOUNCEMENT EDITOR ────────────────────────────── */
@@ -1198,6 +1201,8 @@ async function loadDashboard() {
     }
   } catch (e) {
     console.error('Dashboard load error:', e);
+    // Hata durumunda tek tek dene
+    loadKPIsFallback();
   }
 
   // Recent listings
@@ -1205,6 +1210,24 @@ async function loadDashboard() {
 
   // Category chart
   loadCategoryChart();
+}
+
+async function loadKPIsFallback() {
+  const tryCount = async (table, filter) => {
+    try {
+      let q = sb.from(table).select('id', { count: 'exact' });
+      if (filter) q = q.eq(...filter);
+      const r = await q;
+      return r.count ?? r.data?.length ?? 0;
+    } catch { return '?'; }
+  };
+
+  setKPI('kpiUsers', await tryCount('profiles'));
+  setKPI('kpiActive', await tryCount('listings', ['status','active']));
+  setKPI('kpiPending', await tryCount('listings', ['status','pending']));
+  setKPI('kpiMessages', await tryCount('messages'));
+  setKPI('kpiAnnouncements', await tryCount('announcements'));
+  setKPI('kpiHealth', await tryCount('health_leads'));
 }
 
 function setKPI(id, value) {
