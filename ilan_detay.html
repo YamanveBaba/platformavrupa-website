@@ -88,8 +88,8 @@
             const content = document.getElementById('content');
             content.classList.remove('hidden');
 
-            const title    = d.title || 'Başlıksız İlan';
-            const desc     = d.description || '';
+            const title    = d.title_tr || d.title || 'Başlıksız İlan';
+            const desc     = d.description_tr || d.description || '';
             const price    = d.price || '';
             const city     = d.city || '';
             const country  = d.country || '';

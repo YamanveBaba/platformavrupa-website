@@ -60,6 +60,15 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python -X utf8 ilan_cekici/haber_cek.py
 
+      - name: Ilanlari Turkceleştir (basliklar)
+        run: python -X utf8 ilan_cekici/cevir.py --mode title
+
+      - name: Ilanlari Turkceleştir (aciklamalar)
+        run: python -X utf8 ilan_cekici/cevir.py --mode desc
+
+      - name: Market urunlerini Turkceleştir
+        run: python -X utf8 ilan_cekici/cevir.py --tablo market
+
       - name: Telegram bildirimi gonder
         if: always()
         run: python -X utf8 ilan_cekici/bildir.py
