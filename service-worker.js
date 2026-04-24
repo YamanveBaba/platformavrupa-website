@@ -133,5 +133,34 @@ self.addEventListener('fetch', (event) => {
   } else {
     // Diğer tüm harici istekleri direkt ağdan çek
     event.respondWith(fetch(request));
+
   }
+});
+
+// ── Push Bildirimleri (PWA) ───────────────────────────────────────────────────
+self.addEventListener('push', (event) => {
+  const data = event.data?.json() || {};
+  event.waitUntil(
+    self.registration.showNotification(data.title || 'Platform Avrupa', {
+      body: data.body || 'Yeni bildirim var',
+      icon: '/logo.png',
+      badge: '/logo.png',
+      tag: data.tag || 'pa-notif',
+      data: { url: data.url || '/admin.html' }
+    })
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    clients.matchAll({ type: 'window' }).then((list) => {
+      for (const client of list) {
+        if (client.url.includes(event.notification.data.url) && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      return clients.openWindow(event.notification.data.url || '/admin.html');
+    })
+  );
 });
