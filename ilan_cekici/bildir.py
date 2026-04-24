@@ -50,17 +50,6 @@ def main():
     except Exception:
         ilan_toplam = "?"
 
-    # Market urunleri
-    colruyt  = supabase_say(sb_url, sb_key, "market_chain_products", "&chain=eq.colruyt")
-    delhaize = supabase_say(sb_url, sb_key, "market_chain_products", "&chain=eq.delhaize")
-    lidl     = supabase_say(sb_url, sb_key, "market_chain_products", "&chain=eq.lidl")
-    carrefour= supabase_say(sb_url, sb_key, "market_chain_products", "&chain=eq.carrefour")
-    aldi     = supabase_say(sb_url, sb_key, "market_chain_products", "&chain=eq.aldi")
-    try:
-        market_toplam = colruyt + delhaize + lidl + carrefour + aldi
-    except Exception:
-        market_toplam = "?"
-
     # Haberler
     haber_toplam = supabase_say(sb_url, sb_key, "announcements", "&source=eq.otomatik")
 
@@ -97,13 +86,6 @@ def main():
         f"  🟩 FOREM (Valoniya):   <b>{fmt(forem)}</b>\n"
         f"  🟧 VDAB (Flandriya):   <b>{fmt(vdab)}</b>\n"
         f"  📊 Toplam:             <b>{fmt(ilan_toplam)}</b>\n\n"
-        f"🛒 <b>Market Ürünleri</b>\n"
-        f"  Colruyt:   <b>{fmt(colruyt)}</b>\n"
-        f"  Delhaize:  <b>{fmt(delhaize)}</b>\n"
-        f"  Lidl:      <b>{fmt(lidl)}</b>\n"
-        f"  Carrefour: <b>{fmt(carrefour)}</b>\n"
-        f"  Aldi:      <b>{fmt(aldi)}</b>\n"
-        f"  📊 Toplam: <b>{fmt(market_toplam)}</b>\n\n"
         f"📰 <b>Haberler</b>\n"
         f"  Otomatik:  <b>{fmt(haber_toplam)}</b>\n"
     )
