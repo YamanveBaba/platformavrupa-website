@@ -1167,30 +1167,33 @@ async function loadDashboard() {
 
   try {
     const [users, active, pending, msgs, announcements, health] = await Promise.all([
-      sb.from('profiles').select('id', { count: 'exact', head: true }),
-      sb.from('listings').select('id', { count: 'exact', head: true }).eq('status', 'active'),
-      sb.from('listings').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
-      sb.from('messages').select('id', { count: 'exact', head: true }).gte('created_at', today.toISOString()),
-      sb.from('announcements').select('id', { count: 'exact', head: true }),
-      sb.from('health_leads').select('id', { count: 'exact', head: true }).catch(() => ({ count: 0 }))
+      sb.from('profiles').select('id', { count: 'exact' }),
+      sb.from('listings').select('id', { count: 'exact' }).eq('status', 'active'),
+      sb.from('listings').select('id', { count: 'exact' }).eq('status', 'pending'),
+      sb.from('messages').select('id', { count: 'exact' }).gte('created_at', today.toISOString()),
+      sb.from('announcements').select('id', { count: 'exact' }),
+      sb.from('health_leads').select('id', { count: 'exact' }).catch(() => ({ count: 0, data: [] }))
     ]);
 
-    setKPI('kpiUsers', users.count);
-    setKPI('kpiActive', active.count);
-    setKPI('kpiPending', pending.count);
-    setKPI('kpiMessages', msgs.count);
-    setKPI('kpiAnnouncements', announcements.count);
-    setKPI('kpiHealth', health.count || 0);
+    const getCount = r => r.count ?? r.data?.length ?? 0;
+
+    setKPI('kpiUsers', getCount(users));
+    setKPI('kpiActive', getCount(active));
+    setKPI('kpiPending', getCount(pending));
+    setKPI('kpiMessages', getCount(msgs));
+    setKPI('kpiAnnouncements', getCount(announcements));
+    setKPI('kpiHealth', getCount(health));
+
+    const pendingCount = getCount(pending);
 
     // Update pending badges
-    const pc = pending.count || 0;
-    document.getElementById('pendingBadge').textContent = pc;
-    document.getElementById('pendingBadge').style.display = pc > 0 ? '' : 'none';
+    document.getElementById('pendingBadge').textContent = pendingCount;
+    document.getElementById('pendingBadge').style.display = pendingCount > 0 ? '' : 'none';
     const bnBadge = document.getElementById('bnPendingBadge');
-    bnBadge.textContent = pc;
-    bnBadge.style.display = pc > 0 ? '' : 'none';
+    bnBadge.textContent = pendingCount;
+    bnBadge.style.display = pendingCount > 0 ? '' : 'none';
 
-    if (pending.count > 0) {
+    if (pendingCount > 0) {
       document.getElementById('kpiPendingSub').innerHTML = `<span style="color:var(--warning)">Onay bekliyor!</span>`;
     }
   } catch (e) {
