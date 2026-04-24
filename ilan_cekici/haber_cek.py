@@ -41,11 +41,17 @@ ULKE_MAP = {
 # RSS kaynakları — Avrupa Türkleri için
 RSS_KAYNAKLAR = [
     # Türk medyası
-    {"url": "https://www.aa.com.tr/tr/rss/default.aspx",         "kaynak": "Anadolu Ajansı"},
-    {"url": "https://www.ntv.com.tr/son-dakika.rss",             "kaynak": "NTV"},
-    {"url": "http://rss.dw.com/rdf/rss-tur-all",                 "kaynak": "DW Türkçe"},
-    {"url": "https://www.bbc.com/turkce/index.xml",              "kaynak": "BBC Türkçe"},
-    {"url": "https://www.trthaber.com/anasayfa.rss",             "kaynak": "TRT Haber"},
+    {"url": "https://www.aa.com.tr/tr/rss/default.aspx",               "kaynak": "Anadolu Ajansı"},
+    {"url": "https://www.ntv.com.tr/son-dakika.rss",                   "kaynak": "NTV"},
+    {"url": "https://www.cnnturk.com/feed/rss/main/news",              "kaynak": "CNN Türk"},
+    {"url": "http://rss.dw.com/rdf/rss-tur-all",                       "kaynak": "DW Türkçe"},
+    {"url": "https://www.bbc.com/turkce/index.xml",                    "kaynak": "BBC Türkçe"},
+    {"url": "https://www.trthaber.com/anasayfa.rss",                   "kaynak": "TRT Haber"},
+    {"url": "https://www.sabah.com.tr/rss/anasayfa.xml",               "kaynak": "Sabah"},
+    {"url": "https://www.milliyet.com.tr/rss/rssnew/gundemrss.xml",    "kaynak": "Milliyet"},
+    {"url": "https://www.hurriyet.com.tr/rss/gundem",                  "kaynak": "Hürriyet"},
+    {"url": "https://www.haberler.com/rss/",                           "kaynak": "Haberler.com"},
+    {"url": "https://www.ensonhaber.com/rss.xml",                      "kaynak": "En Son Haber"},
     # Uluslararası Türkçe
     {"url": "https://www.france24.com/tr/rss",                   "kaynak": "France24 Türkçe"},
     {"url": "https://tr.euronews.com/rss",                       "kaynak": "Euronews Türkçe"},
