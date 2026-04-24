@@ -57,6 +57,10 @@ RSS_KAYNAKLAR = [
     {"url": "https://tr.euronews.com/rss",                       "kaynak": "Euronews Türkçe"},
     {"url": "https://www.t24.com.tr/rss",                        "kaynak": "T24"},
     {"url": "https://bianet.org/bianet/rss",                     "kaynak": "Bianet"},
+    # Reddit
+    {"url": "https://www.reddit.com/r/gurbetci.rss",            "kaynak": "Reddit r/gurbetci"},
+    {"url": "https://www.reddit.com/r/Turkey.rss",              "kaynak": "Reddit r/Turkey"},
+    {"url": "https://www.reddit.com/r/europe.rss",              "kaynak": "Reddit r/europe"},
     # Avrupa Türk medyası
     {"url": "https://www.avrupahaber.net/feed",                  "kaynak": "Avrupa Haber"},
     {"url": "https://www.almanyabulteni.de/feed",                "kaynak": "Almanya Bülteni"},
