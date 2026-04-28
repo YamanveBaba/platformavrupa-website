@@ -15,7 +15,8 @@ const ASSETS_TO_CACHE = [
   './sila_yolu.html',
   './akademi.html',
   './logo.png',
-  './consent.js'
+  './consent.js',
+  './track-events.js'
 ];
 
 // Kurulum: Yeni cache aç, hemen aktive et
