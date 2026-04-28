@@ -72,6 +72,60 @@ def sektor_bul(text: str) -> str:
             return sektor
     return "Diger"
 
+BE_PROVINCE_MAP = {
+    "oost-vlaanderen": "Gent",
+    "west-vlaanderen": "Brugge",
+    "vlaams-brabant":  "Leuven",
+    "limburg":         "Hasselt",
+    "hainaut":         "Charleroi",
+    "brabant wallon":  "Wavre",
+    "walloon brabant": "Wavre",
+    "luxemburg":       "Arlon",
+    "namur":           "Namur",
+    "liège":           "Liège",
+    "liege":           "Liège",
+}
+
+BE_POSTAL_CITY = {
+    "10": "Brussels (Bruxelles)", "11": "Brussels (Bruxelles)", "12": "Brussels (Bruxelles)",
+    "20": "Antwerpen", "21": "Antwerpen", "22": "Antwerpen", "23": "Antwerpen",
+    "24": "Mechelen",
+    "30": "Leuven", "31": "Leuven",
+    "32": "Hasselt", "33": "Hasselt", "34": "Hasselt", "35": "Hasselt",
+    "36": "Turnhout",
+    "40": "Liège", "41": "Liège", "42": "Liège", "43": "Liège", "44": "Liège", "45": "Liège",
+    "46": "Verviers",
+    "50": "Namur", "51": "Namur", "52": "Namur",
+    "60": "Charleroi", "61": "Charleroi", "62": "Charleroi",
+    "63": "La Louvière",
+    "70": "Mons", "71": "Mons", "72": "Mons", "73": "Mons", "74": "Tournai",
+    "80": "Brugge", "81": "Brugge", "82": "Brugge", "83": "Brugge",
+    "84": "Kortrijk", "85": "Kortrijk",
+    "86": "Roeselare",
+    "88": "Ostend (Oostende)",
+    "90": "Gent", "91": "Gent", "92": "Gent", "93": "Aalst",
+    "94": "Sint-Niklaas",
+    "96": "Genk", "97": "Genk",
+    "98": "Hasselt",
+}
+
+def normalize_city(raw: str) -> str:
+    if not raw or raw.strip().lower() in ("belgie", "belgique", "belgium", ""):
+        return "Belgie"
+    s = raw.strip()
+    m = re.match(r'^\d{4}\s+(.+)', s)
+    if m:
+        return m.group(1).strip()
+    m2 = re.match(r'^(\d{4})$', s)
+    if m2:
+        return BE_POSTAL_CITY.get(s[:2], "Belgie")
+    lower = s.lower()
+    for key, city in BE_PROVINCE_MAP.items():
+        if key in lower:
+            return city
+    return s
+
+
 def load_secrets() -> tuple[str, str]:
     url = os.environ.get("SUPABASE_URL", "").strip()
     key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "").strip()
@@ -117,7 +171,7 @@ def parse_ilan(job: dict) -> dict | None:
     if not baslik:
         return None
     firma = job.get("vacatureBedrijfsnaam", "") or ""
-    sehir = job.get("tewerkstellingsLocatieRegioOfAdres", "") or "Belgie"
+    sehir = normalize_city(job.get("tewerkstellingsLocatieRegioOfAdres", "") or "Belgie")
     tijds = " ".join(job.get("tijdsregeling", []) or []).lower()
     pozisyon = "Uzaktan" if "thuis" in tijds else ("Yari Zamanli" if "deel" in tijds else "Ofis")
     contract = vf.get("arbeidscircuitLijn", "") or ""

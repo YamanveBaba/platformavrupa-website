@@ -61,13 +61,13 @@ jobs:
         run: python -X utf8 ilan_cekici/haber_cek.py
 
       - name: Ilanlari Turkceleştir (basliklar)
-        run: python -X utf8 ilan_cekici/cevir.py --mode title
+        run: python -X utf8 ilan_cekici/cevir.py --mode title --limit 15000
 
       - name: Ilanlari Turkceleştir (aciklamalar)
-        run: python -X utf8 ilan_cekici/cevir.py --mode desc
+        run: python -X utf8 ilan_cekici/cevir.py --mode desc --limit 5000
 
       - name: Market urunlerini Turkceleştir
-        run: python -X utf8 ilan_cekici/cevir.py --tablo market
+        run: python -X utf8 ilan_cekici/cevir.py --tablo market --limit 2000
 
       - name: Telegram bildirimi gonder
         if: always()

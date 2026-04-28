@@ -1,13 +1,8 @@
 <!DOCTYPE html>
-
 <html lang="tr">
-
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Haber Detayı - PlatformAvrupa</title>
     <meta name="description" content="Platform Avrupa haber ve duyuru detayı. Gurbetçilere yönelik güncel içerik.">
     <link rel="canonical" href="https://www.platformavrupa.com/duyuru_detay.html">
@@ -24,202 +19,105 @@
     <meta name="twitter:image" content="https://www.platformavrupa.com/og-image.png">
 
     <script src="https://cdn.tailwindcss.com"></script>
-
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="utils.js"></script>
-    <style>body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }</style>
-    <script type="application/ld+json">
-    {"@context":"https://schema.org","@type":"Article","headline":"Haber Detayı","publisher":{"@type":"Organization","name":"Platform Avrupa","logo":{"@type":"ImageObject","url":"https://www.platformavrupa.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.platformavrupa.com/duyuru_detay.html"}}
-    </script>
-
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        #haberIcerik a { color: #2563eb; text-decoration: underline; }
+        #haberIcerik p { margin-bottom: 1rem; }
+    </style>
 </head>
-
 <body class="text-slate-800 flex flex-col min-h-screen">
 
-
-
     <nav class="bg-white/95 backdrop-blur sticky top-0 z-50 border-b border-slate-200 px-6 py-4 shadow-sm">
-
         <div class="max-w-4xl mx-auto flex justify-between items-center">
-
             <a href="duyurular.html" class="flex items-center gap-2 text-slate-600 hover:text-blue-600 transition font-bold">
-
                 <div class="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center"><i class="fa-solid fa-arrow-left"></i></div>
-
                 <span>Tüm Haberler</span>
-
             </a>
-
             <div class="w-8"></div>
-
         </div>
-
     </nav>
 
-
-
     <main class="flex-grow w-full">
-
-       
-
         <div id="loading" class="text-center py-20">
-
             <i class="fa-solid fa-circle-notch fa-spin text-3xl text-slate-400"></i>
-
         </div>
 
-
-
         <article id="haberAlani" class="hidden">
-
-           
-
             <div class="w-full h-[400px] relative">
-
                 <img id="haberResim" src="" class="w-full h-full object-cover">
-
                 <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
-
                 <div class="absolute bottom-0 left-0 w-full p-6 md:p-12 max-w-4xl mx-auto">
-
                     <span id="haberKaynak" class="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded mb-4 inline-block">DUYURU</span>
-
-                    <h1 id="haberBaslik" class="text-3xl md:text-5xl font-extrabold text-white leading-tight mb-2 text-shadow"></h1>
-
-                    <p id="haberTarih" class="text-slate-300 text-sm font-medium flex items-center gap-2"><i class="fa-regular fa-clock"></i> </p>
-
+                    <h1 id="haberBaslik" class="text-3xl md:text-5xl font-extrabold text-white leading-tight mb-2"></h1>
+                    <p id="haberTarih" class="text-slate-300 text-sm font-medium flex items-center gap-2"><i class="fa-regular fa-clock"></i></p>
                 </div>
-
             </div>
-
-
 
             <div class="max-w-3xl mx-auto px-6 py-12">
-
-                <div id="haberIcerik" class="prose prose-lg text-slate-600 leading-loose whitespace-pre-line">
-
-                </div>
-
+                <div id="haberIcerik" class="prose prose-lg text-slate-600 leading-loose"></div>
             </div>
-
-
-
         </article>
-
-
-
     </main>
 
-
-
     <div class="bg-white border-t border-slate-200 py-8 text-center text-xs text-slate-400">
-
         &copy; 2025 PlatformAvrupa. Tüm hakları saklıdır.
-
     </div>
 
-
-
     <script>
-
-        // 1. SUPABASE AYARLARI
-
         const SUPABASE_URL = 'https://vhietrqljahdmloazgpp.supabase.co';
-
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoaWV0cnFsamFoZG1sb2F6Z3BwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTk5MTcsImV4cCI6MjA4MDYzNTkxN30.sxpUrTnR40XuEBPUeQXj352xMziGr_lDqdA8H69ejBA';
-
         const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-
-
         window.onload = async function() {
-
-            // URL'den ID'yi al (Örn: duyuru_detay.html?id=550e8400-e29b...)
-
             const urlParams = new URLSearchParams(window.location.search);
-
             const id = urlParams.get('id');
 
-
-
-            // ID yoksa anasayfaya at
-
-            if (!id) {
-
-                window.location.href = 'duyurular.html';
-
-                return;
-
-            }
-
-
-
-            // Veritabanından bu ID'ye sahip haberi bul
+            if (!id) { window.location.href = 'duyurular.html'; return; }
 
             const { data: haber, error } = await sb
-
                 .from('announcements')
-
                 .select('*')
-
                 .eq('id', id)
-
                 .single();
 
-
-
             const loadingDiv = document.getElementById('loading');
-
             const contentDiv = document.getElementById('haberAlani');
 
-
-
             if (error || !haber) {
-
                 loadingDiv.innerHTML = '<p class="text-red-500 font-bold">Haber bulunamadı.</p><a href="duyurular.html" class="text-blue-600 underline mt-4 block">Geri Dön</a>';
-
                 return;
-
             }
 
+            if (haber.status === 'draft') {
+                loadingDiv.innerHTML = '<p class="text-slate-500 font-bold">Bu haber henüz yayınlanmamış.</p><a href="duyurular.html" class="text-blue-600 underline mt-4 block">Geri Dön</a>';
+                return;
+            }
 
-
-            // Verileri Yerleştir
-
-            const resim = haber.image_url ? haber.image_url : 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?q=80&w=1200';
-
+            const resim = haber.image_url || 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?q=80&w=1200';
             const tarih = formatDate(haber.created_at, 'long');
-
-
+            const kategoriMetin = (haber.kategori || 'DUYURU').replace(/_/g, ' ').toUpperCase();
 
             document.getElementById('haberResim').src = resim;
-
             document.getElementById('haberBaslik').innerText = haber.title;
-
             document.getElementById('haberTarih').innerHTML = `<i class="fa-regular fa-clock"></i> ${tarih}`;
+            document.getElementById('haberKaynak').textContent = kategoriMetin;
+            document.getElementById('haberIcerik').innerHTML = haber.content || '';
 
-           
-
-            // İçeriği textContent yerine innerText ile koyuyoruz ki satır başları korunsun
-
-            document.getElementById('haberIcerik').innerText = haber.content;
-
-
-
-            // Yükleniyor'u gizle, içeriği göster
+            if (haber.source_url) {
+                const linkDiv = document.createElement('div');
+                linkDiv.className = 'mt-8 pt-6 border-t border-slate-200';
+                linkDiv.innerHTML = `<a href="${haber.source_url}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl transition"><i class="fa-solid fa-external-link-alt"></i> Orijinal Kaynağa Git</a>`;
+                document.getElementById('haberIcerik').appendChild(linkDiv);
+            }
 
             loadingDiv.classList.add('hidden');
-
             contentDiv.classList.remove('hidden');
-
         };
-
     </script>
 
 </body>
-
 </html>

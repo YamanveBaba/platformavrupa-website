@@ -62,7 +62,8 @@ def main():
         market_toplam = "?"
 
     # Haberler
-    haber_toplam = supabase_say(sb_url, sb_key, "announcements", "&source=eq.otomatik")
+    haber_toplam  = supabase_say(sb_url, sb_key, "announcements", "&source=eq.otomatik&status=eq.published")
+    draft_haberler = supabase_say(sb_url, sb_key, "announcements", "&source=eq.otomatik&status=eq.draft")
 
     saat = datetime.now(timezone.utc).strftime("%d.%m.%Y %H:%M UTC")
 
@@ -105,7 +106,8 @@ def main():
         f"  Aldi:      <b>{fmt(aldi)}</b>\n"
         f"  📊 Toplam: <b>{fmt(market_toplam)}</b>\n\n"
         f"📰 <b>Haberler</b>\n"
-        f"  Otomatik:  <b>{fmt(haber_toplam)}</b>\n"
+        f"  Yayında:          <b>{fmt(haber_toplam)}</b>\n"
+        f"  Onay bekleyen:    <b>{fmt(draft_haberler)}</b>\n"
     )
 
     if isinstance(pending_count, int) and pending_count > 0:
