@@ -188,24 +188,20 @@ def gemini_filtrele(haber: dict, gemini_key: str) -> dict | None:
             "skor": 5,
         }
 
-    prompt = f"""Avrupa'daki Türkler için çalışan bir haber editörüsün.
-
-Şu haberi analiz et ve SADECE JSON döndür:
+    prompt = f"""Avrupa'daki Türkler için haber editörüsün. Haberi puanla ve kategorize et.
 
 BAŞLIK: {haber['baslik']}
 ÖZET: {haber['ozet'][:400]}
 KAYNAK: {haber['kaynak']}
 
-JSON format:
-{{"alakali": true/false, "ozet": "2 cümle Türkçe özet", "ulke": "almanya/hollanda/belcika/fransa/avusturya/ingiltere/italya/ispanya/genel", "kategori": "vize_ikamet|vatandaslik|egitim_burs|is_ekonomi|kultur_toplum|turkiye|avrupa_politika", "skor": 1-10}}
+SADECE JSON döndür:
+{{"ozet": "2 cümle Türkçe özet", "ulke": "almanya/hollanda/belcika/fransa/avusturya/ingiltere/italya/ispanya/genel", "kategori": "vize_ikamet|vatandaslik|egitim_burs|is_ekonomi|kultur_toplum|turkiye|avrupa_politika|diger", "skor": 1-10}}
 
-Alakalı = Avrupa'daki Türklerin günlük hayatını etkiler (vize, ikamet, vatandaşlık, iş, eğitim, sosyal haklar, Türkiye-AB ilişkileri, gurbetçi haberleri).
-Alakasız = spor skoru, magazin, reklam, Türkiye iç siyaseti (Avrupa'yı etkilemiyorsa).
-
-Skor rehberi:
-8-10: Kritik (vize değişikliği, vatandaşlık hakkı, iş imkânı, yasal değişiklik)
-5-7: Önemli (kültürel etkinlik, topluluk haberi, ekonomi)
-1-4: Düşük öncelik"""
+Skor rehberi (geniş tut — şüphe durumunda 5 ver):
+8-10: Kritik (vize/ikamet değişikliği, vatandaşlık, iş hukuku, Schengen, AB-Türkiye ilişkileri)
+5-7: Önemli (Avrupa haberleri, ekonomi, eğitim, kültür, Türkiye-Avrupa)
+3-4: Az alakalı ama yayınlanabilir
+1-2: Sadece spor skoru, magazin, reklam"""
 
     try:
         r = requests.post(
@@ -330,15 +326,20 @@ def main():
         if gemini_key:
             time.sleep(random.uniform(0.5, 1.5))
         sonuc = gemini_filtrele(h, gemini_key)
-        if sonuc and sonuc.get("alakali"):
+        if sonuc:
             h["ozet"] = sonuc.get("ozet", h["ozet"])
             h["ulke"] = sonuc.get("ulke", "genel")
             h["kategori"] = sonuc.get("kategori", "genel")
             h["ai_skor"] = sonuc.get("skor", 5)
-            gecenler.append(h)
-            print(f"  OK [skor:{h['ai_skor']}] [{h['kaynak']}] {h['baslik'][:70]}")
+            if h["ai_skor"] >= 3:
+                gecenler.append(h)
+                print(f"  OK [skor:{h['ai_skor']}] [{h['kaynak']}] {h['baslik'][:70]}")
+            else:
+                print(f"  -- [skor:{h['ai_skor']}] [{h['kaynak']}] {h['baslik'][:70]}")
         else:
-            print(f"  -- [{h['kaynak']}] {h['baslik'][:70]}")
+            h["ai_skor"] = 5
+            gecenler.append(h)
+            print(f"  OK [skor:5/fallback] [{h['kaynak']}] {h['baslik'][:70]}")
 
     print(f"\n  {len(gecenler)}/{len(haberler)} haber filtreyi geçti\n")
 
