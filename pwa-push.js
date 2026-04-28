@@ -35,13 +35,15 @@ async function subscribeToPush() {
 }
 
 async function saveSubscription(sub) {
-  if (!sub || !window.SUPABASE_URL || !window.SUPABASE_ANON_KEY) return false;
+  const sbUrl = window.SUPABASE_URL;
+  const sbKey = window.SUPABASE_KEY || window.SUPABASE_ANON_KEY;
+  if (!sub || !sbUrl || !sbKey) return false;
   const j = sub.toJSON();
-  const res = await fetch(`${window.SUPABASE_URL}/rest/v1/push_subscriptions`, {
+  const res = await fetch(`${sbUrl}/rest/v1/push_subscriptions`, {
     method: 'POST',
     headers: {
-      'apikey': window.SUPABASE_ANON_KEY,
-      'Authorization': `Bearer ${window.SUPABASE_ANON_KEY}`,
+      'apikey': sbKey,
+      'Authorization': `Bearer ${sbKey}`,
       'Content-Type': 'application/json',
       'Prefer': 'resolution=ignore-duplicates'
     },
@@ -58,14 +60,12 @@ async function unsubscribeFromPush() {
   const sub = await getPushSubscription();
   if (!sub) return;
   await sub.unsubscribe();
-  // Supabase'den de sil
-  if (window.SUPABASE_URL && window.SUPABASE_ANON_KEY) {
-    await fetch(`${window.SUPABASE_URL}/rest/v1/push_subscriptions?endpoint=eq.${encodeURIComponent(sub.endpoint)}`, {
+  const sbUrl = window.SUPABASE_URL;
+  const sbKey = window.SUPABASE_KEY || window.SUPABASE_ANON_KEY;
+  if (sbUrl && sbKey) {
+    await fetch(`${sbUrl}/rest/v1/push_subscriptions?endpoint=eq.${encodeURIComponent(sub.endpoint)}`, {
       method: 'DELETE',
-      headers: {
-        'apikey': window.SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${window.SUPABASE_ANON_KEY}`
-      }
+      headers: { 'apikey': sbKey, 'Authorization': `Bearer ${sbKey}` }
     });
   }
 }
