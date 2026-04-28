@@ -1,4 +1,4 @@
-const CACHE_NAME = 'platform-avrupa-v7';
+const CACHE_NAME = 'platform-avrupa-v8';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -14,7 +14,8 @@ const ASSETS_TO_CACHE = [
   './hukuk_vitrini.html',
   './sila_yolu.html',
   './akademi.html',
-  './logo.png'
+  './logo.png',
+  './consent.js'
 ];
 
 // Kurulum: Yeni cache aç, hemen aktive et
