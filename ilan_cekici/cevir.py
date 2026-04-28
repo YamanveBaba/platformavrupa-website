@@ -134,7 +134,7 @@ def cevir_ilanlar_title(sb_url, sb_key, gm_key, limit):
         kalan  = min(PAGE, limit - toplam)
         satırlar = sb_get(
             sb_url, sb_key, "ilanlar",
-            "title_tr=is.null&status=eq.active",
+            "title_tr=is.null",
             "id,title", limit=kalan,
         )
         if not satırlar:
@@ -172,7 +172,7 @@ def cevir_ilanlar_desc(sb_url, sb_key, gm_key, limit):
         kalan  = min(PAGE, limit - toplam)
         satırlar = sb_get(
             sb_url, sb_key, "ilanlar",
-            "description_tr=is.null&status=eq.active&description=not.is.null",
+            "description_tr=is.null&description=not.is.null",
             "id,description", limit=kalan,
         )
         if not satırlar:
