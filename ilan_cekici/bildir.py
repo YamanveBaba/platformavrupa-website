@@ -119,6 +119,25 @@ def main():
 
     print(mesaj)
     telegram_gonder(tg_token, tg_chat, mesaj)
+    web_push_gonder(sb_url, sb_key, ilan_toplam)
+
+def web_push_gonder(sb_url, sb_key, ilan_toplam):
+    """Tüm PWA abonelerine günlük güncelleme bildirimi gönder."""
+    edge_url = f"{sb_url}/functions/v1/send-push"
+    headers = {
+        "Authorization": f"Bearer {sb_key}",
+        "Content-Type": "application/json",
+    }
+    try:
+        toplam_str = f"{ilan_toplam:,}" if isinstance(ilan_toplam, int) else str(ilan_toplam)
+        r = requests.post(edge_url, headers=headers, json={
+            "title": "Platform Avrupa",
+            "body": f"Bugün {toplam_str} iş ilanı güncellendi.",
+            "url": "/is_vitrini.html"
+        }, timeout=30)
+        print(f"Web push: {r.status_code} — {r.text[:80]}")
+    except Exception as e:
+        print(f"Web push hata: {e}")
 
 if __name__ == "__main__":
     main()

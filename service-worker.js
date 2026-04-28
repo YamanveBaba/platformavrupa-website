@@ -1,4 +1,4 @@
-const CACHE_NAME = 'platform-avrupa-v8';
+const CACHE_NAME = 'platform-avrupa-v9';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -16,7 +16,8 @@ const ASSETS_TO_CACHE = [
   './akademi.html',
   './logo.png',
   './consent.js',
-  './track-events.js'
+  './track-events.js',
+  './pwa-push.js'
 ];
 
 // Kurulum: Yeni cache aç, hemen aktive et

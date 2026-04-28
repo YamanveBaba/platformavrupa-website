@@ -25,6 +25,8 @@
 <script src="/consent.js"></script>
 <!-- Custom Event Tracking -->
 <script defer src="/track-events.js"></script>
+<!-- PWA Push -->
+<script defer src="/pwa-push.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PlatformAvrupa | Dijital Yol Arkadaşınız</title>
@@ -225,6 +227,9 @@
                 <span class="font-display font-bold text-xl text-gray-900">PlatformAvrupa</span>
             </a>
             <div class="flex items-center gap-3">
+                <button id="pushBtn" title="Yeni ilan bildirimlerini aç" class="flex items-center text-sm font-medium text-gray-500 hover:text-indigo-600 transition px-2 py-1.5 rounded-lg hover:bg-gray-100">
+                    <i class="fa-solid fa-bell mr-1.5"></i><span class="hidden sm:inline">Bildirimler</span>
+                </button>
                 <a href="ilan_giris.html" class="hidden sm:flex bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2 rounded-lg font-semibold text-sm transition">
                     <i class="fa-solid fa-plus mr-2"></i> İlan Ver
                 </a>
