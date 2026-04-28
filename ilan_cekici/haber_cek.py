@@ -336,9 +336,9 @@ def main():
             h["kategori"] = sonuc.get("kategori", "genel")
             h["ai_skor"] = sonuc.get("skor", 5)
             gecenler.append(h)
-            print(f"  ✓ [skor:{h['ai_skor']}] [{h['kaynak']}] {h['baslik'][:70]}")
+            print(f"  OK [skor:{h['ai_skor']}] [{h['kaynak']}] {h['baslik'][:70]}")
         else:
-            print(f"  ✗ [{h['kaynak']}] {h['baslik'][:70]}")
+            print(f"  -- [{h['kaynak']}] {h['baslik'][:70]}")
 
     print(f"\n  {len(gecenler)}/{len(haberler)} haber filtreyi geçti\n")
 
