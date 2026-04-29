@@ -648,6 +648,27 @@
                 </p>
             </div>
 
+            <!-- Windy Webcam - Kapıkule canlı görüntü -->
+            <div class="border-card p-4 mb-4">
+                <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-video text-blue-600"></i>
+                    Kapıkule — Canlı Görüntü
+                </h3>
+                <div id="windyCameraWrap">
+                    <img id="kapikuleSnapshot" src="" alt="Kapıkule kamera"
+                         class="w-full rounded-xl bg-slate-100 hidden" style="max-height:280px;object-fit:cover" />
+                    <div id="windyCameraLoading" class="flex items-center justify-center py-10 text-slate-400">
+                        <i class="fa-solid fa-circle-notch fa-spin text-2xl mr-2"></i>
+                        <span class="text-sm">Kamera yükleniyor...</span>
+                    </div>
+                    <div id="windyCameraError" class="hidden text-center py-8 text-slate-400">
+                        <i class="fa-solid fa-video-slash text-2xl mb-2 block"></i>
+                        <p class="text-sm">Kamera görüntüsü şu an mevcut değil</p>
+                    </div>
+                </div>
+                <p class="text-xs text-slate-400 mt-2">Kaynak: Windy.com · ~5 dk'da bir güncellenir</p>
+            </div>
+
             <!-- Dış kaynak linkleri -->
             <div class="border-card p-4 mb-4">
                 <h3 class="font-bold text-slate-800 mb-3 text-sm flex items-center gap-2">
@@ -1333,7 +1354,7 @@
         });
         document.getElementById(`content-${tab}`).classList.remove('hidden');
         if (tab === 'live')   { initLiveReportsMap(); loadLiveReports(); }
-        if (tab === 'camera') { loadBorderWaits(); }
+        if (tab === 'camera') { loadBorderWaits(); loadWindyCamera(); }
     }
 
     function openRouteCalculator() { switchTab('routes'); }
@@ -1484,6 +1505,32 @@
 
         } catch(e) {
             container.innerHTML = `<div class="col-span-full text-center py-4 text-slate-400 text-sm">Yüklenemedi.</div>`;
+        }
+    }
+
+    async function loadWindyCamera() {
+        const key = (typeof API_KEYS !== 'undefined') ? API_KEYS.WINDY_WEBCAM : null;
+        if (!key) return;
+        const loading = document.getElementById('windyCameraLoading');
+        const errDiv  = document.getElementById('windyCameraError');
+        const img     = document.getElementById('kapikuleSnapshot');
+        try {
+            const r = await fetch(
+                'https://api.windy.com/webcams/api/v3/webcams/1613219576?include=images',
+                { headers: { 'x-windy-api-key': key } }
+            );
+            const data = await r.json();
+            const src = data.webcams?.[0]?.images?.current?.preview;
+            if (src) {
+                img.src = src;
+                img.classList.remove('hidden');
+                if (loading) loading.classList.add('hidden');
+            } else {
+                throw new Error('no image');
+            }
+        } catch(e) {
+            if (loading) loading.classList.add('hidden');
+            if (errDiv)  errDiv.classList.remove('hidden');
         }
     }
 

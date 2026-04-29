@@ -34,7 +34,10 @@ const API_KEYS = {
     
     // NewsAPI - Otomatik haber önerileri için (günde 100 ücretsiz request)
     // Türk diasporası, vatandaşlık, finans haberleri
-    NEWS_API: 'fe4b9d88c63545f6a824467f7ccd25df'
+    NEWS_API: 'fe4b9d88c63545f6a824467f7ccd25df',
+
+    // Windy Webcam API - sila_yolu.html kamera görüntüsü için
+    WINDY_WEBCAM: 'xmUfa53M3iU53yJQW9c0HfmITZdtQGEH'
 };
 
 // ============================================================================
