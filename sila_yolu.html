@@ -642,10 +642,6 @@
                         <p class="text-sm">Veriler yükleniyor...</p>
                     </div>
                 </div>
-                <p class="text-xs text-slate-400 mt-3 border-t border-slate-100 pt-2">
-                    <i class="fa-brands fa-google mr-1"></i>Google Maps gerçek zamanlı trafik verisi.
-                    Sınır öncesi ve sonrası ~15 km güzergah ölçülür. Her 15 dakikada bir güncellenir.
-                </p>
             </div>
 
             <!-- Windy Webcam - Kapıkule canlı görüntü -->
@@ -654,19 +650,14 @@
                     <i class="fa-solid fa-video text-blue-600"></i>
                     Kapıkule — Canlı Görüntü
                 </h3>
-                <div id="windyCameraWrap">
-                    <img id="kapikuleSnapshot" src="" alt="Kapıkule kamera"
-                         class="w-full rounded-xl bg-slate-100 hidden" style="max-height:280px;object-fit:cover" />
-                    <div id="windyCameraLoading" class="flex items-center justify-center py-10 text-slate-400">
-                        <i class="fa-solid fa-circle-notch fa-spin text-2xl mr-2"></i>
-                        <span class="text-sm">Kamera yükleniyor...</span>
-                    </div>
-                    <div id="windyCameraError" class="hidden text-center py-8 text-slate-400">
-                        <i class="fa-solid fa-video-slash text-2xl mb-2 block"></i>
-                        <p class="text-sm">Kamera görüntüsü şu an mevcut değil</p>
-                    </div>
-                </div>
-                <p class="text-xs text-slate-400 mt-2">Kaynak: Windy.com · ~5 dk'da bir güncellenir</p>
+                <iframe
+                    src="https://webcams.windy.com/webcams/public/embed/player/1613219576/day"
+                    width="100%" height="260"
+                    frameborder="0"
+                    allow="fullscreen"
+                    class="w-full rounded-xl bg-slate-100">
+                </iframe>
+                <p class="text-xs text-slate-400 mt-2">~5 dk'da bir güncellenir</p>
             </div>
 
             <!-- Dış kaynak linkleri -->
@@ -692,18 +683,8 @@
                             <i class="fa-solid fa-map text-blue-600"></i>
                         </div>
                         <div>
-                            <p class="font-bold text-slate-800 text-sm">BG-TR Tüm Kapılar</p>
-                            <p class="text-xs text-slate-400">nakordoni.eu haritası</p>
-                        </div>
-                    </a>
-                    <a href="https://borderalarm.com/countries/bulgaria/" target="_blank" rel="noopener"
-                       class="flex items-center gap-3 p-3 bg-slate-50 hover:bg-red-50 rounded-xl transition group">
-                        <div class="w-9 h-9 bg-red-100 group-hover:bg-red-200 rounded-lg flex items-center justify-center shrink-0">
-                            <i class="fa-solid fa-bell text-red-600"></i>
-                        </div>
-                        <div>
-                            <p class="font-bold text-slate-800 text-sm">BorderAlarm</p>
-                            <p class="text-xs text-slate-400">Avrupa sınır alarmları</p>
+                            <p class="font-bold text-slate-800 text-sm">Bulgaristan Sınır Haritası</p>
+                            <p class="text-xs text-slate-400">nakordoni.eu · interaktif harita</p>
                         </div>
                     </a>
                 </div>
@@ -828,6 +809,18 @@
             }
         } catch(e) { /* Supabase yoksa boş devam */ }
 
+        // Google Maps bekleme verisi
+        const googleWaits = {};
+        try {
+            const { data: gwData } = await sb
+                .from('border_wait_times')
+                .select('gate_slug, wait_mins')
+                .order('checked_at', { ascending: false });
+            if (gwData) gwData.forEach(r => {
+                if (!googleWaits[r.gate_slug]) googleWaits[r.gate_slug] = r.wait_mins;
+            });
+        } catch(e) {}
+
         container.innerHTML = '';
         KAPILER.forEach(kapi => {
             const kayitlar = raporlar[kapi.id] || [];
@@ -835,7 +828,7 @@
                 ? Math.round(kayitlar.reduce((s, r) => s + r.bekleme_dk, 0) / kayitlar.length)
                 : null;
             const sonRapor = kayitlar.length ? kayitlar[0] : null;
-            container.innerHTML += kapiKartiOlustur(kapi, ortalama, kayitlar.length, sonRapor);
+            container.innerHTML += kapiKartiOlustur(kapi, ortalama, kayitlar.length, sonRapor, googleWaits[kapi.id] ?? null);
         });
     }
 
@@ -847,8 +840,12 @@
         return          { renk: 'wait-black', metin: `${dk}+ dk`, emoji: '⚫' };
     }
 
-    function kapiKartiOlustur(kapi, ortalama, raporSayisi, sonRapor) {
-        const b = beklemeSinifi(ortalama);
+    function kapiKartiOlustur(kapi, ortalama, raporSayisi, sonRapor, googleDk = null) {
+        const gosterilecek = (ortalama !== null) ? ortalama : googleDk;
+        const b = beklemeSinifi(gosterilecek);
+        const kaynakEtiketi = (ortalama === null && googleDk !== null)
+            ? `<span class="text-white/70 text-[10px] font-normal ml-1">📡 Google tahmini</span>`
+            : '';
         const sonGuncelleme = sonRapor
             ? getTimeAgo(new Date(sonRapor.created_at)) + ' güncellendi'
             : 'Henüz bildirim yok';
@@ -859,7 +856,7 @@
         return `
         <div class="border-card">
             <div class="${b.renk} px-6 py-3 flex items-center justify-between">
-                <div class="text-white font-black text-2xl">${b.emoji} ${b.metin}</div>
+                <div class="text-white font-black text-2xl">${b.emoji} ${b.metin}${kaynakEtiketi}</div>
                 <div class="text-white/80 text-xs">${sonGuncelleme}</div>
             </div>
             <div class="p-5">
@@ -1354,7 +1351,7 @@
         });
         document.getElementById(`content-${tab}`).classList.remove('hidden');
         if (tab === 'live')   { initLiveReportsMap(); loadLiveReports(); }
-        if (tab === 'camera') { loadBorderWaits(); loadWindyCamera(); }
+        if (tab === 'camera') { loadBorderWaits(); }
     }
 
     function openRouteCalculator() { switchTab('routes'); }
@@ -1505,32 +1502,6 @@
 
         } catch(e) {
             container.innerHTML = `<div class="col-span-full text-center py-4 text-slate-400 text-sm">Yüklenemedi.</div>`;
-        }
-    }
-
-    async function loadWindyCamera() {
-        const key = (typeof API_KEYS !== 'undefined') ? API_KEYS.WINDY_WEBCAM : null;
-        if (!key) return;
-        const loading = document.getElementById('windyCameraLoading');
-        const errDiv  = document.getElementById('windyCameraError');
-        const img     = document.getElementById('kapikuleSnapshot');
-        try {
-            const r = await fetch(
-                'https://api.windy.com/webcams/api/v3/webcams/1613219576?include=images',
-                { headers: { 'x-windy-api-key': key } }
-            );
-            const data = await r.json();
-            const src = data.webcams?.[0]?.images?.current?.preview;
-            if (src) {
-                img.src = src;
-                img.classList.remove('hidden');
-                if (loading) loading.classList.add('hidden');
-            } else {
-                throw new Error('no image');
-            }
-        } catch(e) {
-            if (loading) loading.classList.add('hidden');
-            if (errDiv)  errDiv.classList.remove('hidden');
         }
     }
 
