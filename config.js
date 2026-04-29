@@ -25,7 +25,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const API_KEYS = {
     // Google Maps - Sadece admin.html ve sila_yolu.html'de kullanılıyor
     // Google Cloud Console'da HTTP referer kısıtlaması yapın!
-    GOOGLE_MAPS: 'AIzaSyDhMlLszA1wpS9lk_T7yJIc8hb8gIiatgc',
+    GOOGLE_MAPS: 'AIzaSyAfadKqif0yyGgan1BQJYZNTidKRmAG2G8',
     
     // Adzuna Job API - Sadece admin.html'de kullanılıyor
     // Prod'da bu API çağrıları Supabase Edge Function üzerinden yapılmalı

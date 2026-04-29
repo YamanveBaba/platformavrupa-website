@@ -68,16 +68,9 @@ async function googleSureCek(origin: string, dest: string): Promise<number | nul
 }
 
 Deno.serve(async (req) => {
-  // Basit auth: service role key kontrolü
-  const auth = req.headers.get('Authorization') || '';
-  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-  if (!auth.includes(serviceKey)) {
-    return new Response('Unauthorized', { status: 401 });
-  }
-
   const sb = createClient(
     Deno.env.get('SUPABASE_URL')!,
-    serviceKey
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   );
 
   const sonuclar: Array<{ slug: string; wait: number | null; travel: number | null }> = [];
