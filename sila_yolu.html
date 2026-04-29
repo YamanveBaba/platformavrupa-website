@@ -171,7 +171,6 @@
                 <span class="flex items-center gap-1.5"><span class="inline-block w-3 h-3 rounded-full bg-red-500"></span>90-179 dk — Yoğun</span>
                 <span class="flex items-center gap-1.5"><span class="inline-block w-3 h-3 rounded-full bg-gray-800"></span>180+ dk — Çok Yoğun</span>
                 <span class="flex items-center gap-1.5"><span class="inline-block w-3 h-3 rounded-full bg-slate-400"></span>Takip Edilmiyor</span>
-                <span class="text-white/50 ml-2">· 📡 Google Maps trafik verisi</span>
             </div>
         </div>
 
@@ -1230,6 +1229,7 @@
 
     function loadPopularRoutes() {
         const c = document.getElementById('popularRoutes');
+        if (!c) return;
         c.innerHTML = '';
         POPULER_ROTALAR.forEach(r => {
             c.innerHTML += `
@@ -1271,7 +1271,7 @@
         });
         document.getElementById(`tab-${tab}`).classList.remove('bg-white/20','text-white');
         document.getElementById(`tab-${tab}`).classList.add('bg-white','text-blue-600','shadow-lg');
-        ['gates','live','vignette','routes','info','camera'].forEach(t => {
+        ['gates','live','vignette','routes','info'].forEach(t => {
             const el = document.getElementById(`content-${t}`);
             if (el) el.classList.add('hidden');
         });
