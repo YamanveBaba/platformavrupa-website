@@ -146,9 +146,6 @@
             <button onclick="switchTab('info')" id="tab-info" class="tab-btn bg-white/20 text-white px-5 py-3 rounded-full font-bold text-sm whitespace-nowrap hover:bg-white/30 transition">
                 <i class="fa-solid fa-info-circle mr-2"></i>Bilgiler
             </button>
-            <button onclick="switchTab('camera')" id="tab-camera" class="tab-btn bg-white/20 text-white px-5 py-3 rounded-full font-bold text-sm whitespace-nowrap hover:bg-white/30 transition">
-                <i class="fa-solid fa-satellite-dish mr-2"></i>Canlı Veriler
-            </button>
         </div>
 
         <!-- ═══════════════════════════════════════ -->
@@ -620,62 +617,6 @@
         <!-- ═══════════════════════════════════════ -->
         <!-- TAB 6: CANLI VERİLER                    -->
         <!-- ═══════════════════════════════════════ -->
-        <div id="content-camera" class="hidden">
-
-            <!-- Google Maps trafik kaynaklı bekleme -->
-            <div class="border-card p-5 mb-4">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="font-bold text-slate-800 flex items-center gap-2">
-                        <i class="fa-brands fa-google text-blue-600"></i>
-                        Google Maps Anlık Kuyruk Tahmini
-                    </h3>
-                    <div class="flex items-center gap-2">
-                        <span id="borderDataTime" class="text-xs text-slate-400"></span>
-                        <button onclick="loadBorderWaits()" class="bg-blue-50 hover:bg-blue-100 text-blue-600 px-2 py-1 rounded-lg text-xs font-bold transition">
-                            <i class="fa-solid fa-rotate"></i>
-                        </button>
-                    </div>
-                </div>
-                <div id="borderWaitList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                    <div class="col-span-full text-center py-8 text-slate-400">
-                        <i class="fa-solid fa-circle-notch fa-spin text-2xl mb-2"></i>
-                        <p class="text-sm">Veriler yükleniyor...</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Windy Webcam - Kapıkule canlı görüntü -->
-            <!-- Dış kaynak linkleri -->
-            <div class="border-card p-4 mb-4">
-                <h3 class="font-bold text-slate-800 mb-3 text-sm flex items-center gap-2">
-                    <i class="fa-solid fa-link text-slate-500"></i>
-                    Ek Kaynaklar
-                </h3>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <a href="https://nakordoni.eu/en/id/id_385" target="_blank" rel="noopener"
-                       class="flex items-center gap-3 p-3 bg-slate-50 hover:bg-blue-50 rounded-xl transition group">
-                        <div class="w-9 h-9 bg-orange-100 group-hover:bg-orange-200 rounded-lg flex items-center justify-center shrink-0">
-                            <i class="fa-solid fa-clock text-orange-600"></i>
-                        </div>
-                        <div>
-                            <p class="font-bold text-slate-800 text-sm">Kapıkule Detay</p>
-                            <p class="text-xs text-slate-400">nakordoni.eu · Bulgar Polis verisi</p>
-                        </div>
-                    </a>
-                    <a href="https://nakordoni.eu/en/maps/bg-tr" target="_blank" rel="noopener"
-                       class="flex items-center gap-3 p-3 bg-slate-50 hover:bg-blue-50 rounded-xl transition group">
-                        <div class="w-9 h-9 bg-blue-100 group-hover:bg-blue-200 rounded-lg flex items-center justify-center shrink-0">
-                            <i class="fa-solid fa-map text-blue-600"></i>
-                        </div>
-                        <div>
-                            <p class="font-bold text-slate-800 text-sm">Bulgaristan Sınır Haritası</p>
-                            <p class="text-xs text-slate-400">nakordoni.eu · interaktif harita</p>
-                        </div>
-                    </a>
-                </div>
-            </div>
-
-        </div>
     </div>
 
     <script>
@@ -1336,7 +1277,6 @@
         });
         document.getElementById(`content-${tab}`).classList.remove('hidden');
         if (tab === 'live')   { initLiveReportsMap(); loadLiveReports(); }
-        if (tab === 'camera') { loadBorderWaits(); }
     }
 
     function openRouteCalculator() { switchTab('routes'); }
@@ -1422,80 +1362,6 @@
         ipsala:     '🇬🇷', pazarkule:  '🇬🇷',
     };
 
-    async function loadBorderWaits() {
-        const container = document.getElementById('borderWaitList');
-        if (!container) return;
-
-        try {
-            const { data, error } = await sb
-                .from('border_wait_times')
-                .select('gate_slug, gate_name, wait_mins, checked_at')
-                .order('checked_at', { ascending: false });
-
-            if (error || !data || data.length === 0) {
-                container.innerHTML = `<div class="col-span-full text-center py-6 text-slate-400 text-sm">
-                    <i class="fa-solid fa-triangle-exclamation mr-2"></i>Veri henüz yok — sistem ilk çalışmasını bekliyor.
-                </div>`;
-                return;
-            }
-
-            // Her kapı için en son kaydı al
-            const latest = {};
-            for (const row of data) {
-                if (!latest[row.gate_slug]) latest[row.gate_slug] = row;
-            }
-
-            container.innerHTML = Object.entries(latest).map(([slug, row]) => {
-                const w = row.wait_mins;
-                let bgColor, textColor, label, icon;
-                if (w === null) {
-                    bgColor = 'bg-slate-100'; textColor = 'text-slate-500';
-                    label = 'Veri Yok'; icon = '⚫';
-                } else if (w < 30) {
-                    bgColor = 'bg-green-50'; textColor = 'text-green-700';
-                    label = 'Az Yoğun'; icon = '🟢';
-                } else if (w < 90) {
-                    bgColor = 'bg-yellow-50'; textColor = 'text-yellow-700';
-                    label = 'Orta Yoğun'; icon = '🟡';
-                } else if (w < 180) {
-                    bgColor = 'bg-orange-50'; textColor = 'text-orange-700';
-                    label = 'Yoğun'; icon = '🔴';
-                } else {
-                    bgColor = 'bg-red-50'; textColor = 'text-red-700';
-                    label = 'Çok Yoğun'; icon = '⚫';
-                }
-                const mins = w === null ? '?' : w === 0 ? 'Akıcı' : `~${w} dk`;
-                const flag = GATE_FLAGS[slug] || '';
-                const name = GATE_DISPLAY[slug] || (row.gate_name || slug);
-                return `<div class="flex items-center gap-3 p-4 ${bgColor} rounded-xl">
-                    <span class="text-2xl">${icon}</span>
-                    <div class="flex-1 min-w-0">
-                        <p class="font-bold text-slate-800 text-sm">${flag} ${name}</p>
-                        <p class="text-xs ${textColor} font-medium">${label}</p>
-                    </div>
-                    <span class="font-black text-xl ${textColor} shrink-0">${mins}</span>
-                </div>`;
-            }).join('');
-
-            // Son güncelleme zamanı
-            const latest0 = Object.values(latest)[0];
-            if (latest0) {
-                const t = new Date(latest0.checked_at);
-                document.getElementById('borderDataTime').textContent =
-                    isNaN(t) ? '' : t.toLocaleTimeString('tr-TR') + ' güncellendi';
-            }
-
-        } catch(e) {
-            container.innerHTML = `<div class="col-span-full text-center py-4 text-slate-400 text-sm">Yüklenemedi.</div>`;
-        }
-    }
-
-    // 15 dakikada bir otomatik yenile (tab açıkken)
-    setInterval(() => {
-        if (!document.getElementById('content-camera')?.classList.contains('hidden')) {
-            loadBorderWaits();
-        }
-    }, 15 * 60 * 1000);
 
     // ════════════════════════════════════════════════
     // BAŞLAT
