@@ -2,13 +2,13 @@
 """
 Aldi BE — Tam Katalog Çekici v2
 Özellikler:
-  ✓ camoufox (Firefox, Cloudflare bypass)
-  ✓ Network interception — Aldi JSON API'sini otomatik yakala
-  ✓ window.__NEXT_DATA__ / embedded JSON taraması
-  ✓ Çoklu DOM fallback (eski data-article dahil)
-  ✓ Tam insan davranışı: gaussian timing, bezier mouse, değişken scroll
-  ✓ Checkpoint/resume — crash → kaldığı yerden devam
-  ✓ Site yapısı değişirse akıllı hata yönetimi
+  OK camoufox (Firefox, Cloudflare bypass)
+  OK Network interception — Aldi JSON API'sini otomatik yakala
+  OK window.__NEXT_DATA__ / embedded JSON taraması
+  OK Çoklu DOM fallback (eski data-article dahil)
+  OK Tam insan davranışı: gaussian timing, bezier mouse, değişken scroll
+  OK Checkpoint/resume — crash -> kaldığı yerden devam
+  OK Site yapısı değişirse akıllı hata yönetimi
 
 Kullanım:
   python aldi_be_v2.py              # tam çekim
@@ -792,7 +792,7 @@ def calistir(test: bool = False, resume: bool = False,
                 checkpoint_kaydet(urunler, tamamlananlar)
                 continue
 
-            print(f"  → {page.url[:80]}  [{baslik[:50]}]")
+            print(f"  -> {page.url[:80]}  [{baslik[:50]}]")
 
             if diag:
                 _diagnostic(page, kat_ad)
@@ -865,7 +865,7 @@ def calistir(test: bool = False, resume: bool = False,
 
             yeni = len(urunler) - onceki
 
-            # 0 ürün geldiyse → hub sayfa olabilir, alt kategori linklerini tara
+            # 0 ürün geldiyse -> hub sayfa olabilir, alt kategori linklerini tara
             if yeni == 0:
                 alt_urls = page.evaluate("""
                     () => {
@@ -939,7 +939,7 @@ def calistir(test: bool = False, resume: bool = False,
         }, f, ensure_ascii=False, indent=2)
 
     print(f"\n{'='*60}")
-    print(f"TAMAM: {len(urun_listesi)} ürün → {cikti_dosya}")
+    print(f"TAMAM: {len(urun_listesi)} ürün -> {cikti_dosya}")
     print(f"{'='*60}")
 
     try:

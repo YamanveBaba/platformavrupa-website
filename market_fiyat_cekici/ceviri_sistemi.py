@@ -25,8 +25,8 @@ from typing import Optional
 SCRIPT_DIR = Path(__file__).parent
 
 # ─── GLOSSARY ─────────────────────────────────────────────────────────────────
-# Belçika süpermarketlerine özel NL → TR kelime sözlüğü
-# Küçük harf → büyük/küçük harf duyarsız arama yapılır
+# Belçika süpermarketlerine özel NL -> TR kelime sözlüğü
+# Küçük harf -> büyük/küçük harf duyarsız arama yapılır
 GLOSSARY: dict[str, str] = {
     # Süt & Peynir
     "melk": "süt",
@@ -456,12 +456,12 @@ def google_cevir(translator, metinler: list[str]) -> list[str]:
                     r = translator.translate(metin, src="nl", dest="tr")
                     sonuclar.append(r.text)
                 except Exception as e:
-                    sonuclar.append(metin)  # hata → orijinal
+                    sonuclar.append(metin)  # hata -> orijinal
             # Rate limit bekleme
             time.sleep(random.uniform(1.0, 2.5))
         except Exception as e:
             print(f"  Google Translate hata: {e}")
-            sonuclar.extend(parca)  # hata → orijinal
+            sonuclar.extend(parca)  # hata -> orijinal
 
     return sonuclar
 

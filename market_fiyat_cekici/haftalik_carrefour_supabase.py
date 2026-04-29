@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Haftalık Carrefour BE: Playwright çekimi → en son carrefour_be_producten_*.json → Supabase."""
+"""Haftalık Carrefour BE: Playwright çekimi -> en son carrefour_be_producten_*.json -> Supabase."""
 from __future__ import annotations
 
 import glob

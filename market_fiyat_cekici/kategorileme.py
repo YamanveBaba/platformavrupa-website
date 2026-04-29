@@ -63,7 +63,7 @@ def save_all(url, key, updates: list[dict], dry_run: bool):
         print(f"  [dry-run] {len(updates)} satır yazılacaktı")
         return
 
-    # Grupla: (raw, tr) → [id, id, ...]
+    # Grupla: (raw, tr) -> [id, id, ...]
     groups: dict[tuple, list] = {}
     for r in updates:
         key_ = (r["category_raw"] or "", r["category_tr"])
@@ -95,7 +95,7 @@ def save_all(url, key, updates: list[dict], dry_run: bool):
     print(f"\n  Tamamlandı.")
 
 # ─── KATEGORİ EŞLEŞTİRME TABLOSU ────────────────────────────────────────────
-# Her market'in kendi kategori adı → Türkçe ana kategori
+# Her market'in kendi kategori adı -> Türkçe ana kategori
 # Kural: küçük harfe çevir, tam eşleşme yoksa keyword arama yapar
 
 KATEGORI_MAP: dict[str, str] = {
@@ -406,7 +406,7 @@ def map_category(raw: str) -> str:
 
 def load_category_map_from_jsons() -> dict[str, str]:
     """
-    Tüm JSON çıktı dosyalarından pid → category_raw eşlemesi oluşturur.
+    Tüm JSON çıktı dosyalarından pid -> category_raw eşlemesi oluşturur.
     Bu sayede mevcut kayıtları yeniden import etmeden güncelleyebiliriz.
     """
     pid_to_cat: dict[str, str] = {}
@@ -464,7 +464,7 @@ def main():
             break
     print(f"{len(all_rows)} ürün çekildi.")
 
-    # JSON'lardan pid → kategori eşlemesini yükle
+    # JSON'lardan pid -> kategori eşlemesini yükle
     pid_to_cat = load_category_map_from_jsons()
 
     # Her ürüne kategori ata

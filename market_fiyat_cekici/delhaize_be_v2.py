@@ -2,14 +2,14 @@
 """
 Delhaize BE — Tam Katalog Çekici v2
 Özellikler:
-  ✓ camoufox (Firefox, anti-bot) — artık plain Chromium değil
-  ✓ GraphQL GetCategoryProductSearch intercept (kanıtlanmış, çalışıyor)
-  ✓ apollographql-client-version OTOMATİK keşif — hardcoded hash süresi dolsa bile çalışır
-  ✓ Kategori kodları OTOMATİK keşif — delhaize.be/nl/shop HTML'inden
-  ✓ Tam insan davranışı: gaussian timing, bezier mouse, değişken scroll
-  ✓ Checkpoint/resume — crash → kaldığı yerden devam
-  ✓ potentialPromotions ile promo fiyat + tarih
-  ✓ Tüm sayfalar: totalPages ile tam pagination
+  OK camoufox (Firefox, anti-bot) — artık plain Chromium değil
+  OK GraphQL GetCategoryProductSearch intercept (kanıtlanmış, çalışıyor)
+  OK apollographql-client-version OTOMATİK keşif — hardcoded hash süresi dolsa bile çalışır
+  OK Kategori kodları OTOMATİK keşif — delhaize.be/nl/shop HTML'inden
+  OK Tam insan davranışı: gaussian timing, bezier mouse, değişken scroll
+  OK Checkpoint/resume — crash -> kaldığı yerden devam
+  OK potentialPromotions ile promo fiyat + tarih
+  OK Tüm sayfalar: totalPages ile tam pagination
 
 Kullanım:
   python delhaize_be_v2.py              # tam çekim
@@ -388,7 +388,7 @@ def graphql_api_cek(page, cat_name: str, cat_code: str,
         return 0
 
     real_url = page.url.split("?")[0]
-    print(f"    → {real_url.replace(BASE, '')}")
+    print(f"    -> {real_url.replace(BASE, '')}")
 
     sl(2.5, 1.0, 1.2, 6.0)
 
@@ -417,7 +417,7 @@ def graphql_api_cek(page, cat_name: str, cat_code: str,
             urunler[rec["delhaizePid"]] = rec
             yeni += 1
 
-    # Sayfa 1 → N
+    # Sayfa 1 -> N
     for pg in range(1, min(total_pages, 300)):
         intercepted.clear()
         captured["flag"] = False
@@ -681,7 +681,7 @@ def calistir(test: bool = False, resume: bool = False,
         }, f, ensure_ascii=False, indent=2)
 
     print(f"\n{'='*60}")
-    print(f"TAMAM: {len(urun_listesi)} ürün → {cikti_dosya}")
+    print(f"TAMAM: {len(urun_listesi)} ürün -> {cikti_dosya}")
     print(f"{'='*60}")
 
     try:

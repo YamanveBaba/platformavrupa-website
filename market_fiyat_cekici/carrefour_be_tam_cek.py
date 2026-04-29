@@ -4,7 +4,7 @@ Carrefour BE — camoufox + "Meer tonen" buton tıklama ile tam katalog
 Strateji:
   1. Ana sayfa + kategori URL keşfi
   2. Her kategori sayfasında "Meer tonen / Toon meer / Laad meer" butonuna bas
-  3. Buton bitene kadar devam et → tüm ürünler DOM'da → data-pid ile topla
+  3. Buton bitene kadar devam et -> tüm ürünler DOM'da -> data-pid ile topla
   4. Einstein-Recommendations JSON yanıtlarını da yakala
 
 Kullanım:
@@ -433,7 +433,7 @@ def sayfayi_tam_cek(page, kat_ad: str, urunler: Dict,
         # Buton var mı?
         buton_tiklandi = meer_toon_tikla(page)
         if not buton_tiklandi:
-            # Buton yok → sayfa bitti
+            # Buton yok -> sayfa bitti
             page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
             time.sleep(1.5)
             try:
@@ -447,7 +447,7 @@ def sayfayi_tam_cek(page, kat_ad: str, urunler: Dict,
 
         # Yükleme bekle: Verbolia AJAX için yeterince uzun
         time.sleep(random.uniform(2.5, 4.0))
-        # Sayfa sonuna scroll → lazy-load tetikle, buton görünsün
+        # Sayfa sonuna scroll -> lazy-load tetikle, buton görünsün
         page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
         time.sleep(1.0)
 
@@ -612,7 +612,7 @@ def calistir(max_kat: int = 0, no_pause: bool = False) -> int:
                 print(f"  [404/hata] {baslik} — atlandı")
                 continue
 
-            print(f"  → {son_url[:70]}  [{baslik[:50]}]")
+            print(f"  -> {son_url[:70]}  [{baslik[:50]}]")
 
             # Sayfa tam yüklensin, spinner bitsin
             time.sleep(1)
@@ -662,7 +662,7 @@ def calistir(max_kat: int = 0, no_pause: bool = False) -> int:
         json.dump(payload, f, ensure_ascii=False, indent=2)
 
     print(f"\n{'='*60}")
-    print(f"TAMAM: {len(urun_listesi)} ürün → {out}")
+    print(f"TAMAM: {len(urun_listesi)} ürün -> {out}")
     print(f"{'='*60}")
 
     if not no_pause:

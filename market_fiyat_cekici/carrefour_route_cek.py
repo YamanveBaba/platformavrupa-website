@@ -263,7 +263,7 @@ def calistir(headed: bool, no_pause: bool):
     with open(JSONL_DOSYA, "w", encoding="utf-8") as f:
         for entry in yakalanan_jsonl:
             f.write(json.dumps(entry, ensure_ascii=False) + "\n")
-    print(f"\n[log] {len(yakalanan_jsonl)} JSON yanıt → {JSONL_DOSYA}")
+    print(f"\n[log] {len(yakalanan_jsonl)} JSON yanıt -> {JSONL_DOSYA}")
 
     # ── 5. Ürünleri kaydet ─────────────────────────────────────────────────
     urun_listesi_final = list(urunler.values())
@@ -279,7 +279,7 @@ def calistir(headed: bool, no_pause: bool):
         }
         with open(out, "w", encoding="utf-8") as f:
             json.dump(payload, f, ensure_ascii=False, indent=2)
-        print(f"TAMAM: {len(urun_listesi_final)} ürün → {out}")
+        print(f"TAMAM: {len(urun_listesi_final)} ürün -> {out}")
     else:
         print("\n[!] Hiç ürün yakalanamadı.")
         print(f"    JSON log ({len(yakalanan_jsonl)} kayıt): {JSONL_DOSYA}")

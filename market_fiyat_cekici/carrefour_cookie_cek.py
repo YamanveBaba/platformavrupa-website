@@ -6,9 +6,9 @@ Adım 1: --headed ile browser aç, promoties sayfasını yükle, cookie'leri kay
 Adım 2: Kaydedilen cookie'lerle tüm ürünleri HTTP ile çek (browser gerek yok).
 
 Kullanım:
-  python carrefour_cookie_cek.py --sadece-cookie   → cookie.txt üretir
-  python carrefour_cookie_cek.py                   → cookie varsa direkt çeker
-  python carrefour_cookie_cek.py --headed          → browser aç + çek
+  python carrefour_cookie_cek.py --sadece-cookie   -> cookie.txt üretir
+  python carrefour_cookie_cek.py                   -> cookie varsa direkt çeker
+  python carrefour_cookie_cek.py --headed          -> browser aç + çek
 """
 from __future__ import annotations
 import argparse, json, os, re, time, random
@@ -391,7 +391,7 @@ def main():
     }
     with open(out, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
-    print(f"\nTAMAM: {len(urunler)} ürün → {out}")
+    print(f"\nTAMAM: {len(urunler)} ürün -> {out}")
 
     if not args.no_pause:
         input("\nÇıkmak için Enter…")

@@ -3,12 +3,12 @@
 haftalik_tam.py — Akıllı haftalık fiyat güncelleme orchestrator.
 
 Özellikler:
-  ✓ Her market için beklenen minimum ürün eşiği
-  ✓ Başarısız marketi 1 kez otomatik retry
-  ✓ Delhaize/Carrefour için process timeout (takılma koruması)
-  ✓ Lidl cookie süresi kontrolü — süreli ise uyarı
-  ✓ Sonunda özet rapor (hangi market kaç ürün, ne kadar sürdü)
-  ✓ Tüm loglar haftalik_log_YYYY-MM-DD.txt dosyasına
+  OK Her market için beklenen minimum ürün eşiği
+  OK Başarısız marketi 1 kez otomatik retry
+  OK Delhaize/Carrefour için process timeout (takılma koruması)
+  OK Lidl cookie süresi kontrolü — süreli ise uyarı
+  OK Sonunda özet rapor (hangi market kaç ürün, ne kadar sürdü)
+  OK Tüm loglar haftalik_log_YYYY-MM-DD.txt dosyasına
 
 Kullanım:
   python haftalik_tam.py            # tüm marketler
@@ -192,7 +192,7 @@ def cek_lidl(log: Path) -> int:
     gecerli, uyari = lidl_cookie_kontrol()
     if not gecerli:
         print(R(f"\n[UYARI] Lidl cookie: {uyari}", SARI))
-        print(R("  → F12 > Network > q/api/search > Request Headers > Cookie satırını lidl_cookie.txt'ye kopyala", SARI))
+        print(R("  -> F12 > Network > q/api/search > Request Headers > Cookie satırını lidl_cookie.txt'ye kopyala", SARI))
         with open(log, "a", encoding="utf-8") as lf:
             lf.write(f"[UYARI] Lidl cookie: {uyari}\n")
     ret, _ = calistir([sys.executable, "haftalik_lidl_supabase.py"], TIMEOUT["lidl"], log)
@@ -259,11 +259,11 @@ def main():
         for m in hedefler:
             n = son_json_urun_sayisi(m)
             esik = ESIKLER.get(m, 0)
-            durum = R(f"{n} ürün ✓", YESIL) if n >= esik else R(f"{n} ürün ✗ (eşik: {esik})", KIRMIZI)
+            durum = R(f"{n} ürün OK", YESIL) if n >= esik else R(f"{n} ürün HATA (eşik: {esik})", KIRMIZI)
             print(f"  {m:12s}: {durum}")
         return
 
-    ozet = {}  # market → {urun, sure, durum}
+    ozet = {}  # market -> {urun, sure, durum}
 
     for market in hedefler:
         print(f"\n{'─'*60}")
@@ -315,7 +315,7 @@ def main():
     sorunlar    = []
 
     for market, bilgi in ozet.items():
-        simge = R("✓", YESIL) if bilgi["basarili"] else R("✗", KIRMIZI)
+        simge = R("OK", YESIL) if bilgi["basarili"] else R("HATA", KIRMIZI)
         renk  = YESIL if bilgi["basarili"] else KIRMIZI
         print(
             f"  {simge} {market:12s} "
@@ -332,17 +332,17 @@ def main():
 
     if sorunlar:
         print(R(f"\n  SORUNLU MARKETLER: {', '.join(sorunlar)}", KIRMIZI))
-        print(R("  → BAKIM_KILAVUZU.md dosyasına bak", SARI))
+        print(R("  -> BAKIM_KILAVUZU.md dosyasına bak", SARI))
     else:
-        print(R("\n  Tüm marketler başarıyla güncellendi! ✓", YESIL))
+        print(R("\n  Tüm marketler başarıyla güncellendi! OK", YESIL))
 
     # Eski fiyat (üstü çizili) desteği
     print(f"\n  Eski fiyat gösterimi (market.html):")
     for m in hedefler:
         if m in ESKI_FIYAT_DESTEGI:
-            print(R(f"    ✓ {m:12s} — eski fiyat + üstü çizili gösterir", YESIL))
+            print(R(f"    OK {m:12s} — eski fiyat + üstü çizili gösterir", YESIL))
         else:
-            print(f"    ✗ {m:12s} — API eski fiyat vermiyor (sadece güncel fiyat)")
+            print(f"    HATA {m:12s} — API eski fiyat vermiyor (sadece güncel fiyat)")
 
     print(f"\n  Log: {log_dosya}")
     print(f"{'='*60}\n")
@@ -366,7 +366,7 @@ def main():
         print(f"{'─'*60}")
         ret_e, _ = calistir([sys.executable, str(eslestir_script)], 600, log_dosya)
         if ret_e == 0:
-            print(R("  Ürün eşleştirmesi tamamlandı. ✓", YESIL))
+            print(R("  Ürün eşleştirmesi tamamlandı. OK", YESIL))
         else:
             print(R(f"  Ürün eşleştirmesi başarısız (kod: {ret_e})", KIRMIZI))
     elif sorunlar:

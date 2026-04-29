@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Haftalık Delhaize: GraphQL çekimi → en son delhaize_be_producten_*.json → Supabase."""
+"""Haftalık Delhaize: GraphQL çekimi -> en son delhaize_be_producten_*.json -> Supabase."""
 from __future__ import annotations
 
 import glob

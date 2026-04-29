@@ -28,7 +28,7 @@ def load_secrets():
     return lines[0].rstrip("/"), lines[1]
 
 def is_bozuk(name_tr: str) -> bool:
-    """Çeviri bozuksa True döner → NULL yapılacak"""
+    """Çeviri bozuksa True döner -> NULL yapılacak"""
     t = name_tr.strip()
     if len(t) < 3:
         return True
@@ -44,7 +44,7 @@ def clean_name_tr(name_tr: str) -> str | None:
     """name_tr'yi temizle. Bozuksa None döner."""
     if not name_tr:
         return None
-    # \n ile çift yazılmış → ilk satırı al
+    # \n ile çift yazılmış -> ilk satırı al
     t = name_tr.split('\n')[0].strip()
     # Çok sayıda boşluk temizle
     t = re.sub(r'  +', ' ', t)

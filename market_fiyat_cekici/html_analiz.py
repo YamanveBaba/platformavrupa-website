@@ -151,7 +151,7 @@ def unit_parse(s: str) -> str:
     if not s:
         return ""
     s = s.strip().lower()
-    # "6 st" → "6 stuks"
+    # "6 st" -> "6 stuks"
     s = re.sub(r"\bst\b\.?", "stuks", s)
     return s[:200]
 
@@ -194,19 +194,19 @@ def parse_delhaize(html: str, kategori: str) -> list[dict]:
             unit_el = wrapper.select_one("[data-testid='product-block-supplementary-price']")
             unit = ""
             if unit_el:
-                # "6 st" veya "250 gr" → ilk token
+                # "6 st" veya "250 gr" -> ilk token
                 raw = unit_el.get_text(" ", strip=True)
                 m = re.match(r"(\d+[\.,]?\d*\s*(?:stuks?|st\.?|gr?|kg|cl|ml|l\b|x\s*\d+))", raw, re.I)
                 if m:
                     unit = unit_parse(m.group(1))
 
             # Fiyat: data-testid="product-block-price"
-            # Format: €[euro_el][sup_cent] → "€" + "2" + sup"19" = 2.19
+            # Format: €[euro_el][sup_cent] -> "€" + "2" + sup"19" = 2.19
             price_block = wrapper.select_one("[data-testid='product-block-price']")
             price = None
             if price_block:
                 full_text = price_block.get_text(strip=True)
-                # Temizle: €219 → 2.19, €1025 → 10.25
+                # Temizle: €219 -> 2.19, €1025 -> 10.25
                 digits = re.sub(r"[^\d]", "", full_text)
                 if len(digits) >= 2:
                     # Son 2 rakam cent, öncekiler euro
@@ -404,7 +404,7 @@ def parse_aldi(html: str, kategori: str) -> list[dict]:
     ALDI ürün kartlarını parse eder.
     Her kart: <div class="mod mod-article-tile" data-article='{...JSON...}'>
     JSON içinde: productName, productID, brand, priceWithTax, inPromotion
-    Adet bilgisi ismin sonunda: "Actimel aardbei, 12 st." → "12 st."
+    Adet bilgisi ismin sonunda: "Actimel aardbei, 12 st." -> "12 st."
     """
     soup = BeautifulSoup(html, "html.parser")
     urunler = []
@@ -953,12 +953,12 @@ def parse_colruyt_json(data: dict, kategori: str) -> list[dict]:
     """
     Colruyt API intercept çıktısını ayrıştırır.
     Gerçek veri yapısı (apip.colruyt.be):
-      item["price"]["basicPrice"]       → float fiyat
-      item["price"]["isPromoActive"]    → "Y" / "N"
-      item["technicalArticleNumber"]    → ürün ID
-      item["name"], item["brand"]       → isim, marka
-      item["content"]                   → içerik/miktar ("12st", "250 g")
-      item["thumbNail"] / item["fullImage"] → resim
+      item["price"]["basicPrice"]       -> float fiyat
+      item["price"]["isPromoActive"]    -> "Y" / "N"
+      item["technicalArticleNumber"]    -> ürün ID
+      item["name"], item["brand"]       -> isim, marka
+      item["content"]                   -> içerik/miktar ("12st", "250 g")
+      item["thumbNail"] / item["fullImage"] -> resim
     """
     urunler = []
 
@@ -1104,7 +1104,7 @@ def parse_colruyt_json(data: dict, kategori: str) -> list[dict]:
     return urunler
 
 
-# ─── Kategori adı → Türkçe eşlemesi ─────────────────────────────────────────
+# ─── Kategori adı -> Türkçe eşlemesi ─────────────────────────────────────────
 
 KAT_MAP = {
     "zuivel": "Süt Ürünleri",
@@ -1154,7 +1154,7 @@ PARSER_MAP = {
 
 
 def market_ve_kategori_bul(dosya_adi: str) -> tuple[str, str]:
-    """Dosya adından market ve kategori çıkar. Örn: 'delhaize_Zuivel_p01_...' → ('delhaize','Zuivel')"""
+    """Dosya adından market ve kategori çıkar. Örn: 'delhaize_Zuivel_p01_...' -> ('delhaize','Zuivel')"""
     ad = Path(dosya_adi).stem  # uzantısız
     parcalar = ad.split("_")
     market = parcalar[0] if parcalar else "bilinmiyor"

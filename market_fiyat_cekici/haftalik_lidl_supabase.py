@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Haftalık Lidl BE: Mindshift API (cookie + kategori dosyasi varsa) yoksa Playwright → JSON → Supabase."""
+"""Haftalık Lidl BE: Mindshift API (cookie + kategori dosyasi varsa) yoksa Playwright -> JSON -> Supabase."""
 from __future__ import annotations
 
 import glob

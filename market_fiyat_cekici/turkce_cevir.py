@@ -10,7 +10,7 @@ Kullanım:
   python turkce_cevir.py --dry-run          # Çeviriyi yap ama DB'ye yazma
 
 Motor: argostranslate (tamamen offline, rate limit yok, ücretsiz)
-Pivot: Hollandaca (nl) → İngilizce (en) → Türkçe (tr)
+Pivot: Hollandaca (nl) -> İngilizce (en) -> Türkçe (tr)
 
 Kurulum (bir kez çalıştır):
   pip install argostranslate
@@ -63,7 +63,7 @@ def load_secrets() -> tuple[str, str]:
     lines = [l.strip() for l in open(path, encoding="utf-8", errors="ignore")
              if l.strip() and not l.strip().startswith("#")]
     if len(lines) < 2:
-        print("HATA: supabase_import_secrets.txt → 1. satır URL, 2. satır service_role key")
+        print("HATA: supabase_import_secrets.txt -> 1. satır URL, 2. satır service_role key")
         sys.exit(1)
     return _clean(lines[0], is_url=True).rstrip("/"), _clean(lines[1], is_url=False)
 
@@ -162,7 +162,7 @@ def local_translate(name: str) -> str | None:
 # ─── ARGOSTRANSLATE ───────────────────────────────────────────────────────────
 
 def kur_modeller():
-    """nl→en ve en→tr modellerini indir (bir kez çalıştır)."""
+    """nl->en ve en->tr modellerini indir (bir kez çalıştır)."""
     try:
         import argostranslate.package
         import argostranslate.translate
@@ -181,22 +181,22 @@ def kur_modeller():
             None
         )
         if pkg is None:
-            print(f"UYARI: {from_code}→{to_code} paketi bulunamadı.")
+            print(f"UYARI: {from_code}->{to_code} paketi bulunamadı.")
             continue
         installed = argostranslate.package.get_installed_packages()
         already = any(p.from_code == from_code and p.to_code == to_code for p in installed)
         if already:
-            print(f"  {from_code}→{to_code}: zaten kurulu.")
+            print(f"  {from_code}->{to_code}: zaten kurulu.")
         else:
-            print(f"  {from_code}→{to_code} indiriliyor (~150MB)...")
+            print(f"  {from_code}->{to_code} indiriliyor (~150MB)...")
             argostranslate.package.install_from_path(pkg.download())
-            print(f"  {from_code}→{to_code}: kuruldu.")
+            print(f"  {from_code}->{to_code}: kuruldu.")
 
     print("\nModeller hazır. Şimdi çalıştırabilirsin:\n  python turkce_cevir.py\n")
 
 
 def _get_translator():
-    """nl→en ve en→tr çeviricilerini döndür."""
+    """nl->en ve en->tr çeviricilerini döndür."""
     try:
         import argostranslate.translate
     except ImportError:
@@ -223,7 +223,7 @@ def _get_translator():
     en_tr = en.get_translation(tr)
 
     if not nl_en or not en_tr:
-        print("HATA: nl→en veya en→tr çeviri paketi yüklü değil.")
+        print("HATA: nl->en veya en->tr çeviri paketi yüklü değil.")
         print("Çalıştır: python turkce_cevir.py --kur-modeller")
         sys.exit(1)
 
@@ -231,7 +231,7 @@ def _get_translator():
 
 
 def argo_translate_batch(names: list[str], nl_en, en_tr) -> list[str]:
-    """nl→en→tr pivot ile toplu çeviri."""
+    """nl->en->tr pivot ile toplu çeviri."""
     results = []
     for name in names:
         try:
@@ -245,11 +245,11 @@ def argo_translate_batch(names: list[str], nl_en, en_tr) -> list[str]:
 # ─── MAIN ─────────────────────────────────────────────────────────────────────
 
 def main():
-    parser = argparse.ArgumentParser(description="Ürün isimlerini nl→tr çevirir (argostranslate)")
+    parser = argparse.ArgumentParser(description="Ürün isimlerini nl->tr çevirir (argostranslate)")
     parser.add_argument("--zincir", help="Sadece bu zincir (örn: aldi, delhaize)")
     parser.add_argument("--limit", type=int, default=0, help="En fazla kaç ürün (0=hepsi)")
     parser.add_argument("--dry-run", action="store_true", help="DB'ye yazma, sadece göster")
-    parser.add_argument("--kur-modeller", action="store_true", help="nl→en ve en→tr modellerini indir")
+    parser.add_argument("--kur-modeller", action="store_true", help="nl->en ve en->tr modellerini indir")
     args = parser.parse_args()
 
     if args.kur_modeller:
@@ -318,7 +318,7 @@ def main():
         rate = done / elapsed if elapsed > 0 else 0
         remaining = (total - done) / rate if rate > 0 else 0
         print(f"  [{done}/{total}] ~{remaining/60:.0f} dk kaldı | "
-              f"Son: {batch[-1].get('name','')[:30]} → {results[-1][:30]}")
+              f"Son: {batch[-1].get('name','')[:30]} -> {results[-1][:30]}")
 
         # Periyodik kayıt
         if len(pending_save) >= SAVE_EVERY:

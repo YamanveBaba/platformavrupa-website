@@ -2,13 +2,13 @@
 """
 Carrefour BE — Tam Katalog Çekici v2
 Özellikler:
-  ✓ İnsan gibi davranış: gaussian bekleme, bezier mouse, değişken scroll
-  ✓ Oturum simülasyonu: her 10-14 kategoride uzun mola
-  ✓ Checkpoint: crash → --resume ile kaldığı yerden devam
-  ✓ Akıllı redirect tespiti: az ürün + farklı URL → alternatif URL dene
-  ✓ Cloudflare tespiti: bloklandığında otomatik bekle
-  ✓ Çoklu DOM stratejisi: SFCC + Verbolia + generic fallback
-  ✓ Einstein JSON yakalama
+  OK İnsan gibi davranış: gaussian bekleme, bezier mouse, değişken scroll
+  OK Oturum simülasyonu: her 10-14 kategoride uzun mola
+  OK Checkpoint: crash -> --resume ile kaldığı yerden devam
+  OK Akıllı redirect tespiti: az ürün + farklı URL -> alternatif URL dene
+  OK Cloudflare tespiti: bloklandığında otomatik bekle
+  OK Çoklu DOM stratejisi: SFCC + Verbolia + generic fallback
+  OK Einstein JSON yakalama
 
 Kullanım:
   python carrefour_be_v2.py              # tam çekim
@@ -178,7 +178,7 @@ def insan_mouse_hareket(page, hedef_x: float, hedef_y: float):
 def insan_tiklama(page, locator) -> bool:
     """
     Butona insan gibi tıkla:
-    scroll_into_view → mouse hareketi → hover → küçük bekleme → click
+    scroll_into_view -> mouse hareketi -> hover -> küçük bekleme -> click
     """
     try:
         locator.scroll_into_view_if_needed(timeout=3000)
@@ -421,7 +421,7 @@ def cloudflare_var_mi(page) -> bool:
 
 # ─── Yanlış redirect tespiti ──────────────────────────────────────────────────
 def redirect_sorunlu_mu(hedef_url: str, final_url: str, urun_sayisi: int) -> bool:
-    """Az ürün VE URL değişti → sorunlu redirect."""
+    """Az ürün VE URL değişti -> sorunlu redirect."""
     if urun_sayisi >= 15:
         return False
     return urlparse(hedef_url).path != urlparse(final_url).path
@@ -535,7 +535,7 @@ def sayfayi_cek(page, kat_ad: str, urunler: Dict, max_tiklama: int = 300) -> int
         onceki_sayi = len(urunler)
 
         if not meer_toon_tikla(page):
-            # Buton yok → sayfa bitti
+            # Buton yok -> sayfa bitti
             page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
             sl(1.3, 0.5, 0.6, 3.5)
             try:
@@ -595,7 +595,7 @@ def calistir(test: bool = False, resume: bool = False,
         return 1
 
     CIKTI_DIR.mkdir(exist_ok=True)
-    _stop.sinyal_kaydet(_log)   # Ctrl+C → graceful shutdown
+    _stop.sinyal_kaydet(_log)   # Ctrl+C -> graceful shutdown
 
     # Proxy (proxies.txt veya --proxy argümanı)
     proxiler = proxy_yukle() if not proxy else [proxy]
@@ -718,7 +718,7 @@ def calistir(test: bool = False, resume: bool = False,
                 checkpoint_kaydet(urunler, tamamlananlar)
                 continue
 
-            print(f"  → {son_url[:80]}  [{baslik[:50]}]")
+            print(f"  -> {son_url[:80]}  [{baslik[:50]}]")
 
             # Sayfa yüklendi, biraz scroll
             insan_scroll(page, int(random.gauss(900, 350)))
@@ -727,11 +727,11 @@ def calistir(test: bool = False, resume: bool = False,
             # Ürünleri çek
             yeni = sayfayi_cek(page, kat_ad, urunler, max_tiklama=300)
 
-            # Az ürün + farklı URL → alternatif dene
+            # Az ürün + farklı URL -> alternatif dene
             if redirect_sorunlu_mu(url, son_url, yeni) and alternatifler:
-                print(f"  [?] Az ürün ({yeni}) ve redirect var → alternatifler deneniyor")
+                print(f"  [?] Az ürün ({yeni}) ve redirect var -> alternatifler deneniyor")
                 for alt_url in alternatifler:
-                    print(f"      → {alt_url}")
+                    print(f"      -> {alt_url}")
                     sl(5.0, 2.0, 2.0, 12.0)
                     if not goto_safe(alt_url):
                         continue
@@ -773,10 +773,10 @@ def calistir(test: bool = False, resume: bool = False,
         json.dump(payload, f, ensure_ascii=False, indent=2)
 
     print(f"\n{'='*60}")
-    print(f"TAMAM: {len(urun_listesi)} ürün → {cikti}")
+    print(f"TAMAM: {len(urun_listesi)} ürün -> {cikti}")
     print(f"{'='*60}")
 
-    # Başarılı tamamlandı → checkpoint temizle
+    # Başarılı tamamlandı -> checkpoint temizle
     try:
         CHECKPOINT.unlink(missing_ok=True)
     except Exception:

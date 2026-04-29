@@ -6,9 +6,9 @@ Her ürüne match_group_id atar.
 Aynı match_group_id = aynı ürün (farklı markette).
 
 Eşleştirme mantığı:
-  1. Branded: marka + tip + miktar → tam eşleşme
+  1. Branded: marka + tip + miktar -> tam eşleşme
      "Alpro Volle Melk 1L" ↔ "Alpro Volle Melk 1L" (farklı market)
-  2. Own-brand: tip + miktar + özellik → fonksiyonel eşdeğer
+  2. Own-brand: tip + miktar + özellik -> fonksiyonel eşdeğer
      "Milbona Volle Melk 1L" ↔ "Boni Volle Melk 1L" ↔ "Delhaize Volle Melk 1L"
 
 Kullanım:
@@ -83,7 +83,7 @@ def _to_float(s: str) -> float:
 
 def miktar_normalize(text: str) -> Optional[str]:
     """
-    "1 liter" / "500ml" / "6x100g" / "2 x 1L" → standart string
+    "1 liter" / "500ml" / "6x100g" / "2 x 1L" -> standart string
     "1l", "500ml", "600g", "2l"
     None döner = miktar bulunamadı
     """
@@ -152,9 +152,9 @@ def isim_normalize(name: str, brand: str = '') -> str:
     """
     Ürün isminden marka + stopwords + miktar + özel karakter kaldır.
     Kalan kelimeler alfabetik sıraya sokulur.
-    "Milbona Volle Melk" → "melk volle"
-    "Boni Selection Volle Melk" → "melk volle"
-    Aynı sonuç → aynı match group!
+    "Milbona Volle Melk" -> "melk volle"
+    "Boni Selection Volle Melk" -> "melk volle"
+    Aynı sonuç -> aynı match group!
     """
     text = (name or '').lower()
     text = text.translate(KARAKTER_MAP)
@@ -196,7 +196,7 @@ def isim_normalize(name: str, brand: str = '') -> str:
 def match_group_id_hesapla(name: str, brand: str, unit_or_content: str) -> str:
     """
     Ürünün eşleştirme anahtarını hesapla.
-    Aynı key → aynı ürün (farklı market).
+    Aynı key -> aynı ürün (farklı market).
 
     Sadece normalize edilmiş isim kullanılır.
     Miktar (qty) key'e dahil edilmez çünkü:
@@ -274,7 +274,7 @@ def update_match_groups(url: str, key: str, products: list[dict],
     1. Tüm match_group_id'leri NULL yap (temiz başlangıç)
     2. Cross-market gruplar için PATCH ile GID yaz
     """
-    # GID → [product id list] (sadece cross-market gruplar için)
+    # GID -> [product id list] (sadece cross-market gruplar için)
     gid_to_ids: dict[str, list] = defaultdict(list)
     for p in products:
         gid = match_group_id_hesapla(
@@ -442,7 +442,7 @@ def main():
 
     # Her ürüne match_group_id hesapla
     print('Match group ID hesaplanıyor...')
-    group_counter: dict[str, list[str]] = defaultdict(list)  # gid → [chain_slug, ...]
+    group_counter: dict[str, list[str]] = defaultdict(list)  # gid -> [chain_slug, ...]
     no_gid = 0
 
     for p in products:

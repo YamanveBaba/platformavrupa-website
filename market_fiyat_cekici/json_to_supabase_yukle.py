@@ -86,7 +86,7 @@ def load_secrets(script_dir: str) -> tuple[str, str]:
         print(
             "HATA: SUPABASE_URL ve SUPABASE_SERVICE_ROLE_KEY ortam değişkeninde yok,\n"
             f"       veya {path} dosyası bulunamadı.\n"
-            "Supabase → Project Settings → API → service_role key kopyalayın."
+            "Supabase -> Project Settings -> API -> service_role key kopyalayın."
         )
         sys.exit(1)
     with open(path, "r", encoding="utf-8", errors="ignore") as f:
@@ -99,7 +99,7 @@ def load_secrets(script_dir: str) -> tuple[str, str]:
     if "supabase.co" not in url and not url.startswith("http://127.0.0.1") and not url.startswith("http://localhost"):
         print(
             "UYARI: 1. satırdaki adres genelde şöyle olur: https://xxxx.supabase.co\n"
-            "       (kendi domain / Netlify adresi değil; Supabase panel → Settings → API → Project URL)"
+            "       (kendi domain / Netlify adresi değil; Supabase panel -> Settings -> API -> Project URL)"
         )
     return url, key
 
@@ -498,7 +498,7 @@ def upsert_batches(
             if resp.status_code == 405:
                 print(
                     "405 = Bu adrese POST kabul edilmiyor. 1. satırda Supabase 'Project URL' olmalı:\n"
-                    "   Panel → Project Settings → API → Project URL → örn. https://abcdefgh.supabase.co\n"
+                    "   Panel -> Project Settings -> API -> Project URL -> örn. https://abcdefgh.supabase.co\n"
                     "   (platformavrupa.com / Netlify / dashboard.supabase.com adresi YAZMA.)"
                 )
             return False
@@ -540,12 +540,12 @@ def log_import_run(
 
 
 def main():
-    parser = argparse.ArgumentParser(description="JSON → Supabase market_chain_products")
+    parser = argparse.ArgumentParser(description="JSON -> Supabase market_chain_products")
     parser.add_argument(
         "json_path",
         nargs="?",
         default=None,
-        help="Yüklenecek JSON (cikti/). Verilmezse sırayla: aldi platform → aldi yeme-içme → colruyt playwright → colruyt producten (her grupta en yeni dosya).",
+        help="Yüklenecek JSON (cikti/). Verilmezse sırayla: aldi platform -> aldi yeme-içme -> colruyt playwright -> colruyt producten (her grupta en yeni dosya).",
     )
     parser.add_argument("--dry-run", action="store_true", help="Sadece format kontrolü ve ilk satır örneği")
     parser.add_argument("--raw", action="store_true", help="raw_json sütununu doldur (daha büyük veri)")

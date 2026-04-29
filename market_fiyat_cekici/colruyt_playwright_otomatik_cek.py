@@ -591,7 +591,7 @@ def main():
 
                 if n2 - last_checkpoint_count >= CONFIG["save_every_new"]:
                     save_checkpoint(checkpoint_path, collected, tf2)
-                    print(f"  Ara kayıt → {checkpoint_path}")
+                    print(f"  Ara kayıt -> {checkpoint_path}")
                     last_checkpoint_count = n2
 
                 if stale >= stale_cap:

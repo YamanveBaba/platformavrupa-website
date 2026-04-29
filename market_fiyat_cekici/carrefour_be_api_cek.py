@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Carrefour Belçika — Tam Ürün + Fiyat Çekici
-Strateji: Playwright ile network interception → JSON API yanıtlarını yakala
+Strateji: Playwright ile network interception -> JSON API yanıtlarını yakala
 SFCC (Salesforce Commerce Cloud) tabanlı; tüm kategori ağacını gezer.
 
 Kullanım:
@@ -250,7 +250,7 @@ class YanitIzleyici:
 
     def __init__(self, kesfet_modu: bool = False):
         self.kesfet_modu = kesfet_modu
-        self.urunler: Dict[str, Dict] = {}   # pid/ean → normalized ürün
+        self.urunler: Dict[str, Dict] = {}   # pid/ean -> normalized ürün
         self.api_log: List[Dict] = []        # keşif modunda tüm ilginç URL'ler
         self.yakalanan_url: Set[str] = set() # toplam sayfa bazlı tekrar atla
         self._kategori_simdiki: str = ""
@@ -312,7 +312,7 @@ class YanitIzleyici:
                 yeni += 1
 
             if yeni > 0:
-                print(f"    [api] {yeni} yeni ürün ← {url[:90]}")
+                print(f"    [api] {yeni} yeni ürün <- {url[:90]}")
         except Exception:
             pass  # Yanıt zaten gitmiş olabilir
 
@@ -514,7 +514,7 @@ def calistir(*, headed: bool, kesfet_modu: bool, no_pause: bool,
             # ── KESİF MODU ───────────────────────────────────────────────────
             print("\n[KESİF] Promosyon ve ürün sayfaları inceleniyor …")
             for url in [CONFIG["promosyon_url"], CONFIG["kategori_nav_url"]]:
-                print(f"  → {url}")
+                print(f"  -> {url}")
                 try:
                     page.goto(url, wait_until="domcontentloaded",
                               timeout=CONFIG["goto_timeout_ms"])
@@ -531,7 +531,7 @@ def calistir(*, headed: bool, kesfet_modu: bool, no_pause: bool,
             with open(log_dosya, "w", encoding="utf-8") as f:
                 for entry in izleyici.api_log:
                     f.write(json.dumps(entry, ensure_ascii=False) + "\n")
-            print(f"\n[KESİF TAMAM] {len(izleyici.api_log)} endpoint kaydedildi → {log_dosya}")
+            print(f"\n[KESİF TAMAM] {len(izleyici.api_log)} endpoint kaydedildi -> {log_dosya}")
             ctx.close()
             if not no_pause:
                 input("\nÇıkmak için Enter …")
@@ -605,12 +605,12 @@ def calistir(*, headed: bool, kesfet_modu: bool, no_pause: bool,
             # Scroll ile yeni ürün geldiyse sayfalama da dene
             if yeni_scroll > 0:
                 yeni_page = sfcc_sayfalama_cek(page, izleyici, url, ad)
-                print(f"  → scroll: {yeni_scroll}, sayfalama: {yeni_page} | "
+                print(f"  -> scroll: {yeni_scroll}, sayfalama: {yeni_page} | "
                       f"toplam: {len(izleyici.urunler)}")
             else:
                 # Scroll işe yaramadıysa sayfalama stratejisi uygula
                 yeni_page = sfcc_sayfalama_cek(page, izleyici, url, ad)
-                print(f"  → sadece sayfalama: {yeni_page} | "
+                print(f"  -> sadece sayfalama: {yeni_page} | "
                       f"toplam: {len(izleyici.urunler)}")
 
         ctx.close()
@@ -629,7 +629,7 @@ def calistir(*, headed: bool, kesfet_modu: bool, no_pause: bool,
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
     print(f"\n{'='*60}")
-    print(f"TAMAM: {len(urunler)} ürün → {out_path}")
+    print(f"TAMAM: {len(urunler)} ürün -> {out_path}")
     print(f"{'='*60}")
 
     if not no_pause:

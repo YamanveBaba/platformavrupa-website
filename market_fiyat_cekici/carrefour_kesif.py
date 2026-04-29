@@ -127,7 +127,7 @@ def calistir(headed: bool):
                                 f_txt,
                             )
                         except Exception as e:
-                            _log(f"  [JSON body hata] {url[:80]} → {e}", f_txt)
+                            _log(f"  [JSON body hata] {url[:80]} -> {e}", f_txt)
                         return
 
                     # JSON olmayan ama ilginç URL'leri logla

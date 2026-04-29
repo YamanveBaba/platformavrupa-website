@@ -72,7 +72,7 @@ def main():
             page.wait_for_timeout(3000)
             collect_visible_products()
 
-            # Azar azar aşağı kaydır: biraz kaydır → oku → biraz daha kaydır → oku (sonuna kadar)
+            # Azar azar aşağı kaydır: biraz kaydır -> oku -> biraz daha kaydır -> oku (sonuna kadar)
             # Böylece her ekrandaki ürünler DOM'dayken toplanır (tam alta zıplamıyoruz)
             scroll_adim_piksel = 500
             adim = 0

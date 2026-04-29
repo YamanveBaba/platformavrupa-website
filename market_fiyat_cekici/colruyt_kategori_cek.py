@@ -4,7 +4,7 @@ Colruyt Belçika — KATEGORİ BAZLI tam ürün + fiyat + indirim tarihi çekici
 ==========================================================================
 NEDEN YENİ SCRIPT?
   Eski script placeId+skip ile düz sayfalama yapıyordu.
-  Colruyt API'si skip~7500'de susuyor → 7548 üründe takılı kalıyorduk.
+  Colruyt API'si skip~7500'de susuyor -> 7548 üründe takılı kalıyorduk.
   Çözüm: Her kategoriyi ayrı ayrı sayfalamak (her biri <1000 ürün,
   pagination tavanına asla çarpmaz). 12.000+ ürün hedefi bu şekilde
   tutarlı şekilde ulaşılabilir.
@@ -12,7 +12,7 @@ NEDEN YENİ SCRIPT?
 ÇALIŞMA MANTIĞI
   1. Playwright ile kalıcı profil açılır (colruyt_browser_profile/).
   2. colruyt.be/nl/producten sayfası açılır; kategori linkleri toplanır.
-  3. Her kategori linki ziyaret edilerek ağ trafiği dinlenir → categoryId'ler
+  3. Her kategori linki ziyaret edilerek ağ trafiği dinlenir -> categoryId'ler
      otomatik keşfedilir (elle cURL kopyasına gerek yok).
   4. Her categoryId için API sayfalanır (skip=0,60,120,...).
   5. Tüm sonuçlar retailProductNumber ile birleştirilir (deduplicate).
@@ -21,7 +21,7 @@ NEDEN YENİ SCRIPT?
 KULLANIM
   İlk çalıştırma (profilde oturum yok):
       python colruyt_kategori_cek.py --enter-sonra-devam
-      (Tarayıcı açılır, giriş yap + mağaza seç, Enter'a bas → devam)
+      (Tarayıcı açılır, giriş yap + mağaza seç, Enter'a bas -> devam)
 
   Sonraki çalıştırmalar (profilde oturum var):
       python colruyt_kategori_cek.py --zaten-giris
@@ -491,7 +491,7 @@ def main() -> None:
         print(f"  Toplam benzersiz kategori linki: {len(tum_linkler)}")
 
         # ----------------------------------------------------------------
-        # 2. AŞAMA: Her kategori sayfasını ziyaret et → categoryId keşfet
+        # 2. AŞAMA: Her kategori sayfasını ziyaret et -> categoryId keşfet
         # ----------------------------------------------------------------
         print("\n[2/3] Kategori sayfaları ziyaret ediliyor (categoryId keşfi)...")
 
@@ -513,7 +513,7 @@ def main() -> None:
             try:
                 page.goto(link_temiz, wait_until="domcontentloaded", timeout=45_000)
                 time.sleep(2.5)
-                # Scroll tetikle → daha fazla API isteği ateşlenir
+                # Scroll tetikle -> daha fazla API isteği ateşlenir
                 page.evaluate("window.scrollBy(0, 800)")
                 time.sleep(1.5)
             except Exception as e:
@@ -580,7 +580,7 @@ def main() -> None:
                 kategori_adi=f"cat{cid}",
                 max_urun=MAX_URUN,
             )
-            print(f"    → +{yeni} yeni ürün (toplam {len(toplanan)})")
+            print(f"    -> +{yeni} yeni ürün (toplam {len(toplanan)})")
 
             # Ara kayıt
             if len(toplanan) - onceki_kayit >= 200:
@@ -663,7 +663,7 @@ def _parse_args() -> argparse.Namespace:
     )
     ap.add_argument(
         "--enter-sonra-devam", action="store_true",
-        help="Tarayıcıda giriş yaptıktan sonra Enter'a bas → devam eder"
+        help="Tarayıcıda giriş yaptıktan sonra Enter'a bas -> devam eder"
     )
     ap.add_argument(
         "--sadece-kesif", action="store_true",

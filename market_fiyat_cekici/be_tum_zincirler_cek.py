@@ -2,7 +2,7 @@
 """
 Belçika 5 zincir — tam çekimi sırayla çalıştırır; zincirler arası uzun durak (ban riskini azaltır).
 
-Sıra (sabit): ALDI → Colruyt → Delhaize → Lidl → Carrefour
+Sıra (sabit): ALDI -> Colruyt -> Delhaize -> Lidl -> Carrefour
 Her adım ayrı subprocess: bir zincir çökse bile sonrakine geçebilirsiniz.
 
 Önkoşullar: Colruyt cookie.txt; Carrefour ilk seferde gerekirse --headed ile profil.

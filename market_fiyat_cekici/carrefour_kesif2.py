@@ -141,7 +141,7 @@ async def calistir():
                     for e in entries:
                         url = e.get("url", "")
                         if re.search(r"(search|product|catalog|category|promo|offer|assortment|api)", url, re.I):
-                            _log(f"    → {url[:110]}", f_txt)
+                            _log(f"    -> {url[:110]}", f_txt)
                     f_json.write(json.dumps({"tip": "perf_entries", "sayfa": hedef_url, "entries": entries}, ensure_ascii=False) + "\n")
                     f_json.flush()
             except Exception as e:

@@ -1,0 +1,24 @@
+name: Sinir Kapisi Bekleme Guncelle
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'   # Her 15 dakikada bir
+  workflow_dispatch:
+
+jobs:
+  guncelle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+
+    steps:
+      - name: Edge Function cagir
+        run: |
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X POST "${{ secrets.SUPABASE_URL }}/functions/v1/sinir-bekleme" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Content-Type: application/json")
+          echo "HTTP Status: $HTTP_STATUS"
+          if [ "$HTTP_STATUS" != "200" ]; then
+            echo "Hata: HTTP $HTTP_STATUS"
+            exit 1
+          fi

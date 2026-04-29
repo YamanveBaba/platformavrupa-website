@@ -217,7 +217,7 @@ def load_token_from_file(script_dir):
 def load_cookie_from_curl(script_dir):
     """
     curl.txt varsa içindeki cURL komutundan Cookie'yi çıkarır.
-    Tarayıcıda: Network → isteğe sağ tık → Copy → Copy as cURL (bash) → curl.txt içine yapıştır.
+    Tarayıcıda: Network -> isteğe sağ tık -> Copy -> Copy as cURL (bash) -> curl.txt içine yapıştır.
     """
     path = os.path.join(script_dir, "curl.txt")
     if not os.path.isfile(path):
@@ -347,8 +347,8 @@ def setup_colruyt_http(script_dir: str, args):
         if not (headers.get("Cookie") or "").strip():
             print(
                 "  UYARI: curl.txt içinden Cookie çıkarılamadı (çok satırlı/^ ile cmd kopyası bazen bozulur). "
-                "Şunlardan biri: (1) Chrome/Edge → Copy as cURL (**bash**), tek seferde yapıştırın. "
-                "(2) Request Headers → Cookie değerini doğrudan cookie.txt dosyasına tek satır yapıştırın.\n"
+                "Şunlardan biri: (1) Chrome/Edge -> Copy as cURL (**bash**), tek seferde yapıştırın. "
+                "(2) Request Headers -> Cookie değerini doğrudan cookie.txt dosyasına tek satır yapıştırın.\n"
             )
     cookie_from_curl = bool((curl_headers.get("Cookie") or "").strip())
     cookie = load_cookie_from_file(script_dir) or load_cookie_from_curl(script_dir)
@@ -376,7 +376,7 @@ def setup_colruyt_http(script_dir: str, args):
             print(
                 "  token.txt bulundu; ancak tarayıcı oturum çerezi YOK.\n"
                 "  Colruyt çoğu zaman sadece token= ile 406 döner — lütfen curl.txt veya cookie.txt ekleyin:\n"
-                "  F12 → Network → product-search-prs → Copy as cURL → market_fiyat_cekici/curl.txt\n"
+                "  F12 -> Network -> product-search-prs -> Copy as cURL -> market_fiyat_cekici/curl.txt\n"
             )
     elif cookie_base:
         headers["Cookie"] = cookie_base
@@ -534,13 +534,13 @@ def fetch_page(session, skip, size, headers, extra_params=None):
                 return None
             if resp.status_code == 403:
                 print("  403 Forbidden: Erişim reddedildi — genelde süresi dolmuş veya eksik Cookie.")
-                print("  colruyt.be'de giriş yapıp Network'ten product-search-prs → Copy as cURL → curl.txt güncelleyin.")
+                print("  colruyt.be'de giriş yapıp Network'ten product-search-prs -> Copy as cURL -> curl.txt güncelleyin.")
                 _probe_response_hint(resp)
                 return None
             if resp.status_code == 406:
                 print("  406 Not Acceptable: Oturum (Cookie) gerekli veya istek reddedildi.")
                 print("  Token süresi dolmuş olabilir (~6 dk). Yeni token alıp token.txt güncelleyin VEYA tarayıcıdan tam Cookie kullanın:")
-                print("  F12 → Network → product-search-prs isteğine sağ tık → Copy → Copy as cURL (bash) → curl.txt dosyasına yapıştırın.")
+                print("  F12 -> Network -> product-search-prs isteğine sağ tık -> Copy -> Copy as cURL (bash) -> curl.txt dosyasına yapıştırın.")
                 _probe_response_hint(resp)
                 return None
             print(f"  HTTP {resp.status_code}")

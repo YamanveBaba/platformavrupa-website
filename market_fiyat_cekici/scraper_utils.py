@@ -104,7 +104,7 @@ BACKOFF_MAX  = 150  # saniye
 
 def backoff_bekle(attempt: int, logger: logging.Logger = None):
     """
-    attempt=0 → ~12s, attempt=1 → ~24s, attempt=2 → ~48s, max 150s
+    attempt=0 -> ~12s, attempt=1 -> ~24s, attempt=2 -> ~48s, max 150s
     %20 jitter eklenir.
     """
     baz  = min(BACKOFF_BASE * (2 ** attempt), BACKOFF_MAX)
@@ -128,7 +128,7 @@ class StopSinyali:
         self._dur = True
 
     def sinyal_kaydet(self, logger: logging.Logger = None):
-        """SIGINT / SIGTERM → graceful shutdown."""
+        """SIGINT / SIGTERM -> graceful shutdown."""
         def _handler(signum, frame):
             if logger:
                 logger.info("Durdurma sinyali alındı — mevcut kategori bittikten sonra çıkılacak.")

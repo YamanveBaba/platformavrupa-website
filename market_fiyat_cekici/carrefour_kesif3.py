@@ -93,7 +93,7 @@ def calistir():
                             _log(f"  [JSON] {status} boyut={len(body)} toplam={toplam}\n"
                                  f"         {url[:100]}", f_txt)
                         except Exception as e:
-                            _log(f"  [JSON hata] {url[:80]} → {e}", f_txt)
+                            _log(f"  [JSON hata] {url[:80]} -> {e}", f_txt)
                     elif re.search(r"(search|product|catalog|categor|promo|offer|assortment|api)", url, re.I):
                         _log(f"  [URL] {status} {url[:110]}", f_txt)
                 except Exception:

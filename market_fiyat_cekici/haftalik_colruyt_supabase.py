@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Haftalık Colruyt akışı: API çekimi → en son colruyt_be_producten_*.json → Supabase upsert.
+Haftalık Colruyt akışı: API çekimi -> en son colruyt_be_producten_*.json -> Supabase upsert.
 
 Görev Zamanlayıcı: bu dosyayı çalıştırın (veya calistir_colruyt_haftalik.bat).
 Önkoşul: supabase_import_secrets.txt ve geçerli curl.txt / cookie.txt / token.txt.
