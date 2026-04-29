@@ -200,11 +200,12 @@ def cek_lidl(log: Path) -> int:
 
 
 def cek_aldi(log: Path) -> tuple[int, int]:
-    ret1, _ = calistir([sys.executable, "sayfa_kaydet.py", "--market", "aldi"], TIMEOUT["aldi"] // 2, log)
+    # aldi_be_v2.py camoufox (Firefox) kullanir — Cloudflare bypass
+    ret1, _ = calistir([sys.executable, "aldi_be_v2.py", "--no-pause"], TIMEOUT["aldi"], log)
     if ret1 != 0:
         return ret1, 0
     ret2, son = calistir([sys.executable, "html_analiz.py", "--market", "aldi"], 600, log)
-    urun = urun_sayisi_stdout_parse(son)
+    urun = urun_sayisi_stdout_parse(son) or son_json_urun_sayisi("aldi")
     return ret2, urun
 
 

@@ -257,6 +257,8 @@ def supabase_kaydet(sb_url: str, sb_key: str, haberler: list[dict], dry_run: boo
         country_code = ULKE_MAP.get(ulke_str, None)
         ai_skor = h.get("ai_skor", 5)
 
+        # Skor >= 5 → doğrudan yayınla, düşük skor → taslak
+        status = "published" if ai_skor >= 5 else "draft"
         row = {
             "title": h["baslik"][:500],
             "content": f'<p>{h["ozet"]}</p>\n<p><a href="{h["link"]}" target="_blank" rel="noopener">Kaynağa git: {h["kaynak"]}</a></p>',
@@ -266,7 +268,7 @@ def supabase_kaydet(sb_url: str, sb_key: str, haberler: list[dict], dry_run: boo
             "source_url": h["link"],
             "source_hash": h["hash"],
             "created_at": h["tarih"],
-            "status": "draft",
+            "status": status,
             "kategori": h.get("kategori", "genel"),
             "ai_skor": ai_skor,
         }

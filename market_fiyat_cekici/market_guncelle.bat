@@ -27,7 +27,7 @@ if %GUN_FARK% LSS 5 (
 echo [%date% %time%] Market cekim basliyor... >> "%LOGFILE%"
 
 cd /d "%~dp0"
-python -X utf8 haftalik_tam.py >> "%LOGFILE%" 2>&1
+"%LOCALAPPDATA%\Programs\Python\Python314\python.exe" -X utf8 haftalik_tam.py >> "%LOGFILE%" 2>&1
 
 :: Basarili bitis tarihini kaydet
 powershell -NoProfile -Command "(Get-Date).ToString('yyyy-MM-dd HH:mm:ss')" > "%LOCKFILE%"
