@@ -156,7 +156,7 @@
         <!-- ═══════════════════════════════════════ -->
         <div id="content-gates">
             <div class="flex items-center justify-between mb-4">
-                <p class="text-white/80 text-sm"><i class="fa-solid fa-users mr-1"></i> Kullanıcıların bildirdiği bekleme süreleri (son 2 saat ortalaması)</p>
+                <p class="text-white/80 text-sm"><i class="fa-solid fa-clock mr-1"></i> Sınır kapılarındaki anlık bekleme tahminleri</p>
                 <button onclick="loadGates()" class="bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-full text-xs font-bold transition flex items-center gap-1">
                     <i class="fa-solid fa-rotate"></i> Yenile
                 </button>
@@ -173,8 +173,8 @@
                 <span class="flex items-center gap-1.5"><span class="inline-block w-3 h-3 rounded-full bg-yellow-500"></span>30-89 dk — Orta</span>
                 <span class="flex items-center gap-1.5"><span class="inline-block w-3 h-3 rounded-full bg-red-500"></span>90-179 dk — Yoğun</span>
                 <span class="flex items-center gap-1.5"><span class="inline-block w-3 h-3 rounded-full bg-gray-800"></span>180+ dk — Çok Yoğun</span>
-                <span class="flex items-center gap-1.5"><span class="inline-block w-3 h-3 rounded-full bg-slate-400"></span>Bilgi Yok</span>
-                <span class="text-white/50 ml-2">· Veriler kullanıcı bildirimleri (son 2 saat)</span>
+                <span class="flex items-center gap-1.5"><span class="inline-block w-3 h-3 rounded-full bg-slate-400"></span>Takip Edilmiyor</span>
+                <span class="text-white/50 ml-2">· 📡 Google Maps trafik verisi</span>
             </div>
         </div>
 
@@ -645,21 +645,6 @@
             </div>
 
             <!-- Windy Webcam - Kapıkule canlı görüntü -->
-            <div class="border-card p-4 mb-4">
-                <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
-                    <i class="fa-solid fa-video text-blue-600"></i>
-                    Kapıkule — Canlı Görüntü
-                </h3>
-                <iframe
-                    src="https://webcams.windy.com/webcams/public/embed/player/1613219576/day"
-                    width="100%" height="260"
-                    frameborder="0"
-                    allow="fullscreen"
-                    class="w-full rounded-xl bg-slate-100">
-                </iframe>
-                <p class="text-xs text-slate-400 mt-2">~5 dk'da bir güncellenir</p>
-            </div>
-
             <!-- Dış kaynak linkleri -->
             <div class="border-card p-4 mb-4">
                 <h3 class="font-bold text-slate-800 mb-3 text-sm flex items-center gap-2">
@@ -700,7 +685,7 @@
     const KAPILER = [
         { id: 'kapikule',    isim: 'Kapıkule',     ulke: 'Bulgaristan 🇧🇬', lat: 41.7395, lon: 26.5601, acik: true },
         { id: 'hamzabeyli',  isim: 'Hamzabeyli',   ulke: 'Bulgaristan 🇧🇬', lat: 41.7175, lon: 26.6125, acik: true },
-        { id: 'dereköy',     isim: 'Dereköy',      ulke: 'Bulgaristan 🇧🇬', lat: 41.9741, lon: 27.4693, acik: true },
+        { id: 'derekoy',     isim: 'Dereköy',      ulke: 'Bulgaristan 🇧🇬', lat: 41.9741, lon: 27.4693, acik: true },
         { id: 'ipsala',      isim: 'İpsala',       ulke: 'Yunanistan 🇬🇷',  lat: 40.9269, lon: 26.3872, acik: true },
         { id: 'pazarkule',   isim: 'Pazarkule',    ulke: 'Yunanistan 🇬🇷',  lat: 41.7118, lon: 26.3314, acik: true },
         { id: 'horgos',      isim: 'Horgoş',       ulke: 'Sırbistan/Macaristan 🇷🇸🇭🇺', lat: 46.1553, lon: 19.9869, acik: true },
@@ -833,7 +818,7 @@
     }
 
     function beklemeSinifi(dk) {
-        if (dk === null) return { renk: 'wait-grey', metin: 'Bilgi Yok', emoji: '⚫' };
+        if (dk === null) return { renk: 'wait-grey', metin: 'Takip Yok', emoji: '⚫' };
         if (dk < 30)  return { renk: 'wait-green',  metin: `${dk} dk`, emoji: '🟢' };
         if (dk < 90)  return { renk: 'wait-yellow', metin: `${dk} dk`, emoji: '🟡' };
         if (dk < 180) return { renk: 'wait-red',    metin: `${dk} dk`, emoji: '🔴' };
