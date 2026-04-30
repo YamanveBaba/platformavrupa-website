@@ -4,6 +4,7 @@ Cekum tamamlandiktan sonra Telegram bildirimi gonder.
 Is ilanlari, market urunleri ve haber sayilarini Supabase'den cekip ozet gonderir.
 """
 import os
+import time
 import requests
 from datetime import datetime, timezone
 
@@ -14,21 +15,56 @@ def load_secrets():
     tg_chat = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
     return sb_url.rstrip("/"), sb_key, tg_token, tg_chat
 
+_hatalar: list[str] = []  # Biriktirilen hata açıklamaları
+
 def supabase_say(sb_url, sb_key, tablo, filtre=""):
-    if not sb_url or not sb_key:
+    """Supabase'den COUNT döner. Başarısız olursa "?" + hata nedenini _hatalar listesine ekler."""
+    if not sb_url:
+        _hatalar.append("SUPABASE_URL tanımlı değil")
         return "?"
+    if not sb_key:
+        _hatalar.append("SUPABASE_SERVICE_ROLE_KEY tanımlı değil")
+        return "?"
+
     headers = {"apikey": sb_key, "Authorization": f"Bearer {sb_key}",
-                "Range-Unit": "items", "Range": "0-0", "Prefer": "count=exact"}
+               "Range-Unit": "items", "Range": "0-0", "Prefer": "count=exact"}
+    url = f"{sb_url}/rest/v1/{tablo}?select=id{filtre}"
+
+    son_hata = ""
     for deneme in range(3):
         try:
-            r = requests.get(f"{sb_url}/rest/v1/{tablo}?select=id{filtre}",
-                             headers=headers, timeout=30)
+            r = requests.get(url, headers=headers, timeout=30)
+            if r.status_code == 401:
+                son_hata = f"{tablo}: 401 Unauthorized (API key geçersiz?)"
+                break
+            if r.status_code == 404:
+                son_hata = f"{tablo}: 404 Tablo bulunamadı"
+                break
+            if r.status_code >= 400:
+                son_hata = f"{tablo}: HTTP {r.status_code} — {r.text[:60]}"
+                break
             cr = r.headers.get("Content-Range", "")
-            sayi = int(cr.split("/")[-1])
-            return sayi
-        except Exception:
+            if not cr:
+                son_hata = f"{tablo}: Content-Range header yok (Supabase uyanıyor olabilir)"
+                if deneme < 2:
+                    time.sleep(8)
+                    continue
+                break
+            return int(cr.split("/")[-1])
+        except requests.exceptions.Timeout:
+            son_hata = f"{tablo}: timeout (Supabase yanıt vermedi)"
             if deneme < 2:
-                import time as _t; _t.sleep(8)
+                time.sleep(8)
+        except requests.exceptions.ConnectionError as e:
+            son_hata = f"{tablo}: bağlantı hatası — {str(e)[:60]}"
+            if deneme < 2:
+                time.sleep(8)
+        except Exception as e:
+            son_hata = f"{tablo}: {type(e).__name__} — {str(e)[:60]}"
+            break
+
+    if son_hata and son_hata not in _hatalar:
+        _hatalar.append(son_hata)
     return "?"
 
 def telegram_gonder(token, chat_id, mesaj):
@@ -66,7 +102,7 @@ def main():
         market_toplam = "?"
 
     # Haberler
-    haber_toplam  = supabase_say(sb_url, sb_key, "announcements", "&source=eq.otomatik&status=eq.published")
+    haber_toplam   = supabase_say(sb_url, sb_key, "announcements", "&source=eq.otomatik&status=eq.published")
     draft_haberler = supabase_say(sb_url, sb_key, "announcements", "&source=eq.otomatik&status=eq.draft")
 
     saat = datetime.now(timezone.utc).strftime("%d.%m.%Y %H:%M UTC")
@@ -81,11 +117,11 @@ def main():
     pending_count = supabase_say(sb_url, sb_key, "listings", "&status=eq.pending")
     pending_detay = ""
     if sb_url and sb_key and isinstance(pending_count, int) and pending_count > 0:
-        headers = {"apikey": sb_key, "Authorization": f"Bearer {sb_key}"}
+        hdrs = {"apikey": sb_key, "Authorization": f"Bearer {sb_key}"}
         try:
             r = requests.get(
                 f"{sb_url}/rest/v1/listings?status=eq.pending&select=id,title,city&limit=5&order=created_at.asc",
-                headers=headers, timeout=15
+                headers=hdrs, timeout=15
             )
             if r.status_code == 200:
                 for ilan in r.json():
@@ -97,12 +133,12 @@ def main():
     # Draft haberler detayı
     draft_haber_detay = ""
     if sb_url and sb_key and isinstance(draft_haberler, int) and draft_haberler > 0:
-        headers = {"apikey": sb_key, "Authorization": f"Bearer {sb_key}"}
+        hdrs = {"apikey": sb_key, "Authorization": f"Bearer {sb_key}"}
         try:
             r = requests.get(
                 f"{sb_url}/rest/v1/announcements?source=eq.otomatik&status=eq.draft"
                 f"&select=id,title,ai_skor&order=ai_skor.desc&limit=5",
-                headers=headers, timeout=15
+                headers=hdrs, timeout=15
             )
             if r.status_code == 200:
                 for h in r.json():
@@ -146,12 +182,21 @@ def main():
             f"\n<i>Onaylamak için komutu Telegram'a gönderin.</i>"
         )
 
+    # Hata özeti — sadece "?" olan şeyler varsa
+    if _hatalar:
+        benzersiz = list(dict.fromkeys(_hatalar))  # sıra koruyarak tekrarsız
+        mesaj += f"\n\n🔴 <b>Veri alınamayan alanlar ({len(benzersiz)} hata):</b>\n"
+        for h in benzersiz[:5]:
+            mesaj += f"  • {h}\n"
+
     print(mesaj)
     telegram_gonder(tg_token, tg_chat, mesaj)
     web_push_gonder(sb_url, sb_key, ilan_toplam)
 
 def web_push_gonder(sb_url, sb_key, ilan_toplam):
     """Tüm PWA abonelerine günlük güncelleme bildirimi gönder."""
+    if not sb_url or not sb_key:
+        return
     edge_url = f"{sb_url}/functions/v1/send-push"
     headers = {
         "Authorization": f"Bearer {sb_key}",
