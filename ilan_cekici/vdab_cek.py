@@ -330,12 +330,46 @@ def cek_kategori(ctx, req_url, req_headers, method, base_body,
 
     return yeni_toplam
 
+def expired_yap(sb_url: str, sb_key: str, dry_run: bool) -> int:
+    sinir = (datetime.now(timezone.utc) - timedelta(days=EXPIRY_GUN)).isoformat()
+    headers = {
+        "apikey": sb_key,
+        "Authorization": f"Bearer {sb_key}",
+        "Prefer": "count=exact",
+        "Range": "0-0",
+    }
+    params = {"source": "eq.vdab", "status": "eq.active",
+              "created_at": f"lt.{sinir}", "select": "id"}
+    r = requests.get(f"{sb_url}/rest/v1/ilanlar", params=params, headers=headers, timeout=30)
+    m = re.search(r"/(\d+)", r.headers.get("Content-Range", ""))
+    toplam = int(m.group(1)) if m else 0
+    if toplam == 0:
+        print("  Süresi dolan VDAB ilanı yok.")
+        return 0
+    if dry_run:
+        print(f"  [dry-run] {toplam} VDAB ilanı expired yapılacaktı.")
+        return toplam
+    patch = requests.patch(
+        f"{sb_url}/rest/v1/ilanlar?source=eq.vdab&status=eq.active&created_at=lt.{sinir}",
+        json={"status": "expired"},
+        headers={**headers, "Content-Type": "application/json", "Prefer": "return=minimal"},
+        timeout=60,
+    )
+    if patch.status_code not in (200, 204):
+        print(f"  UYARI: VDAB expired güncelleme hatası {patch.status_code}")
+        return 0
+    print(f"  {toplam} VDAB ilanı expired yapıldı.")
+    return toplam
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--max", type=int, default=200000)
     parser.add_argument("--gunler", type=int, default=0,
                         help="0=hepsi, 1=bugun/dun, 6=gecen hafta")
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--temizle", action="store_true",
+                        help=f"30 günden eski VDAB ilanlarını expired yap")
     args = parser.parse_args()
 
     ONLINE_SINDS_CODE = "9000" if args.gunler == 0 else str(args.gunler)
@@ -481,6 +515,10 @@ def main():
     elapsed = time.time() - start
     print(f"\nTamamlandi. {len(tum_ilanlar):,} benzersiz ilan cekildi, "
           f"{basarili_yazilan:,} DB'ye yazildi, {elapsed/60:.1f} dakika.")
+
+    if args.temizle:
+        print(f"\n[Temizle] {EXPIRY_GUN} günden eski VDAB ilanları expire ediliyor...")
+        expired_yap(sb_url, sb_key, args.dry_run)
 
 if __name__ == "__main__":
     main()

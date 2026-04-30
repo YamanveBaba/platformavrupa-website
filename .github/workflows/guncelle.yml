@@ -49,11 +49,11 @@ jobs:
 
       - name: VDAB gunluk cek (Pazartesi-Cumartesi)
         if: github.event.schedule == '0 4 * * 1-6' || github.event_name == 'workflow_dispatch'
-        run: python -X utf8 ilan_cekici/vdab_cek.py --gunler 1 --max 5000
+        run: python -X utf8 ilan_cekici/vdab_cek.py --gunler 1 --max 5000 --temizle
 
       - name: VDAB haftalik tam cek (Pazar)
         if: github.event.schedule == '0 2 * * 0'
-        run: python -X utf8 ilan_cekici/vdab_cek.py --max 300000
+        run: python -X utf8 ilan_cekici/vdab_cek.py --max 300000 --temizle
 
       - name: Haber cek (Avrupa Turkleri)
         env:

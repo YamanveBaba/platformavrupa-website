@@ -19,13 +19,17 @@ def supabase_say(sb_url, sb_key, tablo, filtre=""):
         return "?"
     headers = {"apikey": sb_key, "Authorization": f"Bearer {sb_key}",
                 "Range-Unit": "items", "Range": "0-0", "Prefer": "count=exact"}
-    r = requests.get(f"{sb_url}/rest/v1/{tablo}?select=id{filtre}",
-                     headers=headers, timeout=15)
-    cr = r.headers.get("Content-Range", "")
-    try:
-        return int(cr.split("/")[-1])
-    except Exception:
-        return "?"
+    for deneme in range(3):
+        try:
+            r = requests.get(f"{sb_url}/rest/v1/{tablo}?select=id{filtre}",
+                             headers=headers, timeout=30)
+            cr = r.headers.get("Content-Range", "")
+            sayi = int(cr.split("/")[-1])
+            return sayi
+        except Exception:
+            if deneme < 2:
+                import time as _t; _t.sleep(8)
+    return "?"
 
 def telegram_gonder(token, chat_id, mesaj):
     if not token or not chat_id:
@@ -90,6 +94,24 @@ def main():
         except Exception:
             pass
 
+    # Draft haberler detayı
+    draft_haber_detay = ""
+    if sb_url and sb_key and isinstance(draft_haberler, int) and draft_haberler > 0:
+        headers = {"apikey": sb_key, "Authorization": f"Bearer {sb_key}"}
+        try:
+            r = requests.get(
+                f"{sb_url}/rest/v1/announcements?source=eq.otomatik&status=eq.draft"
+                f"&select=id,title,ai_skor&order=ai_skor.desc&limit=5",
+                headers=headers, timeout=15
+            )
+            if r.status_code == 200:
+                for h in r.json():
+                    skor = h.get('ai_skor') or 0
+                    yildiz = '★' * min(round(skor/2), 5)
+                    draft_haber_detay += f"\n  {yildiz} {h.get('title','')[:60]}"
+        except Exception:
+            pass
+
     mesaj = (
         f"✅ <b>Platform Avrupa — Günlük Güncelleme</b>\n"
         f"📅 {saat}\n\n"
@@ -109,6 +131,13 @@ def main():
         f"  Yayında:          <b>{fmt(haber_toplam)}</b>\n"
         f"  Onay bekleyen:    <b>{fmt(draft_haberler)}</b>\n"
     )
+
+    if isinstance(draft_haberler, int) and draft_haberler > 0:
+        mesaj += (
+            f"\n📋 <b>Onay Bekleyen {draft_haberler} Haber:</b>"
+            f"{draft_haber_detay}\n"
+            f"\n🔗 <a href=\"https://www.platformavrupa.com/admin.html#haberler\">Admin paneli → Haber Kuyruğu</a>"
+        )
 
     if isinstance(pending_count, int) and pending_count > 0:
         mesaj += (
