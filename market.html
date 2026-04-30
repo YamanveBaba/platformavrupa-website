@@ -234,7 +234,27 @@
                     <span class="text-3xl">🇧🇪</span>
                     <h2 class="text-2xl md:text-3xl font-black text-white leading-tight">Belçika Market Fiyatları</h2>
                 </div>
-                <p class="text-white/50 text-sm mb-4">Colruyt, ALDI, Delhaize, Lidl ve Carrefour'da <span class="text-emerald-400 font-semibold">gerçek fiyatlar</span></p>
+                <p class="text-white/50 text-sm mb-3">Colruyt, ALDI, Delhaize, Lidl ve Carrefour'da <span class="text-emerald-400 font-semibold">gerçek fiyatlar</span></p>
+
+                <!-- ── ARAMA KUTUSU ── -->
+                <div class="relative mb-4" id="aramaKutu">
+                    <div class="flex gap-2">
+                        <div class="relative flex-1">
+                            <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none"></i>
+                            <input id="aramaInput" type="text" autocomplete="off"
+                                placeholder="Ürün ara... süt, yumurta, tütün"
+                                class="w-full bg-white/10 border border-white/20 text-white placeholder-white/35 rounded-xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:border-emerald-400/60 focus:bg-white/15 transition"
+                                oninput="aramaDebounce(this.value)"
+                                onkeydown="if(event.key==='Enter'){aramaYap();document.getElementById('aramaOneri').classList.add('hidden')}"
+                                onfocus="if(this.value.length>1)aramaDebounce(this.value)">
+                        </div>
+                        <button onclick="aramaYap()" class="bg-emerald-500 hover:bg-emerald-400 text-white font-bold px-5 py-3 rounded-xl text-sm transition shrink-0">Ara</button>
+                        <button id="aramaSifirlaBtn" onclick="aramaSifirla()" class="hidden bg-white/10 hover:bg-white/20 text-white/70 px-3 py-3 rounded-xl text-sm transition shrink-0"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <!-- Autocomplete önerileri -->
+                    <div id="aramaOneri" class="hidden absolute left-0 right-0 top-full mt-1 bg-slate-800 border border-white/15 rounded-xl overflow-hidden z-50 shadow-xl"></div>
+                </div>
+
                 <div class="flex flex-wrap gap-2" id="heroStats">
                     <div class="shimmer h-7 w-36 rounded-full"></div>
                     <div class="shimmer h-7 w-28 rounded-full"></div>
@@ -274,6 +294,20 @@
             <span class="tab-indicator"></span>
         </button>
     </div>
+</div>
+
+<!-- ═══ ARAMA SONUÇLARI ══════════════════════════════════════════ -->
+<div id="sec-arama" class="hidden px-4 max-w-7xl mx-auto pb-8">
+    <div id="aramaYukleniyor" class="hidden text-center py-12 text-white/40">
+        <i class="fa-solid fa-spinner fa-spin text-2xl mb-3"></i>
+        <p class="text-sm">Aranıyor...</p>
+    </div>
+    <div id="aramaBosSonuc" class="hidden text-center py-12 text-white/40">
+        <i class="fa-solid fa-face-meh text-3xl mb-3"></i>
+        <p class="font-semibold text-white/60 mb-1">Sonuç bulunamadı</p>
+        <p class="text-sm" id="aramaBosSonucText">Farklı bir kelime deneyin.</p>
+    </div>
+    <div id="aramaMarketler" class="space-y-5"></div>
 </div>
 
 <!-- ═══ TAB: İNDİRİMLER ══════════════════════════════════════════ -->
@@ -453,6 +487,233 @@ let allPromos = [];
 let activeFilter = 'all';
 
 // ═══════════════════════════════════════════════════════════════════
+// ARAMA — Türkçe kelime eşlemeleri
+// ═══════════════════════════════════════════════════════════════════
+const TR_ALIAS = {
+    'tütün':      'tabak shag roltabak',
+    'sarmalık':   'shag roltabak',
+    'sigara':     'cigarette sigaretten tabak',
+    'süt':        'melk',
+    'yumurta':    'eieren ei',
+    'ekmek':      'brood',
+    'tavuk':      'kip kipfilet',
+    'pirinç':     'rijst',
+    'makarna':    'pasta spaghetti',
+    'peynir':     'kaas',
+    'tereyağı':   'boter',
+    'zeytinyağı': 'olijfolie',
+    'çay':        'thee',
+    'kahve':      'koffie',
+    'et':         'vlees gehakt',
+    'kıyma':      'gehakt',
+    'soğan':      'ui uien',
+    'sarımsak':   'knoflook',
+    'domates':    'tomaat tomaten',
+    'patates':    'aardappel aardappelen',
+    'elma':       'appel appelen',
+    'muz':        'banaan bananen',
+    'portakal':   'sinaasappel',
+    'limon':      'citroen',
+    'deterjan':   'wasmiddel waspoeders',
+    'şampuan':    'shampoo',
+    'bebek':      'baby',
+    'bira':       'bier',
+    'şarap':      'wijn',
+    'çikolata':   'chocolade',
+    'bisküvi':    'koek koekjes',
+    'cips':       'chips',
+    'dondurma':   'ijsjes',
+    'yoğurt':     'yoghurt',
+    'un':         'bloem meel',
+    'şeker':      'suiker',
+    'tuz':        'zout',
+    'sirke':      'azijn',
+    'zeytin':     'olijven',
+    'konserve':   'conserven blik',
+    'bal':        'honing',
+};
+
+function aramaGenislet(q) {
+    const low = q.toLowerCase().trim();
+    const alias = TR_ALIAS[low];
+    if (!alias) return null;
+    return alias.split(' ');
+}
+
+let aramaTimer = null;
+let sonArama = '';
+
+function aramaDebounce(val) {
+    clearTimeout(aramaTimer);
+    const q = (val || '').trim();
+    if (q.length < 2) {
+        document.getElementById('aramaOneri').classList.add('hidden');
+        return;
+    }
+    aramaTimer = setTimeout(() => aramaAutocomplete(q), 280);
+}
+
+async function aramaAutocomplete(q) {
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const aliases = aramaGenislet(q) || [];
+
+    // or filtresi oluştur
+    let orParts = [`name_tr.ilike.%${q}%`, `name.ilike.%${q}%`];
+    aliases.forEach(a => orParts.push(`name.ilike.%${a}%`));
+
+    const { data } = await sb.from('market_chain_products')
+        .select('name_tr, name')
+        .or(orParts.join(','))
+        .limit(12);
+
+    if (!data || !data.length) {
+        document.getElementById('aramaOneri').classList.add('hidden');
+        return;
+    }
+
+    // Tekrarsız isimler — Türkçe önce
+    const goruldu = new Set();
+    const oneriler = [];
+    for (const row of data) {
+        const isim = bestName(row);
+        const anahtar = isim.toLowerCase().slice(0, 40);
+        if (!goruldu.has(anahtar)) {
+            goruldu.add(anahtar);
+            oneriler.push(isim);
+        }
+        if (oneriler.length >= 7) break;
+    }
+
+    const kutu = document.getElementById('aramaOneri');
+    kutu.innerHTML = oneriler.map(isim =>
+        `<button onclick="aramaSecOneri(this.dataset.isim)" data-isim="${esc(isim)}"
+            class="w-full text-left px-4 py-2.5 text-sm text-white/80 hover:bg-white/10 flex items-center gap-2 transition">
+            <i class="fa-solid fa-magnifying-glass text-white/30 text-xs"></i>
+            ${esc(isim)}
+        </button>`
+    ).join('');
+    kutu.classList.remove('hidden');
+}
+
+function aramaSecOneri(isim) {
+    document.getElementById('aramaInput').value = isim;
+    document.getElementById('aramaOneri').classList.add('hidden');
+    aramaYap();
+}
+
+async function aramaYap() {
+    const q = (document.getElementById('aramaInput').value || '').trim();
+    if (!q) return;
+    sonArama = q;
+
+    // Dropdown kapat
+    document.getElementById('aramaOneri').classList.add('hidden');
+
+    // Sekmeleri gizle, arama bölümünü göster
+    document.getElementById('sec-indirimler').classList.add('hidden');
+    document.getElementById('sec-karsilastir').classList.add('hidden');
+    document.getElementById('sec-marketler').classList.add('hidden');
+    document.getElementById('sec-arama').classList.remove('hidden');
+    document.getElementById('aramaSifirlaBtn').classList.remove('hidden');
+
+    // Tab butonlarından active kaldır
+    ['indirimler','karsilastir','marketler'].forEach(t => {
+        const btn = document.getElementById('tab-'+t);
+        if (btn) { btn.classList.remove('active'); btn.classList.add('text-white/50'); }
+    });
+
+    // Yükleniyor
+    document.getElementById('aramaYukleniyor').classList.remove('hidden');
+    document.getElementById('aramaBosSonuc').classList.add('hidden');
+    document.getElementById('aramaMarketler').innerHTML = '';
+
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const aliases = aramaGenislet(q) || [];
+
+    let orParts = [`name_tr.ilike.%${q}%`, `name.ilike.%${q}%`];
+    aliases.forEach(a => orParts.push(`name.ilike.%${a}%`));
+
+    const { data, error } = await sb.from('market_chain_products')
+        .select('name, name_tr, price, promo_price, in_promo, chain_slug, image_url, unit_or_content, currency')
+        .or(orParts.join(','))
+        .order('price', { ascending: true })
+        .limit(300);
+
+    document.getElementById('aramaYukleniyor').classList.add('hidden');
+
+    if (error || !data || !data.length) {
+        const hint = aliases.length
+            ? `"${q}" için ${aliases.join(', ')} kelimeleriyle de arandı.`
+            : `"${q}" için başka kelime deneyin.`;
+        document.getElementById('aramaBosSonucText').textContent = hint;
+        document.getElementById('aramaBosSonuc').classList.remove('hidden');
+        return;
+    }
+
+    // Market başına grupla
+    const grouped = {};
+    SLUGS.forEach(s => grouped[s] = []);
+    data.forEach(r => {
+        if (grouped[r.chain_slug]) grouped[r.chain_slug].push(r);
+    });
+
+    const toplam = data.length;
+    let html = `<p class="text-white/40 text-xs mb-4">"<span class="text-white/70 font-semibold">${esc(q)}</span>" için ${toplam} sonuç</p>`;
+
+    SLUGS.forEach(slug => {
+        const urunler = grouped[slug];
+        if (!urunler.length) return;
+        const cfg = CHAINS[slug];
+
+        html += `<div class="glass-dark overflow-hidden mb-3">
+            <div class="flex items-center gap-2 px-4 py-3 border-b border-white/10" style="background:${cfg.color}22">
+                ${logoImg(slug, 5)}
+                <span class="font-bold text-white text-sm">${esc(cfg.label)}</span>
+                <span class="ml-auto text-white/40 text-xs">${urunler.length} ürün</span>
+            </div>
+            <div class="divide-y divide-white/5">
+            ${urunler.slice(0, 30).map(r => {
+                const isim = bestName(r);
+                const fiyat = r.promo_price != null ? r.promo_price : r.price;
+                const eski = r.promo_price != null ? r.price : null;
+                const birim = r.unit_or_content || birimCikart(r.name);
+                return `<div class="flex items-center gap-3 px-4 py-3">
+                    ${r.image_url ? `<img src="${esc(r.image_url)}" alt="${esc(isim)}" class="w-10 h-10 object-contain rounded-lg bg-white/5 shrink-0" loading="lazy" onerror="this.style.display='none'">` : `<div class="w-10 h-10 bg-white/5 rounded-lg shrink-0"></div>`}
+                    <div class="flex-1 min-w-0">
+                        <p class="text-white/90 text-sm font-medium leading-tight truncate">${esc(isim)}</p>
+                        ${birim ? `<p class="text-white/35 text-xs mt-0.5">${esc(birim)}</p>` : ''}
+                    </div>
+                    <div class="text-right shrink-0">
+                        <p class="font-black text-emerald-400 text-sm">${fmtP(fiyat, r.currency)}</p>
+                        ${eski ? `<p class="text-white/30 text-xs line-through">${fmtP(eski, r.currency)}</p>` : ''}
+                    </div>
+                </div>`;
+            }).join('')}
+            ${urunler.length > 30 ? `<p class="text-white/30 text-xs text-center py-2">+${urunler.length - 30} ürün daha</p>` : ''}
+            </div>
+        </div>`;
+    });
+
+    document.getElementById('aramaMarketler').innerHTML = html;
+}
+
+function aramaSifirla() {
+    document.getElementById('aramaInput').value = '';
+    document.getElementById('aramaOneri').classList.add('hidden');
+    document.getElementById('sec-arama').classList.add('hidden');
+    document.getElementById('aramaSifirlaBtn').classList.add('hidden');
+    sonArama = '';
+    switchTab('indirimler');
+}
+
+// Dışarı tıklayınca autocomplete kapansın
+document.addEventListener('click', e => {
+    if (!e.target.closest('#aramaKutu')) {
+        document.getElementById('aramaOneri')?.classList.add('hidden');
+    }
+});
+
+// ═══════════════════════════════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════════════════════════════
 function esc(s) {
@@ -535,6 +796,12 @@ function logoImg(slug, size) {
 // NAV BACK
 // ═══════════════════════════════════════════════════════════════════
 function navBack() {
+    // Arama sonuçları açıksa → arama sıfırla
+    const secA = document.getElementById('sec-arama');
+    if (secA && !secA.classList.contains('hidden')) {
+        aramaSifirla();
+        return;
+    }
     // Wizard adımındaysa bir geri git
     const secK = document.getElementById('sec-karsilastir');
     if (secK && !secK.classList.contains('hidden') && wiz.step > 0) {
