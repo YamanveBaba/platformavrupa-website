@@ -6,6 +6,7 @@ import glob
 import os
 import subprocess
 import sys
+sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 
 
 def _lidl_use_mindshift_api(script_dir: str) -> bool:

@@ -17,6 +17,8 @@ Kullanım:
   python carrefour_be_v2.py --no-pause   # Enter bekleme yok
 """
 from __future__ import annotations
+import sys
+sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 import argparse, json, re, time, random
 from datetime import datetime
 from pathlib import Path

@@ -1736,7 +1736,7 @@ async function loadHaberKuyrugu() {
     const kategoriText = KATEGORI_LABEL[h.kategori] || h.kategori || '—';
 
     return `
-    <div id="haber-row-${h.id}" style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px">
+    <div id="haber-row-${h.id}" data-title="${escHtml(h.title||'')}" data-content="${escHtml(h.content||'')}" data-image-url="${escHtml(h.image_url||'')}" style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px">
       <div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap">
         <div style="flex:1;min-width:200px">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
@@ -1751,6 +1751,7 @@ async function loadHaberKuyrugu() {
         </div>
         <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap">
           <button class="btn btn-success btn-sm" onclick="haberOnayla(${h.id})"><i class="fa-solid fa-check"></i> Yayınla</button>
+          <button class="btn btn-ghost btn-sm" onclick="haberDuzenle(${h.id})"><i class="fa-solid fa-pen"></i> Düzenle</button>
           ${h.source_url ? `<a class="btn btn-ghost btn-sm" href="${escHtml(h.source_url)}" target="_blank" rel="noopener"><i class="fa-solid fa-external-link-alt"></i></a>` : ''}
           <button class="btn btn-danger btn-sm btn-icon" onclick="haberSil(${h.id})" title="Sil"><i class="fa-solid fa-trash"></i></button>
         </div>
@@ -1808,6 +1809,44 @@ async function haberDusukSkoriSil() {
 
   if (!error) {
     toast('Düşük skorlu haberler silindi', 'success');
+    loadHaberKuyrugu();
+  } else {
+    toast('Hata: ' + error.message, 'error');
+  }
+}
+
+let _haberDuzenleId = null;
+
+function haberDuzenle(id) {
+  const row = document.getElementById('haber-row-' + id);
+  if (!row) return;
+  _haberDuzenleId = id;
+  const title   = row.dataset.title   || '';
+  const content = row.dataset.content || '';
+  const imgVal  = row.dataset.imageUrl || '';
+
+  const modal = document.getElementById('haberDuzenleModal');
+  document.getElementById('hdTitle').value   = title;
+  document.getElementById('hdContent').value = content;
+  document.getElementById('hdImage').value   = imgVal;
+  modal.style.display = 'flex';
+}
+
+async function haberDuzenleKaydet() {
+  if (!_haberDuzenleId) return;
+  const title   = document.getElementById('hdTitle').value.trim();
+  const content = document.getElementById('hdContent').value.trim();
+  const imgUrl  = document.getElementById('hdImage').value.trim();
+
+  const payload = {};
+  if (title)   payload.title     = title;
+  if (content) payload.content   = content;
+  payload.image_url = imgUrl || null;
+
+  const { error } = await sb.from('announcements').update(payload).eq('id', _haberDuzenleId);
+  if (!error) {
+    toast('Haber güncellendi', 'success');
+    document.getElementById('haberDuzenleModal').style.display = 'none';
     loadHaberKuyrugu();
   } else {
     toast('Hata: ' + error.message, 'error');
@@ -2189,5 +2228,31 @@ window.addEventListener('resize', () => {
   if (currentSection === 'approval') loadApproval();
 });
 </script>
+
+<!-- Haber Düzenleme Modalı -->
+<div id="haberDuzenleModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;align-items:center;justify-content:center;padding:16px">
+  <div style="background:var(--bg-card);border-radius:16px;padding:24px;width:100%;max-width:540px;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <h3 style="font-size:16px;font-weight:700;color:var(--text-primary)"><i class="fa-solid fa-pen" style="color:var(--accent);margin-right:8px"></i>Haber Düzenle</h3>
+      <button onclick="document.getElementById('haberDuzenleModal').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-muted)">×</button>
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:12px;color:var(--text-muted);margin-bottom:4px;display:block">Başlık</label>
+      <input id="hdTitle" type="text" class="form-control" style="width:100%">
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:12px;color:var(--text-muted);margin-bottom:4px;display:block">İçerik</label>
+      <textarea id="hdContent" class="form-control" rows="5" style="width:100%;resize:vertical"></textarea>
+    </div>
+    <div style="margin-bottom:18px">
+      <label style="font-size:12px;color:var(--text-muted);margin-bottom:4px;display:block">Görsel URL (opsiyonel)</label>
+      <input id="hdImage" type="text" class="form-control" style="width:100%" placeholder="https://...">
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('haberDuzenleModal').style.display='none'">İptal</button>
+      <button class="btn btn-primary btn-sm" onclick="haberDuzenleKaydet()"><i class="fa-solid fa-save"></i> Kaydet</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>

@@ -45,8 +45,8 @@ TIMEOUT = {
     "delhaize":  14400,  # 4 saat (34 kategori × ~7 dk)
     "colruyt":    1800,  # 30 dk
     "carrefour":  9000,  # 2.5 saat
-    "lidl":       3600,  # 1 saat
-    "aldi":       3600,  # 1 saat
+    "lidl":       7200,  # 2 saat (büyük katalog)
+    "aldi":       7200,  # 2 saat
 }
 
 # ─── Renk kodları ──────────────────────────────────────────────────────────────
@@ -93,8 +93,17 @@ def calistir(cmd: list[str], timeout_sn: int, log_dosya: Path) -> tuple[int, str
     Komutu çalıştır, çıktıyı logla ve döndür.
     timeout_sn sonra process zorla durdurulur.
     Dönüş: (return_code, son_satir)
+
+    NOT: readline() bloklanma sorununu önlemek için stdout okuma ayrı thread'de yapılır.
+    Ana thread sadece timeout'u izler — process çıktı vermese bile timeout çalışır.
     """
+    import queue
+    import threading
+
     son_satir = ""
+    utf8_env = os.environ.copy()
+    utf8_env["PYTHONIOENCODING"] = "utf-8"
+    utf8_env["PYTHONUTF8"] = "1"
     try:
         with open(log_dosya, "a", encoding="utf-8") as lf:
             proc = subprocess.Popen(
@@ -105,23 +114,49 @@ def calistir(cmd: list[str], timeout_sn: int, log_dosya: Path) -> tuple[int, str
                 text=True,
                 encoding="utf-8",
                 errors="replace",
+                env=utf8_env,
             )
+
+            satir_kuyrugu: queue.Queue = queue.Queue()
+
+            def oku():
+                try:
+                    for line in proc.stdout:
+                        satir_kuyrugu.put(line)
+                except Exception:
+                    pass
+                finally:
+                    satir_kuyrugu.put(None)  # bitti sinyali
+
+            okuyucu = threading.Thread(target=oku, daemon=True)
+            okuyucu.start()
+
             bitis = time.time() + timeout_sn
-            while True:
-                line = proc.stdout.readline()
-                if not line and proc.poll() is not None:
-                    break
-                if line:
-                    print(line, end="")
-                    lf.write(line)
-                    son_satir = line.strip() or son_satir
-                if time.time() > bitis:
+            bitti = False
+            while not bitti:
+                kalan = bitis - time.time()
+                if kalan <= 0:
                     proc.kill()
                     msg = f"\n[TIMEOUT] {timeout_sn}s aşıldı — process durduruldu\n"
                     print(msg)
                     lf.write(msg)
                     return -1, "TIMEOUT"
-            return proc.returncode, son_satir
+                try:
+                    line = satir_kuyrugu.get(timeout=min(kalan, 5.0))
+                except queue.Empty:
+                    continue
+                if line is None:
+                    bitti = True
+                    break
+                try:
+                    print(line, end="")
+                except UnicodeEncodeError:
+                    print(line.encode("ascii", "replace").decode("ascii"), end="")
+                lf.write(line)
+                son_satir = line.strip() or son_satir
+
+            okuyucu.join(timeout=5)
+            return proc.wait(), son_satir
     except Exception as e:
         return -2, str(e)
 
@@ -204,7 +239,8 @@ def cek_aldi(log: Path) -> tuple[int, int]:
     ret1, _ = calistir([sys.executable, "aldi_be_v2.py", "--no-pause"], TIMEOUT["aldi"], log)
     if ret1 != 0:
         return ret1, 0
-    ret2, son = calistir([sys.executable, "html_analiz.py", "--market", "aldi"], 600, log)
+    # JSON'u doğrudan Supabase'e push et (html_analiz Aldi HTML'ini parse edemez)
+    ret2, son = calistir([sys.executable, "aldi_supabase_push.py"], 300, log)
     urun = urun_sayisi_stdout_parse(son) or son_json_urun_sayisi("aldi")
     return ret2, urun
 
@@ -222,6 +258,97 @@ CEKICILER = {
 
 # Önerilen çalıştırma sırası (ağır işler önce, paralel değil)
 SIRALAMA = ["delhaize", "carrefour", "lidl", "colruyt", "aldi"]
+
+
+# ─── Telegram ────────────────────────────────────────────────────────────────
+GECMIS_DOSYA = LOG_DIR / "haftalik_urun_gecmis.json"
+
+
+def _gecmis_oku() -> dict:
+    try:
+        return json.loads(GECMIS_DOSYA.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+
+def _gecmis_yaz(ozet: dict):
+    try:
+        kayit = _gecmis_oku()
+        kayit[date.today().isoformat()] = {m: b["urun"] for m, b in ozet.items()}
+        GECMIS_DOSYA.write_text(json.dumps(kayit, ensure_ascii=False, indent=2), encoding="utf-8")
+    except Exception:
+        pass
+
+
+def _telegram_gonder(token: str, chat_id: str, mesaj: str):
+    try:
+        import requests as req
+        r = req.post(
+            f"https://api.telegram.org/bot{token}/sendMessage",
+            json={"chat_id": chat_id, "text": mesaj, "parse_mode": "HTML"},
+            timeout=15,
+        )
+        if r.status_code != 200:
+            print(f"  [Telegram] Hata: {r.status_code}")
+    except Exception as e:
+        print(f"  [Telegram] İstisna: {e}")
+
+
+def _telegram_market_raporu(ozet: dict, bugun: str):
+    token   = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
+    chat_id = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
+    if not token or not chat_id:
+        return
+
+    # Önceki haftanın verisini bul
+    gecmis  = _gecmis_oku()
+    tarihler = sorted(gecmis.keys())
+    onceki  = {}
+    if tarihler:
+        # Bugünden önceki en son kayıt
+        for t in reversed(tarihler):
+            if t < bugun:
+                onceki = gecmis[t]
+                break
+
+    satirlar = []
+    uyarilar = []
+    toplam = 0
+    for market, bilgi in ozet.items():
+        simge   = "✅" if bilgi["basarili"] else "❌"
+        urun    = bilgi["urun"]
+        sure_dk = bilgi["sure_dk"]
+        toplam += urun if bilgi["basarili"] else 0
+
+        # Önceki haftayla karşılaştır
+        delta_str = ""
+        if market in onceki and onceki[market] > 0:
+            onceki_urun = onceki[market]
+            delta = urun - onceki_urun
+            pct   = delta / onceki_urun * 100
+            if abs(pct) >= 1:
+                ok = "▲" if delta > 0 else "▼"
+                delta_str = f" ({ok}{abs(pct):.0f}%)"
+            if pct < -20 and bilgi["basarili"]:
+                uyarilar.append(f"⚠️ {market}: {onceki_urun:,} → {urun:,} ({pct:.0f}%)")
+
+        satirlar.append(
+            f"  {simge} <b>{market:10s}</b> {urun:>7,} ürün{delta_str}  ({sure_dk} dk)"
+        )
+
+    satirlar_str = "\n".join(satirlar)
+    uyari_str    = ("\n\n⚠️ <b>Dikkat:</b>\n" + "\n".join(uyarilar)) if uyarilar else ""
+
+    mesaj = (
+        f"🛒 <b>Market Güncelleme — {bugun}</b>\n\n"
+        f"{satirlar_str}\n\n"
+        f"📊 Toplam (başarılı): <b>{toplam:,}</b> ürün"
+        f"{uyari_str}"
+    )
+
+    _gecmis_yaz(ozet)
+    _telegram_gonder(token, chat_id, mesaj)
+    print(f"\n  [Telegram] Market raporu gönderildi.")
 
 
 # ─── Ana akış ─────────────────────────────────────────────────────────────────
@@ -357,6 +484,9 @@ def main():
         if sorunlar:
             lf.write(f"\nSOrunlu: {', '.join(sorunlar)}\n")
         lf.write(f"Bitiş: {datetime.now().isoformat()}\n")
+
+    # ─── Telegram bildirimi ───────────────────────────────────────────────────
+    _telegram_market_raporu(ozet, bugun)
 
     # ─── Ürün eşleştirme (urun_eslestir.py) ─────────────────────────────────
     # Sadece tüm marketler başarılıysa çalıştır (kısmi güncelleme sonrası da çalışabilir)

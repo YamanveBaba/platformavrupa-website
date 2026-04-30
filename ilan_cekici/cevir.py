@@ -80,10 +80,18 @@ def gemini_cevir(metinler: list, gm_key: str, alan: str = "başlık") -> list:
     numlu   = "\n".join(f"{i+1}. {m[:400]}" for i, m in enumerate(metinler))
     max_tok = min(100 * n, 2000)
 
-    prompt = (
-        f"Bu {n} adet Flemenkçe veya Fransızca iş ilanı {alan}ını Türkçeye çevir.\n"
-        f"SADECE numaralı liste döndür, başka hiçbir şey yazma.\n\n{numlu}"
-    )
+    if alan == "ürün adı":
+        prompt = (
+            f"Bu {n} adet Hollandaca veya Fransızca market ürünü adını Türkçeye çevir.\n"
+            f"Kural: Marka adlarını değiştirme. Sadece Hollandaca/Fransızca kelimeleri Türkçeye çevir.\n"
+            f"Örnek: 'Halfvolle melk' → 'Yarım yağlı süt', 'Verse eieren' → 'Taze yumurtalar'\n"
+            f"SADECE numaralı liste döndür, başka hiçbir şey yazma.\n\n{numlu}"
+        )
+    else:
+        prompt = (
+            f"Bu {n} adet Flemenkçe veya Fransızca iş ilanı {alan}ını Türkçeye çevir.\n"
+            f"SADECE numaralı liste döndür, başka hiçbir şey yazma.\n\n{numlu}"
+        )
 
     for deneme in range(3):
         try:

@@ -155,6 +155,23 @@ def rss_cek() -> list[dict]:
                 if tarih and tarih < iki_gun_once:
                     continue
 
+                # Görsel URL — enclosure veya media thumbnail
+                gorsel = None
+                if hasattr(entry, "media_thumbnail") and entry.media_thumbnail:
+                    gorsel = entry.media_thumbnail[0].get("url")
+                elif hasattr(entry, "media_content") and entry.media_content:
+                    gorsel = entry.media_content[0].get("url")
+                elif hasattr(entry, "enclosures") and entry.enclosures:
+                    for enc in entry.enclosures:
+                        if enc.get("type", "").startswith("image/"):
+                            gorsel = enc.get("href") or enc.get("url")
+                            break
+                if not gorsel:
+                    import re as _re
+                    m = _re.search(r'<img[^>]+src=["\']([^"\']+)["\']', ozet)
+                    if m:
+                        gorsel = m.group(1)
+
                 haberler.append({
                     "baslik": baslik,
                     "link": link,
@@ -162,6 +179,7 @@ def rss_cek() -> list[dict]:
                     "kaynak": kaynak["kaynak"],
                     "hash": url_hash(link),
                     "tarih": tarih.isoformat() if tarih else datetime.now(timezone.utc).isoformat(),
+                    "gorsel": gorsel,
                 })
         except Exception as e:
             print(f"  RSS hata ({kaynak['kaynak']}): {str(e)[:60]}")
@@ -252,13 +270,12 @@ def supabase_kaydet(sb_url: str, sb_key: str, haberler: list[dict], dry_run: boo
     }
 
     basarili = 0
+    status = "draft"
     for h in haberler:
         ulke_str = h.get("ulke", "genel")
         country_code = ULKE_MAP.get(ulke_str, None)
         ai_skor = h.get("ai_skor", 5)
 
-        # Skor >= 5 → doğrudan yayınla, düşük skor → taslak
-        status = "published" if ai_skor >= 5 else "draft"
         row = {
             "title": h["baslik"][:500],
             "content": f'<p>{h["ozet"]}</p>\n<p><a href="{h["link"]}" target="_blank" rel="noopener">Kaynağa git: {h["kaynak"]}</a></p>',
@@ -271,6 +288,7 @@ def supabase_kaydet(sb_url: str, sb_key: str, haberler: list[dict], dry_run: boo
             "status": status,
             "kategori": h.get("kategori", "genel"),
             "ai_skor": ai_skor,
+            "image_url": h.get("gorsel"),
         }
         r = requests.post(
             f"{sb_url}/rest/v1/announcements",

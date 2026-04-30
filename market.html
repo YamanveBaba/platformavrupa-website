@@ -516,7 +516,7 @@ function bestName(row) {
     const letters = (nt.match(/[a-zA-ZğüşöçıİĞÜŞÖÇ]/g)||[]).length;
     if (dots >= 3 && letters < dots * 2) return nl;
     // Türkçe sözcük oranı düşükse (çoğu İngilizce/Hollandaca kelime kalmış) Hollandacayı tercih et
-    const trWords = (nt.match(/[ğüşöçıİĞÜŞÖÇ]|(\b(ve|ile|için|bir|bu|de|da|mi|mu|mı|mü)\b)/gi)||[]).length;
+    const trWords = (nt.match(/[ğüşöçıİĞÜŞÖÇ]|(\b(ve|ile|için|bir|bu|de|da|mi|mu|mı|mü|et|su|bal|yag|peynir|yumurta|ekmek|sut|tavuk|balik|sebze|meyve|iceceк|konserve|makarna|pirinc|tuz|seker|kahve|cay|bira|sarap|deterjan|sabun|temizlik|bebek|cikolata|biskuvi|cips|dondurma|yogurt|krema|tereyag|zeytinyag|margarin|un|sirke|sos|ketchup|hardal|recel|pasta|kek|kurabiye|adet|paket|gram|litre|kilo|taze|organik|dogal|tam|yarim|az|sade|ince|karisik|kirmizi|beyaz|siyah|yesil|sari|kucuk|buyuk|orta|hafif|light|extra|mini|maxi)\b)/gi)||[]).length;
     const totalWords = nt.split(/\s+/).length;
     if (totalWords > 3 && trWords === 0) return nl;
     return nt;
