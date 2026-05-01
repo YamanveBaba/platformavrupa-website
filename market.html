@@ -54,11 +54,18 @@
         * { box-sizing: border-box; }
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background: linear-gradient(160deg, #090f1e 0%, #0e1f3e 40%, #122348 70%, #090f1e 100%);
+            background: #f1f5f9;
             min-height: 100vh;
         }
 
-        /* ── Glass ── */
+        /* ── Light card ── */
+        .light-card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 1px 4px rgba(0,0,0,.07);
+        }
+
+        /* ── Glass (wizard için korundu) ── */
         .glass-dark {
             background: rgba(255,255,255,0.055);
             backdrop-filter: blur(18px);
@@ -68,15 +75,17 @@
         }
 
         /* ── Tabs ── */
-        .tab-btn { transition: all 0.22s ease; border-radius: 14px; }
-        .tab-btn.active { background: rgba(255,255,255,0.13); color: white !important; }
-        .tab-btn.active .tab-indicator { opacity: 1; }
-        .tab-indicator {
-            display: block; height: 3px; width: 20px;
-            background: #10b981; border-radius: 2px;
-            margin: 3px auto 0; opacity: 0;
-            transition: opacity 0.22s;
+        .tab-btn { transition: all 0.18s ease; padding: 12px 20px; font-size: .875rem; font-weight: 700; color: #94a3b8; border-bottom: 2px solid transparent; }
+        .tab-btn.active { color: #10b981 !important; border-bottom-color: #10b981; }
+
+        /* ── Market filter chips ── */
+        .mchip {
+            background: #f1f5f9; border: 1.5px solid #e2e8f0; color: #64748b;
+            border-radius: 100px; padding: 5px 14px; font-size: .78rem; font-weight: 600;
+            cursor: pointer; transition: all .15s; font-family: inherit;
         }
+        .mchip:hover { background: #e2e8f0; }
+        .mchip.active { background: #10b981; border-color: #10b981; color: #fff; }
 
         /* ── Promo / compare card ── */
         .promo-card {
@@ -100,26 +109,15 @@
         /* ── Filter chips ── */
         .filter-chip {
             cursor: pointer; border-radius: 100px;
-            border: 1.5px solid rgba(255,255,255,0.12);
-            background: rgba(255,255,255,0.05);
-            color: rgba(255,255,255,0.65);
+            border: 1.5px solid #e2e8f0;
+            background: #f8fafc;
+            color: #64748b;
             font-size: .78rem; font-weight: 600;
             padding: 5px 14px; white-space: nowrap;
-            transition: all 0.18s ease;
+            transition: all 0.18s ease; font-family: inherit;
         }
-        .filter-chip:hover { background: rgba(255,255,255,0.1); color:#fff; }
+        .filter-chip:hover { background: #e2e8f0; color:#475569; }
         .filter-chip.active { background:#10b981; border-color:#10b981; color:#fff; box-shadow:0 3px 10px rgba(16,185,129,.3); }
-
-        /* ── Search ── */
-        .search-input {
-            border-radius: 14px;
-            border: 1.5px solid rgba(255,255,255,0.13);
-            background: rgba(255,255,255,0.07);
-            color: #fff; transition: all .25s ease;
-            font-family: inherit;
-        }
-        .search-input:focus { border-color:#10b981; background:rgba(255,255,255,0.1); outline:none; box-shadow:0 0 0 3px rgba(16,185,129,.18); }
-        .search-input::placeholder { color: rgba(255,255,255,.35); }
 
         /* ── Market brand card ── */
         .market-card {
@@ -137,10 +135,10 @@
 
         /* ── Stat pill ── */
         .stat-pill {
-            background: rgba(16,185,129,.1);
-            border: 1px solid rgba(16,185,129,.22);
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
             border-radius: 100px; padding: 4px 12px;
-            font-size:.77rem; color:#34d399; font-weight:600;
+            font-size:.77rem; color:#059669; font-weight:600;
             display:inline-flex; align-items:center; gap:5px;
         }
 
@@ -157,7 +155,7 @@
             100% { background-position: 400px 0; }
         }
         .shimmer {
-            background: linear-gradient(90deg,rgba(255,255,255,.04) 25%,rgba(255,255,255,.09) 50%,rgba(255,255,255,.04) 75%);
+            background: linear-gradient(90deg,#f1f5f9 25%,#e2e8f0 50%,#f1f5f9 75%);
             background-size: 400px 100%;
             animation: shimmer 1.4s infinite linear;
         }
@@ -169,33 +167,27 @@
         }
         .live-dot { animation: pulse-dot 1.8s infinite; }
 
-        /* ── Mode toggle ── */
-        .mode-btn { transition: all 0.2s ease; border-radius: 12px; color: rgba(255,255,255,.5); font-size:.78rem; font-weight:700; }
-        .mode-btn.active { background: rgba(255,255,255,.13); color:#fff; }
-
-        /* ── Category tile ── */
+        /* ── Category tile (wizard) ── */
         .cat-tile {
-            background: rgba(255,255,255,.06);
-            border: 1.5px solid rgba(255,255,255,.09);
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
             border-radius: 18px;
             padding: 14px 8px;
             text-align: center;
             cursor: pointer;
             transition: all .2s ease;
         }
-        .cat-tile:hover, .cat-tile:active { background: rgba(255,255,255,.13); border-color: rgba(16,185,129,.5); transform: translateY(-2px); }
+        .cat-tile:hover, .cat-tile:active { background: #ecfdf5; border-color: #10b981; transform: translateY(-2px); }
         .cat-tile .cat-emoji { font-size: 1.9rem; display:block; margin-bottom:6px; line-height:1; }
-        .cat-tile .cat-name  { font-size: .68rem; font-weight:700; color:rgba(255,255,255,.75); line-height:1.2; }
+        .cat-tile .cat-name  { font-size: .68rem; font-weight:700; color:#475569; line-height:1.2; }
 
-        /* ── Cat product card ── */
-        .cat-prod-row {
-            background: #fff;
-            border-radius: 14px;
-            overflow: hidden;
-            box-shadow: 0 1px 10px rgba(0,0,0,.07);
-            transition: transform .22s ease, box-shadow .22s ease;
+        /* ── Arama sonuç satırı ── */
+        .arama-satir {
+            background:#fff; border-radius:14px;
+            box-shadow:0 1px 3px rgba(0,0,0,.06);
+            transition: box-shadow .2s ease;
         }
-        .cat-prod-row:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.11); }
+        .arama-satir:hover { box-shadow: 0 4px 16px rgba(0,0,0,.1); }
     </style>
 </head>
 <body class="pb-28">
@@ -226,117 +218,126 @@
 </nav>
 
 <!-- ═══ HERO ══════════════════════════════════════════════════════ -->
-<div class="px-4 pt-5 pb-3 max-w-7xl mx-auto">
-    <div class="glass-dark p-5 md:p-6">
-        <div class="flex flex-col md:flex-row md:items-center gap-4">
-            <div class="flex-1">
-                <div class="flex items-center gap-2 mb-1">
-                    <span class="text-3xl">🇧🇪</span>
-                    <h2 class="text-2xl md:text-3xl font-black text-white leading-tight">Belçika Market Fiyatları</h2>
-                </div>
-                <p class="text-white/50 text-sm mb-3">Colruyt, ALDI, Delhaize, Lidl ve Carrefour'da <span class="text-emerald-400 font-semibold">gerçek fiyatlar</span></p>
-
-                <!-- ── ARAMA KUTUSU ── -->
-                <div class="relative mb-4" id="aramaKutu">
-                    <div class="flex gap-2">
-                        <div class="relative flex-1">
-                            <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none"></i>
-                            <input id="aramaInput" type="text" autocomplete="off"
-                                placeholder="Ürün ara... süt, yumurta, tütün"
-                                class="w-full bg-white/10 border border-white/20 text-white placeholder-white/35 rounded-xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:border-emerald-400/60 focus:bg-white/15 transition"
-                                oninput="aramaDebounce(this.value)"
-                                onkeydown="if(event.key==='Enter'){aramaYap();document.getElementById('aramaOneri').classList.add('hidden')}"
-                                onfocus="if(this.value.length>1)aramaDebounce(this.value)">
-                        </div>
-                        <button onclick="aramaYap()" class="bg-emerald-500 hover:bg-emerald-400 text-white font-bold px-5 py-3 rounded-xl text-sm transition shrink-0">Ara</button>
-                        <button id="aramaSifirlaBtn" onclick="aramaSifirla()" class="hidden bg-white/10 hover:bg-white/20 text-white/70 px-3 py-3 rounded-xl text-sm transition shrink-0"><i class="fa-solid fa-xmark"></i></button>
-                    </div>
-                    <!-- Autocomplete önerileri -->
-                    <div id="aramaOneri" class="hidden absolute left-0 right-0 top-full mt-1 bg-slate-800 border border-white/15 rounded-xl overflow-hidden z-50 shadow-xl"></div>
-                </div>
-
-                <div class="flex flex-wrap gap-2" id="heroStats">
-                    <div class="shimmer h-7 w-36 rounded-full"></div>
-                    <div class="shimmer h-7 w-28 rounded-full"></div>
-                    <div class="shimmer h-7 w-32 rounded-full"></div>
-                </div>
-            </div>
-            <div class="flex gap-3 md:flex-col">
-                <div class="glass-dark rounded-2xl px-5 py-3 text-center flex-1 md:flex-none">
-                    <div id="heroPromoNum" class="text-2xl font-black text-emerald-400">—</div>
-                    <div class="text-white/40 text-xs mt-0.5">İndirimde</div>
-                </div>
-                <div class="glass-dark rounded-2xl px-5 py-3 text-center flex-1 md:flex-none">
-                    <div class="text-2xl font-black text-sky-400">5</div>
-                    <div class="text-white/40 text-xs mt-0.5">Market</div>
-                </div>
-            </div>
+<div class="bg-white border-b border-slate-200 py-8 px-4 text-center" id="aramaHero">
+    <h2 class="text-2xl md:text-3xl font-black text-slate-800 mb-1">Belçika'da en iyi fiyatı bul</h2>
+    <p class="text-slate-400 text-sm mb-5">5 markette <span id="heroTotalCount" class="text-emerald-600 font-semibold">50.000+</span> ürün · haftalık güncelleme</p>
+    <div class="relative max-w-xl mx-auto" id="aramaKutu">
+        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+        <input id="aramaInput" type="text" autocomplete="off"
+            placeholder="Ürün ara... süt, yumurta, sarmalık tütün"
+            class="w-full bg-white border border-slate-300 text-slate-800 rounded-2xl pl-12 pr-28 py-4 text-base shadow-sm focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition"
+            oninput="aramaDebounce(this.value)"
+            onkeydown="if(event.key==='Enter'){aramaYap();document.getElementById('aramaOneri').classList.add('hidden')}"
+            onfocus="if(this.value.length>1)aramaDebounce(this.value)">
+        <div class="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
+            <button id="aramaSifirlaBtn" onclick="aramaSifirla()" class="hidden w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 transition"><i class="fa-solid fa-xmark"></i></button>
+            <button onclick="aramaYap()" class="bg-emerald-500 hover:bg-emerald-400 text-white font-bold px-4 py-2 rounded-xl text-sm transition">Ara</button>
         </div>
+        <!-- Autocomplete önerileri -->
+        <div id="aramaOneri" class="hidden absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-2xl overflow-hidden z-50 shadow-xl text-left"></div>
+    </div>
+    <!-- Market quick-filter chips -->
+    <div class="flex justify-center flex-wrap gap-2 mt-4" id="marketChips">
+        <button class="mchip active" data-chain="all" onclick="aramaMarketFiltre('all')">Tümü</button>
+        <button class="mchip" data-chain="colruyt_be" onclick="aramaMarketFiltre('colruyt_be')">Colruyt</button>
+        <button class="mchip" data-chain="aldi_be" onclick="aramaMarketFiltre('aldi_be')">Aldi</button>
+        <button class="mchip" data-chain="delhaize_be" onclick="aramaMarketFiltre('delhaize_be')">Delhaize</button>
+        <button class="mchip" data-chain="lidl_be" onclick="aramaMarketFiltre('lidl_be')">Lidl</button>
+        <button class="mchip" data-chain="carrefour_be" onclick="aramaMarketFiltre('carrefour_be')">Carrefour</button>
     </div>
 </div>
 
 <!-- ═══ TABS ══════════════════════════════════════════════════════ -->
-<div class="sticky top-[68px] z-40 px-4 pb-3 max-w-7xl mx-auto">
-    <div class="glass-dark p-1.5 flex gap-1">
+<div class="sticky top-[60px] z-40 bg-white border-b border-slate-200" id="tabBar">
+    <div class="max-w-7xl mx-auto flex px-4">
         <button id="tab-indirimler" onclick="switchTab('indirimler')"
-            class="tab-btn active flex-1 flex flex-col items-center py-2 text-white text-xs font-bold">
-            <div class="flex items-center gap-1.5"><i class="fa-solid fa-fire text-orange-400"></i> İndirimler</div>
-            <span class="tab-indicator"></span>
+            class="tab-btn active">
+            🔥 İndirimler
         </button>
-        <button id="tab-karsilastir" onclick="switchTab('karsilastir')"
-            class="tab-btn flex-1 flex flex-col items-center py-2 text-white/50 text-xs font-bold">
-            <div class="flex items-center gap-1.5"><i class="fa-solid fa-scale-balanced text-emerald-400"></i> Karşılaştır</div>
-            <span class="tab-indicator"></span>
-        </button>
-        <button id="tab-marketler" onclick="switchTab('marketler')"
-            class="tab-btn flex-1 flex flex-col items-center py-2 text-white/50 text-xs font-bold">
-            <div class="flex items-center gap-1.5"><i class="fa-solid fa-store text-sky-400"></i> Marketler</div>
-            <span class="tab-indicator"></span>
+        <button id="tab-arama" onclick="switchTab('arama')"
+            class="tab-btn">
+            🔍 Ürün Ara
         </button>
     </div>
 </div>
 
 <!-- ═══ ARAMA SONUÇLARI ══════════════════════════════════════════ -->
-<div id="sec-arama" class="hidden px-4 max-w-7xl mx-auto pb-8">
-    <div id="aramaYukleniyor" class="hidden text-center py-12 text-white/40">
-        <i class="fa-solid fa-spinner fa-spin text-2xl mb-3"></i>
-        <p class="text-sm">Aranıyor...</p>
+<div id="sec-arama" class="hidden max-w-7xl mx-auto px-4 py-6 pb-8">
+    <div class="flex gap-5 items-start">
+        <!-- Yan filtre — sadece desktop -->
+        <div class="hidden md:block w-44 shrink-0 sticky top-28">
+            <div class="light-card p-4">
+                <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-3">Market</p>
+                <div class="space-y-1.5">
+                    <label class="flex items-center gap-2 cursor-pointer hover:text-emerald-600 transition" onclick="aramaMarketFiltre('all')">
+                        <span class="text-sm font-semibold text-slate-700 mchip-label" data-chain="all">Tümü</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer py-1" onclick="aramaMarketFiltre('colruyt_be')">
+                        <span class="w-2 h-2 rounded-full bg-red-500 shrink-0"></span>
+                        <span class="text-sm text-slate-600 hover:text-slate-900 transition">Colruyt</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer py-1" onclick="aramaMarketFiltre('aldi_be')">
+                        <span class="w-2 h-2 rounded-full bg-blue-700 shrink-0"></span>
+                        <span class="text-sm text-slate-600 hover:text-slate-900 transition">Aldi</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer py-1" onclick="aramaMarketFiltre('delhaize_be')">
+                        <span class="w-2 h-2 rounded-full bg-red-700 shrink-0"></span>
+                        <span class="text-sm text-slate-600 hover:text-slate-900 transition">Delhaize</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer py-1" onclick="aramaMarketFiltre('lidl_be')">
+                        <span class="w-2 h-2 rounded-full bg-blue-500 shrink-0"></span>
+                        <span class="text-sm text-slate-600 hover:text-slate-900 transition">Lidl</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer py-1" onclick="aramaMarketFiltre('carrefour_be')">
+                        <span class="w-2 h-2 rounded-full bg-blue-400 shrink-0"></span>
+                        <span class="text-sm text-slate-600 hover:text-slate-900 transition">Carrefour</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <!-- Sonuç alanı -->
+        <div class="flex-1 min-w-0">
+            <div id="aramaYukleniyor" class="hidden text-center py-16 text-slate-400">
+                <i class="fa-solid fa-spinner fa-spin text-3xl mb-3"></i>
+                <p class="text-sm">Aranıyor...</p>
+            </div>
+            <div id="aramaBosSonuc" class="hidden text-center py-16 text-slate-400">
+                <i class="fa-solid fa-face-meh text-4xl mb-3"></i>
+                <p class="font-semibold text-slate-600 mb-1">Sonuç bulunamadı</p>
+                <p class="text-sm" id="aramaBosSonucText">Farklı bir kelime deneyin.</p>
+            </div>
+            <div id="aramaMarketler" class="space-y-6"></div>
+        </div>
     </div>
-    <div id="aramaBosSonuc" class="hidden text-center py-12 text-white/40">
-        <i class="fa-solid fa-face-meh text-3xl mb-3"></i>
-        <p class="font-semibold text-white/60 mb-1">Sonuç bulunamadı</p>
-        <p class="text-sm" id="aramaBosSonucText">Farklı bir kelime deneyin.</p>
-    </div>
-    <div id="aramaMarketler" class="space-y-5"></div>
 </div>
 
 <!-- ═══ TAB: İNDİRİMLER ══════════════════════════════════════════ -->
-<div id="sec-indirimler" class="px-4 max-w-7xl mx-auto space-y-5">
+<div id="sec-indirimler" class="px-4 max-w-7xl mx-auto space-y-5 py-4">
 
     <!-- Filter chips -->
     <div class="flex gap-2 overflow-x-auto no-scroll pb-1 pt-1">
         <button class="filter-chip active" data-f="all" onclick="filterPromos('all')">Tümü</button>
         <button class="filter-chip" data-f="colruyt_be" onclick="filterPromos('colruyt_be')">
-            <img src="https://logo.clearbit.com/colruyt.com" class="w-3.5 h-3.5 inline-block rounded mr-0.5 align-middle" onerror="this.remove()"> Colruyt
+            <img src="https://www.google.com/s2/favicons?domain=colruyt.com&sz=32" class="w-3.5 h-3.5 inline-block rounded mr-0.5 align-middle" onerror="this.remove()"> Colruyt
         </button>
         <button class="filter-chip" data-f="aldi_be" onclick="filterPromos('aldi_be')">
-            <img src="https://logo.clearbit.com/aldi.com" class="w-3.5 h-3.5 inline-block rounded mr-0.5 align-middle" onerror="this.remove()"> ALDI
+            <img src="https://www.google.com/s2/favicons?domain=aldi.com&sz=32" class="w-3.5 h-3.5 inline-block rounded mr-0.5 align-middle" onerror="this.remove()"> ALDI
         </button>
         <button class="filter-chip" data-f="delhaize_be" onclick="filterPromos('delhaize_be')">
-            <img src="https://logo.clearbit.com/delhaize.com" class="w-3.5 h-3.5 inline-block rounded mr-0.5 align-middle" onerror="this.remove()"> Delhaize
+            <img src="https://www.google.com/s2/favicons?domain=delhaize.com&sz=32" class="w-3.5 h-3.5 inline-block rounded mr-0.5 align-middle" onerror="this.remove()"> Delhaize
         </button>
         <button class="filter-chip" data-f="lidl_be" onclick="filterPromos('lidl_be')">
-            <img src="https://logo.clearbit.com/lidl.com" class="w-3.5 h-3.5 inline-block rounded mr-0.5 align-middle" onerror="this.remove()"> Lidl
+            <img src="https://www.google.com/s2/favicons?domain=lidl.com&sz=32" class="w-3.5 h-3.5 inline-block rounded mr-0.5 align-middle" onerror="this.remove()"> Lidl
         </button>
         <button class="filter-chip" data-f="carrefour_be" onclick="filterPromos('carrefour_be')">
-            <img src="https://logo.clearbit.com/carrefour.com" class="w-3.5 h-3.5 inline-block rounded mr-0.5 align-middle" onerror="this.remove()"> Carrefour
+            <img src="https://www.google.com/s2/favicons?domain=carrefour.com&sz=32" class="w-3.5 h-3.5 inline-block rounded mr-0.5 align-middle" onerror="this.remove()"> Carrefour
         </button>
     </div>
 
     <!-- Active promos -->
     <div>
         <div class="flex items-center justify-between mb-3">
-            <h3 class="text-white font-bold text-base flex items-center gap-2">
+            <h3 class="text-slate-800 font-bold text-base flex items-center gap-2">
                 <i class="fa-solid fa-fire text-orange-400"></i> Bu Hafta İndirimde
             </h3>
             <span id="promoBadge" class="stat-pill">yükleniyor…</span>
@@ -354,7 +355,7 @@
     <!-- Upcoming promos -->
     <div id="upcomingSec" class="hidden">
         <div class="flex items-center gap-2 mb-3">
-            <h3 class="text-white font-bold text-base flex items-center gap-2">
+            <h3 class="text-slate-800 font-bold text-base flex items-center gap-2">
                 <i class="fa-solid fa-clock text-amber-400"></i> Yakında İndirime Giriyor
             </h3>
         </div>
@@ -364,29 +365,29 @@
 </div>
 
 <!-- ═══ TAB: KARŞILAŞTIR ══════════════════════════════════════════ -->
-<div id="sec-karsilastir" class="hidden px-4 max-w-7xl mx-auto space-y-4">
+<div id="sec-karsilastir" class="hidden px-4 max-w-7xl mx-auto space-y-4 py-4">
 
     <!-- Geri + breadcrumb (Step 1, 2, 3'te görünür) -->
     <div id="wiz-nav" class="hidden flex items-center gap-2">
         <button onclick="wizBack()"
-            class="w-9 h-9 rounded-xl glass-dark flex items-center justify-center text-white/70 hover:text-white transition shrink-0">
+            class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-800 transition shrink-0">
             <i class="fa-solid fa-arrow-left text-sm"></i>
         </button>
         <div class="flex items-center gap-1.5 text-xs overflow-hidden flex-1 min-w-0">
-            <span class="text-white/40 cursor-pointer hover:text-white/70 shrink-0 transition"
+            <span class="text-slate-400 cursor-pointer hover:text-slate-600 shrink-0 transition"
                 onclick="wizGoStep(0)">Kategoriler</span>
-            <span id="wiz-bc-1" class="hidden text-white/25 shrink-0">›</span>
-            <span id="wiz-bc-cat" class="hidden text-white/60 cursor-pointer hover:text-white/80 truncate transition"
+            <span id="wiz-bc-1" class="hidden text-slate-300 shrink-0">›</span>
+            <span id="wiz-bc-cat" class="hidden text-slate-500 cursor-pointer hover:text-slate-700 truncate transition"
                 onclick="wizGoStep(1)"></span>
-            <span id="wiz-bc-2" class="hidden text-white/25 shrink-0">›</span>
-            <span id="wiz-bc-prod" class="hidden text-white/80 font-semibold truncate"></span>
+            <span id="wiz-bc-2" class="hidden text-slate-300 shrink-0">›</span>
+            <span id="wiz-bc-prod" class="hidden text-slate-700 font-semibold truncate"></span>
         </div>
     </div>
 
     <!-- ── STEP 0: Kategori seç ── -->
     <div id="wiz-step0">
-        <p class="text-white/40 text-xs mb-3 flex items-center gap-1.5">
-            <i class="fa-solid fa-scale-balanced text-emerald-400"></i>
+        <p class="text-slate-400 text-xs mb-3 flex items-center gap-1.5">
+            <i class="fa-solid fa-scale-balanced text-emerald-500"></i>
             Hangi ürünü 5 markette karşılaştıralım?
         </p>
         <div id="wiz-cat-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2.5"></div>
@@ -394,9 +395,9 @@
 
     <!-- ── STEP 1: Ürün seç ── -->
     <div id="wiz-step1" class="hidden">
-        <div class="glass-dark p-4">
-            <p class="text-white/40 text-xs flex items-center gap-1.5 mb-3">
-                <i class="fa-solid fa-hand-pointer text-emerald-400"></i>
+        <div class="light-card p-4">
+            <p class="text-slate-400 text-xs flex items-center gap-1.5 mb-3">
+                <i class="fa-solid fa-hand-pointer text-emerald-500"></i>
                 Hangi ürünü karşılaştıralım?
             </p>
             <div id="wiz-prod-chips" class="flex flex-wrap gap-2">
@@ -412,16 +413,16 @@
     <!-- ── STEP 2: Karşılaştırma sonucu ── -->
     <div id="wiz-step2" class="hidden space-y-3">
         <div id="wiz-result-loading" class="hidden text-center py-10">
-            <i class="fa-solid fa-spinner fa-spin text-3xl text-emerald-400 mb-3 block"></i>
-            <p class="text-white/50 text-sm">5 markette aranıyor…</p>
+            <i class="fa-solid fa-spinner fa-spin text-3xl text-emerald-500 mb-3 block"></i>
+            <p class="text-slate-400 text-sm">5 markette aranıyor…</p>
         </div>
         <div id="wiz-result-cards"></div>
     </div>
 
 </div>
 
-<!-- ═══ TAB: MARKETLER ════════════════════════════════════════════ -->
-<div id="sec-marketler" class="hidden px-4 max-w-7xl mx-auto space-y-4">
+<!-- ═══ TAB: MARKETLER (gizli — wizard JS için korundu) ══════════ -->
+<div id="sec-marketler" class="hidden px-4 max-w-7xl mx-auto space-y-4 py-4">
     <div id="marketGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div class="shimmer h-28 rounded-2xl"></div>
         <div class="shimmer h-28 rounded-2xl"></div>
@@ -430,10 +431,10 @@
         <div class="shimmer h-28 rounded-2xl"></div>
     </div>
     <!-- Folder.be link -->
-    <div class="glass-dark rounded-2xl p-4 flex items-center justify-between gap-3">
+    <div class="light-card p-4 flex items-center justify-between gap-3">
         <div>
-            <p class="text-white font-semibold text-sm">Tüm Belçika broşürleri</p>
-            <p class="text-white/40 text-xs mt-0.5">folder.be — haftalık kampanyalar</p>
+            <p class="text-slate-700 font-semibold text-sm">Tüm Belçika broşürleri</p>
+            <p class="text-slate-400 text-xs mt-0.5">folder.be — haftalık kampanyalar</p>
         </div>
         <a href="https://www.folder.be" target="_blank" rel="noopener"
             class="shrink-0 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-sm font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-lg shadow-emerald-500/20">
@@ -557,7 +558,6 @@ async function aramaAutocomplete(q) {
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     const aliases = aramaGenislet(q) || [];
 
-    // or filtresi oluştur
     let orParts = [`name_tr.ilike.%${q}%`, `name.ilike.%${q}%`];
     aliases.forEach(a => orParts.push(`name.ilike.%${a}%`));
 
@@ -571,7 +571,6 @@ async function aramaAutocomplete(q) {
         return;
     }
 
-    // Tekrarsız isimler — Türkçe önce
     const goruldu = new Set();
     const oneriler = [];
     for (const row of data) {
@@ -587,8 +586,8 @@ async function aramaAutocomplete(q) {
     const kutu = document.getElementById('aramaOneri');
     kutu.innerHTML = oneriler.map(isim =>
         `<button onclick="aramaSecOneri(this.dataset.isim)" data-isim="${esc(isim)}"
-            class="w-full text-left px-4 py-2.5 text-sm text-white/80 hover:bg-white/10 flex items-center gap-2 transition">
-            <i class="fa-solid fa-magnifying-glass text-white/30 text-xs"></i>
+            class="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 transition border-b border-slate-100 last:border-0">
+            <i class="fa-solid fa-magnifying-glass text-slate-300 text-xs shrink-0"></i>
             ${esc(isim)}
         </button>`
     ).join('');
@@ -601,43 +600,60 @@ function aramaSecOneri(isim) {
     aramaYap();
 }
 
+let _aramaFiltreChain = 'all';
+
+function aramaMarketFiltre(chain) {
+    _aramaFiltreChain = chain;
+    document.querySelectorAll('.mchip').forEach(c =>
+        c.classList.toggle('active', c.dataset.chain === chain)
+    );
+    if (!document.getElementById('sec-arama').classList.contains('hidden')) {
+        aramaYap();
+    }
+}
+
 async function aramaYap() {
     const q = (document.getElementById('aramaInput').value || '').trim();
     if (!q) return;
     sonArama = q;
 
-    // Dropdown kapat
     document.getElementById('aramaOneri').classList.add('hidden');
 
-    // Sekmeleri gizle, arama bölümünü göster
-    document.getElementById('sec-indirimler').classList.add('hidden');
-    document.getElementById('sec-karsilastir').classList.add('hidden');
-    document.getElementById('sec-marketler').classList.add('hidden');
+    // Sekmeleri gizle, arama göster
+    ['indirimler','karsilastir','marketler'].forEach(t => {
+        document.getElementById('sec-'+t)?.classList.add('hidden');
+        const btn = document.getElementById('tab-'+t);
+        if (btn) btn.classList.remove('active');
+    });
     document.getElementById('sec-arama').classList.remove('hidden');
     document.getElementById('aramaSifirlaBtn').classList.remove('hidden');
+    // Arama sekmesini aktif yap
+    const tabA = document.getElementById('tab-arama');
+    if (tabA) tabA.classList.add('active');
+    const tabI = document.getElementById('tab-indirimler');
+    if (tabI) tabI.classList.remove('active');
 
-    // Tab butonlarından active kaldır
-    ['indirimler','karsilastir','marketler'].forEach(t => {
-        const btn = document.getElementById('tab-'+t);
-        if (btn) { btn.classList.remove('active'); btn.classList.add('text-white/50'); }
-    });
-
-    // Yükleniyor
     document.getElementById('aramaYukleniyor').classList.remove('hidden');
     document.getElementById('aramaBosSonuc').classList.add('hidden');
     document.getElementById('aramaMarketler').innerHTML = '';
 
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const sbQ = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     const aliases = aramaGenislet(q) || [];
 
     let orParts = [`name_tr.ilike.%${q}%`, `name.ilike.%${q}%`];
     aliases.forEach(a => orParts.push(`name.ilike.%${a}%`));
 
-    const { data, error } = await sb.from('market_chain_products')
+    let query = sbQ.from('market_chain_products')
         .select('name, name_tr, price, promo_price, in_promo, chain_slug, image_url, unit_or_content, currency')
         .or(orParts.join(','))
         .order('price', { ascending: true })
         .limit(300);
+
+    if (_aramaFiltreChain !== 'all') {
+        query = query.eq('chain_slug', _aramaFiltreChain);
+    }
+
+    const { data, error } = await query;
 
     document.getElementById('aramaYukleniyor').classList.add('hidden');
 
@@ -650,46 +666,48 @@ async function aramaYap() {
         return;
     }
 
-    // Market başına grupla
     const grouped = {};
     SLUGS.forEach(s => grouped[s] = []);
-    data.forEach(r => {
-        if (grouped[r.chain_slug]) grouped[r.chain_slug].push(r);
-    });
+    data.forEach(r => { if (grouped[r.chain_slug]) grouped[r.chain_slug].push(r); });
 
     const toplam = data.length;
-    let html = `<p class="text-white/40 text-xs mb-4">"<span class="text-white/70 font-semibold">${esc(q)}</span>" için ${toplam} sonuç</p>`;
+    let html = `<p class="text-slate-400 text-xs mb-4">"<span class="text-slate-700 font-semibold">${esc(q)}</span>" için <strong>${toplam}</strong> sonuç</p>`;
 
-    SLUGS.forEach(slug => {
+    const slugsToShow = _aramaFiltreChain === 'all' ? SLUGS : [_aramaFiltreChain];
+    slugsToShow.forEach(slug => {
         const urunler = grouped[slug];
-        if (!urunler.length) return;
+        if (!urunler || !urunler.length) return;
         const cfg = CHAINS[slug];
 
-        html += `<div class="glass-dark overflow-hidden mb-3">
-            <div class="flex items-center gap-2 px-4 py-3 border-b border-white/10" style="background:${cfg.color}22">
+        html += `<div class="mb-4">
+            <div class="flex items-center gap-2 mb-2">
                 ${logoImg(slug, 5)}
-                <span class="font-bold text-white text-sm">${esc(cfg.label)}</span>
-                <span class="ml-auto text-white/40 text-xs">${urunler.length} ürün</span>
+                <span class="font-bold text-slate-700 text-sm">${esc(cfg.label)}</span>
+                <span class="text-slate-400 text-xs font-normal">(${urunler.length} ürün)</span>
             </div>
-            <div class="divide-y divide-white/5">
+            <div class="space-y-2">
             ${urunler.slice(0, 30).map(r => {
                 const isim = bestName(r);
                 const fiyat = r.promo_price != null ? r.promo_price : r.price;
-                const eski = r.promo_price != null ? r.price : null;
-                const birim = r.unit_or_content || birimCikart(r.name);
-                return `<div class="flex items-center gap-3 px-4 py-3">
-                    ${r.image_url ? `<img src="${esc(r.image_url)}" alt="${esc(isim)}" class="w-10 h-10 object-contain rounded-lg bg-white/5 shrink-0" loading="lazy" onerror="this.style.display='none'">` : `<div class="w-10 h-10 bg-white/5 rounded-lg shrink-0"></div>`}
+                const eski = r.promo_price != null && Number(r.price) !== Number(r.promo_price) ? r.price : null;
+                const pct = eski ? discPct(r.price, r.promo_price) : null;
+                const birim = r.unit_or_content || '';
+                return `<div class="arama-satir flex items-center gap-3 p-3">
+                    ${r.image_url
+                        ? `<img src="${esc(r.image_url)}" alt="${esc(isim)}" class="w-14 h-14 object-contain rounded-xl bg-slate-50 shrink-0 border border-slate-100" loading="lazy" onerror="this.style.display='none'">`
+                        : `<div class="w-14 h-14 bg-slate-100 rounded-xl shrink-0 flex items-center justify-center text-slate-300"><i class="fa-solid fa-box"></i></div>`}
                     <div class="flex-1 min-w-0">
-                        <p class="text-white/90 text-sm font-medium leading-tight truncate">${esc(isim)}</p>
-                        ${birim ? `<p class="text-white/35 text-xs mt-0.5">${esc(birim)}</p>` : ''}
-                    </div>
-                    <div class="text-right shrink-0">
-                        <p class="font-black text-emerald-400 text-sm">${fmtP(fiyat, r.currency)}</p>
-                        ${eski ? `<p class="text-white/30 text-xs line-through">${fmtP(eski, r.currency)}</p>` : ''}
+                        <p class="text-sm font-semibold text-slate-800 leading-snug line-clamp-2">${esc(isim)}</p>
+                        ${birim ? `<p class="text-xs text-slate-400 mt-0.5">${esc(birim)}</p>` : ''}
+                        <div class="flex items-center gap-2 mt-1.5">
+                            <span class="text-base font-black text-slate-900">${fmtP(fiyat, r.currency)}</span>
+                            ${eski ? `<span class="text-xs text-slate-400 line-through">${fmtP(eski, r.currency)}</span>` : ''}
+                            ${pct ? `<span class="bg-red-50 text-red-500 text-xs font-bold px-2 py-0.5 rounded-full">-${pct}%</span>` : ''}
+                        </div>
                     </div>
                 </div>`;
             }).join('')}
-            ${urunler.length > 30 ? `<p class="text-white/30 text-xs text-center py-2">+${urunler.length - 30} ürün daha</p>` : ''}
+            ${urunler.length > 30 ? `<p class="text-slate-400 text-xs text-center py-2">+${urunler.length - 30} ürün daha</p>` : ''}
             </div>
         </div>`;
     });
@@ -700,9 +718,12 @@ async function aramaYap() {
 function aramaSifirla() {
     document.getElementById('aramaInput').value = '';
     document.getElementById('aramaOneri').classList.add('hidden');
-    document.getElementById('sec-arama').classList.add('hidden');
     document.getElementById('aramaSifirlaBtn').classList.add('hidden');
     sonArama = '';
+    _aramaFiltreChain = 'all';
+    document.querySelectorAll('.mchip').forEach(c =>
+        c.classList.toggle('active', c.dataset.chain === 'all')
+    );
     switchTab('indirimler');
 }
 
@@ -825,21 +846,22 @@ function navBack() {
 // TABS
 // ═══════════════════════════════════════════════════════════════════
 function switchTab(tab) {
-    ['indirimler','karsilastir','marketler'].forEach(t => {
-        const btn = document.getElementById('tab-'+t);
+    // Tüm section'ları gizle
+    ['indirimler','karsilastir','marketler','arama'].forEach(t => {
         const sec = document.getElementById('sec-'+t);
-        const isActive = t === tab;
-        if (isActive) {
-            btn.classList.add('active');
-            btn.classList.remove('text-white/50');
-            sec.classList.remove('hidden');
-        } else {
-            btn.classList.remove('active');
-            btn.classList.add('text-white/50');
-            sec.classList.add('hidden');
-        }
+        if (sec) sec.classList.add('hidden');
+        const btn = document.getElementById('tab-'+t);
+        if (btn) btn.classList.remove('active');
     });
-    // Karşılaştır sekmesine geçince wizard başa dönsün
+
+    const sec = document.getElementById('sec-'+tab);
+    if (sec) sec.classList.remove('hidden');
+    const btn = document.getElementById('tab-'+tab);
+    if (btn) btn.classList.add('active');
+
+    if (tab === 'arama') {
+        setTimeout(() => document.getElementById('aramaInput')?.focus(), 50);
+    }
     if (tab === 'karsilastir' && typeof wizShow === 'function') wizShow(0);
 }
 
@@ -893,9 +915,9 @@ function renderPromos() {
     badge.textContent = list.length + ' ürün';
     if (list.length === 0) {
         grid.innerHTML = `<div class="col-span-full py-12 text-center">
-            <div class="glass-dark rounded-2xl p-8 inline-block">
-                <i class="fa-solid fa-tag text-4xl text-white/15 mb-3 block"></i>
-                <p class="text-white/40 text-sm">${activeFilter==='all' ? 'Henüz indirimli ürün yok.' : 'Bu market için indirimli ürün bulunamadı.'}</p>
+            <div class="light-card p-8 inline-block">
+                <i class="fa-solid fa-tag text-4xl text-slate-200 mb-3 block"></i>
+                <p class="text-slate-400 text-sm">${activeFilter==='all' ? 'Henüz indirimli ürün yok.' : 'Bu market için indirimli ürün bulunamadı.'}</p>
             </div></div>`;
         return;
     }
@@ -913,7 +935,7 @@ function filterPromos(f) {
 async function loadPromos() {
     if (!sb) {
         document.getElementById('promoGrid').innerHTML =
-            `<div class="col-span-full text-center py-8 text-white/30 text-sm">Supabase bağlantısı yok.</div>`;
+            `<div class="col-span-full text-center py-8 text-slate-300 text-sm">Supabase bağlantısı yok.</div>`;
         document.getElementById('promoBadge').textContent = '—';
         return;
     }
@@ -946,12 +968,13 @@ async function loadPromos() {
 
         allPromos = merged;
         renderPromos();
-        document.getElementById('heroPromoNum').textContent = allPromos.length;
+        const pnEl = document.getElementById('heroPromoNum');
+        if (pnEl) pnEl.textContent = allPromos.length;
         await loadUpcoming();
     } catch(err) {
         console.warn('loadPromos:', err);
         document.getElementById('promoGrid').innerHTML =
-            `<div class="col-span-full text-center py-8 text-white/30 text-sm">İndirim verileri yüklenemedi.</div>`;
+            `<div class="col-span-full text-center py-8 text-slate-300 text-sm">İndirim verileri yüklenemedi.</div>`;
         document.getElementById('promoBadge').textContent = 'hata';
     }
 }
@@ -1492,7 +1515,7 @@ async function wizShowResult() {
 
     const cat = WIZ_CATS[wiz.catIdx];
     const sub = cat?.subs?.[wiz.subIdx];
-    if (!sub) { loadEl.classList.add('hidden'); cardsEl.innerHTML = '<p class="text-white/40 text-sm text-center py-8">Alt kategori seçilmedi</p>'; return; }
+    if (!sub) { loadEl.classList.add('hidden'); cardsEl.innerHTML = '<p class="text-slate-400 text-sm text-center py-8">Alt kategori seçilmedi</p>'; return; }
 
     // Alt kategorinin TÜM keyword'lerini OR ile ara → tüm marketlerde eşleşir
     const orFilter = sub.nl.map(k => `name.ilike.*${k}*`).join(',');
@@ -1518,10 +1541,10 @@ async function wizShowResult() {
     loadEl.classList.add('hidden');
 
     if (!data.length) {
-        cardsEl.innerHTML = `<div class="glass-dark rounded-2xl p-8 text-center">
-            <i class="fa-solid fa-magnifying-glass text-3xl text-white/15 mb-3 block"></i>
-            <p class="text-white/50 text-sm mb-1">Ürün bulunamadı</p>
-            <p class="text-white/25 text-xs">Farklı boyut seç veya geri dön</p>
+        cardsEl.innerHTML = `<div class="light-card p-8 text-center">
+            <i class="fa-solid fa-magnifying-glass text-3xl text-slate-200 mb-3 block"></i>
+            <p class="text-slate-500 text-sm mb-1">Ürün bulunamadı</p>
+            <p class="text-slate-400 text-xs">Farklı boyut seç veya geri dön</p>
         </div>`;
         return;
     }
@@ -1605,10 +1628,10 @@ async function wizShowResult() {
     cardsEl.innerHTML = `
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">${cards}</div>
         ${Number.isFinite(minP)?`
-        <div class="glass-dark rounded-2xl p-4 flex items-center justify-center gap-3 flex-wrap mt-1">
+        <div class="light-card p-4 flex items-center justify-center gap-3 flex-wrap mt-1">
             <i class="fa-solid fa-trophy text-amber-400 text-xl"></i>
-            <span class="text-white font-semibold text-sm">En uygun:
-                <strong class="text-emerald-400">${esc(CHAINS[winner]?.label||winner)}</strong>
+            <span class="text-slate-700 font-semibold text-sm">En uygun:
+                <strong class="text-emerald-600">${esc(CHAINS[winner]?.label||winner)}</strong>
                 — ${minP.toFixed(2)} EUR
             </span>
         </div>`:''}`;
@@ -1770,20 +1793,10 @@ async function loadMarketCards() {
 
     grid.innerHTML = cards;
 
-    // Update hero stats
+    // Update hero total count
     if (total > 0) {
-        document.getElementById('heroStats').innerHTML = `
-            <div class="stat-pill"><i class="fa-solid fa-box"></i>${total.toLocaleString('tr-TR')} ürün</div>
-            <div class="stat-pill"><i class="fa-solid fa-rotate"></i>Haftalık güncelleme</div>
-            <div class="stat-pill"><i class="fa-solid fa-store"></i>5 zincir</div>`;
-        const hn = document.getElementById('headerTotalNum');
-        if (hn) hn.textContent = total.toLocaleString('tr-TR')+' ürün';
-        const ht = document.getElementById('headerTotal');
-        if (ht) { ht.classList.remove('hidden'); setTimeout(()=>ht.style.opacity='1', 100); }
-    } else {
-        document.getElementById('heroStats').innerHTML = `
-            <div class="stat-pill"><i class="fa-solid fa-store"></i>5 büyük zincir</div>
-            <div class="stat-pill"><i class="fa-solid fa-rotate"></i>Haftalık güncelleme</div>`;
+        const el = document.getElementById('heroTotalCount');
+        if (el) el.textContent = total.toLocaleString('tr-TR');
     }
 }
 
