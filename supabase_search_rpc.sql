@@ -74,12 +74,17 @@ AS $$
         LOWER(name_tr) LIKE '%' || LOWER(q) || '%'
         OR LOWER(name) LIKE '%' || LOWER(q) || '%'
         -- Alias'lar: Hollandaca karşılıklar ("eieren", "melk" vb.)
+        -- LENGTH >= 4 kontrolü: "ei" gibi kısa aliaslar "aardbei" içinde eşleşmesin
         OR (
           aliases IS NOT NULL
           AND EXISTS (
             SELECT 1 FROM unnest(aliases) a(term)
-            WHERE LOWER(name)    LIKE '%' || LOWER(term) || '%'
-               OR LOWER(name_tr) LIKE '%' || LOWER(term) || '%'
+            WHERE (
+              (LENGTH(term) >= 4 AND LOWER(name) LIKE '%' || LOWER(term) || '%')
+              OR LOWER(name) LIKE LOWER(term) || ' %'
+              OR LOWER(name) = LOWER(term)
+            )
+            OR (LENGTH(term) >= 4 AND LOWER(name_tr) LIKE '%' || LOWER(term) || '%')
           )
         )
       )
@@ -93,6 +98,9 @@ $$;
 
 -- ============================================================
 -- 2. AUTOCOMPLETE — öneri listesi, alaka düzeye göre sıralı
+-- DISTINCT ON yerine ROW_NUMBER() OVER kullanılır:
+-- DISTINCT ON, ORDER BY'ı alfabetik sıralamaya zorlar → relevance bozulur.
+-- ROW_NUMBER() ile önce prio hesaplanır, sonra dışarıda relevance sırası korunur.
 -- ============================================================
 
 CREATE OR REPLACE FUNCTION autocomplete_market_products(
@@ -103,26 +111,47 @@ CREATE OR REPLACE FUNCTION autocomplete_market_products(
 RETURNS TABLE (name TEXT, name_tr TEXT)
 LANGUAGE sql STABLE SECURITY DEFINER
 AS $$
-  SELECT DISTINCT ON (LOWER(COALESCE(name_tr, name)))
-    name, name_tr
-  FROM market_chain_products
-  WHERE
-    LOWER(name_tr) LIKE '%' || LOWER(q) || '%'
-    OR LOWER(name) LIKE '%' || LOWER(q) || '%'
-    OR (aliases IS NOT NULL AND EXISTS (
-      SELECT 1 FROM unnest(aliases) a(term)
-      WHERE LOWER(name) LIKE '%' || LOWER(term) || '%'
-    ))
-  ORDER BY
-    LOWER(COALESCE(name_tr, name)),
-    -- Önce sorguyla başlayanlar, sonra içinde geçenler
-    CASE
-      WHEN LOWER(name_tr) LIKE LOWER(q) || '%'  THEN 1
-      WHEN LOWER(name)    LIKE LOWER(q) || '%'  THEN 2
-      ELSE 3
-    END ASC,
-    -- Eşit önceliklilerde kısa isim önce (büyük ihtimalle ana ürün)
-    LENGTH(COALESCE(name_tr, name)) ASC
+  WITH filtered AS (
+    SELECT
+      name, name_tr,
+      CASE
+        WHEN LOWER(name_tr) LIKE LOWER(q) || '%' THEN 1
+        WHEN LOWER(name)    LIKE LOWER(q) || '%' THEN 2
+        WHEN aliases IS NOT NULL AND EXISTS (
+          SELECT 1 FROM unnest(aliases) a(term)
+          WHERE LOWER(name_tr) LIKE LOWER(term) || '%'
+             OR LOWER(name)    LIKE LOWER(term) || '%'
+        ) THEN 3
+        ELSE 4
+      END AS prio
+    FROM market_chain_products
+    WHERE
+      LOWER(name_tr) LIKE '%' || LOWER(q) || '%'
+      OR LOWER(name)    LIKE '%' || LOWER(q) || '%'
+      OR (
+        aliases IS NOT NULL AND EXISTS (
+          SELECT 1 FROM unnest(aliases) a(term)
+          WHERE (
+            (LENGTH(term) >= 4 AND LOWER(name) LIKE '%' || LOWER(term) || '%')
+            OR LOWER(name) LIKE LOWER(term) || ' %'
+            OR LOWER(name) = LOWER(term)
+          )
+        )
+      )
+  ),
+  dedup AS (
+    SELECT
+      name, name_tr, prio,
+      ROW_NUMBER() OVER (
+        PARTITION BY LOWER(COALESCE(name_tr, name))
+        ORDER BY prio ASC, LENGTH(COALESCE(name_tr, name)) ASC
+      ) AS rn
+    FROM filtered
+  )
+  SELECT name, name_tr
+  FROM dedup
+  WHERE rn = 1
+  ORDER BY prio ASC, LENGTH(COALESCE(name_tr, name)) ASC
   LIMIT lim;
 $$;
 

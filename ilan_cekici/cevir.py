@@ -83,8 +83,16 @@ def gemini_cevir(metinler: list, gm_key: str, alan: str = "başlık") -> list:
     if alan == "ürün adı":
         prompt = (
             f"Bu {n} adet Hollandaca veya Fransızca market ürünü adını Türkçeye çevir.\n"
-            f"Kural: Marka adlarını değiştirme. Sadece Hollandaca/Fransızca kelimeleri Türkçeye çevir.\n"
-            f"Örnek: 'Halfvolle melk' → 'Yarım yağlı süt', 'Verse eieren' → 'Taze yumurtalar'\n"
+            "Kurallar:\n"
+            "1. Marka adlarını değiştirme (Lidl, Carrefour, Delhaize, Colruyt, Aldi vb.)\n"
+            "2. Miktar ve boyutu koru: '6 stuks'→'6 adet', '1L'→'1L', '500g'→'500g'\n"
+            "3. Ürün adı önce, miktar sonda: 'Eieren 6 stuks'→'Yumurta 6 adet'\n"
+            "4. Kısa ve doğal Türkçe kullan, kelimesi kelimesine çevirme\n"
+            "Örnekler:\n"
+            "  'Halfvolle melk 1L' → 'Yarım yağlı süt 1L'\n"
+            "  'Verse eieren 6 stuks' → 'Taze yumurta 6 adet'\n"
+            "  'Biologische kipfilet 500g' → 'Organik tavuk göğsü 500g'\n"
+            "  'Witte rijst langkorrel 1kg' → 'Uzun taneli beyaz pirinç 1kg'\n"
             f"SADECE numaralı liste döndür, başka hiçbir şey yazma.\n\n{numlu}"
         )
     else:
