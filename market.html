@@ -289,6 +289,11 @@
                         <span class="text-sm text-slate-600 hover:text-slate-900 transition">Carrefour</span>
                     </label>
                 </div>
+                <!-- Kategori filtresi -->
+                <div class="mt-4 pt-4 border-t border-slate-100" id="kategoriFiltreSidebar" style="display:none">
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Kategori</p>
+                    <div id="kategoriFiltreler" class="space-y-0.5"></div>
+                </div>
             </div>
         </div>
         <!-- Sonuç alanı -->
@@ -634,15 +639,76 @@ async function aramaYap() {
             : `"${q}" için başka kelime deneyin.`;
         document.getElementById('aramaBosSonucText').textContent = hint;
         document.getElementById('aramaBosSonuc').classList.remove('hidden');
+        document.getElementById('kategoriFiltreSidebar').style.display = 'none';
         return;
     }
 
+    // Kategori sayılarını hesapla ve sidebar'ı doldur
+    _aktifKategori = null;
+    window._sonAramaData = data;
+    window._sonAramaQ = q;
+    const kategoriSayilari = {};
+    data.forEach(r => {
+        const k = r.category_tr || 'Diğer';
+        kategoriSayilari[k] = (kategoriSayilari[k] || 0) + 1;
+    });
+    renderKategoriFiltreler(kategoriSayilari);
+    renderAramaSonuclari(data, q);
+}
+
+let _aktifKategori = null;
+
+function renderKategoriFiltreler(sayilar) {
+    const sidebar = document.getElementById('kategoriFiltreSidebar');
+    const kutu = document.getElementById('kategoriFiltreler');
+    const kategoriler = Object.entries(sayilar)
+        .filter(([k]) => k !== 'Diğer')
+        .sort((a, b) => b[1] - a[1]);
+    if (!kategoriler.length) { sidebar.style.display = 'none'; return; }
+    sidebar.style.display = '';
+    const diger = sayilar['Diğer'] || 0;
+    const tumKategoriler = diger > 0 ? [...kategoriler, ['Diğer', diger]] : kategoriler;
+    kutu.innerHTML = tumKategoriler.map(([kat, sayi]) =>
+        `<button onclick="aramaKategoriFiltre('${esc(kat)}')"
+            class="kat-chip w-full text-left text-xs px-2 py-1.5 rounded-lg hover:bg-slate-50 flex justify-between items-center transition"
+            data-kat="${esc(kat)}">
+            <span class="text-slate-700 truncate pr-1">${esc(kat)}</span>
+            <span class="text-slate-400 shrink-0">${sayi}</span>
+        </button>`
+    ).join('');
+}
+
+function aramaKategoriFiltre(kat) {
+    _aktifKategori = (_aktifKategori === kat) ? null : kat;
+    document.querySelectorAll('.kat-chip').forEach(b => {
+        const aktif = b.dataset.kat === _aktifKategori;
+        b.classList.toggle('bg-emerald-50', aktif);
+        b.querySelector('span:first-child').classList.toggle('text-emerald-700', aktif);
+        b.querySelector('span:first-child').classList.toggle('font-semibold', aktif);
+    });
+    renderAramaSonuclari(window._sonAramaData, window._sonAramaQ);
+}
+
+function renderAramaSonuclari(data, q) {
+    const gorulecek = _aktifKategori
+        ? data.filter(r => (r.category_tr || 'Diğer') === _aktifKategori)
+        : data;
+
+    if (!gorulecek.length) {
+        document.getElementById('aramaBosSonucText').textContent = `"${_aktifKategori}" kategorisinde sonuç yok.`;
+        document.getElementById('aramaBosSonuc').classList.remove('hidden');
+        document.getElementById('aramaMarketler').innerHTML = '';
+        return;
+    }
+    document.getElementById('aramaBosSonuc').classList.add('hidden');
+
     const grouped = {};
     SLUGS.forEach(s => grouped[s] = []);
-    data.forEach(r => { if (grouped[r.chain_slug]) grouped[r.chain_slug].push(r); });
+    gorulecek.forEach(r => { if (grouped[r.chain_slug]) grouped[r.chain_slug].push(r); });
 
-    const toplam = data.length;
-    let html = `<p class="text-slate-400 text-xs mb-4">"<span class="text-slate-700 font-semibold">${esc(q)}</span>" için <strong>${toplam}</strong> sonuç</p>`;
+    const toplam = gorulecek.length;
+    const katLabel = _aktifKategori ? ` · <span class="text-emerald-600">${esc(_aktifKategori)}</span>` : '';
+    let html = `<p class="text-slate-400 text-xs mb-4">"<span class="text-slate-700 font-semibold">${esc(q)}</span>" için <strong>${toplam}</strong> sonuç${katLabel}</p>`;
 
     const slugsToShow = _aramaFiltreChain === 'all' ? SLUGS : [_aramaFiltreChain];
     slugsToShow.forEach(slug => {

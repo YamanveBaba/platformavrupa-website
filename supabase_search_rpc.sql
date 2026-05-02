@@ -25,14 +25,15 @@ RETURNS TABLE (
   chain_slug       TEXT,
   image_url        TEXT,
   unit_or_content  TEXT,
-  currency         TEXT
+  currency         TEXT,
+  category_tr      TEXT
 )
 LANGUAGE sql STABLE SECURITY DEFINER
 AS $$
   WITH ranked AS (
     SELECT
       name, name_tr, price, promo_price, in_promo, chain_slug,
-      image_url, unit_or_content, currency,
+      image_url, unit_or_content, currency, category_tr,
       CASE
         -- P1: name_tr tam olarak sorguyla başlıyor ("Yumurta 6 adet")
         WHEN LOWER(name_tr) LIKE LOWER(q) || '%'
@@ -90,7 +91,7 @@ AS $$
       )
   )
   SELECT name, name_tr, price, promo_price, in_promo, chain_slug,
-         image_url, unit_or_content, currency
+         image_url, unit_or_content, currency, category_tr
   FROM ranked
   ORDER BY prio ASC, price ASC
   LIMIT lim;
