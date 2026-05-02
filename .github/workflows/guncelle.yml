@@ -22,6 +22,33 @@ jobs:
       - name: Kodu al
         uses: actions/checkout@v4
 
+      - name: Supabase projesi uyandır
+        run: |
+          echo "Supabase projesi kontrol ediliyor..."
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X GET "https://api.supabase.com/v1/projects/${{ secrets.SUPABASE_PROJECT_REF }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ACCESS_TOKEN }}")
+          echo "Proje durumu HTTP: $STATUS"
+          if [ "$STATUS" = "200" ]; then
+            # Proje bilgisini al ve pause durumunu kontrol et
+            RESPONSE=$(curl -s \
+              -X GET "https://api.supabase.com/v1/projects/${{ secrets.SUPABASE_PROJECT_REF }}" \
+              -H "Authorization: Bearer ${{ secrets.SUPABASE_ACCESS_TOKEN }}")
+            echo "Proje yanıtı: $RESPONSE"
+            if echo "$RESPONSE" | grep -q '"status":"INACTIVE"'; then
+              echo "Proje durdu, yeniden başlatılıyor..."
+              curl -s -X POST \
+                "https://api.supabase.com/v1/projects/${{ secrets.SUPABASE_PROJECT_REF }}/restore" \
+                -H "Authorization: Bearer ${{ secrets.SUPABASE_ACCESS_TOKEN }}"
+              echo "60 saniye bekleniyor..."
+              sleep 60
+            else
+              echo "Proje aktif."
+            fi
+          else
+            echo "Management API erişilemiyor ($STATUS), devam ediliyor..."
+          fi
+
       - name: Python kur
         uses: actions/setup-python@v5
         with:
