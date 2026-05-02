@@ -71,10 +71,12 @@ jobs:
 
       - name: Market urunlerini kategorile
         if: github.event.schedule == '0 2 * * 0' || github.event_name == 'workflow_dispatch'
+        continue-on-error: true
         run: python -X utf8 ilan_cekici/market_kategorile.py
 
       - name: Marketler arasi urun eslestir
         if: github.event.schedule == '0 2 * * 0' || github.event_name == 'workflow_dispatch'
+        continue-on-error: true
         run: python -X utf8 market_fiyat_cekici/urun_eslestir.py
 
       - name: Telegram bildirimi gonder

@@ -292,19 +292,32 @@ def main():
     url, key = load_secrets()
     base_headers = {"apikey": key, "Authorization": f"Bearer {key}"}
 
-    # Tüm ürünleri çek
+    # Tüm ürünleri çek — önce category_name ile dene, yoksa sadece name al
     print("Ürünler Supabase'den çekiliyor...")
+    # category_name kolonu var mı kontrol et
+    r_test = requests.get(f"{url}/rest/v1/market_chain_products",
+                          headers=base_headers,
+                          params={"select": "id,name,category_name", "limit": "1"},
+                          timeout=15)
+    if r_test.status_code in (400, 401, 404):
+        print(f"  Not: category_name kolonu yok veya erişilemiyor ({r_test.status_code}), sadece name kullanılacak")
+        select_cols = "id,name"
+    else:
+        select_cols = "id,name,category_name"
+
     all_rows, offset = [], 0
     while True:
         params = {
-            "select": "id,name,category_name",
+            "select": select_cols,
             "order":  "id.asc",
             "limit":  str(BATCH_SIZE),
             "offset": str(offset),
         }
         r = requests.get(f"{url}/rest/v1/market_chain_products",
                          headers=base_headers, params=params, timeout=30)
-        r.raise_for_status()
+        if r.status_code not in (200, 206):
+            print(f"HATA: HTTP {r.status_code} — {r.text[:200]}")
+            sys.exit(1)
         batch = r.json()
         if not batch:
             break
