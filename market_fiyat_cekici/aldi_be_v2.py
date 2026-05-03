@@ -861,41 +861,33 @@ def calistir(test: bool = False, resume: bool = False,
                 except Exception:
                     pass
 
-            # 1. tur scroll: insan gibi, lazy-load tetikle
+            # 1. tur: ilk scroll + topla (lazy-load ilk ürünleri tetikle)
             insan_scroll(page, int(random.gauss(2500, 700)))
             sl(1.5, 0.6, 0.7, 4.0)
             urunleri_topla()
 
-            # 2. tur: az ürün geldiyse sayfa sonuna git ve bekle
-            if len(urunler) - onceki < 5:
-                for _ in range(3):
-                    page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-                    sl(2.5, 1.0, 1.5, 6.0)
-                    urunleri_topla()
-                    if len(urunler) - onceki >= 5:
-                        break
-                    # Scroll başa dönüp tekrar aşağı (lazy-load farklı tetikler)
-                    page.evaluate("window.scrollTo(0, 0)")
-                    sl(1.0, 0.4, 0.5, 2.5)
-                    insan_scroll(page, int(random.gauss(3000, 800)))
-                    sl(2.0, 0.8, 1.0, 5.0)
-                    urunleri_topla()
-                    if len(urunler) - onceki >= 5:
-                        break
-
-            # Eğer hâlâ az ürün geldiyse ekstra scroll tur
-            if len(urunler) - onceki < 5:
+            # 2. tur: infinite scroll — yeni ürün geldiği sürece devam et
+            # Aldi kategori sayfaları lazy-load kullanır, scroll ettikçe yeni ürünler gelir
+            bos_tur = 0
+            max_bos_tur = 3   # 3 ardışık boş tur → sayfa bitti
+            max_tur = 40      # maksimum 40 tur (sonsuz döngü koruması)
+            for _tur in range(max_tur):
+                onceki_tur = len(urunler)
                 page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-                sl(2.5, 1.0, 1.2, 6.0)
-                for entry in list(api_pool):
-                    json_urunleri_cikart(entry["data"], kat_ad, urunler)
-                api_pool.clear()
-                embedded_json_tara(page, urunler, kat_ad)
+                # Yeni ürünlerin yüklenmesini bekle
                 try:
-                    tiles = page.evaluate(_DOM_JS)
-                    dom_urun_ekle(tiles, urunler, kat_ad)
+                    page.wait_for_load_state("networkidle", timeout=8_000)
                 except Exception:
                     pass
+                sl(1.5, 0.5, 0.8, 3.0)
+                urunleri_topla()
+                yeni_bu_tur = len(urunler) - onceki_tur
+                if yeni_bu_tur == 0:
+                    bos_tur += 1
+                    if bos_tur >= max_bos_tur:
+                        break
+                else:
+                    bos_tur = 0
 
             yeni = len(urunler) - onceki
 
