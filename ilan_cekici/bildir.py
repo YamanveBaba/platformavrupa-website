@@ -91,11 +91,11 @@ def main():
         ilan_toplam = "?"
 
     # Market urunleri
-    colruyt  = supabase_say(sb_url, sb_key, "market_chain_products", "&chain=eq.colruyt")
-    delhaize = supabase_say(sb_url, sb_key, "market_chain_products", "&chain=eq.delhaize")
-    lidl     = supabase_say(sb_url, sb_key, "market_chain_products", "&chain=eq.lidl")
-    carrefour= supabase_say(sb_url, sb_key, "market_chain_products", "&chain=eq.carrefour")
-    aldi     = supabase_say(sb_url, sb_key, "market_chain_products", "&chain=eq.aldi")
+    colruyt  = supabase_say(sb_url, sb_key, "market_chain_products", "&chain_slug=eq.colruyt_be")
+    delhaize = supabase_say(sb_url, sb_key, "market_chain_products", "&chain_slug=eq.delhaize_be")
+    lidl     = supabase_say(sb_url, sb_key, "market_chain_products", "&chain_slug=eq.lidl_be")
+    carrefour= supabase_say(sb_url, sb_key, "market_chain_products", "&chain_slug=eq.carrefour_be")
+    aldi     = supabase_say(sb_url, sb_key, "market_chain_products", "&chain_slug=eq.aldi_be")
     try:
         market_toplam = colruyt + delhaize + lidl + carrefour + aldi
     except Exception:
