@@ -37,7 +37,7 @@ ESIKLER = {
     "colruyt":    8_000,
     "carrefour":  8_000,
     "lidl":       5_000,
-    "aldi":         800,
+    "aldi":         400,
 }
 
 # ─── Process timeout (saniye) — bu süreyi aşarsa zorla durdurulur ──────────────
