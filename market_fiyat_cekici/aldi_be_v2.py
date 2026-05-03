@@ -196,8 +196,8 @@ def json_urunleri_cikart(data, kat_ad: str, hedef: Dict) -> int:
 
         # PID tespiti — birçok alan adı dene
         pid = None
-        for k in ("productID", "product_id", "id", "sku", "articleNumber",
-                  "productId", "itemId", "eanCode", "ean"):
+        for k in ("aldiPid", "aldi_pid", "productID", "product_id", "articleNo",
+                  "id", "sku", "articleNumber", "productId", "itemId", "eanCode", "ean"):
             v = obj.get(k)
             if v:
                 pid = str(v).strip()
@@ -526,6 +526,33 @@ def dom_urun_ekle(tiles: list, hedef: Dict, kat: str) -> int:
 # ─── window.__NEXT_DATA__ ve embedded JSON ────────────────────────────────────
 def embedded_json_tara(page, hedef: Dict, kat: str) -> int:
     yeni = 0
+
+    # __NEXT_DATA__ içinde Aldi'nin bilinen ürün yollarını doğrudan dene
+    try:
+        next_data_raw = page.evaluate("() => { try { return JSON.stringify(window.__NEXT_DATA__ || null); } catch(e){return null;} }")
+        if next_data_raw and next_data_raw != "null":
+            nd = json.loads(next_data_raw)
+            pp = (nd.get("props") or {}).get("pageProps") or {}
+            # Aldi kategori sayfasındaki bilinen container alanları
+            for container_key in ("articles", "products", "items", "assortmentArticles",
+                                   "categoryArticles", "articleList", "productList",
+                                   "assortment", "data"):
+                container = pp.get(container_key)
+                if isinstance(container, list) and container:
+                    n = json_urunleri_cikart({"items": container}, kat, hedef)
+                    yeni += n
+                elif isinstance(container, dict):
+                    n = json_urunleri_cikart(container, kat, hedef)
+                    yeni += n
+            # Tam yapıyı da tara (daha derin yollar için)
+            if not yeni:
+                yeni += json_urunleri_cikart(nd, kat, hedef)
+    except Exception:
+        pass
+
+    if yeni:
+        return yeni
+
     scripts_to_check = [
         "() => { try { return JSON.stringify(window.__NEXT_DATA__ || null); } catch(e){return null;} }",
         "() => { try { return JSON.stringify(window.__NUXT__ || null); } catch(e){return null;} }",
@@ -703,6 +730,11 @@ def calistir(test: bool = False, resume: bool = False,
             for deneme in range(3):
                 try:
                     resp = page.goto(url, wait_until="domcontentloaded", timeout=60_000)
+                    # Next.js kategori sayfaları: JS çalışıp API çağrıları yapılana kadar bekle
+                    try:
+                        page.wait_for_load_state("networkidle", timeout=12_000)
+                    except Exception:
+                        pass
                     sl(3.5, 1.2, 1.8, 8.0)
 
                     if resp:
