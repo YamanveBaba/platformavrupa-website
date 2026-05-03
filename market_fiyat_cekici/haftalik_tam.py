@@ -202,7 +202,13 @@ def urun_sayisi_stdout_parse(son_satir: str) -> int:
 
 # ─── Market çekim fonksiyonları ────────────────────────────────────────────────
 def cek_delhaize(log: Path) -> int:
-    ret, _ = calistir([sys.executable, "haftalik_delhaize_supabase.py"], TIMEOUT["delhaize"], log)
+    # Scraper ayrı çalışır — timeout olsa bile veri JSON'a kaydedilir
+    ret, _ = calistir([sys.executable, "delhaize_be_v2.py", "--no-pause"], TIMEOUT["delhaize"], log)
+    # Timeout veya hata olsa bile JSON varsa yükle
+    dosyalar = glob.glob(str(SCRIPT_DIR / "cikti" / "delhaize_be_v2_*.json"))
+    if dosyalar:
+        latest = max(dosyalar, key=os.path.getmtime)
+        calistir([sys.executable, "json_to_supabase_yukle.py", "--no-pause", latest], 900, log)
     return ret
 
 
@@ -219,7 +225,11 @@ def cek_colruyt(log: Path) -> tuple[int, int]:
 
 
 def cek_carrefour(log: Path) -> int:
-    ret, _ = calistir([sys.executable, "haftalik_carrefour_supabase.py"], TIMEOUT["carrefour"], log)
+    ret, _ = calistir([sys.executable, "carrefour_be_v2.py", "--no-pause"], TIMEOUT["carrefour"], log)
+    dosyalar = glob.glob(str(SCRIPT_DIR / "cikti" / "carrefour_be_v2_*.json"))
+    if dosyalar:
+        latest = max(dosyalar, key=os.path.getmtime)
+        calistir([sys.executable, "json_to_supabase_yukle.py", "--no-pause", latest], 900, log)
     return ret
 
 
@@ -411,9 +421,10 @@ def main():
         # Ürün sayısı: stdout parse varsa kullan, yoksa JSON dosyasından al
         urun_sayisi = stdout_urun if stdout_urun > 0 else son_json_urun_sayisi(market)
         esik        = ESIKLER.get(market, 0)
-        basarili    = ret == 0 and urun_sayisi >= esik
+        # Timeout olsa bile ürün sayısı eşiği geçtiyse başarılı say (veri yüklendi)
+        basarili    = urun_sayisi >= esik
 
-        # Başarısız ise 1 kez retry
+        # Başarısız ise 1 kez retry (timeout hariç)
         if not basarili and ret != -1:  # timeout değilse
             print(R(f"\n  [RETRY] {market}: {urun_sayisi} ürün (eşik: {esik}) — tekrar deneniyor...", SARI))
             with open(log_dosya, "a", encoding="utf-8") as lf:
@@ -425,7 +436,7 @@ def main():
                 ret2, stdout_urun2 = sonuc2, 0
             sure = time.time() - baslangic
             urun_sayisi = stdout_urun2 if stdout_urun2 > 0 else son_json_urun_sayisi(market)
-            basarili = ret2 == 0 and urun_sayisi >= esik
+            basarili = urun_sayisi >= esik
 
         ozet[market] = {
             "urun":     urun_sayisi,

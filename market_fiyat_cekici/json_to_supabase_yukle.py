@@ -227,7 +227,11 @@ def row_colruyt(
     if rpn is None or str(rpn).strip() == "":
         return {}
     try:
-        price_f = float(p.get("basicPrice"))
+        price_nested = p.get("price") or {}
+        price_f = float(
+            (price_nested.get("basicPrice") if isinstance(price_nested, dict) else None)
+            or p.get("basicPrice") or 0
+        )
     except (TypeError, ValueError):
         price_f = 0.0
     qp = p.get("quantityPrice")
@@ -449,6 +453,14 @@ def json_to_rows(data: dict, include_raw: bool) -> List[dict]:
             r = row_carrefour(p, captured_at, import_run_id, include_raw)
             if r:
                 rows.append(r)
+
+    # Aynı (chain_slug, external_product_id) çiftini tekrar eden satırları temizle
+    seen: dict = {}
+    for row in rows:
+        key = (row.get("chain_slug", ""), row.get("external_product_id", ""))
+        if key not in seen:
+            seen[key] = row
+    rows = list(seen.values())
 
     return rows
 

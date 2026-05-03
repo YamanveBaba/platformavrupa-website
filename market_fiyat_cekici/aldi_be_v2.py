@@ -912,7 +912,8 @@ def calistir(test: bool = False, resume: bool = False,
 
             print(f"  +{yeni} ürün | Toplam: {len(urunler)}")
 
-            tamamlananlar.add(url)
+            if yeni > 0:  # 0 ürün geldiyse tekrar denenebilsin
+                tamamlananlar.add(url)
             checkpoint_kaydet(urunler, tamamlananlar)
 
             # %5 ihtimalle kısa mola
