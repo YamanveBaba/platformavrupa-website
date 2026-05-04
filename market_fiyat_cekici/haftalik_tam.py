@@ -215,13 +215,10 @@ def cek_delhaize(log: Path) -> int:
 def cek_colruyt(log: Path) -> tuple[int, int]:
     calistir([sys.executable, "colruyt_cookie_yenile.py"], 120, log)
     ret, _ = calistir([sys.executable, "colruyt_direct.py"], TIMEOUT["colruyt"], log)
-    urun = 0
-    if ret == 0:
-        ret2, son = calistir([sys.executable, "html_analiz.py", "--market", "colruyt"], 300, log)
-        urun = urun_sayisi_stdout_parse(son)
-        if ret2 != 0:
-            ret = ret2
-    return ret, urun
+    # Scraper timeout/hata olsa bile JSON varsa yükle
+    ret2, son = calistir([sys.executable, "html_analiz.py", "--market", "colruyt"], 300, log)
+    urun = urun_sayisi_stdout_parse(son) or son_json_urun_sayisi("colruyt")
+    return (ret2 if ret2 != 0 else ret), urun
 
 
 def cek_carrefour(log: Path) -> int:
@@ -241,16 +238,47 @@ def cek_lidl(log: Path) -> int:
         with open(log, "a", encoding="utf-8") as lf:
             lf.write(f"[UYARI] Lidl cookie: {uyari}\n")
     ret, _ = calistir([sys.executable, "haftalik_lidl_supabase.py"], TIMEOUT["lidl"], log)
+    # Timeout/hata durumunda JSON varsa doğrudan yükle
+    if ret != 0:
+        dosyalar = glob.glob(str(SCRIPT_DIR / "cikti" / "lidl_be_producten_*.json"))
+        if dosyalar:
+            latest = max(dosyalar, key=os.path.getmtime)
+            calistir([sys.executable, "json_to_supabase_yukle.py", "--no-pause", latest], 900, log)
     return ret
 
 
 def cek_aldi(log: Path) -> tuple[int, int]:
     # aldi_be_v2.py camoufox (Firefox) kullanir — Cloudflare bypass
-    ret1, _ = calistir([sys.executable, "aldi_be_v2.py", "--no-pause"], TIMEOUT["aldi"], log)
-    if ret1 != 0:
-        return ret1, 0
-    # JSON'u doğrudan Supabase'e push et (html_analiz Aldi HTML'ini parse edemez)
-    ret2, son = calistir([sys.executable, "aldi_supabase_push.py"], 300, log)
+    _, _ = calistir([sys.executable, "aldi_be_v2.py", "--no-pause"], TIMEOUT["aldi"], log)
+
+    # Timeout olsa bile: final JSON yoksa checkpoint'ten üret
+    cikti = SCRIPT_DIR / "cikti"
+    final_jsonlar = glob.glob(str(cikti / "aldi_be_v2_*.json"))
+    if not final_jsonlar:
+        checkpoint = cikti / "aldi_v2_checkpoint.json"
+        if checkpoint.exists():
+            try:
+                with open(checkpoint, encoding="utf-8") as f:
+                    cp = json.load(f)
+                tarih = datetime.now().strftime("%Y-%m-%d_%H-%M")
+                final_dosya = cikti / f"aldi_be_v2_{tarih}.json"
+                with open(final_dosya, "w", encoding="utf-8") as f:
+                    json.dump({
+                        "kaynak": "Aldi BE v2 — checkpoint (timeout sonrası)",
+                        "chain_slug": "aldi_be",
+                        "country_code": "BE",
+                        "cekilme_tarihi": datetime.now().isoformat(),
+                        "urun_sayisi": len(cp.get("urunler", [])),
+                        "urunler": cp.get("urunler", []),
+                    }, f, ensure_ascii=False)
+                with open(log, "a", encoding="utf-8") as lf:
+                    lf.write(f"[ALDI] Timeout — checkpoint'ten {len(cp.get('urunler',[]))} ürün alındı\n")
+            except Exception as e:
+                with open(log, "a", encoding="utf-8") as lf:
+                    lf.write(f"[ALDI] Checkpoint okuma hatası: {e}\n")
+
+    # Upload — scraper timeout/hata olsa bile çalışır
+    ret2, son = calistir([sys.executable, "aldi_supabase_push.py"], 600, log)
     urun = urun_sayisi_stdout_parse(son) or son_json_urun_sayisi("aldi")
     return ret2, urun
 
