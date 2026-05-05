@@ -249,10 +249,14 @@
 
 <!-- ═══ TABS ══════════════════════════════════════════════════════ -->
 <div class="sticky top-[60px] z-40 bg-white border-b border-slate-200" id="tabBar">
-    <div class="max-w-7xl mx-auto flex px-4">
+    <div class="max-w-7xl mx-auto flex px-4 overflow-x-auto no-scroll">
         <button id="tab-indirimler" onclick="switchTab('indirimler')"
-            class="tab-btn active">
+            class="tab-btn active whitespace-nowrap">
             🔥 İndirimler
+        </button>
+        <button id="tab-karsilastir" onclick="switchTab('karsilastir')"
+            class="tab-btn whitespace-nowrap">
+            ⚖️ Karşılaştır
         </button>
     </div>
 </div>

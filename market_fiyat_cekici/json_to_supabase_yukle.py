@@ -462,6 +462,23 @@ def json_to_rows(data: dict, include_raw: bool) -> List[dict]:
             seen[key] = row
     rows = list(seen.values())
 
+    # Her ürüne yüklenirken otomatik L1-L4 kategori ata
+    try:
+        from kategori_ata import kategorize_et as _kat
+        for row in rows:
+            l1, l2, l3, l4 = _kat(
+                row.get("name", ""),
+                category_name=row.get("category_name", "") or "",
+                chain=row.get("chain_slug", ""),
+            )
+            row["category_l1"] = l1
+            row["category_l2"] = l2
+            row["category_l3"] = l3
+            if l4:
+                row["category_l4"] = l4
+    except ImportError:
+        pass  # kategori_ata.py yoksa atla
+
     return rows
 
 
