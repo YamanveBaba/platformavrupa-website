@@ -193,23 +193,26 @@ def isim_normalize(name: str, brand: str = '') -> str:
 # ══════════════════════════════════════════════════════════════════════════════
 # MATCH GROUP ID
 # ══════════════════════════════════════════════════════════════════════════════
-def match_group_id_hesapla(name: str, brand: str, unit_or_content: str) -> str:
+def match_group_id_hesapla(name: str, brand: str, unit_or_content: str,
+                           category_l1: str = '', category_l2: str = '') -> str:
     """
     Ürünün eşleştirme anahtarını hesapla.
     Aynı key -> aynı ürün (farklı market).
 
-    Sadece normalize edilmiş isim kullanılır.
-    Miktar (qty) key'e dahil edilmez çünkü:
-    - Delhaize/Lidl/ALDI/Carrefour ürünlerinin %75-93'ünde qty verisi yok
-    - qty|norm key'i kullansak eşleşme sayısı dramatik düşüyor (~552)
-    - Boyut farkı (400g vs 750g) UI'da gösterilen fiyattan zaten anlaşılır
+    category_l1 + category_l2 hash'e dahil edilir: aynı isim farklı kategoride
+    farklı GID alır (örn. "Melk 1L" D01 ≠ D07).
+    Miktar (qty) hash'e dahil edilmez: Delhaize/Lidl/ALDI ürünlerinin
+    %75-93'ünde qty verisi yok, dahil edilseydi eşleşme sayısı çok düşerdi.
     """
     norm = isim_normalize(name or '', brand or '')
 
     if not norm or len(norm) < 4:
         return ''  # Çok kısa/anlamsız — eşleştirme yok
 
-    return 'mg' + hashlib.md5(norm.encode('utf-8')).hexdigest()[:14]
+    # Kategori prefix: "D01|Peynir|melk volle" → sadece aynı kategoridekiler eşleşir
+    cat_prefix = f"{(category_l1 or '').strip()}|{(category_l2 or '').strip()}|"
+    key = cat_prefix + norm
+    return 'mg' + hashlib.md5(key.encode('utf-8')).hexdigest()[:14]
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -242,7 +245,7 @@ def fetch_all_products(url: str, key: str) -> list[dict]:
         'Range-Unit': 'items',
     }
     params_base = {
-        'select': 'id,chain_slug,external_product_id,name,brand,unit_or_content',
+        'select': 'id,chain_slug,external_product_id,name,brand,unit_or_content,category_l1,category_l2',
         'order': 'id.asc',
     }
 
@@ -278,7 +281,8 @@ def update_match_groups(url: str, key: str, products: list[dict],
     gid_to_ids: dict[str, list] = defaultdict(list)
     for p in products:
         gid = match_group_id_hesapla(
-            p.get('name') or '', p.get('brand') or '', p.get('unit_or_content') or '')
+            p.get('name') or '', p.get('brand') or '', p.get('unit_or_content') or '',
+            p.get('category_l1') or '', p.get('category_l2') or '')
         if gid and gid in multi_market_groups:
             gid_to_ids[gid].append(p['id'])
 
@@ -381,7 +385,8 @@ def debug_analysis(products: list[dict]) -> None:
     gid_chains: dict[str, set[str]] = defaultdict(set)
     for p in products:
         gid = match_group_id_hesapla(
-            p.get('name') or '', p.get('brand') or '', p.get('unit_or_content') or '')
+            p.get('name') or '', p.get('brand') or '', p.get('unit_or_content') or '',
+            p.get('category_l1') or '', p.get('category_l2') or '')
         if gid:
             gid_chains[gid].add(p['chain_slug'])
     pairs: Counter = Counter()
