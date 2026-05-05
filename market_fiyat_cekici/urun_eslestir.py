@@ -303,16 +303,8 @@ def update_match_groups(url: str, key: str, products: list[dict],
         'Prefer': 'return=minimal',
     }
 
-    # 1. Tüm mevcut match_group_id'leri temizle
-    print('Mevcut match_group_id\'ler temizleniyor...')
-    r = requests.patch(f"{endpoint}?id=gt.0", headers=headers,
-                       json={"match_group_id": None}, timeout=60)
-    if r.status_code not in (200, 204):
-        print(f'HATA (temizleme) HTTP {r.status_code}: {r.text[:200]}')
-        return 0
-    print('  Temizlendi.')
-
-    # 2. Cross-market GID'leri PATCH ile yaz
+    # Cross-market GID'leri PATCH ile yaz (eski değerlerin üzerine yazar)
+    # Bulk temizleme kaldırıldı — Supabase timeout'u tetikliyordu
     written = 0
     gid_count = 0
     for gid, ids in gid_to_ids.items():
@@ -452,10 +444,8 @@ def main():
 
     for p in products:
         gid = match_group_id_hesapla(
-            p.get('name') or '',
-            p.get('brand') or '',
-            p.get('unit_or_content') or '',
-        )
+            p.get('name') or '', p.get('brand') or '', p.get('unit_or_content') or '',
+            p.get('category_l1') or '', p.get('category_l2') or '')
         if gid:
             group_counter[gid].append(p['chain_slug'])
         else:
@@ -485,10 +475,8 @@ def main():
     gid_to_name: dict[str, str] = {}
     for p in products:
         gid = match_group_id_hesapla(
-            p.get('name') or '',
-            p.get('brand') or '',
-            p.get('unit_or_content') or '',
-        )
+            p.get('name') or '', p.get('brand') or '', p.get('unit_or_content') or '',
+            p.get('category_l1') or '', p.get('category_l2') or '')
         if gid and gid not in gid_to_name:
             gid_to_name[gid] = f"{(p.get('name') or '')[:50]} ({(p.get('unit_or_content') or '')[:15]})"
 
