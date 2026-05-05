@@ -392,7 +392,7 @@ _DOM_JS = """
         const lnk = el.querySelector('a[href]');
         if(lnk) {
             const href = lnk.getAttribute('href')||'';
-            const m = href.match(/\/([a-z0-9_-]{5,})\\.html/i);
+            const m = href.match(/\\/([a-z0-9_-]{5,})\\.html/i);
             if(m) return m[1];
         }
         return '';
