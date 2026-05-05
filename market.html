@@ -1467,6 +1467,315 @@ const WIZ_CATS = [
   ]},
 ];
 
+// ── WIZ_CATS → DB category_l2 mapping ────────────────────────────────────────
+const WIZ_L2_MAP = {
+    // D01 Süt
+    'Tam Yağlı Süt':{l1:'D01',l2:'Süt & Süt Alternatifleri'},
+    'Yarım Yağlı Süt':{l1:'D01',l2:'Süt & Süt Alternatifleri'},
+    'Yağsız Süt':{l1:'D01',l2:'Süt & Süt Alternatifleri'},
+    'Bitkisel Süt':{l1:'D01',l2:'Süt & Süt Alternatifleri'},
+    'Süt Tozu':{l1:'D01',l2:'Süt & Süt Alternatifleri'},
+    // D01 Yoğurt
+    'Yoğurt':{l1:'D01',l2:'Yoğurt & Fermente'},
+    'Ayran / Kefir':{l1:'D01',l2:'Yoğurt & Fermente'},
+    'Kwark / Lor':{l1:'D01',l2:'Yoğurt & Fermente'},
+    // D01 Krema / Tereyağı
+    'Krema / Çırpılmış':{l1:'D01',l2:'Krema & Tatlı Süt Ürünleri'},
+    'Tereyağı':{l1:'D01',l2:'Tereyağı & Yağlar'},
+    'Margarin':{l1:'D01',l2:'Tereyağı & Yağlar'},
+    // D01 Peynir
+    'Gouda':{l1:'D01',l2:'Peynir'},
+    'Mozzarella':{l1:'D01',l2:'Peynir'},
+    'Beyaz Peynir / Feta':{l1:'D01',l2:'Peynir'},
+    'Krem Peynir':{l1:'D01',l2:'Peynir'},
+    'Parmesan':{l1:'D01',l2:'Peynir'},
+    'Çedar':{l1:'D01',l2:'Peynir'},
+    'Brie / Camembert':{l1:'D01',l2:'Peynir'},
+    'Keçi / Koyun':{l1:'D01',l2:'Peynir'},
+    'Mavi Peynir':{l1:'D01',l2:'Peynir'},
+    'Rendelenmiş Peynir':{l1:'D01',l2:'Peynir'},
+    'Dilimli Peynir':{l1:'D01',l2:'Peynir'},
+    'Eritme Peyniri':{l1:'D01',l2:'Peynir'},
+    'Vegan Peynir':{l1:'D01',l2:'Peynir'},
+    'Vegan Süt':{l1:'D01',l2:'Süt & Süt Alternatifleri'},
+    // D01 Yumurta
+    'Serbest Gezinen':{l1:'D01',l2:'Yumurta'},
+    'Standart Yumurta':{l1:'D01',l2:'Yumurta'},
+    'Bio Yumurta':{l1:'D01',l2:'Yumurta'},
+    'Bıldırcın Yumurtası':{l1:'D01',l2:'Yumurta'},
+    // D02 Et
+    'Biftek':{l1:'D02',l2:'Sığır Eti'},
+    'Dana Kıyma':{l1:'D02',l2:'Sığır Eti'},
+    'Rozbif / Döner':{l1:'D02',l2:'Sığır Eti'},
+    'Sığır Kaburga':{l1:'D02',l2:'Sığır Eti'},
+    'Dana Eti':{l1:'D02',l2:'Sığır Eti'},
+    'Karma Kıyma':{l1:'D02',l2:'Domuz Eti'},
+    'Domuz Eti':{l1:'D02',l2:'Domuz Eti'},
+    'Kuzu Eti':{l1:'D02',l2:'Domuz Eti'},
+    'Jambon':{l1:'D02',l2:'Domuz Eti'},
+    'Salam / Sosis':{l1:'D02',l2:'Domuz Eti'},
+    'Bacon / Pastırma':{l1:'D02',l2:'Domuz Eti'},
+    'Sucuk / Türk Sosis':{l1:'D02',l2:'Domuz Eti'},
+    'Terrine / Paté':{l1:'D02',l2:'Domuz Eti'},
+    // D02 Tavuk
+    'Tavuk Göğsü':{l1:'D02',l2:'Kümes Hayvanları'},
+    'Tavuk Budu':{l1:'D02',l2:'Kümes Hayvanları'},
+    'Bütün Tavuk':{l1:'D02',l2:'Kümes Hayvanları'},
+    'Tavuk Kıyma':{l1:'D02',l2:'Kümes Hayvanları'},
+    'Tavuk Nugget':{l1:'D02',l2:'Kümes Hayvanları'},
+    'Hindi':{l1:'D02',l2:'Kümes Hayvanları'},
+    // D02 Balık
+    'Somon':{l1:'D02',l2:'Balık & Deniz Ürünleri'},
+    'Ton Balığı':{l1:'D02',l2:'Balık & Deniz Ürünleri'},
+    'Karides':{l1:'D02',l2:'Balık & Deniz Ürünleri'},
+    'Beyaz Balık':{l1:'D02',l2:'Balık & Deniz Ürünleri'},
+    'Ringa / Uskumru':{l1:'D02',l2:'Balık & Deniz Ürünleri'},
+    'Alabalık / Levrek':{l1:'D02',l2:'Balık & Deniz Ürünleri'},
+    'Midye / Kalamar':{l1:'D02',l2:'Balık & Deniz Ürünleri'},
+    'Balık Parmak':{l1:'D02',l2:'Balık & Deniz Ürünleri'},
+    'Füme Balık':{l1:'D02',l2:'Balık & Deniz Ürünleri'},
+    // D03 Sebze
+    'Domates':{l1:'D03',l2:'Taze Sebze'},
+    'Salatalık':{l1:'D03',l2:'Taze Sebze'},
+    'Biber':{l1:'D03',l2:'Taze Sebze'},
+    'Soğan / Sarımsak':{l1:'D03',l2:'Taze Sebze'},
+    'Patates':{l1:'D03',l2:'Taze Sebze'},
+    'Havuç':{l1:'D03',l2:'Taze Sebze'},
+    'Brokoli / Karnabahar':{l1:'D03',l2:'Taze Sebze'},
+    'Ispanak / Marul':{l1:'D03',l2:'Taze Sebze'},
+    'Pırasa / Kereviz':{l1:'D03',l2:'Taze Sebze'},
+    'Kabak / Patlıcan':{l1:'D03',l2:'Taze Sebze'},
+    'Mantar':{l1:'D03',l2:'Taze Sebze'},
+    'Kuşkonmaz':{l1:'D03',l2:'Taze Sebze'},
+    'Bezelye / Fasulye':{l1:'D03',l2:'Taze Sebze'},
+    'Mısır':{l1:'D03',l2:'Taze Sebze'},
+    'Turp / Pancar':{l1:'D03',l2:'Taze Sebze'},
+    // D03 Meyve
+    'Elma':{l1:'D03',l2:'Taze Meyve'},
+    'Muz':{l1:'D03',l2:'Taze Meyve'},
+    'Portakal / Mandalina':{l1:'D03',l2:'Taze Meyve'},
+    'Çilek':{l1:'D03',l2:'Taze Meyve'},
+    'Üzüm':{l1:'D03',l2:'Taze Meyve'},
+    'Armut':{l1:'D03',l2:'Taze Meyve'},
+    'Kivi':{l1:'D03',l2:'Taze Meyve'},
+    'Mango / Ananas':{l1:'D03',l2:'Taze Meyve'},
+    'Şeftali / Kayısı':{l1:'D03',l2:'Taze Meyve'},
+    'Limon / Misket':{l1:'D03',l2:'Taze Meyve'},
+    'Karpuz / Kavun':{l1:'D03',l2:'Taze Meyve'},
+    'Ahududu / Böğürtlen':{l1:'D03',l2:'Taze Meyve'},
+    'Kuru Meyve':{l1:'D08',l2:'Fındık & Kuru Meyve'},
+    // D04 Ekmek
+    'Beyaz Ekmek':{l1:'D04',l2:'Ekmek'},
+    'Kepekli Ekmek':{l1:'D04',l2:'Ekmek'},
+    'Baget':{l1:'D04',l2:'Ekmek'},
+    'Sandviç Ekmeği':{l1:'D04',l2:'Ekmek'},
+    'Kruvasan':{l1:'D04',l2:'Belçika Fırın'},
+    'Brioche':{l1:'D04',l2:'Belçika Fırın'},
+    'Tortilla / Wrap':{l1:'D04',l2:'Ekmek'},
+    'Pide / Naan':{l1:'D04',l2:'Ekmek'},
+    'Kraker / Besküvi':{l1:'D04',l2:'Ekmek'},
+    // D05 Makarna/Pirinç
+    'Spagetti':{l1:'D05',l2:'Tahıl & Makarna'},
+    'Penne / Fusilli':{l1:'D05',l2:'Tahıl & Makarna'},
+    'Tagliatelle / Lasagne':{l1:'D05',l2:'Tahıl & Makarna'},
+    'Tam Buğday Makarna':{l1:'D05',l2:'Tahıl & Makarna'},
+    'Beyaz Pirinç':{l1:'D05',l2:'Tahıl & Makarna'},
+    'Basmati':{l1:'D05',l2:'Tahıl & Makarna'},
+    'Tam Pirinç':{l1:'D05',l2:'Tahıl & Makarna'},
+    'Kuskus / Bulgur':{l1:'D05',l2:'Tahıl & Makarna'},
+    'Kinoa':{l1:'D05',l2:'Tahıl & Makarna'},
+    'Erişte':{l1:'D05',l2:'Tahıl & Makarna'},
+    'Mercimek':{l1:'D05',l2:'Tahıl & Makarna'},
+    'Nohut':{l1:'D05',l2:'Tahıl & Makarna'},
+    'Kuru Fasulye':{l1:'D05',l2:'Tahıl & Makarna'},
+    'Bakla / Soya':{l1:'D05',l2:'Tahıl & Makarna'},
+    'Konserve Bakliyat':{l1:'D05',l2:'Konserve & Kavanoz'},
+    // D05 Sos/Konserve
+    'Domates Konserve':{l1:'D05',l2:'Konserve & Kavanoz'},
+    'Ton / Balık Konserve':{l1:'D05',l2:'Konserve & Kavanoz'},
+    'Sebze Konserve':{l1:'D05',l2:'Konserve & Kavanoz'},
+    'Zeytin / Turşu':{l1:'D05',l2:'Konserve & Kavanoz'},
+    'Domates Sosu':{l1:'D05',l2:'Yağ & Sos'},
+    'Pesto / Carbonara':{l1:'D05',l2:'Yağ & Sos'},
+    'Ketçap / Mayonez':{l1:'D05',l2:'Yağ & Sos'},
+    'Hardal / Tabasco':{l1:'D05',l2:'Yağ & Sos'},
+    'Soya / Worcestershire':{l1:'D05',l2:'Yağ & Sos'},
+    'Zeytinyağı':{l1:'D05',l2:'Yağ & Sos'},
+    'Ayçiçek Yağı':{l1:'D05',l2:'Yağ & Sos'},
+    'Sirke':{l1:'D05',l2:'Yağ & Sos'},
+    'Tuz / Karabiber':{l1:'D05',l2:'Baharat & Çeşni'},
+    'Kekik / Fesleğen':{l1:'D05',l2:'Baharat & Çeşni'},
+    'Köri / Kimyon':{l1:'D05',l2:'Baharat & Çeşni'},
+    'Tarçın / Vanilya':{l1:'D05',l2:'Baharat & Çeşni'},
+    'Beyaz Un':{l1:'D05',l2:'Baharat & Çeşni'},
+    'Kepek Unu':{l1:'D05',l2:'Baharat & Çeşni'},
+    'Nişasta / Mısır Unu':{l1:'D05',l2:'Baharat & Çeşni'},
+    'Toz Şeker':{l1:'D05',l2:'Baharat & Çeşni'},
+    'Pudra / Vanilyalı':{l1:'D05',l2:'Baharat & Çeşni'},
+    'Kabartma Tozu':{l1:'D05',l2:'Baharat & Çeşni'},
+    'Çikolata Parçacığı':{l1:'D05',l2:'Baharat & Çeşni'},
+    'Konserve Çorba':{l1:'D05',l2:'Konserve Çorba & Hazır Fon'},
+    'Hazır Çorba (Toz)':{l1:'D05',l2:'Konserve Çorba & Hazır Fon'},
+    // D06 İçecek
+    'Maden Suyu':{l1:'D06',l2:'Su & Maden Suyu'},
+    'Doğal Su':{l1:'D06',l2:'Su & Maden Suyu'},
+    'Portakal Suyu':{l1:'D06',l2:'Meyve Suyu'},
+    'Meyve Suyu':{l1:'D06',l2:'Meyve Suyu'},
+    'Smoothie':{l1:'D06',l2:'Meyve Suyu'},
+    'Cola':{l1:'D06',l2:'Gazlı İçecek'},
+    'Limonata / Fanta':{l1:'D06',l2:'Gazlı İçecek'},
+    'Ice Tea':{l1:'D06',l2:'Gazlı İçecek'},
+    'Enerji İçeceği':{l1:'D06',l2:'Gazlı İçecek'},
+    'Tonic / Bitter':{l1:'D06',l2:'Gazlı İçecek'},
+    'Sırob / Konsantre':{l1:'D06',l2:'Gazlı İçecek'},
+    'Spor İçeceği':{l1:'D06',l2:'Gazlı İçecek'},
+    'Filtre Kahve':{l1:'D06',l2:'Sıcak İçecek'},
+    'Espresso / Fasulye':{l1:'D06',l2:'Sıcak İçecek'},
+    'Kapsül (Nespresso)':{l1:'D06',l2:'Sıcak İçecek'},
+    'Instant Kahve':{l1:'D06',l2:'Sıcak İçecek'},
+    'Siyah Çay':{l1:'D06',l2:'Sıcak İçecek'},
+    'Yeşil Çay':{l1:'D06',l2:'Sıcak İçecek'},
+    'Bitki Çayı':{l1:'D06',l2:'Sıcak İçecek'},
+    'Çay Bardağı (Poşet)':{l1:'D06',l2:'Sıcak İçecek'},
+    'Kakao / Çikolatalı Süt':{l1:'D06',l2:'Sıcak İçecek'},
+    'Pilsner':{l1:'D06',l2:'Bira'},
+    'Abbaye / Trappist':{l1:'D06',l2:'Bira'},
+    'Beyaz / Meyveli':{l1:'D06',l2:'Bira'},
+    'Alkolsüz Bira':{l1:'D06',l2:'Bira'},
+    'Craft / Özel':{l1:'D06',l2:'Bira'},
+    'Kırmızı Şarap':{l1:'D06',l2:'Şarap'},
+    'Beyaz Şarap':{l1:'D06',l2:'Şarap'},
+    'Rosé Şarap':{l1:'D06',l2:'Şarap'},
+    'Köpüklü / Prosecco':{l1:'D06',l2:'Şarap'},
+    'Bag-in-Box':{l1:'D06',l2:'Şarap'},
+    'Viski':{l1:'D06',l2:'Spirits & Likör'},
+    'Votka':{l1:'D06',l2:'Spirits & Likör'},
+    'Cin':{l1:'D06',l2:'Spirits & Likör'},
+    'Rom':{l1:'D06',l2:'Spirits & Likör'},
+    'Konyak / Brendi':{l1:'D06',l2:'Spirits & Likör'},
+    'Likör':{l1:'D06',l2:'Spirits & Likör'},
+    'Aperitif':{l1:'D06',l2:'Spirits & Likör'},
+    'Jenever (Hollanda)':{l1:'D06',l2:'Spirits & Likör'},
+    // D07 Dondurulmuş
+    'Dondurulmuş Sebze':{l1:'D07',l2:'Dondurulmuş Sebze'},
+    'Dondurulmuş Pizza':{l1:'D07',l2:'Dondurulmuş Hazır Yemek'},
+    'Patates Kızartması':{l1:'D07',l2:'Dondurulmuş Hazır Yemek'},
+    'Dondurulmuş Et/Balık':{l1:'D07',l2:'Dondurulmuş Et & Balık'},
+    'Dondurulmuş Hamur':{l1:'D07',l2:'Dondurulmuş Hazır Yemek'},
+    'Dondurulmuş Meyve':{l1:'D07',l2:'Dondurulmuş Tatlı & Dondurma'},
+    'Dondurma (Kutu)':{l1:'D07',l2:'Dondurulmuş Tatlı & Dondurma'},
+    'Dondurma (Bar)':{l1:'D07',l2:'Dondurulmuş Tatlı & Dondurma'},
+    'Sorbe / Frozen':{l1:'D07',l2:'Dondurulmuş Tatlı & Dondurma'},
+    'Puding / Vla':{l1:'D10',l2:'Soğutmalı Hazır Yemek'},
+    'Tiramisu / Mousse':{l1:'D10',l2:'Soğutmalı Hazır Yemek'},
+    'Waffle / Pannenkoek':{l1:'D04',l2:'Belçika Fırın'},
+    // D08 Atıştırmalık
+    'Sütlü Çikolata':{l1:'D08',l2:'Çikolata'},
+    'Bitter Çikolata':{l1:'D08',l2:'Çikolata'},
+    'Beyaz Çikolata':{l1:'D08',l2:'Çikolata'},
+    'Çikolata Bar':{l1:'D08',l2:'Çikolata'},
+    'Pralin / Trüf':{l1:'D15',l2:'Belçika Çikolatası'},
+    'Şeker / Yumuşak':{l1:'D08',l2:'Şekerleme & Gummy'},
+    'Cips':{l1:'D08',l2:'Cips & Tuzlu Atıştırmalık'},
+    'Popcorn / Kraker':{l1:'D08',l2:'Cips & Tuzlu Atıştırmalık'},
+    'Fındık':{l1:'D08',l2:'Fındık & Kuru Meyve'},
+    'Badem':{l1:'D08',l2:'Fındık & Kuru Meyve'},
+    'Ceviz / Kaju':{l1:'D08',l2:'Fındık & Kuru Meyve'},
+    'Karışık Kuruyemiş':{l1:'D08',l2:'Fındık & Kuru Meyve'},
+    'Kuru Meyve Mix':{l1:'D08',l2:'Fındık & Kuru Meyve'},
+    'Bisküvi':{l1:'D08',l2:'Bisküvi & Kek'},
+    'Gofret':{l1:'D08',l2:'Bisküvi & Kek'},
+    'Kek / Tart':{l1:'D08',l2:'Bisküvi & Kek'},
+    'Muffin / Cupcake':{l1:'D08',l2:'Bisküvi & Kek'},
+    'Çocuk Bisküvisi':{l1:'D08',l2:'Bisküvi & Kek'},
+    'Enerji Bar':{l1:'D08',l2:'Bisküvi & Kek'},
+    // D09 Kahvaltılık
+    'Corn Flakes':{l1:'D09',l2:'Mısır Gevreği'},
+    'Müsli':{l1:'D09',l2:'Mısır Gevreği'},
+    'Granola':{l1:'D09',l2:'Mısır Gevreği'},
+    'Yulaf Ezmesi':{l1:'D09',l2:'Yulaf & Sıcak Tahıl'},
+    'Çocuk Gevrekleri':{l1:'D09',l2:'Mısır Gevreği'},
+    'Protein Gevreği':{l1:'D09',l2:'Mısır Gevreği'},
+    'Çilek Reçeli':{l1:'D09',l2:'Reçel & Bal'},
+    'Diğer Reçeller':{l1:'D09',l2:'Reçel & Bal'},
+    'Bal':{l1:'D09',l2:'Reçel & Bal'},
+    'Pekmez / Diğer':{l1:'D09',l2:'Reçel & Bal'},
+    'Fıstık Ezmesi':{l1:'D09',l2:'Süt Ürünleri Kahvaltı'},
+    'Nutella / Fındık':{l1:'D09',l2:'Süt Ürünleri Kahvaltı'},
+    'Spekuloos Ezmesi':{l1:'D09',l2:'Süt Ürünleri Kahvaltı'},
+    // D10 Hazır
+    'Hazır Makarna':{l1:'D10',l2:'Soğutmalı Hazır Yemek'},
+    'Hazır Pirinç':{l1:'D10',l2:'Soğutmalı Hazır Yemek'},
+    'Lazanya / Fırın':{l1:'D10',l2:'Soğutmalı Hazır Yemek'},
+    'Stamppot / Stoof':{l1:'D10',l2:'Soğutmalı Hazır Yemek'},
+    'Sandviç Malzeme':{l1:'D10',l2:'Sandviç & Wrap'},
+    'Salata Hazır':{l1:'D10',l2:'Salata & Meze'},
+    'Tofu':{l1:'D10',l2:'Soğutmalı Hazır Yemek'},
+    'Bitkisel Burger':{l1:'D10',l2:'Soğutmalı Hazır Yemek'},
+    'Bitkisel Kıyma':{l1:'D10',l2:'Soğutmalı Hazır Yemek'},
+    'Bitkisel Sosis':{l1:'D10',l2:'Soğutmalı Hazır Yemek'},
+    'Seitan / Quorn':{l1:'D10',l2:'Soğutmalı Hazır Yemek'},
+    // D11 Temizlik
+    'Çamaşır Deterjanı':{l1:'D11',l2:'Çamaşır'},
+    'Yumuşatıcı':{l1:'D11',l2:'Çamaşır'},
+    'Kuru Temizleme':{l1:'D11',l2:'Çamaşır'},
+    'Bulaşık Sıvısı':{l1:'D11',l2:'Ev Temizliği'},
+    'Bulaşık Makinesi':{l1:'D11',l2:'Ev Temizliği'},
+    'Çok Amaçlı Temizlik':{l1:'D11',l2:'Ev Temizliği'},
+    'Banyo / Tuvalet':{l1:'D11',l2:'Ev Temizliği'},
+    'Mutfak Temizliği':{l1:'D11',l2:'Ev Temizliği'},
+    'Cam Temizliği':{l1:'D11',l2:'Ev Temizliği'},
+    'Kireç Çözücü':{l1:'D11',l2:'Ev Temizliği'},
+    'Temizlik Bezi':{l1:'D11',l2:'Ev Temizliği'},
+    'Çöp Torbası':{l1:'D11',l2:'Kağıt & Tek Kullanım'},
+    'Tuvalet Kağıdı':{l1:'D11',l2:'Kağıt & Tek Kullanım'},
+    'Kağıt Havlu':{l1:'D11',l2:'Kağıt & Tek Kullanım'},
+    'Mendil':{l1:'D11',l2:'Kağıt & Tek Kullanım'},
+    'Pişirme Kağıdı':{l1:'D11',l2:'Kağıt & Tek Kullanım'},
+    'Sıkma Torba / Poşet':{l1:'D11',l2:'Kağıt & Tek Kullanım'},
+    'Pil':{l1:'D11',l2:'Kağıt & Tek Kullanım'},
+    'Mum / Ateşleyici':{l1:'D11',l2:'Kağıt & Tek Kullanım'},
+    // D12 Kişisel Bakım
+    'Şampuan':{l1:'D12',l2:'Saç Bakımı'},
+    'Saç Kremi':{l1:'D12',l2:'Saç Bakımı'},
+    'Duş Jeli':{l1:'D12',l2:'Vücut Bakımı'},
+    'El / Vücut Kremi':{l1:'D12',l2:'Vücut Bakımı'},
+    'Güneş Kremi':{l1:'D12',l2:'Vücut Bakımı'},
+    'Yüz Bakımı':{l1:'D12',l2:'Makyaj & Güzellik'},
+    'Sabun':{l1:'D12',l2:'Vücut Bakımı'},
+    'Deodorant':{l1:'D12',l2:'Deodorant & Parfüm'},
+    'Parfüm':{l1:'D12',l2:'Deodorant & Parfüm'},
+    'Tras Ürünleri':{l1:'D12',l2:'Hijyen'},
+    'Diş Macunu':{l1:'D12',l2:'Diş & Ağız'},
+    'Diş Fırçası':{l1:'D12',l2:'Diş & Ağız'},
+    'Gargara':{l1:'D12',l2:'Diş & Ağız'},
+    'Diş İpi':{l1:'D12',l2:'Diş & Ağız'},
+    'Vitamin':{l1:'D12',l2:'Vücut Bakımı'},
+    'Ağrı Kesici':{l1:'D12',l2:'Vücut Bakımı'},
+    'Soğuk Algınlığı':{l1:'D12',l2:'Vücut Bakımı'},
+    'Pansuman':{l1:'D12',l2:'Hijyen'},
+    'Maske':{l1:'D12',l2:'Hijyen'},
+    'Ped':{l1:'D12',l2:'Hijyen'},
+    'Tampon':{l1:'D12',l2:'Hijyen'},
+    'Menstrual Kup':{l1:'D12',l2:'Hijyen'},
+    'Protein Tozu':{l1:'D12',l2:'Vücut Bakımı'},
+    'Vitamin / Supplement':{l1:'D12',l2:'Vücut Bakımı'},
+    // D13 Bebek
+    'Bebek Maması':{l1:'D13',l2:'Bebek Gıda'},
+    'Bebek Bisküvisi':{l1:'D13',l2:'Bebek Gıda'},
+    'Bebek Formülü':{l1:'D13',l2:'Bebek Gıda'},
+    'Bebek Bezi':{l1:'D13',l2:'Bebek Bakım'},
+    'Islak Mendil':{l1:'D13',l2:'Bebek Bakım'},
+    'Bebek Şampuanı':{l1:'D13',l2:'Bebek Bakım'},
+    // D14 Evcil Hayvan
+    'Kedi Maması (Kuru)':{l1:'D14',l2:'Kedi'},
+    'Kedi Maması (Yaş)':{l1:'D14',l2:'Kedi'},
+    'Köpek Maması (Kuru)':{l1:'D14',l2:'Köpek'},
+    'Köpek Maması (Yaş)':{l1:'D14',l2:'Köpek'},
+    'Kedi Kumu':{l1:'D14',l2:'Aksesuar & Kum'},
+    'Evcil Hayvan Ödülü':{l1:'D14',l2:'Kedi'},
+};
+
 let wiz = { step:0, catIdx:-1, subIdx:-1 };
 
 function wizRenderCats() {
@@ -1558,21 +1867,33 @@ async function wizShowResult() {
     const sub = cat?.subs?.[wiz.subIdx];
     if (!sub) { loadEl.classList.add('hidden'); cardsEl.innerHTML = '<p class="text-slate-400 text-sm text-center py-8">Alt kategori seçilmedi</p>'; return; }
 
-    // Alt kategorinin TÜM keyword'lerini OR ile ara → tüm marketlerde eşleşir
-    const orFilter = sub.nl.map(k => `name.ilike.*${k}*`).join(',');
+    // category_l2 ile indexed sorgu → timeout yok
     let data = [];
     try {
-        const { data:d, error } = await sb
+        const catMap = WIZ_L2_MAP[sub.label] || {};
+        let query = sb
             .from('market_chain_products')
             .select('name,name_tr,price,promo_price,currency,chain_slug,captured_at,in_promo,promo_valid_from,promo_valid_until,unit_or_content,image_url,match_group_id')
             .in('chain_slug', SLUGS)
-            .or(orFilter)
             .gt('price', 0)
-            .limit(500);
+            .limit(3000);
+        if (catMap.l2) {
+            query = query.eq('category_l2', catMap.l2);
+        } else if (catMap.l1) {
+            query = query.eq('category_l1', catMap.l1);
+        }
+        const { data:d, error } = await query;
         if (error) throw error;
         data = d || [];
     } catch(e) { console.warn('wizShowResult error:', e); }
-    // Yanlış eşleşmeleri temizle (örn. yumurta aramasında pankek çıkmasın)
+    // JS tarafında keyword filtresi (subcategory spesifikliği)
+    if (sub.nl && sub.nl.length) {
+        data = data.filter(row => {
+            const lname = (row.name || '').toLowerCase();
+            return sub.nl.some(k => lname.includes(k));
+        });
+    }
+    // Yanlış eşleşmeleri temizle
     if (sub.ex && sub.ex.length) {
         data = data.filter(row => {
             const lname = (row.name || '').toLowerCase();
@@ -1627,55 +1948,67 @@ async function wizShowResult() {
         if (eff < minP) { minP = eff; winner = slug; }
     }
 
-    const cards = SLUGS.map(slug => {
-        const cfg  = CHAINS[slug];
-        const row  = best[slug];
-        const isW  = slug === winner && row != null;
-        const eff  = row ? effPrice(row) : NaN;
-        const pct  = row?.in_promo && row?.promo_price != null ? discPct(row.price, row.promo_price) : null;
-        const until= row?.promo_valid_until ? fmtDate(row.promo_valid_until) : null;
-        const img  = row?.image_url || '';
+    // ── Dikey liste: her market bir satır ──────────────────────────────────────
+    const winnerRow = winner ? best[winner] : null;
+    const winnerName = winnerRow ? bestName(winnerRow) : '';
+
+    const rows = SLUGS.map(slug => {
+        const cfg = CHAINS[slug];
+        const row = best[slug];
+        const isW = slug === winner && row != null;
+        const eff = row ? effPrice(row) : NaN;
+        const pct = row?.in_promo && row?.promo_price != null ? discPct(row.price, row.promo_price) : null;
+        const until = row?.promo_valid_until ? fmtDate(row.promo_valid_until) : null;
         const name = row ? bestName(row) : '';
-        return `<div class="promo-card ${isW?'compare-winner':''} border-2 ${isW?'border-emerald-400':'border-transparent'}">
-            <div style="height:3px;background:${isW?'#10b981':cfg.color}"></div>
-            ${img ? `<div class="bg-slate-50 flex items-center justify-center" style="height:100px">
-                <img src="${esc(img)}" alt="${esc(name)}" loading="lazy"
-                    class="max-h-full max-w-full object-contain p-2"
-                    onerror="this.parentElement.style.display='none'">
-            </div>` : ''}
-            <div class="p-3 flex flex-col flex-1">
-                ${isW?`<div class="mb-1.5"><span class="badge-green text-[.65rem]"><i class="fa-solid fa-crown mr-1"></i>En Uygun</span></div>`:''}
-                <div class="flex items-center gap-1.5 mb-2">
-                    ${logoImg(slug,6)}
-                    <div class="flex-1 min-w-0">
-                        <div class="font-black text-slate-800 text-sm">${esc(cfg.label)}</div>
-                    </div>
-                    ${pct?`<span class="badge-red">-${pct}%</span>`:''}
+        const ps   = row ? packSize(row) : '';
+
+        // Resim: ürün görseli varsa onu, yoksa market logosunu göster
+        const imgSrc = row?.image_url || cfg.logo;
+        const imgEl  = `<img src="${esc(imgSrc)}" alt="${esc(name||cfg.label)}" loading="lazy"
+            class="w-14 h-14 object-contain rounded-lg shrink-0 ${row?.image_url ? 'bg-white border border-slate-100' : 'opacity-40 p-1'}"
+            onerror="this.src='${esc(cfg.logo)}'">`;
+
+        if (!row) {
+            return `<div class="light-card flex items-center gap-3 p-3 rounded-xl opacity-40">
+                ${logoImg(slug, 8)}
+                <div class="flex-1 min-w-0">
+                    <div class="font-semibold text-slate-700 text-sm">${esc(cfg.label)}</div>
+                    <div class="text-xs text-slate-400">Bu markette bulunamadı</div>
                 </div>
-                ${row?`
-                    <p class="text-slate-600 text-xs leading-snug line-clamp-2 mb-1 flex-1">${esc(name)}</p>
-                    ${(()=>{const ps=packSize(row);return ps?`<p class="text-slate-400 text-[.65rem] mb-1.5">${esc(ps)}</p>`:''})()}
-                    ${row.in_promo&&row.promo_price!=null&&Number(row.price)!==Number(row.promo_price)
-                        ?`<div class="strike text-xs mb-0.5">${fmtP(row.price,row.currency)}</div>`:''}
-                    <div class="text-xl font-black ${isW?'text-emerald-600':'text-slate-800'}">${fmtP(eff,row.currency)}</div>
-                    ${until?`<div class="text-[.65rem] text-slate-400 mt-1"><i class="fa-regular fa-clock mr-1"></i>${until} kadar</div>`:''}
-                `:`<div class="flex items-center justify-center flex-1 py-4">
-                    <p class="text-slate-300 text-xs text-center italic">Bu markette<br>bulunamadı</p>
-                </div>`}
+                <div class="text-slate-300 font-bold text-lg">—</div>
+            </div>`;
+        }
+
+        return `<div class="light-card flex items-center gap-3 p-3 rounded-xl border-2 transition-all
+            ${isW ? 'border-emerald-400 bg-emerald-50/40' : 'border-transparent hover:border-slate-200'}">
+            <div class="flex flex-col items-center gap-1 shrink-0">
+                ${logoImg(slug, 8)}
+                ${isW ? `<span class="text-[.55rem] font-black text-emerald-600 uppercase tracking-wide">En Ucuz</span>` : ''}
+            </div>
+            ${imgEl}
+            <div class="flex-1 min-w-0">
+                <div class="font-semibold text-slate-800 text-sm leading-snug line-clamp-2">${esc(name)}</div>
+                ${ps ? `<div class="text-xs text-slate-400 mt-0.5">${esc(ps)}</div>` : ''}
+                ${pct ? `<span class="inline-block mt-1 badge-red text-[.6rem]">-${pct}% indirim${until?' · '+until:''}</span>` : ''}
+            </div>
+            <div class="text-right shrink-0 ml-2">
+                ${row.in_promo && row.promo_price != null && Number(row.price) !== Number(row.promo_price)
+                    ? `<div class="strike text-xs text-slate-400">${fmtP(row.price, row.currency)}</div>` : ''}
+                <div class="text-xl font-black ${isW ? 'text-emerald-600' : 'text-slate-800'}">${fmtP(eff, row.currency)}</div>
             </div>
         </div>`;
     }).join('');
 
     cardsEl.innerHTML = `
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">${cards}</div>
-        ${Number.isFinite(minP)?`
-        <div class="light-card p-4 flex items-center justify-center gap-3 flex-wrap mt-1">
-            <i class="fa-solid fa-trophy text-amber-400 text-xl"></i>
-            <span class="text-slate-700 font-semibold text-sm">En uygun:
-                <strong class="text-emerald-600">${esc(CHAINS[winner]?.label||winner)}</strong>
-                — ${minP.toFixed(2)} EUR
-            </span>
-        </div>`:''}`;
+        ${Number.isFinite(minP) ? `
+        <div class="light-card p-3 flex items-center gap-3 mb-3 border-l-4 border-emerald-400">
+            <i class="fa-solid fa-trophy text-amber-400 text-xl shrink-0"></i>
+            <div class="min-w-0">
+                <div class="font-bold text-emerald-600 text-sm">${esc(CHAINS[winner]?.label||winner)} en uygun</div>
+                <div class="text-slate-500 text-xs line-clamp-1">${esc(winnerName)} · ${minP.toFixed(2)} EUR</div>
+            </div>
+        </div>` : ''}
+        <div class="space-y-2">${rows}</div>`;
 }
 
 // ═══════════════════════════════════════════════════════════════════
