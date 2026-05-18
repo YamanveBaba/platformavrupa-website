@@ -471,30 +471,46 @@ def urun_cevir(isim: str, translator=None) -> str:
     """
     Bir ürün ismini çevirir:
     1. Glossary ile dene
-    2. Yeterli değilse Google Translate ile tamamla
+    2. Glossary değiştiremediyse ve translator varsa Google Translate ile tamamla
     """
     if not isim:
         return isim
 
     ceviri, _ = glossary_cevir(isim)
+    if ceviri == isim and translator:
+        sonuclar = google_cevir(translator, [isim])
+        if sonuclar and sonuclar[0] != isim:
+            return sonuclar[0]
     return ceviri
 
 
 def toplu_cevir(urunler: list[dict], translator=None, verbose: bool = True) -> list[dict]:
     """
     Ürün listesini toplu çevir. Her ürüne 'name_tr' alanı ekle.
+    Glossary çeviri yapamadıysa (metin değişmediyse) Google Translate fallback devreye girer.
     """
     google_gerekli = []
     google_indexler = []
 
-    # Önce glossary ile dene
     for i, urun in enumerate(urunler):
         isim = urun.get("name", "")
         ceviri, _ = glossary_cevir(isim)
         urun["name_tr"] = ceviri
+        if ceviri == isim and isim:
+            google_gerekli.append(isim)
+            google_indexler.append(i)
+
+    if google_gerekli and translator:
+        if verbose:
+            print(f"  {len(google_gerekli)} ürün Google Translate'e gönderiliyor...")
+        google_sonuclar = google_cevir(translator, google_gerekli)
+        for idx, sonuc in zip(google_indexler, google_sonuclar):
+            if sonuc and sonuc != urunler[idx].get("name", ""):
+                urunler[idx]["name_tr"] = sonuc
 
     if verbose:
-        print(f"  {len(urunler)} ürün çevrildi (glossary)")
+        google_sayisi = len(google_gerekli) if translator else 0
+        print(f"  {len(urunler)} ürün çevrildi (glossary: {len(urunler)-len(google_gerekli)}, Google: {google_sayisi})")
 
     return urunler
 

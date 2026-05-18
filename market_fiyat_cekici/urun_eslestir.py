@@ -210,7 +210,7 @@ def match_group_id_hesapla(name: str, brand: str, unit_or_content: str,
         return ''  # Çok kısa/anlamsız — eşleştirme yok
 
     # Kategori prefix: "D01|Peynir|melk volle" → sadece aynı kategoridekiler eşleşir
-    cat_prefix = f"{(category_l1 or '').strip()}|{(category_l2 or '').strip()}|"
+    cat_prefix = f"{(category_l1 or '').strip()}|"
     key = cat_prefix + norm
     return 'mg' + hashlib.md5(key.encode('utf-8')).hexdigest()[:14]
 

@@ -54,7 +54,7 @@ def chain_commands(script_dir: str, *, lidl_mode: str) -> List[ChainSpec]:
         ),
         (
             "colruyt",
-            [py, "colruyt_product_search_api_cek.py", "--no-pause"],
+            [py, "colruyt_kategori_cek.py", "--zaten-giris", "--no-pause"],
         ),
         (
             "delhaize",
@@ -129,6 +129,15 @@ def main() -> int:
             rc_all = p.returncode
             if not args.continue_on_error:
                 return p.returncode
+
+        if name == "lidl":
+            print("\n[Lidl] Resim patch basliyor (image_url bos urunler)...")
+            subprocess.run(
+                [sys.executable, "lidl_resim_cek.py"],
+                cwd=script_dir,
+                check=False,
+            )
+
         if i < len(specs) - 1:
             sec = random.uniform(args.between_min_sec, args.between_max_sec)
             print(f"\nSonraki zincir icin {sec:.0f} sn bekleniyor...\n")

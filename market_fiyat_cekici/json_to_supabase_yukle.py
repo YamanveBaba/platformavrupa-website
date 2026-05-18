@@ -51,6 +51,27 @@ except Exception:
 
 BATCH_SIZE = 300
 
+_COLRUYT_UNIT: dict = {
+    "K": "kg", "KG": "kg",
+    "L": "L",  "LT": "L",
+    "CL": "cL", "ML": "mL",
+    "G": "g",  "GR": "g",
+    "S": "stuk", "ST": "stuk", "P": "stuk",
+}
+
+def _safe_float(v) -> Optional[float]:
+    if v is None:
+        return None
+    try:
+        return float(v)
+    except (TypeError, ValueError):
+        return None
+
+def _colruyt_unit(code: Optional[str]) -> Optional[str]:
+    if not code:
+        return None
+    return _COLRUYT_UNIT.get(str(code).upper().strip(), str(code).strip()[:50]) or None
+
 
 def _cevir(isim: str) -> str | None:
     """Glossary ile Türkçeye çevir. Yüklenemezse None döner (DB'de boş kalır)."""
@@ -206,6 +227,8 @@ def row_aldi(
         "promo_valid_until": promo_until,
         "category_name": (u.get("topCategoryName") or u.get("category") or "")[:500] or None,
         "image_url": image[:1000] or None,
+        "unit_price": _safe_float(u.get("unitPrice") or u.get("pricePerUOM")),
+        "unit_type": (u.get("unitType") or u.get("measurementUnit") or "")[:50] or None,
         "captured_at": captured_at,
         "import_run_id": import_run_id,
         "raw_json": u if include_raw else None,
@@ -227,21 +250,28 @@ def row_colruyt(
     if rpn is None or str(rpn).strip() == "":
         return {}
     try:
-        price_nested = p.get("price") or {}
-        price_f = float(
-            (price_nested.get("basicPrice") if isinstance(price_nested, dict) else None)
-            or p.get("basicPrice") or 0
-        )
+        if p.get("price") is not None:
+            price_f = float(p.get("price"))
+        else:
+            price_nested = p.get("price") or {}
+            price_f = float(
+                (price_nested.get("basicPrice") if isinstance(price_nested, dict) else None)
+                or p.get("basicPrice") or 0
+            )
     except (TypeError, ValueError):
         price_f = 0.0
-    qp = p.get("quantityPrice")
+    qp = p.get("promo_price") or p.get("quantityPrice")
     try:
         promo_f = float(qp) if qp is not None else None
     except (TypeError, ValueError):
         promo_f = None
     in_promo = bool(p.get("inPromo"))
-    promo_start = parse_promo_date(p.get("promoPublicationStart"))
-    promo_end = parse_promo_date(p.get("promoPublicationEnd"))
+    promo_start = parse_promo_date(
+        p.get("promo_valid_from") or p.get("promoPublicationStart")
+    )
+    promo_end = parse_promo_date(
+        p.get("promo_valid_until") or p.get("promoPublicationEnd")
+    )
     row = {
         "chain_slug": chain_slug[:80],
         "country_code": country_code[:8],
@@ -258,7 +288,9 @@ def row_colruyt(
         "promo_valid_from": promo_start,
         "promo_valid_until": promo_end,
         "category_name": (p.get("topCategoryName") or "")[:500] or None,
-        "image_url": None,
+        "image_url": (p.get("image_url") or p.get("thumbNail") or p.get("fullImage") or "")[:1000] or None,
+        "unit_price": _safe_float(p.get("pricePerUOM")),
+        "unit_type": _colruyt_unit(p.get("measurementUnit")),
         "captured_at": captured_at,
         "import_run_id": import_run_id,
         "raw_json": p if include_raw else None,
@@ -297,7 +329,9 @@ def row_delhaize(p: dict, captured_at: str, import_run_id: str, include_raw: boo
         "promo_valid_from": parse_promo_date(p.get("promoValidFrom")),
         "promo_valid_until": parse_promo_date(p.get("promoValidUntil")),
         "category_name": (p.get("topCategoryName") or p.get("categoryName") or "")[:500] or None,
-        "image_url": (p.get("imageUrl") or "")[:1000] or None,
+        "image_url": (p.get("imageUrl") or p.get("image_url") or "")[:1000] or None,
+        "unit_price": _safe_float(p.get("unitPrice") or p.get("pricePerUOM")),
+        "unit_type": (p.get("unitType") or p.get("measurementUnit") or "")[:50] or None,
         "captured_at": captured_at,
         "import_run_id": import_run_id,
         "raw_json": p if include_raw else None,
@@ -310,16 +344,22 @@ def row_lidl(p: dict, captured_at: str, import_run_id: str, include_raw: bool) -
     if not pid:
         return {}
     try:
-        price_f = float(p.get("basicPrice"))
+        price_f = float(p.get("price") if p.get("price") is not None else p.get("basicPrice"))
     except (TypeError, ValueError):
         price_f = 0.0
     in_promo = bool(p.get("inPromo"))
     try:
-        promo_f = float(p.get("promoPrice")) if p.get("promoPrice") is not None else None
+        promo_f = float(
+            p.get("promo_price") if p.get("promo_price") is not None else p.get("promoPrice")
+        ) if (p.get("promo_price") is not None or p.get("promoPrice") is not None) else None
     except (TypeError, ValueError):
         promo_f = None
-    promo_from = parse_promo_date(p.get("promotionStartDate"))
-    promo_until = parse_promo_date(p.get("promotionEndDate"))
+    promo_from = parse_promo_date(
+        p.get("promo_valid_from") or p.get("promotionStartDate")
+    )
+    promo_until = parse_promo_date(
+        p.get("promo_valid_until") or p.get("promotionEndDate")
+    )
     row = {
         "chain_slug": "lidl_be",
         "country_code": "BE",
@@ -336,7 +376,9 @@ def row_lidl(p: dict, captured_at: str, import_run_id: str, include_raw: bool) -
         "promo_valid_from": promo_from,
         "promo_valid_until": promo_until,
         "category_name": (p.get("topCategoryName") or "")[:500] or None,
-        "image_url": (p.get("imageUrl") or p.get("lidlImageUrl") or "")[:1000] or None,
+        "image_url": (p.get("imageUrl") or p.get("image") or p.get("lidlImageUrl") or "")[:1000] or None,
+        "unit_price": _safe_float(p.get("unitPrice") or p.get("pricePerUOM")),
+        "unit_type": (p.get("unitType") or p.get("measurementUnit") or "")[:50] or None,
         "captured_at": captured_at,
         "import_run_id": import_run_id,
         "raw_json": p if include_raw else None,
@@ -349,14 +391,18 @@ def row_carrefour(p: dict, captured_at: str, import_run_id: str, include_raw: bo
     if not pid:
         return {}
     try:
-        price_f = float(p.get("basicPrice"))
+        price_f = float(p.get("price") if p.get("price") is not None else p.get("basicPrice"))
     except (TypeError, ValueError):
         price_f = 0.0
     in_promo = bool(p.get("inPromo"))
     try:
-        promo_f = float(p.get("promoPrice")) if p.get("promoPrice") is not None else None
+        promo_f = float(
+            p.get("promo_price") if p.get("promo_price") is not None else p.get("promoPrice")
+        ) if (p.get("promo_price") is not None or p.get("promoPrice") is not None) else None
     except (TypeError, ValueError):
         promo_f = None
+    promo_from = parse_promo_date(p.get("promo_valid_from"))
+    promo_until = parse_promo_date(p.get("promo_valid_until"))
     row = {
         "chain_slug": "carrefour_be",
         "country_code": "BE",
@@ -370,10 +416,12 @@ def row_carrefour(p: dict, captured_at: str, import_run_id: str, include_raw: bo
         "currency": "EUR",
         "promo_price": promo_f if in_promo else None,
         "in_promo": in_promo,
-        "promo_valid_from": None,
-        "promo_valid_until": None,
+        "promo_valid_from": promo_from,
+        "promo_valid_until": promo_until,
         "category_name": (p.get("topCategoryName") or "")[:500] or None,
-        "image_url": (p.get("imageUrl") or "")[:1000] or None,
+        "image_url": (p.get("imageUrl") or p.get("image_url") or p.get("image") or "")[:1000] or None,
+        "unit_price": _safe_float(p.get("unitPrice") or p.get("pricePerUOM")),
+        "unit_type": (p.get("unitType") or p.get("measurementUnit") or "")[:50] or None,
         "captured_at": captured_at,
         "import_run_id": import_run_id,
         "raw_json": p if include_raw else None,
@@ -466,8 +514,12 @@ def json_to_rows(data: dict, include_raw: bool) -> List[dict]:
     try:
         from kategori_ata import kategorize_et as _kat
         for row in rows:
+            # Marka + isim birleştir: "original" yerine "philadelphia original" gibi
+            name_for_cat = (
+                (row.get("brand") or "") + " " + (row.get("name") or "")
+            ).strip()
             l1, l2, l3, l4 = _kat(
-                row.get("name", ""),
+                name_for_cat,
                 category_name=row.get("category_name", "") or "",
                 chain=row.get("chain_slug", ""),
             )

@@ -82,6 +82,9 @@
         .view-toggle { display: flex; background: white; border: 1px solid #E5E7EB; border-radius: 99px; padding: 3px; }
         .view-btn { padding: 6px 14px; border-radius: 99px; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 6px; transition: all 0.2s; color: #6B7280; }
         .view-btn.active { background: #FAF5FF; color: #7E22CE; }
+        .aktif-etiket { display: inline-flex; align-items: center; gap: 5px; background: #f3e8ff; color: #6b21a8; border: 1px solid #d8b4fe; border-radius: 99px; padding: 3px 10px; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.15s; }
+        .aktif-etiket:hover { background: #ede9fe; }
+        .aktif-etiket .x { font-size: 10px; opacity: 0.7; }
     </style>
 </head>
 <body class="flex flex-col min-h-screen lg:h-screen">
@@ -131,8 +134,20 @@
                 </button>
             </div>
             
-            <div class="p-5 space-y-6 lg:overflow-y-auto lg:flex-1 overflow-y-auto">
-                
+            <div class="p-5 space-y-5 lg:overflow-y-auto lg:flex-1 overflow-y-auto">
+
+                <!-- ARAMA KUTUSU -->
+                <div class="relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                    <input id="aramaInput" type="text" placeholder="Meslek veya firma ara…"
+                        oninput="aramaDebounce()"
+                        class="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 outline-none focus:border-purple-400 focus:bg-white transition">
+                </div>
+
+                <!-- AKTİF FİLTRE ETİKETLERİ -->
+                <div id="aktifFiltreler" class="flex flex-wrap gap-1.5 hidden"></div>
+
+                <!-- İLAN TÜRÜ -->
                 <div>
                     <h3 class="filter-title">İLAN TÜRÜ</h3>
                     <div class="segment-wrapper">
@@ -142,52 +157,101 @@
                     </div>
                 </div>
 
+                <!-- BELÇİKA KONUM — 3 KADEME -->
                 <div>
-                    <h3 class="filter-title">KONUM SEÇİMİ</h3>
-                    <div class="space-y-3">
-                        <select id="ulkeSelect" onchange="ulkeSecildi()" class="modern-select">
-                            <option value="">Tüm Ülkeler</option>
+                    <h3 class="filter-title">KONUM (BELÇİKA)</h3>
+                    <div class="space-y-2">
+                        <select id="bolgeSelect" onchange="bolgeSecildi()" class="modern-select">
+                            <option value="">Tüm Bölgeler</option>
+                            <option value="Flanders">🇧🇪 Flanders (Vlaanderen)</option>
+                            <option value="Brüksel">🏙️ Brüksel (Bruxelles)</option>
+                            <option value="Wallonie">🌿 Wallonie (Vallonya)</option>
                         </select>
-                        <select id="sehirSelect" onchange="sehirSecildi()" class="modern-select" disabled>
+                        <select id="sehirBESelect" onchange="sehirBESecildi()" class="modern-select" disabled>
                             <option value="">Şehir Seç</option>
+                        </select>
+                        <select id="postalSelect" onchange="postalSecildi()" class="modern-select" disabled>
+                            <option value="">Tüm Posta Kodları</option>
                         </select>
                     </div>
                 </div>
 
+                <!-- SEKTÖR -->
                 <div>
                     <h3 class="filter-title">SEKTÖR</h3>
-                    <select id="sektorSelect" onchange="filtrele()" class="modern-select">
+                    <select id="sektorSelect" onchange="sektorSecildi()" class="modern-select">
                         <option value="">Tümü</option>
-                        <option value="Restoran">Restoran / Mutfak</option>
-                        <option value="Saglik">Sağlık / Bakım</option>
-                        <option value="Bilisim">Bilişim / Yazılım</option>
-                        <option value="Teknik">Teknik / Elektrik</option>
-                        <option value="Insaat">İnşaat / Tadilat</option>
-                        <option value="Lojistik">Lojistik / Şoför</option>
-                        <option value="Temizlik">Temizlik</option>
-                        <option value="Ofis">Ofis / Yönetim</option>
+                        <optgroup label="── Mavi Yaka ──">
+                            <option value="Teknik">⚙️ Teknik / Elektrik</option>
+                            <option value="Insaat">🏗️ İnşaat / Yapı</option>
+                            <option value="Uretim">🏭 Fabrika / Üretim</option>
+                            <option value="Lojistik">🚛 Lojistik / Şoför</option>
+                            <option value="Temizlik">🧹 Temizlik</option>
+                        </optgroup>
+                        <optgroup label="── Hizmet ──">
+                            <option value="Restoran">🍽️ Restoran / Mutfak</option>
+                            <option value="Saglik">🏥 Sağlık / Bakım</option>
+                            <option value="Egitim">🎓 Eğitim</option>
+                            <option value="Guvenlik">🔒 Güvenlik</option>
+                        </optgroup>
+                        <optgroup label="── Beyaz Yaka ──">
+                            <option value="Ofis">💼 Ofis / İdari</option>
+                            <option value="Bilisim">💻 Bilişim / Yazılım</option>
+                            <option value="Satis">🛒 Satış / Pazarlama</option>
+                        </optgroup>
                         <option value="Diger">Diğer</option>
                     </select>
                 </div>
 
+                <!-- POZİSYON / ÇALIŞMA ŞEKLİ -->
                 <div>
-                    <h3 class="filter-title">POZİSYON TİPİ</h3>
+                    <h3 class="filter-title">ÇALIŞMA ŞEKLİ</h3>
                     <div class="type-grid">
                         <button onclick="setFilter('pozisyon', 'Hepsi', this)" class="type-btn active col-span-2">Hepsi</button>
-                        <button onclick="setFilter('pozisyon', 'Tam Zamanlı', this)" class="type-btn">Tam Zamanlı</button>
-                        <button onclick="setFilter('pozisyon', 'Yarı Zamanlı', this)" class="type-btn">Yarı Zamanlı</button>
-                        <button onclick="setFilter('pozisyon', 'Haftasonu', this)" class="type-btn">Haftasonu</button>
-                        <button onclick="setFilter('pozisyon', 'Proje Bazlı', this)" class="type-btn">Proje Bazlı</button>
-                        <button onclick="setFilter('pozisyon', 'Freelance', this)" class="type-btn">Freelance</button>
+                        <button onclick="setFilter('pozisyon', 'Ofis', this)" class="type-btn">Tam Zamanlı</button>
+                        <button onclick="setFilter('pozisyon', 'Yari Zamanli', this)" class="type-btn">Yarı Zamanlı</button>
+                        <button onclick="setFilter('pozisyon', 'Uzaktan', this)" class="type-btn">Uzaktan</button>
                         <button onclick="setFilter('pozisyon', 'Staj', this)" class="type-btn">Staj</button>
-                        <button onclick="setFilter('pozisyon', 'Geçici', this)" class="type-btn">Geçici</button>
                     </div>
                 </div>
 
+                <!-- SÖZLEŞME TÜRÜ -->
+                <div>
+                    <h3 class="filter-title">SÖZLEŞME TÜRÜ</h3>
+                    <div class="type-grid">
+                        <button onclick="setSozlesme('', this)" class="type-btn active col-span-2">Hepsi</button>
+                        <button onclick="setSozlesme('Vaste', this)" class="type-btn">Sabit (CDI)</button>
+                        <button onclick="setSozlesme('Tijdelijk', this)" class="type-btn">Geçici (CDD)</button>
+                        <button onclick="setSozlesme('Student', this)" class="type-btn">Öğrenci</button>
+                        <button onclick="setSozlesme('Flexi', this)" class="type-btn">Flexi-job</button>
+                    </div>
+                </div>
+
+                <!-- KAYNAK -->
+                <div>
+                    <h3 class="filter-title">KAYNAK</h3>
+                    <div class="segment-wrapper">
+                        <button onclick="setFilter('kaynak', '', this)" class="segment-btn active">Tümü</button>
+                        <button onclick="setFilter('kaynak', 'vdab', this)" class="segment-btn">VDAB</button>
+                        <button onclick="setFilter('kaynak', 'actiris', this)" class="segment-btn">Actiris</button>
+                        <button onclick="setFilter('kaynak', 'forem', this)" class="segment-btn">FOREM</button>
+                    </div>
+                </div>
+
+                <!-- SIRALAMA -->
+                <div>
+                    <h3 class="filter-title">SIRALAMA</h3>
+                    <select id="siralamaSelect" onchange="siralamaSecildi()" class="modern-select">
+                        <option value="yeni">En Yeni</option>
+                        <option value="eski">En Eski</option>
+                    </select>
+                </div>
+
             </div>
-            
+
             <div class="p-4 border-t border-gray-100 text-center text-xs text-gray-400 bg-gray-50 lg:rounded-b-2xl">
                 <span id="ilanSayisi">0</span> ilan bulundu
+                <button onclick="tumFiltreleriSifirla()" class="ml-3 text-purple-500 hover:text-purple-700 font-semibold hidden" id="sifirlaBtn">Sıfırla</button>
             </div>
         </div>
 
@@ -227,7 +291,207 @@
         let map = null;
         let markers = [];
         let tumIlanlar = [];
-        let filters = { rol: 'Hepsi', country: '', city: '', sektor: '', pozisyon: 'Hepsi' };
+        let filters = {
+            rol: 'Hepsi', sektor: '', pozisyon: 'Hepsi',
+            bolge: '', sehirBE: '', postalMin: 0, postalMax: 0, postalExact: '',
+            kaynak: '', sozlesme: '', siralama: 'yeni', search: ''
+        };
+
+        // Belçika bölge → şehir → posta kodu aralığı
+        const BE_BOLGELER = {
+            'Flanders': {
+                isim: 'Flanders (Vlaanderen)',
+                sehirler: {
+                    'Antwerpen':           { min: 2000, max: 2999, postalar: [2000,2018,2020,2050,2060,2100,2140,2150,2170,2180,2600,2610,2660] },
+                    'Gent':                { min: 9000, max: 9099, postalar: [9000,9030,9031,9032,9040,9041,9042,9050,9051,9052] },
+                    'Brugge':              { min: 8000, max: 8399, postalar: [8000,8020,8200,8210,8300,8310,8340,8370,8380] },
+                    'Leuven':              { min: 3000, max: 3499, postalar: [3000,3001,3010,3012,3018,3020,3040,3051,3052,3053,3054,3060,3070,3080,3090,3110,3120,3128,3130,3140,3150,3190,3191,3200,3210,3211,3212,3220,3221,3270,3271,3272,3290,3293,3294,3300,3320,3321,3350,3360,3370,3380,3390,3400,3401,3404,3440,3450,3460,3461,3470,3471,3472,3473,3480,3481,3490,3495] },
+                    'Hasselt':             { min: 3500, max: 3999, postalar: [3500,3510,3511,3512,3520,3530,3540,3545,3550,3560,3570,3580,3581,3582,3583,3590,3600,3620,3621,3630,3640,3650,3660,3665,3668,3670,3680,3690,3700,3717,3720,3721,3722,3723,3724,3730,3740,3742,3746,3770,3790,3791,3793,3798,3800,3803,3806,3831,3840,3850,3870,3890,3891,3900,3910,3920,3930,3940,3941,3945,3950,3960,3970,3980,3990] },
+                    'Kortrijk':            { min: 8500, max: 8699, postalar: [8500,8501,8510,8511,8520,8530,8531,8540,8550,8560,8570,8572,8573,8580,8581,8582,8587,8600,8610,8620,8630,8640,8647,8650,8660,8670,8680,8690] },
+                    'Mechelen':            { min: 2800, max: 2899, postalar: [2800,2811,2812,2820,2830,2840,2845,2850,2860,2861,2870,2880,2890] },
+                    'Aalst':               { min: 9300, max: 9399, postalar: [9300,9308,9310,9320,9340,9360,9370,9380,9390,9400,9401,9402,9403,9404,9406,9420,9450,9451,9470,9472,9473] },
+                    'Sint-Niklaas':        { min: 9100, max: 9299, postalar: [9100,9111,9112,9120,9130,9140,9150,9160,9170,9180,9185,9190,9200,9220,9230,9240,9250,9255,9260,9270,9280,9290] },
+                    'Turnhout':            { min: 2300, max: 2399, postalar: [2300,2310,2320,2328,2330,2340,2350,2360,2370,2380,2381,2382,2387,2390] },
+                    'Ostend (Oostende)':   { min: 8400, max: 8499, postalar: [8400,8420,8421,8430,8431,8432,8433,8434,8450,8460,8469,8470,8480,8490] },
+                    'Roeselare':           { min: 8700, max: 8899, postalar: [8700,8710,8720,8730,8740,8750,8755,8760,8770,8780,8790,8800,8810,8820,8830,8840,8850,8860,8870,8880,8890] },
+                    'Genk':                { min: 3600, max: 3699, postalar: [3600,3620,3621,3630,3640,3650,3660,3665,3668,3670,3680,3690] },
+                }
+            },
+            'Brüksel': {
+                isim: 'Brüksel (Bruxelles)',
+                sehirler: {
+                    'Brussels (Bruxelles)': { min: 1000, max: 1299, postalar: [1000,1020,1030,1040,1050,1060,1070,1080,1081,1082,1083,1090,1120,1130,1140,1150,1160,1170,1180,1190,1200,1210] }
+                }
+            },
+            'Wallonie': {
+                isim: 'Wallonie (Vallonya)',
+                sehirler: {
+                    'Liège':        { min: 4000, max: 4799, postalar: [4000,4020,4030,4031,4040,4050,4051,4052,4053,4100,4101,4102,4120,4121,4122,4130,4140,4141,4210,4217,4218,4219,4250,4252,4253,4254,4257,4260,4261,4263,4280,4287,4300,4317,4340,4341,4342,4347,4350,4351,4357,4360,4367,4369,4400,4420,4430,4431,4432,4450,4451,4452,4453,4460,4470,4480,4500,4520,4530,4537,4540,4550,4557,4560,4570,4577,4590,4600,4606,4607,4608,4610,4620,4621,4624,4630,4632,4633,4650,4651,4652,4653,4654,4670,4671,4672,4680,4681,4682,4683,4684,4690,4700,4710,4720,4721,4728,4730,4731,4750,4760,4770,4771,4780,4782,4783,4784,4790,4791] },
+                    'Verviers':     { min: 4800, max: 4999, postalar: [4800,4801,4802,4820,4821,4830,4831,4834,4837,4840,4841,4845,4850,4851,4852,4860,4861,4877,4880,4890,4900,4910,4920,4950,4960,4970,4980,4983,4987,4990] },
+                    'Namur':        { min: 5000, max: 5999, postalar: [5000,5001,5002,5003,5004,5010,5012,5020,5021,5022,5024,5030,5031,5032,5060,5070,5080,5081,5100,5101,5140,5150,5170,5190,5300,5310,5330,5340,5350,5360,5370,5372,5374,5377,5380] },
+                    'Charleroi':    { min: 6000, max: 6299, postalar: [6000,6001,6010,6020,6030,6031,6032,6040,6041,6042,6043,6044,6060,6061,6075,6110,6111,6120,6140,6141,6142,6150,6180,6181,6182,6183,6200,6210,6220,6221,6222,6223,6224,6230,6238,6240,6250,6280,6290] },
+                    'La Louvière':  { min: 7100, max: 7199, postalar: [7100,7110,7120,7130,7131,7133,7134,7140,7141,7160,7170,7180,7181,7190] },
+                    'Mons':         { min: 7000, max: 7099, postalar: [7000,7011,7012,7020,7021,7022,7024,7030,7031,7032,7033,7034,7040,7041,7050,7060,7061,7062,7063,7070,7080,7090] },
+                    'Tournai':      { min: 7500, max: 7699, postalar: [7500,7501,7502,7503,7504,7506,7510,7511,7512,7513,7516,7520,7521,7522,7530,7531,7532,7533,7534,7536,7538,7540,7542,7543,7548,7600,7601,7602,7603,7604,7608,7610,7611,7618,7620,7621,7622,7624,7640,7641,7642,7643,7850,7860,7861] },
+                    'Wavre':        { min: 1300, max: 1499, postalar: [1300,1301,1302,1310,1315,1320,1325,1330,1331,1332,1340,1341,1342,1348,1350,1357,1360,1367,1370,1380,1390,1400,1401,1402,1404,1410,1420,1421,1428,1430,1435,1440,1450,1457,1460,1461,1470,1471,1472,1473,1474,1480,1490] },
+                    'Arlon':        { min: 6700, max: 6999, postalar: [6700,6704,6706,6720,6721,6723,6724,6730,6740,6741,6742,6743,6747,6750,6760,6761,6762,6767,6769,6800,6810,6811,6812,6813,6820,6821,6823,6824,6830,6831,6832,6833,6834,6836,6838,6840,6850,6851,6852,6853,6860,6870,6880,6890,6900,6920,6927,6929,6940,6941,6950,6960,6970,6980,6982,6983,6984,6986,6987,6990,6997] },
+                }
+            }
+        };
+
+        // Arama debounce
+        let aramaTimer = null;
+        function aramaDebounce() {
+            clearTimeout(aramaTimer);
+            aramaTimer = setTimeout(() => {
+                filters.search = document.getElementById('aramaInput').value.trim();
+                filtrele();
+            }, 400);
+        }
+
+        function bolgeSecildi() {
+            const bolge = document.getElementById('bolgeSelect').value;
+            filters.bolge = bolge;
+            filters.sehirBE = '';
+            filters.postalMin = 0;
+            filters.postalMax = 0;
+            filters.postalExact = '';
+
+            const sehirSel = document.getElementById('sehirBESelect');
+            const postalSel = document.getElementById('postalSelect');
+
+            sehirSel.innerHTML = '<option value="">Tüm Şehirler</option>';
+            postalSel.innerHTML = '<option value="">Tüm Posta Kodları</option>';
+            postalSel.disabled = true;
+
+            if (bolge && BE_BOLGELER[bolge]) {
+                const sehirler = Object.keys(BE_BOLGELER[bolge].sehirler);
+                sehirler.forEach(s => {
+                    sehirSel.innerHTML += `<option value="${s}">${s}</option>`;
+                });
+                sehirSel.disabled = false;
+
+                // Brüksel tek şehir — otomatik seç
+                if (bolge === 'Brüksel') {
+                    sehirSel.value = 'Brussels (Bruxelles)';
+                    sehirBESecildi();
+                    return;
+                }
+            } else {
+                sehirSel.disabled = true;
+            }
+            filtrele();
+        }
+
+        function sehirBESecildi() {
+            const bolge = document.getElementById('bolgeSelect').value;
+            const sehir = document.getElementById('sehirBESelect').value;
+            filters.sehirBE = sehir;
+            filters.postalExact = '';
+
+            const postalSel = document.getElementById('postalSelect');
+            postalSel.innerHTML = '<option value="">Tüm Posta Kodları</option>';
+
+            if (sehir && bolge && BE_BOLGELER[bolge]?.sehirler?.[sehir]) {
+                const info = BE_BOLGELER[bolge].sehirler[sehir];
+                filters.postalMin = info.min;
+                filters.postalMax = info.max;
+                info.postalar.forEach(p => {
+                    postalSel.innerHTML += `<option value="${p}">${p}</option>`;
+                });
+                postalSel.disabled = false;
+                if (bolge === 'Brüksel') {
+                    akilliZoom('Brussels, Belgium', 11);
+                } else {
+                    akilliZoom(sehir + ', Belgium', 11);
+                }
+            } else {
+                filters.postalMin = 0;
+                filters.postalMax = 0;
+                postalSel.disabled = true;
+            }
+            filtrele();
+        }
+
+        function postalSecildi() {
+            filters.postalExact = document.getElementById('postalSelect').value;
+            filtrele();
+        }
+
+        function sektorSecildi() {
+            filters.sektor = document.getElementById('sektorSelect').value;
+            filtrele();
+        }
+
+        function siralamaSecildi() {
+            filters.siralama = document.getElementById('siralamaSelect').value;
+            filtrele();
+        }
+
+        function setSozlesme(val, btn) {
+            filters.sozlesme = val;
+            document.querySelectorAll('#filterPanel .type-btn[data-sozlesme]').forEach(b => b.classList.remove('active'));
+            // Mark all sozlesme buttons, find clicked
+            document.querySelectorAll('[onclick^="setSozlesme"]').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            filtrele();
+        }
+
+        function aktifFiltrelerGoster() {
+            const container = document.getElementById('aktifFiltreler');
+            const sifirlaBtn = document.getElementById('sifirlaBtn');
+            const etiketler = [];
+
+            if (filters.search) etiketler.push({ label: `🔍 ${filters.search}`, key: 'search', reset: () => { filters.search = ''; document.getElementById('aramaInput').value = ''; } });
+            if (filters.bolge) {
+                const bolgeIsim = BE_BOLGELER[filters.bolge]?.isim || filters.bolge;
+                etiketler.push({ label: bolgeIsim, key: 'bolge', reset: () => { filters.bolge = ''; filters.sehirBE = ''; filters.postalMin = 0; filters.postalMax = 0; filters.postalExact = ''; document.getElementById('bolgeSelect').value = ''; document.getElementById('sehirBESelect').innerHTML = '<option value="">Şehir Seç</option>'; document.getElementById('sehirBESelect').disabled = true; document.getElementById('postalSelect').innerHTML = '<option value="">Tüm Posta Kodları</option>'; document.getElementById('postalSelect').disabled = true; } });
+            }
+            if (filters.sehirBE && filters.bolge !== 'Brüksel') etiketler.push({ label: `📍 ${filters.sehirBE}`, key: 'sehirBE', reset: () => { filters.sehirBE = ''; filters.postalMin = 0; filters.postalMax = 0; filters.postalExact = ''; document.getElementById('sehirBESelect').value = ''; } });
+            if (filters.postalExact) etiketler.push({ label: `📮 ${filters.postalExact}`, key: 'postalExact', reset: () => { filters.postalExact = ''; document.getElementById('postalSelect').value = ''; } });
+            if (filters.sektor) etiketler.push({ label: filters.sektor, key: 'sektor', reset: () => { filters.sektor = ''; document.getElementById('sektorSelect').value = ''; } });
+            if (filters.kaynak) etiketler.push({ label: filters.kaynak.toUpperCase(), key: 'kaynak' });
+            if (filters.sozlesme) etiketler.push({ label: filters.sozlesme, key: 'sozlesme' });
+
+            if (etiketler.length === 0) {
+                container.classList.add('hidden');
+                sifirlaBtn.classList.add('hidden');
+                return;
+            }
+
+            container.classList.remove('hidden');
+            sifirlaBtn.classList.remove('hidden');
+            container.innerHTML = etiketler.map((e, i) =>
+                `<span class="aktif-etiket" onclick="etiketKaldir(${i})">${e.label} <span class="x">✕</span></span>`
+            ).join('');
+            container._etiketler = etiketler;
+        }
+
+        function etiketKaldir(i) {
+            const container = document.getElementById('aktifFiltreler');
+            const e = container._etiketler?.[i];
+            if (!e) return;
+            if (e.reset) e.reset();
+            else filters[e.key] = '';
+            filtrele();
+        }
+
+        function tumFiltreleriSifirla() {
+            filters = { rol: 'Hepsi', sektor: '', pozisyon: 'Hepsi', bolge: '', sehirBE: '', postalMin: 0, postalMax: 0, postalExact: '', kaynak: '', sozlesme: '', siralama: 'yeni', search: '' };
+            document.getElementById('aramaInput').value = '';
+            document.getElementById('bolgeSelect').value = '';
+            document.getElementById('sehirBESelect').innerHTML = '<option value="">Şehir Seç</option>';
+            document.getElementById('sehirBESelect').disabled = true;
+            document.getElementById('postalSelect').innerHTML = '<option value="">Tüm Posta Kodları</option>';
+            document.getElementById('postalSelect').disabled = true;
+            document.getElementById('sektorSelect').value = '';
+            document.getElementById('siralamaSelect').value = 'yeni';
+            document.querySelectorAll('.segment-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.segment-wrapper .segment-btn:first-child').forEach(b => b.classList.add('active'));
+            document.querySelectorAll('[onclick^="setSozlesme"]').forEach(b => b.classList.remove('active'));
+            document.querySelector('[onclick="setSozlesme(\'\', this)"]')?.classList.add('active');
+            filtrele();
+        }
 
         function formatDate(isoStr) {
             if (!isoStr) return '';
@@ -243,8 +507,6 @@
 
         window.onload = function() {
             initMap();
-            // genel_veriler.js'den ülkeleri doldur
-            if (typeof ulkeleriDoldur === 'function') ulkeleriDoldur('ulkeSelect');
             veriCek();
         };
 
@@ -269,42 +531,9 @@
                 }).catch(e => console.log("Harita hatası:", e));
         }
 
-        function ulkeSecildi() {
-            const code = document.getElementById('ulkeSelect').value;
-            filters.country = code;
-            
-            // genel_veriler.js'den şehirleri doldur
-            if (typeof sehirleriGetirOrtak === 'function') sehirleriGetirOrtak(code, 'sehirSelect');
-            
-            const sehirSelect = document.getElementById('sehirSelect');
-            if(code) {
-                if (typeof lokasyonVeritabani !== 'undefined' && lokasyonVeritabani[code]) {
-                    akilliZoom(lokasyonVeritabani[code].isim, 6);
-                }
-                sehirSelect.disabled = false;
-                sehirSelect.classList.remove('opacity-50', 'cursor-not-allowed');
-            } else {
-                sehirSelect.disabled = true;
-                sehirSelect.classList.add('opacity-50', 'cursor-not-allowed');
-                map.setView([48.0, 10.0], 5);
-            }
-            filters.city = "";
-            filtrele();
-        }
-
-        function sehirSecildi() {
-            const sehir = document.getElementById('sehirSelect').value;
-            filters.city = sehir;
-            
-            if(sehir) {
-                const ulkeKod = document.getElementById('ulkeSelect').value;
-                let tamAdres = sehir;
-                if (typeof lokasyonVeritabani !== 'undefined' && lokasyonVeritabani[ulkeKod]) {
-                    tamAdres += ", " + lokasyonVeritabani[ulkeKod].isim;
-                }
-                akilliZoom(tamAdres, 12);
-            }
-            filtrele();
+        function filtrele() {
+            aktifFiltrelerGoster();
+            veriCek();
         }
 
         function setView(view) {
@@ -341,21 +570,45 @@
         let mevcutIlanlar = [];
 
         function buildQuery(offset) {
+            const ascending = filters.siralama === 'eski';
             let q = sb.from('ilanlar')
-                .select('id,title,title_tr,city,country,price,sektor,pozisyon,created_at,lat,lon,source_url,owner_name')
+                .select('id,title,title_tr,city,country,price,sektor,pozisyon,created_at,lat,lon,source_url,owner_name,postal_code,source')
                 .eq('category', 'Is Ilani')
                 .eq('status', 'active')
-                .order('created_at', { ascending: false })
+                .order('created_at', { ascending })
                 .range(offset, offset + PAGE_SIZE - 1);
 
-            if (filters.country) q = q.eq('country', filters.country);
-            if (filters.city === 'Brussels (Bruxelles)') {
-                q = q.eq('source', 'actiris');
-            } else if (filters.city) {
-                q = q.ilike('city', `%${filters.city}%`);
+            // Tam metin arama
+            if (filters.search) {
+                q = q.or(`title.ilike.%${filters.search}%,title_tr.ilike.%${filters.search}%,owner_name.ilike.%${filters.search}%`);
             }
-            if (filters.sektor)  q = q.ilike('sektor', `%${filters.sektor}%`);
+
+            // Kaynak filtresi (VDAB / Actiris / FOREM)
+            if (filters.kaynak) q = q.eq('source', filters.kaynak);
+
+            // Belçika konum filtresi
+            if (filters.postalExact) {
+                q = q.eq('postal_code', filters.postalExact);
+            } else if (filters.postalMin > 0 && filters.postalMax > 0) {
+                // Posta kodu aralığı — city üzerinden filtrele (postal_code varsa onu kullan)
+                q = q.eq('city', filters.sehirBE);
+            } else if (filters.bolge) {
+                // Sadece bölge seçili — source'a göre filtrele
+                const kaynakMap = { 'Flanders': 'vdab', 'Brüksel': 'actiris', 'Wallonie': 'forem' };
+                if (!filters.kaynak && kaynakMap[filters.bolge]) {
+                    q = q.eq('source', kaynakMap[filters.bolge]);
+                }
+            }
+
+            // Sektör
+            if (filters.sektor) q = q.ilike('sektor', `%${filters.sektor}%`);
+
+            // Çalışma şekli
             if (filters.pozisyon && filters.pozisyon !== 'Hepsi') q = q.ilike('pozisyon', `%${filters.pozisyon}%`);
+
+            // Sözleşme türü (description alanında geçiyor)
+            if (filters.sozlesme) q = q.ilike('description', `%${filters.sozlesme}%`);
+
             return q;
         }
 
@@ -477,14 +730,10 @@
                 if (group) group.querySelectorAll('button').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
             }
-            if (type === 'rol') filters.rol = value;
+            if (type === 'rol')     filters.rol = value;
             if (type === 'pozisyon') filters.pozisyon = value;
+            if (type === 'kaynak')  filters.kaynak = value;
             filtrele();
-        }
-
-        function filtrele() {
-            filters.sektor = document.getElementById('sektorSelect').value;
-            veriCek();
         }
 
         function renderList(data) {
@@ -531,9 +780,9 @@
                         ${item.pozisyon && item.pozisyon !== item.sektor && item.pozisyon !== 'Ofis' ? `<span class="bg-gray-50 px-2 py-1 rounded border border-gray-200">${item.pozisyon}</span>` : ''}
                     </div>
                     <div class="flex justify-between items-center pt-3 border-t border-gray-50">
-                         <span class="text-xs text-gray-400 flex items-center gap-1"><i class="fa-solid fa-location-dot"></i> ${item.ulke}</span>
+                         <span class="text-xs text-gray-400 flex items-center gap-1"><i class="fa-solid fa-location-dot"></i> ${item.konum || item.ulke}</span>
                          ${item.source_url
-                            ? `<a href="${item.source_url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="text-xs font-bold text-purple-600 hover:text-purple-800 flex items-center gap-1"><i class="fa-solid fa-arrow-up-right-from-square"></i> Orijinal İlan</a>`
+                            ? `<a href="${item.source_url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="text-xs font-bold text-purple-600 hover:text-purple-800 flex items-center gap-1"><i class="fa-solid fa-arrow-up-right-from-square"></i> Tam İlan</a>`
                             : `<span class="font-bold text-slate-800 text-sm">${item.fiyat || ''}</span>`}
                     </div>
                 </div>`;

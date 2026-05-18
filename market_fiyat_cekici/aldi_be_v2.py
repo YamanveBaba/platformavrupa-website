@@ -70,6 +70,7 @@ KATEGORILER: List[Tuple[str, str]] = [
     ("Babyproducten",              f"{BASE}/nl/producten/assortiment/babyproducten.html"),
     ("Diepvrieskost",              f"{BASE}/nl/producten/assortiment/diepvrieskost.html"),
     ("Sauzen Kruiden",             f"{BASE}/nl/producten/assortiment/sauzen-kruiden-specerijen.html"),
+    ("Eieren",                      f"{BASE}/nl/producten/verse-producten/eieren.html"),
     ("Verse producten",            f"{BASE}/nl/producten/assortiment/verse-producten.html"),
     ("Thee Hub",                   f"{BASE}/nl/producten.html"),
 ]

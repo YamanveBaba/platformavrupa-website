@@ -172,6 +172,50 @@ def tile_to_record(tile: dict) -> Optional[dict]:
     cat_name = flc.get("name") if isinstance(flc, dict) else None
     parts = [price_obj.get("supplementaryPriceLabel1"), price_obj.get("supplementaryPriceLabel2")]
     supp = " ".join(str(p) for p in parts if p) or None
+
+    # Birim fiyat — comparisonPrice veya unitPrice
+    cp_obj = price_obj.get("comparisonPrice") or {}
+    unit_price_val = None
+    unit_type_val = ""
+    if isinstance(cp_obj, dict):
+        try:
+            unit_price_val = float(cp_obj.get("value")) if cp_obj.get("value") is not None else None
+        except (TypeError, ValueError):
+            pass
+        unit_type_val = str(cp_obj.get("unit") or cp_obj.get("label") or "")
+    elif cp_obj:
+        try:
+            unit_price_val = float(cp_obj)
+        except (TypeError, ValueError):
+            pass
+    # Fallback: supplementaryPriceLabel'dan birim parse et (ör. "3,50/kg")
+    if not unit_type_val and supp:
+        m = re.search(r"/\s*(kg|g|l|cl|ml|st(?:uk)?|pcs?)\b", supp.lower())
+        if m:
+            unit_type_val = m.group(1)
+
+    # Resim URL'si
+    images = tile.get("images") or []
+    img_url = ""
+    if images and isinstance(images[0], dict):
+        img_url = images[0].get("url") or images[0].get("src") or ""
+    if not img_url:
+        img_url = str(tile.get("thumbnail") or tile.get("imageUrl") or "")
+
+    # Promo tarihleri
+    promo_data = (tile.get("promotionData") or tile.get("promotion") or
+                  tile.get("promotions") or {})
+    if isinstance(promo_data, list):
+        promo_data = promo_data[0] if promo_data else {}
+    promo_start = str(
+        promo_data.get("startDate") or promo_data.get("from") or
+        promo_data.get("validFrom") or promo_data.get("promotionStartDate") or ""
+    )
+    promo_end = str(
+        promo_data.get("endDate") or promo_data.get("to") or
+        promo_data.get("validUntil") or promo_data.get("promotionEndDate") or ""
+    )
+
     return {
         "productCode": code,
         "name": (tile.get("name") or "")[:2000],
@@ -181,6 +225,11 @@ def tile_to_record(tile: dict) -> Optional[dict]:
         "inPromo": bool(in_promo),
         "topCategoryName": ((cat_name or "")[:500] or None),
         "unitContent": ((supp or "")[:200] or None),
+        "imageUrl": img_url[:1000] if img_url else "",
+        "unitPrice": unit_price_val,
+        "unitType": unit_type_val[:50] if unit_type_val else "",
+        "promoValidFrom": promo_start or None,
+        "promoValidUntil": promo_end or None,
         "url": tile.get("url"),
     }
 

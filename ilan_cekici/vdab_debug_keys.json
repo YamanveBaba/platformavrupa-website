@@ -1,0 +1,599 @@
+{
+  "pagina": 0,
+  "paginaGrootte": 15,
+  "totaalAantal": 208216,
+  "filters": {
+    "beroep": [
+      {
+        "code": "142a1c8a-ded8-4b8e-b445-5da25dec3335",
+        "omschrijving": "Vrachtwagenbestuurder",
+        "aantalResultaten": 11356
+      },
+      {
+        "code": "953ddb4a-da61-4d28-b46f-c1efb64a5fc0",
+        "omschrijving": "Industrieel elektromecanicien",
+        "aantalResultaten": 10175
+      },
+      {
+        "code": "bb86bb0c-8062-4cd5-a257-186606056bbe",
+        "omschrijving": "Magazijnmedewerker",
+        "aantalResultaten": 8338
+      },
+      {
+        "code": "c6eda604-d594-4d41-ab67-3e2ef003641d",
+        "omschrijving": "Winkelverkoper",
+        "aantalResultaten": 6673
+      },
+      {
+        "code": "410a4483-7305-496a-93f2-613e6e5930fd",
+        "omschrijving": "Industrieel onderhoudstechnicus",
+        "aantalResultaten": 5190
+      },
+      {
+        "code": "383e50a3-9d06-4821-b880-c6da89b6e809",
+        "omschrijving": "Accountant",
+        "aantalResultaten": 4456
+      },
+      {
+        "code": "fa01c16b-2027-4df2-8c51-feaa80db1129",
+        "omschrijving": "Insteller-omsteller verspaning",
+        "aantalResultaten": 4091
+      },
+      {
+        "code": "fe24420c-0cf8-4bbc-9fa6-9b1120e6aabf",
+        "omschrijving": "Winkelmedewerker",
+        "aantalResultaten": 3787
+      },
+      {
+        "code": "d70607ef-e4cf-43a9-a340-a1b9e9d8e3f9",
+        "omschrijving": "Polyvalent administratief medewerker",
+        "aantalResultaten": 3740
+      },
+      {
+        "code": "4a95fd9c-8dd5-4e5f-a7cf-4a836cd4691d",
+        "omschrijving": "Manueel lasser",
+        "aantalResultaten": 3672
+      },
+      {
+        "code": "cfe84de1-a7d1-4b34-924d-764c2cb3c649",
+        "omschrijving": "Elektrotechnicus",
+        "aantalResultaten": 3571
+      },
+      {
+        "code": "bc1d48d2-763e-477b-b1e8-d0038fdd0a14",
+        "omschrijving": "Werfleider",
+        "aantalResultaten": 3301
+      },
+      {
+        "code": "54a6cf77-d3ff-4691-b03d-f9e30b4790ef",
+        "omschrijving": "Vertegenwoordiger B2B",
+        "aantalResultaten": 3234
+      },
+      {
+        "code": "ff2b9b81-6c31-4528-8b5d-4995788c8cf5",
+        "omschrijving": "Productiemedewerker",
+        "aantalResultaten": 3195
+      },
+      {
+        "code": "af332f1f-8134-4799-92e7-00d6f2119e2d",
+        "omschrijving": "Productieoperator voedingsindustrie",
+        "aantalResultaten": 3076
+      },
+      {
+        "code": "9ef857e6-fc27-41f8-a6dd-2970daa31411",
+        "omschrijving": "Teamleader productie",
+        "aantalResultaten": 2660
+      },
+      {
+        "code": "cee9ee58-43a9-4300-b6c4-8bf1f7b59c28",
+        "omschrijving": "Verpleegkundige",
+        "aantalResultaten": 2635
+      },
+      {
+        "code": "ff8e0023-a150-4c4e-8c48-9b635d2cbfa3",
+        "omschrijving": "Monteur installatietechnieken",
+        "aantalResultaten": 2560
+      },
+      {
+        "code": "da50b460-bfac-4eeb-b328-fc7c66ed6088",
+        "omschrijving": "Technicus werf-, landbouw- en hefmachines",
+        "aantalResultaten": 2512
+      },
+      {
+        "code": "d0f506b4-0894-41bf-b1a4-e494c892bca3",
+        "omschrijving": "Onderhoudsmecanicien van personenwagens en lichte bedrijfsvoertuigen",
+        "aantalResultaten": 2478
+      },
+      {
+        "code": "a8fc4ca1-3512-4e9c-ad95-13ba3a09c0f1",
+        "omschrijving": "Wegenwerker",
+        "aantalResultaten": 2405
+      },
+      {
+        "code": "1eddda40-3023-4324-834e-c7b0df9e3531",
+        "omschrijving": "Medewerker ruwbouw",
+        "aantalResultaten": 2355
+      },
+      {
+        "code": "3d87a629-d78d-4fee-8597-3b5daf475447",
+        "omschrijving": "Verantwoordelijke kwaliteitscontrole",
+        "aantalResultaten": 2314
+      },
+      {
+        "code": "9cbe7cd0-9ff7-4723-ac13-7610e52bee6a",
+        "omschrijving": "Commercieel medewerker binnendienst",
+        "aantalResultaten": 2200
+      },
+      {
+        "code": "5cb21c1f-a279-4654-ad0c-4419dfc55006",
+        "omschrijving": "Operator montage en assemblage",
+        "aantalResultaten": 1994
+      },
+      {
+        "code": "06d059a3-6f65-4b4f-b359-8a27ce3c3594",
+        "omschrijving": "Logistiek verantwoordelijke",
+        "aantalResultaten": 1987
+      },
+      {
+        "code": "adf8d084-3819-45d5-a429-0471b3fa4432",
+        "omschrijving": "Dakwerker",
+        "aantalResultaten": 1984
+      },
+      {
+        "code": "b11bf6de-c048-4539-90ee-d969c2956c1b",
+        "omschrijving": "Projectleider bouw en openbare werken",
+        "aantalResultaten": 1949
+      },
+      {
+        "code": "30093422-8571-4ff4-97f9-5a1bab6a2ee9",
+        "omschrijving": "Kraanbestuurder",
+        "aantalResultaten": 1876
+      },
+      {
+        "code": "ef48a4b9-65cf-4565-abc9-ffa76c1a4b35",
+        "omschrijving": "Calculator bouw",
+        "aantalResultaten": 1843
+      }
+    ],
+    "ervaring": [
+      {
+        "code": "0",
+        "omschrijving": "Niet van belang",
+        "aantalResultaten": 51320
+      },
+      {
+        "code": "1",
+        "omschrijving": "Geen ervaring",
+        "aantalResultaten": 36836
+      },
+      {
+        "code": "2",
+        "omschrijving": "Beperkte ervaring",
+        "aantalResultaten": 63619
+      },
+      {
+        "code": "3",
+        "omschrijving": "Minstens 2 jaar ervaring",
+        "aantalResultaten": 66046
+      },
+      {
+        "code": "4",
+        "omschrijving": "Minstens 5 jaar ervaring",
+        "aantalResultaten": 10395
+      }
+    ],
+    "jobdomein": [
+      {
+        "code": "JOBCAT01",
+        "omschrijving": "Aankoop",
+        "aantalResultaten": 1193
+      },
+      {
+        "code": "JOBCAT02",
+        "omschrijving": "Administratie",
+        "aantalResultaten": 18723
+      },
+      {
+        "code": "JOBCAT03",
+        "omschrijving": "Bouw",
+        "aantalResultaten": 37861
+      },
+      {
+        "code": "JOBCAT04",
+        "omschrijving": "Communicatie",
+        "aantalResultaten": 458
+      },
+      {
+        "code": "JOBCAT05",
+        "omschrijving": "Creatief",
+        "aantalResultaten": 2846
+      },
+      {
+        "code": "JOBCAT14",
+        "omschrijving": "Dienstverlening",
+        "aantalResultaten": 7492
+      },
+      {
+        "code": "JOBCAT06",
+        "omschrijving": "Financieel",
+        "aantalResultaten": 10271
+      },
+      {
+        "code": "JOBCAT07",
+        "omschrijving": "Gezondheid",
+        "aantalResultaten": 7266
+      },
+      {
+        "code": "JOBCAT08",
+        "omschrijving": "Horeca en toerisme",
+        "aantalResultaten": 5361
+      },
+      {
+        "code": "JOBCAT09",
+        "omschrijving": "Human resources",
+        "aantalResultaten": 2749
+      },
+      {
+        "code": "JOBCAT10",
+        "omschrijving": "ICT",
+        "aantalResultaten": 3874
+      },
+      {
+        "code": "JOBCAT11",
+        "omschrijving": "Juridisch",
+        "aantalResultaten": 955
+      },
+      {
+        "code": "JOBCAT12",
+        "omschrijving": "Land- en tuinbouw",
+        "aantalResultaten": 2414
+      },
+      {
+        "code": "JOBCAT13",
+        "omschrijving": "Logistiek en transport",
+        "aantalResultaten": 30994
+      },
+      {
+        "code": "JOBCAT15",
+        "omschrijving": "Management",
+        "aantalResultaten": 13417
+      },
+      {
+        "code": "JOBCAT16",
+        "omschrijving": "Marketing",
+        "aantalResultaten": 3385
+      },
+      {
+        "code": "JOBCAT17",
+        "omschrijving": "Onderhoud",
+        "aantalResultaten": 5312
+      },
+      {
+        "code": "JOBCAT18",
+        "omschrijving": "Onderwijs",
+        "aantalResultaten": 3033
+      },
+      {
+        "code": "JOBCAT20",
+        "omschrijving": "Onderzoek en ontwikkeling",
+        "aantalResultaten": 904
+      },
+      {
+        "code": "JOBCAT19",
+        "omschrijving": "Overheid",
+        "aantalResultaten": 842
+      },
+      {
+        "code": "JOBCAT21",
+        "omschrijving": "Productie",
+        "aantalResultaten": 37650
+      },
+      {
+        "code": "JOBCAT22",
+        "omschrijving": "Techniek",
+        "aantalResultaten": 84102
+      },
+      {
+        "code": "JOBCAT23",
+        "omschrijving": "Verkoop",
+        "aantalResultaten": 24324
+      },
+      {
+        "code": "JOBCAT24",
+        "omschrijving": "Andere",
+        "aantalResultaten": 1144
+      }
+    ],
+    "arbeidsduur": [
+      {
+        "code": "D",
+        "omschrijving": "Deeltijds",
+        "aantalResultaten": 12924
+      },
+      {
+        "code": "V",
+        "omschrijving": "Voltijds",
+        "aantalResultaten": 215292
+      }
+    ],
+    "contractTypes": [
+      {
+        "code": "8",
+        "omschrijving": "Vaste jobs",
+        "aantalResultaten": 93930
+      },
+      {
+        "code": "4",
+        "omschrijving": "Tijdelijke jobs",
+        "aantalResultaten": 7556
+      },
+      {
+        "code": "18",
+        "omschrijving": "Flexijob",
+        "aantalResultaten": 1586
+      },
+      {
+        "code": "7",
+        "omschrijving": "Studentenjobs",
+        "aantalResultaten": 2261
+      },
+      {
+        "code": "5",
+        "omschrijving": "Tijdelijke jobs met optie vast",
+        "aantalResultaten": 118965
+      },
+      {
+        "code": "6",
+        "omschrijving": "Dienstenchequebaan",
+        "aantalResultaten": 1418
+      },
+      {
+        "code": "15",
+        "omschrijving": "Overeenkomst alternerende opleiding",
+        "aantalResultaten": 264
+      },
+      {
+        "code": "2",
+        "omschrijving": "Tewerkstellingsmaatregelen",
+        "aantalResultaten": 15
+      },
+      {
+        "code": "10",
+        "omschrijving": "Zelfstandige activiteit",
+        "aantalResultaten": 2052
+      },
+      {
+        "code": "14",
+        "omschrijving": "Werfreserve",
+        "aantalResultaten": 148
+      },
+      {
+        "code": "3",
+        "omschrijving": "Examens bij de overheid",
+        "aantalResultaten": 21
+      }
+    ],
+    "rijbewijs": [
+      {
+        "code": "0",
+        "omschrijving": "Geen rijbewijs",
+        "aantalResultaten": 166594
+      },
+      {
+        "code": "A",
+        "omschrijving": "A motorfietsen",
+        "aantalResultaten": 267
+      },
+      {
+        "code": "A1",
+        "omschrijving": "A1 motorfietsen",
+        "aantalResultaten": 25
+      },
+      {
+        "code": "A2",
+        "omschrijving": "A2 motorfietsen",
+        "aantalResultaten": 29
+      },
+      {
+        "code": "A3",
+        "omschrijving": "A3 motorfietsen",
+        "aantalResultaten": 140
+      },
+      {
+        "code": "AM",
+        "omschrijving": "AM motorfietsen",
+        "aantalResultaten": 20
+      },
+      {
+        "code": "B",
+        "omschrijving": "B auto's",
+        "aantalResultaten": 53795
+      },
+      {
+        "code": "BE",
+        "omschrijving": "BE auto's",
+        "aantalResultaten": 664
+      },
+      {
+        "code": "C",
+        "omschrijving": "C zware vrachtwagen",
+        "aantalResultaten": 3876
+      },
+      {
+        "code": "C1",
+        "omschrijving": "C1 kleine vrachtwagen",
+        "aantalResultaten": 93
+      },
+      {
+        "code": "C1+E",
+        "omschrijving": "C1+E kleine vrachtwagen",
+        "aantalResultaten": 173
+      },
+      {
+        "code": "CE",
+        "omschrijving": "CE zware vrachtwagen",
+        "aantalResultaten": 4369
+      },
+      {
+        "code": "D",
+        "omschrijving": "D autobus",
+        "aantalResultaten": 314
+      },
+      {
+        "code": "D1",
+        "omschrijving": "D1 autobus",
+        "aantalResultaten": 11
+      },
+      {
+        "code": "D1+E",
+        "omschrijving": "D1+E autobus",
+        "aantalResultaten": 8
+      },
+      {
+        "code": "DE",
+        "omschrijving": "DE autobus",
+        "aantalResultaten": 16
+      },
+      {
+        "code": "G",
+        "omschrijving": "G landbouwvoertuigen",
+        "aantalResultaten": 102
+      }
+    ],
+    "internationaal": [
+      {
+        "code": "BUITEN_EUROPA",
+        "omschrijving": "Buiten Europa",
+        "aantalResultaten": 4
+      },
+      {
+        "code": "EUROPA",
+        "omschrijving": "Europa",
+        "aantalResultaten": 400
+      },
+      {
+        "code": "GRENSREGIO",
+        "omschrijving": "Grensregio's",
+        "aantalResultaten": 11
+      }
+    ],
+    "diploma": [
+      {
+        "code": "A",
+        "omschrijving": "Geen",
+        "aantalResultaten": 94373
+      },
+      {
+        "code": "B",
+        "omschrijving": "Lager onderwijs",
+        "aantalResultaten": 10833
+      },
+      {
+        "code": "C",
+        "omschrijving": "Secundair onderwijs",
+        "aantalResultaten": 71595
+      },
+      {
+        "code": "F",
+        "omschrijving": "Graduaat/HBO5",
+        "aantalResultaten": 12546
+      },
+      {
+        "code": "D",
+        "omschrijving": "Bachelor",
+        "aantalResultaten": 49604
+      },
+      {
+        "code": "E",
+        "omschrijving": "Master",
+        "aantalResultaten": 17267
+      }
+    ],
+    "arbeidsregime": [
+      {
+        "code": "D",
+        "omschrijving": "Dagwerk",
+        "aantalResultaten": 204088
+      },
+      {
+        "code": "2",
+        "omschrijving": "2-ploegenstelsel",
+        "aantalResultaten": 16389
+      },
+      {
+        "code": "3",
+        "omschrijving": "3-ploegenstelsel",
+        "aantalResultaten": 2712
+      },
+      {
+        "code": "N",
+        "omschrijving": "Nachtwerk",
+        "aantalResultaten": 4062
+      },
+      {
+        "code": "Z",
+        "omschrijving": "Weekendwerk",
+        "aantalResultaten": 8360
+      },
+      {
+        "code": "O",
+        "omschrijving": "Onderbroken dienst",
+        "aantalResultaten": 670
+      },
+      {
+        "code": "V",
+        "omschrijving": "Volcontinu systeem",
+        "aantalResultaten": 1554
+      }
+    ],
+    "onlineSinds": [
+      {
+        "code": "1",
+        "omschrijving": "Vandaag of gisteren",
+        "aantalResultaten": 12656
+      },
+      {
+        "code": "6",
+        "omschrijving": "Voorbije week",
+        "aantalResultaten": 40722
+      },
+      {
+        "code": "9000",
+        "omschrijving": "Alle jobs",
+        "aantalResultaten": 228216
+      }
+    ],
+    "taalniveaus": [
+      {
+        "code": "10",
+        "omschrijving": "Geen",
+        "aantalResultaten": 0
+      },
+      {
+        "code": "11",
+        "omschrijving": "Starter",
+        "aantalResultaten": 0
+      },
+      {
+        "code": "12",
+        "omschrijving": "Basis",
+        "aantalResultaten": 0
+      },
+      {
+        "code": "13",
+        "omschrijving": "Medium",
+        "aantalResultaten": 0
+      },
+      {
+        "code": "14",
+        "omschrijving": "Goed",
+        "aantalResultaten": 0
+      },
+      {
+        "code": "15",
+        "omschrijving": "Zeer goed",
+        "aantalResultaten": 0
+      }
+    ]
+  }
+}

@@ -125,6 +125,12 @@ def tam_katalog_url(place_id: str, skip: int = 0) -> str:
 
 def urun_satirina_donustur(p: dict) -> dict:
     """API ürün objesini platform formatına çevirir."""
+    # Fiyat bilgileri "price" sub-objesinde geliyor
+    pr = p.get("price") or {}
+    # Promo tarihleri "promotion" listesinin ilk elemanında
+    promo_list = p.get("promotion") or []
+    promo0 = promo_list[0] if promo_list else {}
+
     return {
         "retailProductNumber": p.get("retailProductNumber"),
         "technicalArticleNumber": p.get("technicalArticleNumber"),
@@ -132,22 +138,36 @@ def urun_satirina_donustur(p: dict) -> dict:
         "brand": p.get("brand", "") or p.get("seoBrand", ""),
         "LongName": p.get("fullName") or p.get("LongName") or p.get("name", ""),
         "content": p.get("content", ""),
-        "basicPrice": p.get("basicPrice"),
-        "quantityPrice": p.get("quantityPrice"),
-        "pricePerUOM": p.get("pricePerUOM"),
-        "measurementUnit": p.get("measurementUnit"),
-        "isRedPrice": p.get("isRedPrice", False),
-        "isPromoActive": p.get("isPromoActive", "N"),
-        "inPromo": bool(p.get("isPromoActive") == "Y" or p.get("inPromo")),
-        "promoPublicationStart": p.get("promoPublicationStart"),
-        "promoPublicationEnd": p.get("promoPublicationEnd"),
-        "activationDate": p.get("activationDate"),
+        "basicPrice": pr.get("basicPrice"),
+        "quantityPrice": pr.get("quantityPrice"),
+        "pricePerUOM": pr.get("pricePerUOM"),
+        "measurementUnit": pr.get("measurementUnit"),
+        "isRedPrice": pr.get("isRedPrice", False),
+        "isPromoActive": pr.get("isPromoActive", "N"),
+        "inPromo": bool(pr.get("isPromoActive") == "Y" or p.get("inPromo")),
+        "promoPublicationStart": promo0.get("publicationStartDate"),
+        "promoPublicationEnd": promo0.get("publicationEndDate"),
+        "activationDate": pr.get("activationDate"),
         "topCategoryName": p.get("topCategoryName", ""),
         "topCategoryId": p.get("topCategoryId"),
         "nutriScore": p.get("nutriScore"),
         "countryOfOrigin": p.get("countryOfOrigin"),
         "isPriceAvailable": p.get("isPriceAvailable", True),
         "isAvailable": p.get("isAvailable", True),
+        "price": pr.get("basicPrice"),
+        "promo_price": pr.get("quantityPrice"),
+        "promo_valid_from": promo0.get("publicationStartDate"),
+        "promo_valid_until": promo0.get("publicationEndDate"),
+        "image_url": (
+            p.get("thumbNail") or
+            p.get("fullImage") or
+            p.get("imageUrl") or
+            (
+                f"https://static.colruytgroup.com/images/200x200/std.lang.all/"
+                f"{p.get('retailProductNumber', '')}.jpg"
+                if p.get("retailProductNumber") else None
+            )
+        ),
     }
 
 
@@ -491,62 +511,102 @@ def main() -> None:
         print(f"  Toplam benzersiz kategori linki: {len(tum_linkler)}")
 
         # ----------------------------------------------------------------
-        # 2. AŞAMA: Her kategori sayfasını ziyaret et -> categoryId keşfet
+        # 2. AŞAMA: categoryId keşfi
+        # Önce colruyt_sub_kategoriler.json var mı bak (map scriptiyle oluşturuldu)
+        # Varsa browser navigation'ı atla — çok daha hızlı ve stabil
         # ----------------------------------------------------------------
-        print("\n[2/3] Kategori sayfaları ziyaret ediliyor (categoryId keşfi)...")
+        sub_kat_dosya = os.path.join(script_dir, "colruyt_sub_kategoriler.json")
+        harita_yuklendi = False
 
-        max_k = args.max_kategori or len(tum_linkler)
-        ziyaret_edilen = set()
-
-        for i, link in enumerate(tum_linkler[:max_k]):
-            if args.sadece_kesif and i >= 5:
-                break
-
-            link_temiz = link.rstrip("/")
-            if link_temiz in ziyaret_edilen:
-                continue
-            ziyaret_edilen.add(link_temiz)
-
-            kategori_adi = link_temiz.split("/nl/producten/")[-1].replace("-", " ").title()
-            print(f"  [{i+1}/{min(max_k, len(tum_linkler))}] {kategori_adi}: {link_temiz}")
-
+        if os.path.isfile(sub_kat_dosya):
+            print(f"\n[2/3] colruyt_sub_kategoriler.json bulundu — browser navigation atlanıyor...")
             try:
-                page.goto(link_temiz, wait_until="domcontentloaded", timeout=45_000)
-                time.sleep(2.5)
-                # Scroll tetikle -> daha fazla API isteği ateşlenir
-                page.evaluate("window.scrollBy(0, 800)")
-                time.sleep(1.5)
+                with open(sub_kat_dosya, encoding="utf-8") as f:
+                    sub_harita = json.load(f)
+                for cid in sub_harita.values():
+                    if cid:
+                        agi_yakalanan_kategori_idleri.add(str(cid))
+                print(f"  {len(agi_yakalanan_kategori_idleri)} kategori ID yüklendi (kayıtlı dosyadan)")
+                harita_yuklendi = True
             except Exception as e:
-                print(f"    Atlandı: {e}")
-                continue
+                print(f"  JSON yükleme hatası: {e} — browser navigation ile devam")
 
-            # Ağdan yakalanan kategori ID'yi bul
-            bulunan_id = None
-            for cid in sorted(agi_yakalanan_kategori_idleri):
-                # En son eklenenler en yeni kategoriye ait
-                bulunan_id = cid  # Basit heuristik: son yakalananı al
-            # Daha güvenilir: URL'den parse et (sayfada /c/XXX veya data-category-id)
-            try:
-                page_url = page.url
-                # Colruyt kategori sayfaları bazen URL'de ID içerir
-                import re
-                m = re.search(r"/c/(\d+)", page_url)
-                if m:
-                    bulunan_id = m.group(1)
-                    agi_yakalanan_kategori_idleri.add(bulunan_id)
-            except Exception:
-                pass
+        if not harita_yuklendi:
+            print("\n[2/3] Kategori sayfaları ziyaret ediliyor (categoryId keşfi)...")
+            print("  İpucu: colruyt_kategori_map_olustur.py ile ID haritası oluşturabilirsin")
+            print("         Bir kez çalıştırınca bu aşama her zaman atlanır.\n")
 
-            insan_bekle("sayfa")
+            max_k = args.max_kategori or len(tum_linkler)
+            ziyaret_edilen = set()
+
+            for i, link in enumerate(tum_linkler[:max_k]):
+                if args.sadece_kesif and i >= 5:
+                    break
+
+                link_temiz = link.rstrip("/")
+                if link_temiz in ziyaret_edilen:
+                    continue
+                ziyaret_edilen.add(link_temiz)
+
+                kategori_adi = link_temiz.split("/nl/producten/")[-1].replace("-", " ").title()
+                print(f"  [{i+1}/{min(max_k, len(tum_linkler))}] {kategori_adi}: {link_temiz}")
+
+                # Browser alive kontrolü — çöktüyse yeniden aç
+                browser_alive = True
+                try:
+                    _ = page.url
+                except Exception:
+                    browser_alive = False
+
+                if not browser_alive:
+                    print("  Browser kapandı! Yeniden açılıyor...")
+                    try:
+                        context.close()
+                    except Exception:
+                        pass
+                    context = pw.chromium.launch_persistent_context(
+                        user_data_dir=profil_dir,
+                        headless=False,
+                        locale="nl-BE",
+                        viewport={"width": 1280, "height": 900},
+                        args=["--disable-blink-features=AutomationControlled"],
+                        ignore_https_errors=False,
+                    )
+                    page = context.pages[0] if context.pages else context.new_page()
+                    page.on("response", ag_yanitini_isle)
+                    try:
+                        page.goto(SITE_URL, wait_until="domcontentloaded", timeout=60_000)
+                        time.sleep(5)
+                    except Exception:
+                        pass
+
+                try:
+                    page.goto(link_temiz, wait_until="domcontentloaded", timeout=45_000)
+                    time.sleep(2.5)
+                    page.evaluate("window.scrollBy(0, 800)")
+                    time.sleep(1.5)
+                except Exception as e:
+                    print(f"    Atlandı: {e}")
+                    continue
+
+                try:
+                    import re
+                    m = re.search(r"/c/(\d+)", page.url)
+                    if m:
+                        agi_yakalanan_kategori_idleri.add(m.group(1))
+                except Exception:
+                    pass
+
+                insan_bekle("sayfa")
 
         # Tüm yakalanan kategori ID'lerini listeye çevir
         for cid in sorted(agi_yakalanan_kategori_idleri):
             kesfedilen_kategoriler.append({
                 "categoryId": cid,
-                "kaynak": "ag_yakalama",
+                "kaynak": "ag_yakalama" if not harita_yuklendi else "harita_dosyasi",
             })
 
-        # Mevcut verideki topCategoryId'leri de ekle (backup)
+        # Hardcoded bilinen ID'leri de ekle (backup)
         bilinen_idler = {"354","693","591","233","65","628","335","105","1675",
                          "124","129","421","347","670","188","33","761","306"}
         for cid in bilinen_idler:

@@ -63,7 +63,50 @@ def extract_tiles(page) -> List[Dict[str, Any]]:
               el.getAttribute('data-master-id');
             const text = el.innerText || '';
             if (!pid && text.length < 8) return;
-            out.push({ pid: pid || '', text: text.slice(0, 800) });
+
+            // Resim
+            const img = el.querySelector('img');
+            let imgUrl = '';
+            if (img) {
+              imgUrl = img.currentSrc || img.getAttribute('src') || img.getAttribute('data-src') || '';
+              if (imgUrl.startsWith('data:')) imgUrl = '';
+            }
+
+            // Marka
+            const brandEl = el.querySelector('[class*="brand"], [itemprop="brand"], [class*="manufacturer"]');
+            const brand = brandEl ? brandEl.innerText.trim().slice(0, 200) : '';
+
+            // Birim fiyat (€/kg vb.)
+            const unitEl = el.querySelector(
+              '[class*="unit-price"], [class*="unitprice"], [class*="price-per"], [class*="comparison"]'
+            );
+            const unitPriceText = unitEl ? unitEl.innerText.trim().slice(0, 100) : '';
+
+            // İndirim tarihleri (data attribute veya element)
+            const promoFrom = el.getAttribute('data-promo-from') || el.getAttribute('data-valid-from') || '';
+            const promoTo   = el.getAttribute('data-promo-to')   || el.getAttribute('data-valid-to')   || '';
+
+            // İndirim öncesi fiyat
+            const oldPriceEl = el.querySelector(
+              '[class*="old-price"], [class*="was-price"], [class*="strike"], s, del'
+            );
+            const oldPriceText = oldPriceEl ? oldPriceEl.innerText.trim().slice(0, 50) : '';
+
+            // İndirim yüzdesi / label
+            const promoLabelEl = el.querySelector('[class*="promo-label"], [class*="discount-badge"], [class*="promotion-label"]');
+            const promoLabel = promoLabelEl ? promoLabelEl.innerText.trim().slice(0, 100) : '';
+
+            out.push({
+              pid: pid || '',
+              text: text.slice(0, 800),
+              imgUrl: imgUrl.slice(0, 500),
+              brand,
+              unitPriceText,
+              promoFrom,
+              promoTo,
+              oldPriceText,
+              promoLabel,
+            });
           });
           return out;
         }
@@ -149,15 +192,44 @@ def run(*, headless: bool, dry_run: bool, no_pause: bool) -> int:
                     key = pid or re.sub(r"\W+", "_", first_title_line(text).lower())[:80] + "_" + str(price)
                     if key in by_pid:
                         continue
+
+                    # Birim fiyat parse: "1,23/kg" veya "€ 1,23 / kg"
+                    unit_price = None
+                    unit_type = ""
+                    upt = item.get("unitPriceText") or ""
+                    if upt:
+                        m = re.search(r"(\d+[,.]?\d*)\s*/\s*(kg|g|l|cl|ml|st(?:uk)?|pcs?)\b", upt.lower())
+                        if m:
+                            try:
+                                unit_price = float(m.group(1).replace(",", "."))
+                            except ValueError:
+                                pass
+                            unit_type = m.group(2)
+                        else:
+                            unit_price = parse_price(upt)
+
+                    # Eski fiyat (indirimden önceki)
+                    old_price = parse_price(item.get("oldPriceText") or "")
+                    in_promo = bool(
+                        "promo" in text.lower() or "%" in text or
+                        (item.get("promoLabel") or "").strip() or
+                        (old_price and old_price > price)
+                    )
+
                     by_pid[key] = {
                         "carrefourPid": key[:200],
                         "name": first_title_line(text) or key[:120],
-                        "brand": None,
+                        "brand": (item.get("brand") or None),
                         "basicPrice": price,
-                        "promoPrice": None,
-                        "inPromo": "promo" in text.lower() or "%" in text,
+                        "promoPrice": old_price if (in_promo and old_price and old_price > price) else None,
+                        "inPromo": in_promo,
                         "topCategoryName": start.split("/")[-1][:200],
                         "unitContent": None,
+                        "imageUrl": item.get("imgUrl") or None,
+                        "unitPrice": unit_price,
+                        "unitType": unit_type or None,
+                        "promo_valid_from": item.get("promoFrom") or None,
+                        "promo_valid_until": item.get("promoTo") or None,
                     }
                 page.evaluate("window.scrollBy(0, Math.min(700, window.innerHeight * 0.85))")
                 if dry_run:

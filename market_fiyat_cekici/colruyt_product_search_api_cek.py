@@ -23,12 +23,12 @@ CONFIG = {
     "base_url": "https://apip.colruyt.be/gateway/emec.colruyt.protected.bffsvc/cg/nl/api/product-search-prs",
     "place_id": "762",           # Mağaza (tarayıcıdan kopyaladığın placeId)
     "cg_api_key": "a8ylmv13-b285-4788-9e14-0f79b7ed2411",  # Site güncellenirse tarayıcı isteğinden kopyalayın
-    "page_size": 20,             # Sayfa başına ürün (sitedeki gibi 20; bazen 18–24 arası random)
+    "page_size": 60,             # Sayfa başına ürün (max 60 — daha az istek, daha az 456)
     "max_products": 50000,       # Tam katalog için yüksek tavan (API totalProductsFound ile de sınırlanır)
     "request_timeout": 25,       # İstek zaman aşımı (saniye)
     "max_retries": 4,           # Hata durumunda deneme sayısı
     "checkpoint_every_pages": 5, # Kaç sayfada bir ara kayıt
-    "stale_page_limit": 3,       # Üst üste yeni ürün gelmeyen sayfa limiti
+    "stale_page_limit": 15,      # Üst üste yeni ürün gelmeyen sayfa limiti
 }
 
 # Tarayıcıya benzeyen sabit header'lar (API anahtarı CONFIG["cg_api_key"] ile eklenir)
@@ -82,10 +82,10 @@ def sanitize_place_id(raw) -> str:
 
 
 # İnsan benzeri bekleme aralıkları (saniye)
-DELAY_NORMAL = (2.2, 5.5)        # Her istek sonrası
-DELAY_SLOW = (7.0, 16.0)         # Bazen "sayfayı okuyor" (yaklaşık %12)
-DELAY_COFFEE = (28.0, 72.0)      # Nadiren "kısa mola" (yaklaşık %3)
-DELAY_LONG = (95.0, 185.0)       # Çok nadiren "uzun ara" (yaklaşık %0.8)
+DELAY_NORMAL = (8.0, 15.0)       # Her istek sonrası (456 önlemek için yavaş)
+DELAY_SLOW = (20.0, 35.0)        # Bazen "sayfayı okuyor" (yaklaşık %12)
+DELAY_COFFEE = (60.0, 120.0)     # Nadiren "kısa mola" (yaklaşık %3)
+DELAY_LONG = (180.0, 300.0)      # Çok nadiren "uzun ara" (yaklaşık %0.8)
 
 
 def human_like_delay():
@@ -517,9 +517,9 @@ def fetch_page(session, skip, size, headers, extra_params=None):
             )
             if resp.status_code == 200:
                 return resp.json()
-            if resp.status_code == 429:
-                wait = 60 * (2 ** attempt) + random.uniform(0, 30)
-                print(f"  Rate limit (429); {wait:.0f} sn bekleniyor...")
+            if resp.status_code in (429, 456):
+                wait = 90 * (2 ** attempt) + random.uniform(0, 30)
+                print(f"  Rate limit ({resp.status_code}); {wait:.0f} sn bekleniyor...")
                 time.sleep(wait)
                 continue
             if resp.status_code >= 500:
@@ -618,6 +618,9 @@ def product_to_platform(p):
         "countryOfOrigin": p.get("countryOfOrigin"),
         "isPriceAvailable": p.get("isPriceAvailable"),
         "isAvailable": p.get("isAvailable"),
+        "image_url": p.get("thumbNail") or p.get("fullImage"),
+        "unit_price": price.get("pricePerUOM"),
+        "unit_type": price.get("measurementUnit"),
     }
 
 

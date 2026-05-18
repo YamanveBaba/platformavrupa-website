@@ -72,6 +72,33 @@ def sektor_bul(text: str) -> str:
             return sektor
     return "Diger"
 
+VDAB_JOBCAT_TR = {
+    "JOBCAT01": "Satis",    # Aankoop → Satın Alma/Satış
+    "JOBCAT02": "Ofis",     # Administratie
+    "JOBCAT03": "Insaat",   # Bouw
+    "JOBCAT04": "Ofis",     # Communicatie
+    "JOBCAT05": "Creatief", # Creatief
+    "JOBCAT14": "Diger",    # Dienstverlening
+    "JOBCAT06": "Ofis",     # Financieel
+    "JOBCAT07": "Saglik",   # Gezondheid
+    "JOBCAT08": "Restoran", # Horeca en toerisme
+    "JOBCAT09": "Ofis",     # Human resources
+    "JOBCAT10": "Bilisim",  # ICT
+    "JOBCAT11": "Ofis",     # Juridisch
+    "JOBCAT12": "Diger",    # Land- en tuinbouw
+    "JOBCAT13": "Lojistik", # Logistiek en transport
+    "JOBCAT15": "Ofis",     # Management
+    "JOBCAT16": "Satis",    # Marketing
+    "JOBCAT17": "Teknik",   # Onderhoud
+    "JOBCAT18": "Egitim",   # Onderwijs
+    "JOBCAT20": "Bilisim",  # Onderzoek en ontwikkeling
+    "JOBCAT19": "Ofis",     # Overheid
+    "JOBCAT21": "Uretim",   # Productie
+    "JOBCAT22": "Teknik",   # Techniek
+    "JOBCAT23": "Satis",    # Verkoop
+    "JOBCAT24": "Diger",    # Andere
+}
+
 BE_PROVINCE_MAP = {
     "oost-vlaanderen": "Gent",
     "west-vlaanderen": "Brugge",
@@ -88,42 +115,62 @@ BE_PROVINCE_MAP = {
 
 BE_POSTAL_CITY = {
     "10": "Brussels (Bruxelles)", "11": "Brussels (Bruxelles)", "12": "Brussels (Bruxelles)",
+    "13": "Brussels (Bruxelles)",
     "20": "Antwerpen", "21": "Antwerpen", "22": "Antwerpen", "23": "Antwerpen",
-    "24": "Mechelen",
+    "24": "Mechelen", "25": "Mechelen", "26": "Antwerpen", "27": "Antwerpen",
+    "28": "Mechelen", "29": "Antwerpen",
     "30": "Leuven", "31": "Leuven",
     "32": "Hasselt", "33": "Hasselt", "34": "Hasselt", "35": "Hasselt",
-    "36": "Turnhout",
+    "36": "Turnhout", "37": "Turnhout",
+    "38": "Leuven", "39": "Leuven",
     "40": "Liège", "41": "Liège", "42": "Liège", "43": "Liège", "44": "Liège", "45": "Liège",
-    "46": "Verviers",
-    "50": "Namur", "51": "Namur", "52": "Namur",
+    "46": "Verviers", "47": "Liège", "48": "Verviers", "49": "Verviers",
+    "50": "Namur", "51": "Namur", "52": "Namur", "53": "Namur", "54": "Namur",
+    "55": "Namur", "56": "Namur", "57": "Namur", "58": "Namur",
     "60": "Charleroi", "61": "Charleroi", "62": "Charleroi",
-    "63": "La Louvière",
+    "63": "La Louvière", "64": "La Louvière", "65": "Mons",
+    "66": "Mons", "67": "Mons", "68": "Charleroi", "69": "Namur",
     "70": "Mons", "71": "Mons", "72": "Mons", "73": "Mons", "74": "Tournai",
+    "75": "Tournai", "76": "Tournai", "77": "Mons", "78": "Mons", "79": "Tournai",
     "80": "Brugge", "81": "Brugge", "82": "Brugge", "83": "Brugge",
     "84": "Kortrijk", "85": "Kortrijk",
-    "86": "Roeselare",
-    "88": "Ostend (Oostende)",
+    "86": "Roeselare", "87": "Brugge",
+    "88": "Ostend (Oostende)", "89": "Ostend (Oostende)",
     "90": "Gent", "91": "Gent", "92": "Gent", "93": "Aalst",
-    "94": "Sint-Niklaas",
+    "94": "Sint-Niklaas", "95": "Aalst",
     "96": "Genk", "97": "Genk",
-    "98": "Hasselt",
+    "98": "Hasselt", "99": "Gent",
 }
 
-def normalize_city(raw: str) -> str:
+def normalize_city(raw: str) -> tuple[str, str]:
+    """
+    Ham lokasyon stringinden (şehir, posta_kodu) döndür.
+    Posta kodu bilinmiyorsa posta_kodu = "".
+    """
     if not raw or raw.strip().lower() in ("belgie", "belgique", "belgium", ""):
-        return "Belgie"
+        return "Belgie", ""
     s = raw.strip()
-    m = re.match(r'^\d{4}\s+(.+)', s)
+
+    # Format: "2600 Berchem" — posta kodu + komün adı
+    m = re.match(r'^(\d{4})\s+(.+)', s)
     if m:
-        return m.group(1).strip()
+        postal = m.group(1)
+        city = BE_POSTAL_CITY.get(postal[:2], m.group(2).strip())
+        return city, postal
+
+    # Format: "2600" — sadece posta kodu
     m2 = re.match(r'^(\d{4})$', s)
     if m2:
-        return BE_POSTAL_CITY.get(s[:2], "Belgie")
+        postal = s
+        return BE_POSTAL_CITY.get(s[:2], "Belgie"), postal
+
+    # İl adı eşleşmesi
     lower = s.lower()
     for key, city in BE_PROVINCE_MAP.items():
         if key in lower:
-            return city
-    return s
+            return city, ""
+
+    return s, ""
 
 
 def load_secrets() -> tuple[str, str]:
@@ -170,14 +217,25 @@ def parse_ilan(job: dict) -> dict | None:
     baslik = vf.get("naam", "") or ""
     if not baslik:
         return None
-    firma = job.get("vacatureBedrijfsnaam", "") or ""
-    sehir = normalize_city(job.get("tewerkstellingsLocatieRegioOfAdres", "") or "Belgie")
+    firma       = job.get("vacatureBedrijfsnaam", "") or ""
+    jobcat_code = vf.get("jobdomeinCode", "") or ""
+    sehir, postal = normalize_city(job.get("tewerkstellingsLocatieRegioOfAdres", "") or "Belgie")
     tijds = " ".join(job.get("tijdsregeling", []) or []).lower()
     pozisyon = "Uzaktan" if "thuis" in tijds else ("Yari Zamanli" if "deel" in tijds else "Ofis")
     contract = vf.get("arbeidscircuitLijn", "") or ""
+    CONTRACT_TR = {
+        "Regulier": "Düzenli iş", "Tijdelijk": "Geçici iş",
+        "Uitzend": "Geçici iş (uitzend)", "Flexi": "Flexi-job",
+        "Student": "Öğrenci işi", "Zelfstandige": "Serbest çalışma",
+    }
+    contract_tr = next((v for k, v in CONTRACT_TR.items() if k.lower() in contract.lower()), contract)
+    desc_parts = []
+    if contract_tr: desc_parts.append(f"Sözleşme: {contract_tr}")
+    if sehir and sehir != "Belgie": desc_parts.append(f"Konum: {sehir}")
+    desc_parts.append("Kaynak: VDAB (Flanders)")
     return {
         "title":        baslik[:300],
-        "description":  contract[:500],
+        "description":  " | ".join(desc_parts)[:500],
         "category":     "Is Ilani",
         "sub_category": "Tam Zamanli",
         "status":       "active",
@@ -186,8 +244,9 @@ def parse_ilan(job: dict) -> dict | None:
         "source_url":   f"https://www.vdab.be/vindeenjob/vacatures/{job_id}",
         "owner_name":   firma[:200],
         "city":         sehir[:100],
+        "postal_code":  postal,
         "country":      "BE",
-        "sektor":       sektor_bul(baslik + " " + firma),
+        "sektor":       VDAB_JOBCAT_TR.get(jobcat_code) or sektor_bul(baslik + " " + firma),
         "pozisyon":     pozisyon,
         "price":        "",
         "created_at":   datetime.now(timezone.utc).isoformat(),

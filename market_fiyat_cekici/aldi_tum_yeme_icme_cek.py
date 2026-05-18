@@ -251,6 +251,24 @@ def main() -> None:
                     if not pid:
                         continue
                     promo_start, promo_end = _aldi_promo_dates_from_product_info(info)
+                    # Resim URL'si — DOM img elementi veya productInfo
+                    img_url = ""
+                    try:
+                        img_el = tile.query_selector("img[src], img[data-src], img[data-lazy-src]")
+                        if img_el:
+                            src = (img_el.get_attribute("src") or
+                                   img_el.get_attribute("data-src") or
+                                   img_el.get_attribute("data-lazy-src") or "")
+                            if src and not src.startswith("data:") and len(src) > 10:
+                                img_url = src
+                    except Exception:
+                        pass
+                    img_url = (img_url or
+                               str(info.get("imageUrl") or info.get("image") or
+                                   info.get("thumbnail") or ""))
+                    if img_url.startswith("data:"):
+                        img_url = ""
+
                     row = {
                         "productID": pid,
                         "productName": info.get("productName", ""),
@@ -259,6 +277,18 @@ def main() -> None:
                         "promoPrice": info.get("promoPrice") or info.get("strikePrice"),
                         "inPromotion": info.get("inPromotion", False),
                         "category": cat.get("primaryCategory", ""),
+                        "imageUrl": img_url,
+                        "unitContent": str(
+                            info.get("unitSize") or info.get("baseUnit") or
+                            info.get("packaging") or info.get("content") or ""
+                        ),
+                        "unitPrice": (info.get("pricePerUnit") or
+                                      info.get("unitPrice") or
+                                      info.get("pricePerKg")),
+                        "unitType": str(
+                            info.get("unitOfMeasure") or info.get("priceUnitLabel") or
+                            info.get("priceUnit") or ""
+                        ),
                     }
                     if promo_start:
                         row["promotionStartDate"] = promo_start

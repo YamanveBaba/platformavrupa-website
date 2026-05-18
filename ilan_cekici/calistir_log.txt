@@ -89,3 +89,143 @@ operable program or batch file.
 operable program or batch file.
 [Paz 19.04.2026  3:00:01,47] Tamamlandi. 
  
+[€ar 29.04.2026  3:00:01,58] Ilan cekici basliyor... 
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+[€ar 29.04.2026  3:00:01,61] Tamamlandi. 
+ 
+[Per 30.04.2026  3:00:01,58] Ilan cekici basliyor... 
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+[Per 30.04.2026  3:00:01,62] Tamamlandi. 
+ 
+[Cum 01.05.2026  3:00:01,59] Ilan cekici basliyor... 
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+[Cum 01.05.2026  3:00:01,63] Tamamlandi. 
+ 
+[Cmt 02.05.2026  3:00:01,61] Ilan cekici basliyor... 
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+[Cmt 02.05.2026  3:00:01,65] Tamamlandi. 
+ 
+[Paz 03.05.2026  3:00:01,61] Ilan cekici basliyor... 
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+[Paz 03.05.2026  3:00:01,65] Tamamlandi. 
+ 
+[Pzt 04.05.2026  3:00:01,61] Ilan cekici basliyor... 
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+[Pzt 04.05.2026  3:00:01,64] Tamamlandi. 
+ 
+[Sal 05.05.2026  3:00:01,64] Ilan cekici basliyor... 
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+[Sal 05.05.2026  3:00:01,67] Tamamlandi. 
+ 
+[€ar 06.05.2026  3:00:01,66] Ilan cekici basliyor... 
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+[€ar 06.05.2026  3:00:01,73] Tamamlandi. 
+ 
+[Per 07.05.2026  3:00:01,69] Ilan cekici basliyor... 
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+[Per 07.05.2026  3:00:01,73] Tamamlandi. 
+ 
+[Cum 08.05.2026  3:00:01,73] Ilan cekici basliyor... 
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+[Cum 08.05.2026  3:00:01,79] Tamamlandi. 
+ 
+[Cmt 09.05.2026  3:00:01,71] Ilan cekici basliyor... 
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+[Cmt 09.05.2026  3:00:01,75] Tamamlandi. 
+ 
+[Paz 10.05.2026  3:00:01,68] Ilan cekici basliyor... 
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+[Paz 10.05.2026  3:00:01,72] Tamamlandi. 
+ 
+[Pzt 11.05.2026  3:00:01,99] Ilan cekici basliyor... 
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+[Pzt 11.05.2026  3:00:02,02] Tamamlandi. 
+ 
+[Sal 12.05.2026  3:26:55,36] Ilan cekici basliyor... 
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+[Sal 12.05.2026  3:26:55,42] Tamamlandi. 
+ 
+[€ar 13.05.2026  3:00:02,04] Ilan cekici basliyor... 
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+[€ar 13.05.2026  3:00:02,09] Tamamlandi. 
+ 
+[Per 14.05.2026  3:00:02,02] Ilan cekici basliyor... 
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+[Per 14.05.2026  3:00:02,07] Tamamlandi. 
+ 
+[Cum 15.05.2026  3:00:02,00] Ilan cekici basliyor... 
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+[Cum 15.05.2026  3:00:02,03] Tamamlandi. 
+ 
+[Cmt 16.05.2026  3:00:01,98] Ilan cekici basliyor... 
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+[Cmt 16.05.2026  3:00:02,03] Tamamlandi. 
+ 
+[Paz 17.05.2026  3:00:02,03] Ilan cekici basliyor... 
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+[Paz 17.05.2026  3:00:02,04] Tamamlandi. 
+ 
+[Pzt 18.05.2026  3:00:01,14] Ilan cekici basliyor... 
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+'python' is not recognized as an internal or external command,
+operable program or batch file.
+[Pzt 18.05.2026  3:00:01,15] Tamamlandi. 
+ 

@@ -136,15 +136,69 @@ def _ilk_eleman(val) -> str:
         return ""
     return str(val).strip() if val else ""
 
+# Wallonie kasabaları → büyük şehir eşlemesi (büyük harfe normalize ederek aranır)
+FOREM_CITY_MAP: dict[str, str] = {
+    # Liège ili
+    "liege": "Liège", "liège": "Liège", "luik": "Liège",
+    "seraing": "Liège", "herstal": "Liège", "ans": "Liège",
+    "flemalle": "Liège", "flémalle": "Liège", "grace-hollogne": "Liège",
+    "grâce-hollogne": "Liège", "trooz": "Liège", "chaudfontaine": "Liège",
+    "oupeye": "Liège", "saint-nicolas": "Liège",
+    "verviers": "Verviers", "dison": "Verviers", "pepinster": "Verviers",
+    "theux": "Verviers", "spa": "Verviers",
+    # Charleroi ili
+    "charleroi": "Charleroi", "gerpinnes": "Charleroi", "fontaine-l'eveque": "Charleroi",
+    "fontaine-l'évêque": "Charleroi", "fleurus": "Charleroi", "chatelet": "Charleroi",
+    "châtelet": "Charleroi", "farciennes": "Charleroi", "courcelles": "Charleroi",
+    "manage": "Charleroi", "anderlues": "Charleroi", "lobbes": "Charleroi",
+    "les bons villers": "Charleroi", "seneffe": "Charleroi",
+    # Mons ili
+    "mons": "Mons", "bergen": "Mons", "boussu": "Mons", "quaregnon": "Mons",
+    "jurbise": "Mons", "quievrain": "Mons", "dour": "Mons",
+    "colfontaine": "Mons", "frameries": "Mons", "saint-ghislain": "Mons",
+    # La Louvière
+    "la louviere": "La Louvière", "la louvière": "La Louvière",
+    "binche": "La Louvière", "morlanwelz": "La Louvière",
+    "estinnes": "La Louvière", "chapelle-lez-herlaimont": "La Louvière",
+    # Tournai
+    "tournai": "Tournai", "doornik": "Tournai", "peruwelz": "Tournai",
+    "peruwelz": "Tournai", "antoing": "Tournai", "brunehaut": "Tournai",
+    # Namur
+    "namur": "Namur", "namen": "Namur", "gembloux": "Namur", "sambreville": "Namur",
+    "andenne": "Namur", "floreffe": "Namur", "profondeville": "Namur",
+    "fosses-la-ville": "Namur",
+    # Wavre / Brabant Wallon
+    "wavre": "Wavre", "nivelles": "Wavre", "ottignies": "Wavre",
+    "braine-l'alleud": "Wavre", "waterloo": "Wavre", "tubize": "Wavre",
+    "genappe": "Wavre", "rixensart": "Wavre", "la hulpe": "Wavre",
+    # Arlon / Luxembourg belge
+    "arlon": "Arlon", "bastogne": "Arlon", "marche-en-famenne": "Arlon",
+    "libramont": "Arlon", "libramont-chevigny": "Arlon", "neufchateau": "Arlon",
+    "neufchâteau": "Arlon", "virton": "Arlon", "aubange": "Arlon",
+}
+
 def sehir_temizle(localite, region) -> str:
-    """Şehir adını temizle — localite önce, region fallback."""
-    s = _ilk_eleman(localite)
-    if s:
-        return s[:100]
-    s = _ilk_eleman(region)
-    if s and s.upper() not in ("BELGIQUE", "RÉGION WALLONNE", "WALLONIE"):
-        return s[:100]
-    return "Belçika"
+    """
+    Şehir adını normalize et — küçük Wallonie kasabalarını büyük şehirlere eşle.
+    localite önce, region fallback.
+    """
+    raw = _ilk_eleman(localite)
+    if not raw:
+        raw = _ilk_eleman(region)
+    if not raw or raw.upper() in ("BELGIQUE", "RÉGION WALLONNE", "WALLONIE", ""):
+        return "Belçika"
+
+    # Büyük şehir eşlemesi dene
+    key = raw.strip().lower()
+    if key in FOREM_CITY_MAP:
+        return FOREM_CITY_MAP[key]
+
+    # Kısmi eşleşme — kasaba adı büyük şehir adını içeriyorsa
+    for k, city in FOREM_CITY_MAP.items():
+        if k in key or key in k:
+            return city
+
+    return raw.strip()[:100]
 
 def contrat_tipi(type_contrat: str, regime: str) -> str:
     """Sözleşme tipini pozisyon alanına çevir."""
@@ -287,6 +341,7 @@ def _yeni_ilan(record: dict) -> Optional[dict]:
         "source_url":   lien[:500],
         "owner_name":   firma[:200],
         "city":         sehir,
+        "postal_code":  "",
         "country":      "BE",
         "sektor":       sektor_bul(sektor_metin),
         "pozisyon":     contrat_tipi(type_cont, regime),

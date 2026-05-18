@@ -243,6 +243,25 @@ def _to_price_float(x: Any) -> Optional[float]:
     return v
 
 
+def _extract_lidl_image(data: dict) -> str:
+    """Mindshift API yanıtından resim URL'si çıkarır."""
+    for key in ("imageUrl", "thumbnail", "image"):
+        v = data.get(key)
+        if isinstance(v, str) and v.startswith("http"):
+            return v[:1000]
+    imgs = data.get("images")
+    if isinstance(imgs, list) and imgs:
+        first = imgs[0]
+        if isinstance(first, dict):
+            for k in ("url", "src", "imageUrl"):
+                v = first.get(k)
+                if isinstance(v, str) and v.startswith("http"):
+                    return v[:1000]
+        elif isinstance(first, str) and first.startswith("http"):
+            return first[:1000]
+    return ""
+
+
 def _promo_dates_from_mindshift_dict(blob: Any) -> Tuple[Optional[str], Optional[str]]:
     """İndirim/kampanya objesinden metin tarih alanları (API sürümüne göre değişebilir)."""
     if not isinstance(blob, dict):
@@ -396,6 +415,9 @@ def normalize_gridbox_data(data: dict, category_label: str) -> Optional[dict]:
         "inPromo": in_promo,
         "topCategoryName": f"api:{category_label}"[:500],
         "unitContent": unit_content,
+        "imageUrl": _extract_lidl_image(data),
+        "price": None,
+        "promo_price": None,
     }
     if promo_start_s:
         out["promotionStartDate"] = promo_start_s

@@ -227,6 +227,50 @@ def _actiris_payload(page: int, from_idx: int) -> dict:
         }
     }
 
+def _actiris_normalize_city(code_postal: str, commune_fr: str, commune_nl: str) -> tuple[str, str]:
+    """
+    Actiris komün adını normalize edilmiş büyük şehre çevir.
+    Brüksel 19 komünü (1000-1299) hepsi Brussels (Bruxelles) olarak kaydedilir.
+    Posta kodu ayrıca saklanır.
+    """
+    postal = code_postal.strip() if code_postal else ""
+    try:
+        p = int(postal)
+    except (ValueError, TypeError):
+        p = 0
+
+    if 1000 <= p <= 1299:
+        return "Brussels (Bruxelles)", postal
+    if 1300 <= p <= 1499:
+        return "Wavre", postal
+    if 1500 <= p <= 1999:
+        return "Leuven", postal
+    if 2000 <= p <= 2999:
+        return "Antwerpen", postal
+    if 3000 <= p <= 3499:
+        return "Leuven", postal
+    if 3500 <= p <= 3999:
+        return "Hasselt", postal
+    if 4000 <= p <= 4999:
+        return "Liège", postal
+    if 5000 <= p <= 5999:
+        return "Namur", postal
+    if 6000 <= p <= 6299:
+        return "Charleroi", postal
+    if 6300 <= p <= 6999:
+        return "Namur", postal
+    if 7000 <= p <= 7999:
+        return "Mons", postal
+    if 8000 <= p <= 8999:
+        return "Brugge", postal
+    if 9000 <= p <= 9999:
+        return "Gent", postal
+
+    # Posta kodu yoksa komün adı fallback
+    sehir = commune_fr or commune_nl or "Brussels (Bruxelles)"
+    return sehir, postal
+
+
 def _ilan_donustur(item: dict) -> Optional[dict]:
     """Actiris API öğesini ilanlar tablosu satırına çevir."""
     ref = str(item.get("reference", "")).strip()
@@ -242,11 +286,11 @@ def _ilan_donustur(item: dict) -> Optional[dict]:
     emp = item.get("employeur") or {}
     firma = (emp.get("nomFr") or emp.get("nomNl") or "").strip()
 
-    # Şehir — posta kodu + Brüksel
+    # Şehir — posta kodundan normalize et
     code_postal = str(item.get("codePostal") or "").strip()
     commune_fr = (item.get("communeFr") or "").strip()
     commune_nl = (item.get("communeNl") or "").strip()
-    sehir = commune_fr or commune_nl or (f"Brüksel {code_postal}" if code_postal else "Brüksel")
+    sehir, postal = _actiris_normalize_city(code_postal, commune_fr, commune_nl)
 
     # Sözleşme
     type_cont = (item.get("typeContratLibelle") or item.get("typeContrat") or "").strip()
@@ -288,6 +332,7 @@ def _ilan_donustur(item: dict) -> Optional[dict]:
         "source_url":   source_url,
         "owner_name":   firma[:200],
         "city":         sehir[:100],
+        "postal_code":  postal,
         "country":      "BE",
         "sektor":       sektor_bul(baslik + " " + firma),
         "pozisyon":     pozisyon_bul(type_cont, regime),

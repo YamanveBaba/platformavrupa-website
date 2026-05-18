@@ -285,8 +285,22 @@ _DOM_JS = """
         const inPromo=!!el.querySelector('[class*="promo"],[class*="badge-promo"],[class*="promotion"],[class*="actie"]');
         const imgEl=el.querySelector('img[data-src],img[src]');
         const img=imgEl?(imgEl.getAttribute('data-src')||imgEl.getAttribute('src')||''):'';
+        // Promo tarihleri: data-promotions veya data-gtm attribute'larından çek
+        let promoFrom='', promoUntil='';
+        for (const pa of ['data-promotions','data-promo-data','data-gtm-product']) {
+            const pRaw=el.getAttribute(pa);
+            if (!pRaw) continue;
+            try {
+                let pd=JSON.parse(pRaw);
+                if (Array.isArray(pd)) pd=pd[0]||{};
+                promoFrom=pd.startDate||pd.validFrom||pd.from||pd.start||pd.promotionStartDate||'';
+                promoUntil=pd.endDate||pd.validTo||pd.until||pd.end||pd.promotionEndDate||'';
+                if (promoFrom||promoUntil) break;
+            } catch(e) {}
+        }
         out.push({pid,price:price.trim().slice(0,60),name:name.trim().slice(0,300),
-                  brand:brand.slice(0,100),cat:cat.slice(0,200),inPromo,img:img.slice(0,400)});
+                  brand:brand.slice(0,100),cat:cat.slice(0,200),inPromo,img:img.slice(0,400),
+                  promoFrom,promoUntil});
     });
 
     // ── Strateji 2: Verbolia a[data-id].single-product-desktop ───────────────
@@ -355,6 +369,10 @@ def dom_urun_ekle(tiles: list, hedef: Dict, kat: str) -> int:
             "basicPrice":      floats[0] if floats else None,
             "promoPrice":      floats[1] if len(floats) > 1 else None,
             "inPromo":         bool(t.get("inPromo")) or len(floats) > 1,
+            "price": None,
+            "promo_price": None,
+            "promo_valid_from": t.get("promoFrom") or None,
+            "promo_valid_until": t.get("promoUntil") or None,
             "imageUrl":        t.get("img", "")[:400],
         }
         yeni += 1

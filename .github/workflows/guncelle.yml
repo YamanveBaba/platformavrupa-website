@@ -17,6 +17,7 @@ jobs:
       TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
     steps:
       - name: Kodu al
@@ -87,11 +88,8 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python -X utf8 ilan_cekici/haber_cek.py
 
-      - name: Ilanlari Turkceleştir (basliklar)
-        run: python -X utf8 ilan_cekici/cevir.py --mode title --limit 15000
-
-      - name: Ilanlari Turkceleştir (aciklamalar)
-        run: python -X utf8 ilan_cekici/cevir.py --mode desc --limit 5000
+      - name: Ilanlari Turkceleştir (cache + Google Translate)
+        run: python -X utf8 ilan_cekici/cevir_v2.py --limit 2000
 
       - name: Market urunlerini Turkceleştir
         run: python -X utf8 ilan_cekici/cevir.py --tablo market --limit 2000
