@@ -38,3 +38,52 @@ Thumbs.db
 node_modules/
 dist/
 *.log
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Supabase temp
+supabase/.temp/
+
+# VDAB çıktı klasörleri (ilan_cekici içindeki kategori dosyaları)
+ilan_cekici/Aankoop
+ilan_cekici/Administratie
+ilan_cekici/Andere
+ilan_cekici/Bouw
+ilan_cekici/Communicatie
+ilan_cekici/Creatief
+ilan_cekici/Dienstverlening
+ilan_cekici/Financieel
+ilan_cekici/Gezondheid
+ilan_cekici/Hedef
+ilan_cekici/Horeca
+ilan_cekici/Human
+ilan_cekici/ICT
+ilan_cekici/Juridisch
+ilan_cekici/Land-
+ilan_cekici/Logistiek
+ilan_cekici/Management
+ilan_cekici/Marketing
+ilan_cekici/Onderhoud
+ilan_cekici/Onderwijs
+ilan_cekici/Onderzoek
+ilan_cekici/Overheid
+ilan_cekici/Productie
+ilan_cekici/Supabase
+ilan_cekici/Tamamlandi
+ilan_cekici/Techniek
+ilan_cekici/VDAB
+ilan_cekici/Verkoop
+ilan_cekici/[Aankoop]
+ilan_cekici/[DRY-RUN]
+ilan_cekici/24
+ilan_cekici/python
+ilan_cekici/calistir_log.txt
+
+# Büyük/gereksiz dosyalar
+ilan_cekici/*.docx
+market_fiyat_cekici/market_log.txt
+market_fiyat_cekici/scrapling_debug.txt
+market_fiyat_cekici/son_calisma.txt

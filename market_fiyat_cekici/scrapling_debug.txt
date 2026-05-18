@@ -1,4 +1,0 @@
-page_action started
-cards found
-initial cards: 24
-page_action done
