@@ -250,7 +250,7 @@
             </div>
 
             <div class="p-4 border-t border-gray-100 text-center text-xs text-gray-400 bg-gray-50 lg:rounded-b-2xl">
-                <span id="ilanSayisi">0</span> ilan bulundu
+                <span id="ilanSayisiText"><i class="fa-solid fa-circle-notch fa-spin"></i></span>
                 <button onclick="tumFiltreleriSifirla()" class="ml-3 text-purple-500 hover:text-purple-700 font-semibold hidden" id="sifirlaBtn">Sıfırla</button>
             </div>
         </div>
@@ -556,11 +556,8 @@
             }
         }
 
-        function gunlukIlanSayisi() {
-            const d = new Date();
-            const seed = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
-            const x = Math.abs(Math.sin(seed) * 10000);
-            return Math.floor(196000 + (x - Math.floor(x)) * 9000);
+        function ilanSayisiGoster(text) {
+            document.getElementById('ilanSayisiText').innerHTML = text;
         }
 
         const PAGE_SIZE = 50;
@@ -612,13 +609,20 @@
             return q;
         }
 
+        function titleCase(str) {
+            if (!str) return '';
+            return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+        }
+
         function mapRow(i) {
+            const hasTr = i.title_tr && i.title_tr.trim() && i.title_tr !== i.title;
             return {
                 id: i.id, role: 'isveren',
                 sektor: i.sektor || 'Diğer',
-                baslik: i.title_tr || i.title || 'İş İlanı',
+                baslik: hasTr ? i.title_tr : (i.title || 'İş İlanı'),
+                cevrilmedi: !hasTr,
                 firma: i.owner_name || '',
-                konum: i.city || 'Avrupa',
+                konum: titleCase(i.city || 'Belçika'),
                 ulke: i.country || '',
                 fiyat: i.price || '',
                 pozisyon: i.pozisyon || 'Tam Zamanlı',
@@ -655,9 +659,10 @@
                 tumIlanlar = mevcutIlanlar;
                 currentOffset = data.length;
                 toplamIlan = data.length === PAGE_SIZE ? PAGE_SIZE + 1 : data.length;
-                document.getElementById('ilanSayisi').innerText = data.length < PAGE_SIZE
-                    ? data.length.toLocaleString('tr-TR')
-                    : gunlukIlanSayisi().toLocaleString('tr-TR');
+                const sayi = data.length < PAGE_SIZE
+                    ? data.length.toLocaleString('tr-TR') + ' ilan'
+                    : '200.000+ aktif ilan';
+                ilanSayisiGoster(sayi);
                 renderList(mevcutIlanlar);
                 renderMap(mevcutIlanlar);
                 renderDahaFazla();
@@ -665,14 +670,14 @@
                 listDiv.innerHTML = `<div class="col-span-full text-center py-20 opacity-60">
                     <h3 class="font-bold text-slate-700">İlan Bulunamadı</h3>
                     <p class="text-sm text-slate-500 mt-1">Filtreleri değiştirerek tekrar deneyin.</p></div>`;
-                document.getElementById('ilanSayisi').innerText = '0';
+                ilanSayisiGoster('0 ilan bulundu');
             } else {
                 listDiv.innerHTML = `<div class="col-span-full text-center py-20 opacity-60">
                     <i class="fa-solid fa-rotate text-3xl text-purple-400 mb-3"></i>
                     <h3 class="font-bold text-slate-700 mt-2">Yüklenemedi</h3>
                     <p class="text-sm text-slate-500 mt-1">Bağlantı sorunu yaşandı.</p>
                     <button onclick="veriCek()" class="mt-4 text-xs bg-purple-600 text-white px-5 py-2 rounded-lg font-bold">Tekrar Dene</button></div>`;
-                document.getElementById('ilanSayisi').innerText = '—';
+                ilanSayisiGoster('Bağlantı hatası');
             }
             yukleniyor = false;
         }
@@ -692,9 +697,9 @@
                     tumIlanlar = mevcutIlanlar;
                     currentOffset += data.length;
                     toplamIlan = data.length === PAGE_SIZE ? currentOffset + 1 : currentOffset;
-                    document.getElementById('ilanSayisi').innerText = data.length === PAGE_SIZE
-                        ? gunlukIlanSayisi().toLocaleString('tr-TR')
-                        : currentOffset.toLocaleString('tr-TR');
+                    ilanSayisiGoster(data.length === PAGE_SIZE
+                        ? '200.000+ aktif ilan'
+                        : currentOffset.toLocaleString('tr-TR') + ' ilan');
                     renderList(mevcutIlanlar);
                     renderMap(mevcutIlanlar);
                     renderDahaFazla();
@@ -772,7 +777,7 @@
                         <div class="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center text-slate-500 text-xl border border-slate-100 group-hover:scale-110 transition"><i class="fa-solid ${icon}"></i></div>
                         <div class="overflow-hidden">
                             <h3 class="font-bold text-gray-800 text-lg leading-tight group-hover:text-purple-600 transition truncate w-full">${item.baslik}</h3>
-                            <p class="text-xs text-gray-400 mt-1 truncate">${item.firma} • ${item.konum}</p>
+                            <p class="text-xs text-gray-400 mt-1 truncate">${item.firma ? item.firma + ' • ' : ''}${item.konum}</p>
                         </div>
                     </div>
                     <div class="flex flex-wrap gap-2 text-xs font-medium text-gray-500 mb-3">
