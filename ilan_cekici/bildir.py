@@ -27,7 +27,7 @@ def supabase_say(sb_url, sb_key, tablo, filtre=""):
         return "?"
 
     headers = {"apikey": sb_key, "Authorization": f"Bearer {sb_key}",
-               "Range-Unit": "items", "Range": "0-0", "Prefer": "count=exact"}
+               "Range-Unit": "items", "Range": "0-0", "Prefer": "count=estimated"}
     url = f"{sb_url}/rest/v1/{tablo}?select=id{filtre}"
 
     son_hata = ""
