@@ -199,7 +199,7 @@
                     <h3 class="filter-title">ÇALIŞMA ŞEKLİ</h3>
                     <div class="type-grid">
                         <button onclick="setFilter('pozisyon', 'Hepsi', this)" class="type-btn active col-span-2">Hepsi</button>
-                        <button onclick="setFilter('pozisyon', 'Tam Zamanli', this)" class="type-btn">Tam Zamanlı</button>
+                        <button onclick="setFilter('pozisyon', 'Ofis', this)" class="type-btn">Tam Zamanlı</button>
                         <button onclick="setFilter('pozisyon', 'Yari Zamanli', this)" class="type-btn">Yarı Zamanlı</button>
                         <button onclick="setFilter('pozisyon', 'Uzaktan', this)" class="type-btn">Uzaktan</button>
                         <button onclick="setFilter('pozisyon', 'Staj', this)" class="type-btn">Staj</button>
@@ -612,9 +612,10 @@
                 .order('created_at', { ascending })
                 .range(offset, offset + PAGE_SIZE - 1);
 
-            // Tam metin arama — FTS index ile hızlı (fts kolonu Supabase'de oluşturulduysa)
+            // Tam metin arama — FTS SQL çalıştırıldıysa textSearch, yoksa ilike fallback
             if (filters.search) {
-                q = q.textSearch('fts', filters.search, { type: 'websearch', config: 'simple' });
+                const s = filters.search.replace(/[%_]/g, '\\$&');
+                q = q.or(`title.ilike.%${s}%,title_tr.ilike.%${s}%,owner_name.ilike.%${s}%`);
             }
 
             // Kaynak filtresi (VDAB / Actiris / FOREM)
@@ -824,7 +825,7 @@
                     </div>
                     <div class="flex flex-wrap gap-2 text-xs font-medium text-gray-500 mb-3">
                         <span class="bg-gray-50 px-2 py-1 rounded border border-gray-200">${item.sektor}</span>
-                        ${item.pozisyon && item.pozisyon !== item.sektor && item.pozisyon !== 'Ofis' ? `<span class="bg-gray-50 px-2 py-1 rounded border border-gray-200">${item.pozisyon}</span>` : ''}
+                        ${item.pozisyon && item.pozisyon !== item.sektor && item.pozisyon !== 'Ofis' && item.pozisyon !== 'Tam Zamanli' ? `<span class="bg-gray-50 px-2 py-1 rounded border border-gray-200">${item.pozisyon}</span>` : ''}
                     </div>
                     <div class="flex justify-between items-center pt-3 border-t border-gray-50">
                          <span class="text-xs text-gray-400 flex items-center gap-1"><i class="fa-solid fa-location-dot"></i> ${item.konum || item.ulke}</span>
