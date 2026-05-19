@@ -38,64 +38,75 @@ ULKE_MAP = {
     "genel": None,
 }
 
-# RSS kaynakları — Avrupa Türkleri için
+# RSS kaynakları — Avrupa Türkleri ve gurbetçi odaklı
 RSS_KAYNAKLAR = [
-    # Türk medyası
-    {"url": "https://www.aa.com.tr/tr/rss/default.aspx",               "kaynak": "Anadolu Ajansı"},
-    {"url": "https://www.ntv.com.tr/son-dakika.rss",                   "kaynak": "NTV"},
-    {"url": "https://www.cnnturk.com/feed/rss/main/news",              "kaynak": "CNN Türk"},
-    {"url": "http://rss.dw.com/rdf/rss-tur-all",                       "kaynak": "DW Türkçe"},
-    {"url": "https://www.bbc.com/turkce/index.xml",                    "kaynak": "BBC Türkçe"},
-    {"url": "https://www.trthaber.com/anasayfa.rss",                   "kaynak": "TRT Haber"},
-    {"url": "https://www.sabah.com.tr/rss/anasayfa.xml",               "kaynak": "Sabah"},
-    {"url": "https://www.milliyet.com.tr/rss/rssnew/gundemrss.xml",    "kaynak": "Milliyet"},
-    {"url": "https://www.hurriyet.com.tr/rss/gundem",                  "kaynak": "Hürriyet"},
-    {"url": "https://www.haberler.com/rss/",                           "kaynak": "Haberler.com"},
-    {"url": "https://www.ensonhaber.com/rss.xml",                      "kaynak": "En Son Haber"},
+    # Kaliteli Türk medyası (seçilmiş)
+    {"url": "https://www.aa.com.tr/tr/rss/default.aspx",         "kaynak": "Anadolu Ajansı"},
+    {"url": "http://rss.dw.com/rdf/rss-tur-all",                 "kaynak": "DW Türkçe"},
+    {"url": "https://www.bbc.com/turkce/index.xml",              "kaynak": "BBC Türkçe"},
     # Uluslararası Türkçe
     {"url": "https://www.france24.com/tr/rss",                   "kaynak": "France24 Türkçe"},
     {"url": "https://tr.euronews.com/rss",                       "kaynak": "Euronews Türkçe"},
-    {"url": "https://www.t24.com.tr/rss",                        "kaynak": "T24"},
     {"url": "https://bianet.org/bianet/rss",                     "kaynak": "Bianet"},
-    # Reddit
-    {"url": "https://www.reddit.com/r/gurbetci.rss",            "kaynak": "Reddit r/gurbetci"},
-    {"url": "https://www.reddit.com/r/Turkey.rss",              "kaynak": "Reddit r/Turkey"},
-    {"url": "https://www.reddit.com/r/europe.rss",              "kaynak": "Reddit r/europe"},
     # Avrupa Türk medyası
     {"url": "https://www.avrupahaber.net/feed",                  "kaynak": "Avrupa Haber"},
     {"url": "https://www.almanyabulteni.de/feed",                "kaynak": "Almanya Bülteni"},
-    {"url": "https://www.dailysabah.com/rss",                    "kaynak": "Daily Sabah"},
-    {"url": "https://www.hurriyetdailynews.com/rss",             "kaynak": "Hürriyet Daily News"},
+    # Gurbetçi odaklı site
+    {"url": "https://mobesekamerasi.com/feed",                   "kaynak": "Kapıkule Canlı Haber"},
+    # Resmi Türk kurumları
+    {"url": "https://www.gumruk.gov.tr/rss/haberler.xml",        "kaynak": "Gümrük Bakanlığı"},
+    {"url": "https://ytb.gov.tr/haberler/rss",                   "kaynak": "YTB Yurtdışı Türkler"},
     # AB haberleri
     {"url": "https://www.euractiv.com/feed/",                    "kaynak": "Euractiv"},
-    # Google News — Avrupa Türkleri araması
-    {"url": "https://news.google.com/rss/search?q=Avrupa+Türkler&hl=tr&gl=TR&ceid=TR:tr",                   "kaynak": "Google News TR"},
-    {"url": "https://news.google.com/rss/search?q=Almanya+Türk+ikamet&hl=tr&gl=TR&ceid=TR:tr",              "kaynak": "Google News DE"},
-    {"url": "https://news.google.com/rss/search?q=Belçika+Türk+vize&hl=tr&gl=TR&ceid=TR:tr",                "kaynak": "Google News BE"},
-    {"url": "https://news.google.com/rss/search?q=Hollanda+Türk+vatandaş&hl=tr&gl=TR&ceid=TR:tr",           "kaynak": "Google News NL"},
-    {"url": "https://news.google.com/rss/search?q=Fransa+Türk+ikamet&hl=tr&gl=TR&ceid=TR:tr",               "kaynak": "Google News FR"},
-    {"url": "https://news.google.com/rss/search?q=vatandaşlık+başvurusu+Avrupa&hl=tr&gl=TR&ceid=TR:tr",     "kaynak": "Google News Vatandaşlık"},
-    {"url": "https://news.google.com/rss/search?q=oturma+izni+Avrupa+Türkiye&hl=tr&gl=TR&ceid=TR:tr",       "kaynak": "Google News Oturma"},
-    {"url": "https://news.google.com/rss/search?q=Avrupa+emekli+Türkiye+SGK&hl=tr&gl=TR&ceid=TR:tr",        "kaynak": "Google News Emekli"},
+    # Google News — Mevcut gurbetçi aramaları
+    {"url": "https://news.google.com/rss/search?q=Avrupa+Türkler&hl=tr&gl=TR&ceid=TR:tr",                       "kaynak": "Google News TR"},
+    {"url": "https://news.google.com/rss/search?q=Almanya+Türk+ikamet&hl=tr&gl=TR&ceid=TR:tr",                  "kaynak": "Google News DE"},
+    {"url": "https://news.google.com/rss/search?q=Belçika+Türk+vize&hl=tr&gl=TR&ceid=TR:tr",                    "kaynak": "Google News BE"},
+    {"url": "https://news.google.com/rss/search?q=vatandaşlık+başvurusu+Avrupa&hl=tr&gl=TR&ceid=TR:tr",         "kaynak": "Google News Vatandaşlık"},
+    {"url": "https://news.google.com/rss/search?q=oturma+izni+Avrupa+Türkiye&hl=tr&gl=TR&ceid=TR:tr",           "kaynak": "Google News Oturma"},
+    {"url": "https://news.google.com/rss/search?q=Avrupa+emekli+Türkiye+SGK&hl=tr&gl=TR&ceid=TR:tr",            "kaynak": "Google News Emekli"},
+    # Google News — YENİ: Sıla yolu ve gümrük aramaları
+    {"url": "https://news.google.com/rss/search?q=kapıkule+gümrük+2026&hl=tr&gl=TR&ceid=TR:tr",                 "kaynak": "Google News Kapıkule"},
+    {"url": "https://news.google.com/rss/search?q=sıla+yolu+gurbetçi&hl=tr&gl=TR&ceid=TR:tr",                   "kaynak": "Google News Sıla"},
+    {"url": "https://news.google.com/rss/search?q=yabancı+plakalı+araç+türkiye+gümrük&hl=tr&gl=TR&ceid=TR:tr",  "kaynak": "Google News Araç Gümrük"},
+    {"url": "https://news.google.com/rss/search?q=Bulgaristan+vignette+e-vinyet+2026&hl=tr&gl=TR&ceid=TR:tr",   "kaynak": "Google News Vignette"},
+    {"url": "https://news.google.com/rss/search?q=gurbetçi+gümrük+araç+ceza&hl=tr&gl=TR&ceid=TR:tr",            "kaynak": "Google News Gümrük Ceza"},
+    {"url": "https://news.google.com/rss/search?q=çifte+vatandaşlık+2026&hl=tr&gl=TR&ceid=TR:tr",               "kaynak": "Google News Çifte Vatandaşlık"},
+    {"url": "https://news.google.com/rss/search?q=engelli+araç+ithalat+gümrük&hl=tr&gl=TR&ceid=TR:tr",          "kaynak": "Google News Engelli Araç"},
+    {"url": "https://news.google.com/rss/search?q=Avrupa+Türk+emeklilik+sigorta&hl=tr&gl=TR&ceid=TR:tr",        "kaynak": "Google News Emeklilik"},
 ]
 
 ALAKALI_KELIMELER = [
+    # Ülkeler ve şehirler
     "avrupa", "almanya", "hollanda", "belçika", "fransa", "avusturya",
+    "brüksel", "berlin", "paris", "amsterdam", "viyana", "sırbistan",
+    "bulgaristan", "macaristan", "romanya", "polonya", "çekya",
+    # Gurbetçi ve diaspora
     "gurbetçi", "diaspora", "ikamet", "oturma izni", "vize", "vatandaşlık",
-    "pasaport", "sgk", "emekli", "yurt dışı", "ab ", "avrupa birliği",
-    "schengen", "işçi", "göçmen", "mülteci", "sığınmacı",
-    "döviz", "euro", "türk lirası", "vergi", "sigorta",
-    "belçika", "brüksel", "berlin", "paris", "amsterdam", "viyana",
-    "türkiye-ab", "türkiye-avrupa", "türkiye-almanya",
-    "çifte vatandaşlık", "bürokratik", "konsolosluk", "büyükelçilik",
-    "eğitim", "burs", "üniversite", "okul",
-    "konut", "kira", "satın alma", "tapu",
+    "çifte vatandaşlık", "pasaport", "schengen", "yurt dışı",
+    "işçi", "göçmen", "konsolosluk", "büyükelçilik",
+    # Sıla yolu ve sınır — YENİ
+    "kapıkule", "sıla yolu", "sıla", "kapitan andreevo", "hamzabeyli",
+    "dereköy", "ipsala", "pazarkule", "sınır kapısı", "sınır geçişi",
+    "bekleme süresi",
+    # Gümrük ve araç — YENİ
+    "gümrük", "yabancı plakalı", "geçici ithalat", "araç gümrük",
+    "öTV muafiyeti", "engelli araç", "vignette", "e-vinyet",
+    "otoyol ücreti", "otoban", "trafik cezası",
+    # Ekonomi ve sosyal
+    "sgk", "emekli", "sigorta", "döviz", "euro", "türk lirası", "vergi",
+    "ab ", "avrupa birliği", "türkiye-ab", "türkiye-avrupa",
+    "eğitim", "burs", "üniversite", "konut", "kira", "tapu",
+    # Pratik gurbetçi bilgileri — YENİ
+    "konsolosluk randevu", "vergi kimlik", "emekli maaşı yurt dışı",
+    "banka hesabı yurt dışı", "ikametgah belgesi",
 ]
 
 ALAKASIZ_KELIMELER = [
     "futbol skoru", "maç sonucu", "şampiyon", "transfer",
     "magazin", "ünlü", "evlendi", "boşandı", "dizi", "film",
     "reklam", "indirim kampanyası", "satılık", "kiralık",
+    "spor toto", "bahis", "casino",
 ]
 
 def load_secrets() -> tuple[str, str, str, str, str]:
@@ -206,20 +217,22 @@ def gemini_filtrele(haber: dict, gemini_key: str) -> dict | None:
             "skor": 5,
         }
 
-    prompt = f"""Avrupa'daki Türkler için haber editörüsün. Haberi puanla ve kategorize et.
+    prompt = f"""Avrupa'daki Türk gurbetçiler için haber editörüsün. Haberi puanla ve kategorize et.
 
 BAŞLIK: {haber['baslik']}
 ÖZET: {haber['ozet'][:400]}
 KAYNAK: {haber['kaynak']}
 
 SADECE JSON döndür:
-{{"ozet": "2 cümle Türkçe özet", "ulke": "almanya/hollanda/belcika/fransa/avusturya/ingiltere/italya/ispanya/genel", "kategori": "vize_ikamet|vatandaslik|egitim_burs|is_ekonomi|kultur_toplum|turkiye|avrupa_politika|diger", "skor": 1-10}}
+{{"ozet": "2 cümle Türkçe özet", "ulke": "almanya/hollanda/belcika/fransa/avusturya/ingiltere/italya/ispanya/genel", "kategori": "sila_yolu|gumruk_arac|vignette|sinir_mevzuat|vize_ikamet|vatandaslik|egitim_burs|is_ekonomi|kultur_toplum|turkiye|avrupa_politika|diger", "skor": 1-10}}
 
 Skor rehberi (geniş tut — şüphe durumunda 5 ver):
-8-10: Kritik (vize/ikamet değişikliği, vatandaşlık, iş hukuku, Schengen, AB-Türkiye ilişkileri)
-5-7: Önemli (Avrupa haberleri, ekonomi, eğitim, kültür, Türkiye-Avrupa)
+8-10: KRİTİK — sıla yolu/Kapıkule bilgisi, gümrük değişikliği, vignette/e-vinyet fiyatı, araç mevzuatı,
+      yabancı plakalı araç cezası, sınır bekleme süresi, vize/ikamet değişikliği, vatandaşlık,
+      engelli araç ithalat, AB-Türkiye ilişkileri
+5-7: ÖNEMLİ — Avrupa Türkleri haberleri, SGK/emeklilik, eğitim, ekonomi, kültür, konsolosluk
 3-4: Az alakalı ama yayınlanabilir
-1-2: Sadece spor skoru, magazin, reklam"""
+1-2: Spor skoru, magazin, reklam, genel haber (gurbetçiyle ilgisiz)"""
 
     try:
         r = requests.post(
