@@ -259,6 +259,7 @@ Skor rehberi (geniş tut — şüphe durumunda 5 ver):
     return None
 
 def telegram_gonder(token: str, chat_id: str, mesaj: str):
+    """Düz metin Telegram mesajı gönder (özet bildirimler için)."""
     if not token or not chat_id:
         return
     try:
@@ -269,6 +270,51 @@ def telegram_gonder(token: str, chat_id: str, mesaj: str):
         )
     except Exception:
         pass
+
+
+def telegram_haber_gonder(token: str, chat_id: str, haber_id: int,
+                           baslik: str, ozet: str, kaynak: str,
+                           skor: int, kategori: str, url: str):
+    """Haberi onay/red butonlarıyla Telegram'a gönder."""
+    if not token or not chat_id:
+        return
+
+    kategori_emoji = {
+        "sila_yolu": "🚗", "gumruk_arac": "🛃", "vignette": "🛣️",
+        "sinir_mevzuat": "🛂", "vize_ikamet": "📋", "vatandaslik": "🇹🇷",
+        "egitim_burs": "🎓", "is_ekonomi": "💼", "kultur_toplum": "🏛️",
+        "avrupa_politika": "🇪🇺", "turkiye": "🇹🇷", "diger": "📰",
+    }.get(kategori, "📰")
+
+    skor_bar = "⭐" * min(skor, 5)
+    mesaj = (
+        f"{kategori_emoji} <b>{baslik[:120]}</b>\n\n"
+        f"{ozet[:300]}\n\n"
+        f"📡 {kaynak}  |  {skor_bar} ({skor}/10)\n"
+        f'<a href="{url}">Orijinal habere git →</a>'
+    )
+
+    klavye = {
+        "inline_keyboard": [[
+            {"text": "✅ Yayınla", "callback_data": f"onayla_{haber_id}"},
+            {"text": "🗑️ Sil",    "callback_data": f"reddet_{haber_id}"},
+        ]]
+    }
+
+    try:
+        requests.post(
+            f"https://api.telegram.org/bot{token}/sendMessage",
+            json={
+                "chat_id": chat_id,
+                "text": mesaj,
+                "parse_mode": "HTML",
+                "reply_markup": klavye,
+                "disable_web_page_preview": True,
+            },
+            timeout=10,
+        )
+    except Exception as e:
+        print(f"  Telegram haber gönderme hata: {e}")
 
 def supabase_kaydet(sb_url: str, sb_key: str, haberler: list[dict], dry_run: bool,
                     tg_token: str = "", tg_chat: str = "") -> int:
@@ -309,15 +355,29 @@ def supabase_kaydet(sb_url: str, sb_key: str, haberler: list[dict], dry_run: boo
         )
         if r.status_code in (200, 201, 204):
             basarili += 1
-            # Kritik haberler (skor >= 8) anında Telegram'a gider
-            if isinstance(ai_skor, int) and ai_skor >= 8 and tg_token and tg_chat:
-                tg_mesaj = (
-                    f"🔴 <b>Önemli Haber</b> (skor: {ai_skor}/10)\n"
-                    f"{h['baslik']}\n\n"
-                    f"{h['ozet']}\n\n"
-                    f"<a href='{h['link']}'>Kaynağa Git</a>"
+            # Kaydedilen haberin ID'sini al
+            haber_id = None
+            try:
+                # ID'yi source_hash ile sorgula
+                id_r = requests.get(
+                    f"{sb_url}/rest/v1/announcements",
+                    params={"select": "id", "source_hash": f"eq.{h['hash']}", "limit": "1"},
+                    headers={"apikey": sb_key, "Authorization": f"Bearer {sb_key}"},
+                    timeout=10,
                 )
-                telegram_gonder(tg_token, tg_chat, tg_mesaj)
+                if id_r.status_code == 200 and id_r.json():
+                    haber_id = id_r.json()[0]["id"]
+            except Exception:
+                pass
+
+            # Tüm haberler (skor >= 5) Telegram'a inline butonlarla gider
+            if isinstance(ai_skor, int) and ai_skor >= 5 and tg_token and tg_chat and haber_id:
+                telegram_haber_gonder(
+                    tg_token, tg_chat, haber_id,
+                    h["baslik"], h["ozet"], h["kaynak"],
+                    ai_skor, h.get("kategori", "diger"), h["link"]
+                )
+                time.sleep(0.3)  # Telegram rate limit
         else:
             print(f"  UYARI: Kayit hatasi {r.status_code}: {r.text[:100]}")
 
