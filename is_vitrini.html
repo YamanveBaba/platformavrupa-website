@@ -140,7 +140,7 @@
                 <!-- ARAMA KUTUSU -->
                 <div class="relative">
                     <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                    <input id="aramaInput" type="text" placeholder="Meslek veya firma ara…"
+                    <input id="aramaInput" type="text" placeholder="Flemenkçe, Fransızca veya Türkçe ara…"
                         oninput="aramaDebounce()"
                         class="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 outline-none focus:border-purple-400 focus:bg-white transition">
                 </div>
@@ -566,9 +566,11 @@
                 }).catch(e => console.log("Harita hatası:", e));
         }
 
+        let filtreTimer = null;
         function filtrele() {
             aktifFiltrelerGoster();
-            veriCek();
+            clearTimeout(filtreTimer);
+            filtreTimer = setTimeout(() => veriCek(), 150);
         }
 
         function setView(view) {
@@ -610,9 +612,9 @@
                 .order('created_at', { ascending })
                 .range(offset, offset + PAGE_SIZE - 1);
 
-            // Tam metin arama
+            // Tam metin arama — FTS index ile hızlı (fts kolonu Supabase'de oluşturulduysa)
             if (filters.search) {
-                q = q.or(`title.ilike.%${filters.search}%,title_tr.ilike.%${filters.search}%,owner_name.ilike.%${filters.search}%`);
+                q = q.textSearch('fts', filters.search, { type: 'websearch', config: 'simple' });
             }
 
             // Kaynak filtresi (VDAB / Actiris / FOREM)
@@ -624,7 +626,7 @@
             const kaynakMap = { 'Flanders': 'vdab', 'Brüksel': 'actiris', 'Wallonie': 'forem' };
             if (filters.sehirBE) {
                 // Şehir seçili (posta kodu seçilse de şehir üzerinden filtrele)
-                q = q.ilike('city', `%${filters.sehirBE}%`);
+                q = q.eq('city', filters.sehirBE);
                 if (!filters.kaynak && kaynakMap[filters.bolge]) {
                     q = q.eq('source', kaynakMap[filters.bolge]);
                 }
@@ -635,8 +637,8 @@
                 }
             }
 
-            // Sektör
-            if (filters.sektor) q = q.ilike('sektor', `%${filters.sektor}%`);
+            // Sektör — eq() ile index kullanır
+            if (filters.sektor) q = q.eq('sektor', filters.sektor);
 
             // Çalışma şekli — eq() ile index kullanır, ilike'den çok daha hızlı
             if (filters.pozisyon && filters.pozisyon !== 'Hepsi') q = q.eq('pozisyon', filters.pozisyon);
@@ -691,7 +693,7 @@
                 } catch(e) {
                     error = e;
                 }
-                if (deneme < 3) await new Promise(r => setTimeout(r, 1500 * deneme));
+                if (deneme < 3) await new Promise(r => setTimeout(r, 600 * deneme));
             }
 
             if (!error && data) {
