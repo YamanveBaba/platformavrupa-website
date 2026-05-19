@@ -388,21 +388,10 @@
             }
         }
         
-        // Sayfa yüklendiğinde
+        // Sayfa yüklendiğinde — Supabase'den anında oku
         window.onload = async function() {
-            // genel_veriler.js yüklenmesini bekle
             await waitForGenelVeriler();
-            await loadAllPrices();
-            
-            // Her 30 dakikada bir otomatik cache güncelle (döviz + altın, sessiz)
-            setInterval(async () => {
-                console.log('🔄 Otomatik cache güncelleme (30 dk)...');
-                try {
-                    await refreshPricesInBackground();
-                } catch (error) {
-                    console.warn('Otomatik güncelleme hatası:', error);
-                }
-            }, CACHE_DURATION_MINUTES * 60 * 1000);
+            await loadFromSupabase();
         };
         
         // genel_veriler.js yüklenmesini bekle
@@ -430,7 +419,60 @@
             });
         }
         
-        // İlk başarılı promise'i döndür (null/undefined olmayanlar)
+        // ─── SUPABASE'DEN OKU (birincil yöntem) ────────────────────────────────
+        async function loadFromSupabase() {
+            showLoading();
+            try {
+                const SUPA_URL = 'https://vhietrqljahdmloazgpp.supabase.co';
+                const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoaWV0cnFsamFoZG1sb2F6Z3BwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTk5MTcsImV4cCI6MjA4MDYzNTkxN30.sxpUrTnR40XuEBPUeQXj352xMziGr_lDqdA8H69ejBA';
+
+                const r = await fetch(
+                    `${SUPA_URL}/rest/v1/doviz_cache?id=in.("rates","gold")&select=id,data,updated_at`,
+                    { headers: { apikey: SUPA_KEY, Authorization: `Bearer ${SUPA_KEY}` } }
+                );
+
+                if (!r.ok) throw new Error(`Supabase ${r.status}`);
+                const rows = await r.json();
+
+                const ratesRow = rows.find(row => row.id === 'rates');
+                const goldRow  = rows.find(row => row.id === 'gold');
+
+                if (!ratesRow || !goldRow) {
+                    // Henüz script çalışmamış — eski yönteme düş
+                    console.warn('Supabase cache boş, canlı API deneniyor...');
+                    await loadAllPrices();
+                    return;
+                }
+
+                // Döviz
+                const ratesData = ratesRow.data;
+                exchangeRates = ratesData.rates || {};
+                exchangeRates._yesterday = ratesData.yesterday || {};
+
+                // Altın
+                const goldData = goldRow.data;
+                goldPrices = goldData.prices || {};
+                goldPrices._changes = {};
+
+                // Güncelleme zamanı
+                const updatedAt = new Date(goldRow.updated_at || ratesRow.updated_at);
+                const dakikaOnce = Math.floor((Date.now() - updatedAt.getTime()) / 60000);
+                const zamanStr = dakikaOnce < 1 ? 'Az önce' : `${dakikaOnce} dakika önce`;
+
+                updateHeroSection();
+                renderCurrencyTable();
+                renderGoldGrid();
+                document.getElementById('lastUpdate').textContent =
+                    `Son güncelleme: ${updatedAt.toLocaleTimeString('tr-TR')} (${zamanStr})`;
+
+            } catch (err) {
+                console.error('Supabase okuma hatası:', err);
+                // Fallback: eski yöntemle çek
+                await loadAllPrices();
+            }
+        }
+
+        // ─── İlk başarılı promise'i döndür (null/undefined olmayanlar) ────────
         function firstSuccess(promises) {
             return new Promise(resolve => {
                 let remaining = promises.length;
