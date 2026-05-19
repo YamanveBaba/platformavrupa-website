@@ -1832,20 +1832,32 @@ function haberDuzenle(id) {
   modal.style.display = 'flex';
 }
 
-async function haberDuzenleKaydet() {
+function hdImageOnizle(url) {
+  const preview = document.getElementById('hdImagePreview');
+  const img = document.getElementById('hdImageImg');
+  if (url && url.startsWith('http')) {
+    img.src = url;
+    preview.style.display = 'block';
+  } else {
+    preview.style.display = 'none';
+  }
+}
+
+async function haberDuzenleKaydet(yayinla = false) {
   if (!_haberDuzenleId) return;
   const title   = document.getElementById('hdTitle').value.trim();
   const content = document.getElementById('hdContent').value.trim();
   const imgUrl  = document.getElementById('hdImage').value.trim();
 
   const payload = {};
+  if (yayinla) payload.status = 'published';
   if (title)   payload.title     = title;
   if (content) payload.content   = content;
   payload.image_url = imgUrl || null;
 
   const { error } = await sb.from('announcements').update(payload).eq('id', _haberDuzenleId);
   if (!error) {
-    toast('Haber güncellendi', 'success');
+    toast(yayinla ? 'Haber kaydedildi ve yayınlandı ✅' : 'Haber güncellendi', 'success');
     document.getElementById('haberDuzenleModal').style.display = 'none';
     loadHaberKuyrugu();
   } else {
@@ -2241,16 +2253,21 @@ window.addEventListener('resize', () => {
       <input id="hdTitle" type="text" class="form-control" style="width:100%">
     </div>
     <div style="margin-bottom:12px">
-      <label style="font-size:12px;color:var(--text-muted);margin-bottom:4px;display:block">İçerik</label>
-      <textarea id="hdContent" class="form-control" rows="5" style="width:100%;resize:vertical"></textarea>
+      <label style="font-size:12px;color:var(--text-muted);margin-bottom:4px;display:block">İçerik (uzun açıklama)</label>
+      <textarea id="hdContent" class="form-control" rows="10" style="width:100%;resize:vertical" oninput="document.getElementById('hdCharCount').textContent=this.value.length"></textarea>
+      <div style="font-size:11px;color:var(--text-muted);text-align:right;margin-top:2px"><span id="hdCharCount">0</span> karakter</div>
     </div>
-    <div style="margin-bottom:18px">
+    <div style="margin-bottom:16px">
       <label style="font-size:12px;color:var(--text-muted);margin-bottom:4px;display:block">Görsel URL (opsiyonel)</label>
-      <input id="hdImage" type="text" class="form-control" style="width:100%" placeholder="https://...">
+      <input id="hdImage" type="text" class="form-control" style="width:100%" placeholder="https://..." oninput="hdImageOnizle(this.value)">
+      <div id="hdImagePreview" style="margin-top:8px;display:none">
+        <img id="hdImageImg" src="" style="max-width:100%;max-height:160px;border-radius:8px;object-fit:cover" onerror="document.getElementById('hdImagePreview').style.display='none'">
+      </div>
     </div>
-    <div style="display:flex;gap:8px;justify-content:flex-end">
+    <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
       <button class="btn btn-ghost btn-sm" onclick="document.getElementById('haberDuzenleModal').style.display='none'">İptal</button>
-      <button class="btn btn-primary btn-sm" onclick="haberDuzenleKaydet()"><i class="fa-solid fa-save"></i> Kaydet</button>
+      <button class="btn btn-secondary btn-sm" onclick="haberDuzenleKaydet(false)"><i class="fa-solid fa-save"></i> Kaydet</button>
+      <button class="btn btn-primary btn-sm" onclick="haberDuzenleKaydet(true)"><i class="fa-solid fa-paper-plane"></i> Kaydet & Yayınla</button>
     </div>
   </div>
 </div>

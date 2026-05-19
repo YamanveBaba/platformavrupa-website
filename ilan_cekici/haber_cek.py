@@ -274,7 +274,8 @@ def telegram_gonder(token: str, chat_id: str, mesaj: str):
 
 def telegram_haber_gonder(token: str, chat_id: str, haber_id: int,
                            baslik: str, ozet: str, kaynak: str,
-                           skor: int, kategori: str, url: str):
+                           skor: int, kategori: str, url: str,
+                           gorsel_url: str = ""):
     """Haberi onay/red butonlarıyla Telegram'a gönder."""
     if not token or not chat_id:
         return
@@ -298,23 +299,46 @@ def telegram_haber_gonder(token: str, chat_id: str, haber_id: int,
         "inline_keyboard": [[
             {"text": "✅ Yayınla", "callback_data": f"onayla_{haber_id}"},
             {"text": "🗑️ Sil",    "callback_data": f"reddet_{haber_id}"},
+            {"text": "✏️ Düzenle", "url": f"https://www.platformavrupa.com/admin.html#haber_{haber_id}"},
         ]]
     }
 
     try:
-        requests.post(
-            f"https://api.telegram.org/bot{token}/sendMessage",
-            json={
-                "chat_id": chat_id,
-                "text": mesaj,
-                "parse_mode": "HTML",
-                "reply_markup": klavye,
-                "disable_web_page_preview": True,
-            },
-            timeout=10,
-        )
-    except Exception as e:
-        print(f"  Telegram haber gönderme hata: {e}")
+        # Resim varsa fotoğraflı mesaj gönder
+        if gorsel_url:
+            caption = mesaj[:1024]  # Telegram caption max 1024 karakter
+            r = requests.post(
+                f"https://api.telegram.org/bot{token}/sendPhoto",
+                json={
+                    "chat_id": chat_id,
+                    "photo": gorsel_url,
+                    "caption": caption,
+                    "parse_mode": "HTML",
+                    "reply_markup": klavye,
+                },
+                timeout=10,
+            )
+            # Resim yüklenemezse düz mesaja düş
+            if r.status_code != 200:
+                raise Exception(f"sendPhoto {r.status_code}")
+        else:
+            raise Exception("resim yok")
+    except Exception:
+        # Resim yoksa veya hata varsa düz metin gönder
+        try:
+            requests.post(
+                f"https://api.telegram.org/bot{token}/sendMessage",
+                json={
+                    "chat_id": chat_id,
+                    "text": mesaj,
+                    "parse_mode": "HTML",
+                    "reply_markup": klavye,
+                    "disable_web_page_preview": True,
+                },
+                timeout=10,
+            )
+        except Exception as e:
+            print(f"  Telegram haber gönderme hata: {e}")
 
 def supabase_kaydet(sb_url: str, sb_key: str, haberler: list[dict], dry_run: bool,
                     tg_token: str = "", tg_chat: str = "") -> int:
@@ -375,7 +399,8 @@ def supabase_kaydet(sb_url: str, sb_key: str, haberler: list[dict], dry_run: boo
                 telegram_haber_gonder(
                     tg_token, tg_chat, haber_id,
                     h["baslik"], h["ozet"], h["kaynak"],
-                    ai_skor, h.get("kategori", "diger"), h["link"]
+                    ai_skor, h.get("kategori", "diger"), h["link"],
+                    gorsel_url=h.get("gorsel", "")
                 )
                 time.sleep(0.3)  # Telegram rate limit
         else:
