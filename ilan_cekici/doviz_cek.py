@@ -171,7 +171,7 @@ def fetch_gold_ons_usd(exchange_rates: dict | None = None) -> float | None:
     except Exception as e:
         print(f"  FreeGoldAPI hata: {e}")
 
-    # 3. Yahoo Finance — XAUUSD (API key gerekmez)
+    # 3. Yahoo Finance — XAUUSD
     try:
         r = requests.get(
             "https://query1.finance.yahoo.com/v8/finance/chart/XAUUSD=X?range=1d&interval=1m",
@@ -188,6 +188,43 @@ def fetch_gold_ons_usd(exchange_rates: dict | None = None) -> float | None:
                     return float(price)
     except Exception as e:
         print(f"  Yahoo Finance hata: {e}")
+
+    # 4. SwissQuote — API key gereksiz
+    try:
+        r = requests.get(
+            "https://forex-data-feed.swissquote.com/public-quotes/bboquotes/instrument/XAU/USD",
+            headers={"User-Agent": "Mozilla/5.0 PlatformAvrupa/1.0"},
+            timeout=10,
+        )
+        if r.status_code == 200:
+            data = r.json()
+            if isinstance(data, list) and data:
+                price = data[0].get("spreadProfilePrices", [{}])[0].get("ask", 0)
+            else:
+                price = data.get("ask", 0) if isinstance(data, dict) else 0
+            if 1000 < float(price) < 10000:
+                print(f"  SwissQuote: {price:.2f} USD/ons")
+                return float(price)
+    except Exception as e:
+        print(f"  SwissQuote hata: {e}")
+
+    # 5. Stooq CSV — XAU/USD günlük kapanış
+    try:
+        r = requests.get(
+            "https://stooq.com/q/d/l/?s=xauusd&i=d",
+            headers={"User-Agent": "Mozilla/5.0 PlatformAvrupa/1.0"},
+            timeout=10,
+        )
+        if r.status_code == 200:
+            lines = r.text.strip().split("\n")
+            if len(lines) >= 2:
+                last = lines[-1].split(",")
+                price = float(last[4]) if len(last) >= 5 else 0  # Close price
+                if 1000 < price < 10000:
+                    print(f"  Stooq: {price:.2f} USD/ons")
+                    return float(price)
+    except Exception as e:
+        print(f"  Stooq hata: {e}")
 
     # 4. Fallback sabit değer
     print("  UYARI: Canlı ons fiyatı alınamadı, sabit değer kullanılıyor (3100 USD)")
