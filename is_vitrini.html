@@ -584,14 +584,17 @@
             if (filters.kaynak) q = q.eq('source', filters.kaynak);
 
             // Belçika konum filtresi
-            if (filters.postalExact) {
-                q = q.eq('postal_code', filters.postalExact);
-            } else if (filters.postalMin > 0 && filters.postalMax > 0) {
-                // Posta kodu aralığı — city üzerinden filtrele (postal_code varsa onu kullan)
-                q = q.eq('city', filters.sehirBE);
+            // Not: postal_code kolonu scraper yeniden çalışınca dolacak,
+            // şimdilik şehir + kaynak filtresiyle çalışıyoruz
+            const kaynakMap = { 'Flanders': 'vdab', 'Brüksel': 'actiris', 'Wallonie': 'forem' };
+            if (filters.sehirBE) {
+                // Şehir seçili (posta kodu seçilse de şehir üzerinden filtrele)
+                q = q.ilike('city', `%${filters.sehirBE}%`);
+                if (!filters.kaynak && kaynakMap[filters.bolge]) {
+                    q = q.eq('source', kaynakMap[filters.bolge]);
+                }
             } else if (filters.bolge) {
                 // Sadece bölge seçili — source'a göre filtrele
-                const kaynakMap = { 'Flanders': 'vdab', 'Brüksel': 'actiris', 'Wallonie': 'forem' };
                 if (!filters.kaynak && kaynakMap[filters.bolge]) {
                     q = q.eq('source', kaynakMap[filters.bolge]);
                 }
