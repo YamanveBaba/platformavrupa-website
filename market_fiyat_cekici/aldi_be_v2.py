@@ -245,8 +245,13 @@ def json_urunleri_cikart(data, kat_ad: str, hedef: Dict) -> int:
             in_promo = True
 
         brand = str(obj.get("brand") or obj.get("manufacturer") or "").strip()
-        image = str(obj.get("imageUrl") or obj.get("image") or
-                    obj.get("thumbnail") or obj.get("img") or "").strip()
+        def _img(*keys):
+            for k in keys:
+                v = str(obj.get(k) or "").strip()
+                if v and not v.startswith("data:") and v.startswith("http"):
+                    return v
+            return ""
+        image = _img("imageUrl", "image", "thumbnail", "img", "picture", "photo")
         category = str(obj.get("category") or obj.get("categoryName")
                        or obj.get("primaryCategory") or kat_ad).strip()
 
@@ -400,16 +405,31 @@ _DOM_JS = """
     }
 
     function extractImage(el) {
+        // 1. data-article JSON'dan imageUrl
         const raw = el.getAttribute('data-article');
         if(raw) {
             try {
                 const d = JSON.parse(raw.replace(/&quot;/g,'"'));
-                const img = (d.productInfo||{}).imageUrl;
-                if(img) return img;
+                const img = (d.productInfo||{}).imageUrl || (d||{}).imageUrl;
+                if(img && !img.startsWith('data:')) return img;
             } catch(e) {}
         }
-        const imgEl = el.querySelector('img[data-src],img[src]');
-        if(imgEl) return imgEl.getAttribute('data-src')||imgEl.getAttribute('src')||'';
+        // 2. img elementinden — tüm olası attribute'ları dene, placeholder'ı atla
+        const imgEl = el.querySelector('img');
+        if(imgEl) {
+            const attrs = ['src','data-src','data-lazy-src','data-original','data-lazy'];
+            for(const attr of attrs) {
+                const v = imgEl.getAttribute(attr) || '';
+                if(v && !v.startsWith('data:') && v.startsWith('http')) return v;
+            }
+        }
+        // 3. picture/source elementinden
+        const srcEl = el.querySelector('source[data-srcset],source[srcset]');
+        if(srcEl) {
+            const ss = srcEl.getAttribute('data-srcset') || srcEl.getAttribute('srcset') || '';
+            const first = ss.split(',')[0].trim().split(' ')[0];
+            if(first && first.startsWith('http')) return first;
+        }
         return '';
     }
 
