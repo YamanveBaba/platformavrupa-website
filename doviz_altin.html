@@ -430,16 +430,32 @@
             });
         }
         
-        // Tüm fiyatları yükle: Önce cache varsa anında göster, arka planda yenile (yarım saatte bir)
+        // İlk başarılı promise'i döndür (null/undefined olmayanlar)
+        function firstSuccess(promises) {
+            return new Promise(resolve => {
+                let remaining = promises.length;
+                if (remaining === 0) { resolve(null); return; }
+                let resolved = false;
+                promises.forEach(p => {
+                    Promise.resolve(p).then(val => {
+                        if (!resolved && val) { resolved = true; resolve(val); }
+                        else if (--remaining === 0 && !resolved) resolve(null);
+                    }).catch(() => {
+                        if (--remaining === 0 && !resolved) resolve(null);
+                    });
+                });
+            });
+        }
+
+        // Tüm fiyatları yükle: Önce cache varsa anında göster, arka planda yenile
         async function loadAllPrices() {
             const cachedRates = getCachedExchangeRates();
             const cachedGold = getCachedGoldPrices();
             const ratesValid = cachedRates && isCacheValid(cachedRates, CACHE_DURATION_MINUTES);
             const goldValid = cachedGold && isCacheValid(cachedGold, CACHE_DURATION_MINUTES);
-            
-            // Her iki cache de geçerliyse: anında göster, yükleniyor gösterme
+
+            // Her iki cache de geçerliyse: anında göster
             if (ratesValid && goldValid) {
-                console.log('✅ Cache\'den anında gösterim (döviz + altın)');
                 exchangeRates = cachedRates.rates || cachedRates;
                 goldPrices = (cachedGold.prices || cachedGold) || {};
                 if (!goldPrices._changes) goldPrices._changes = {};
@@ -447,49 +463,35 @@
                 renderCurrencyTable();
                 renderGoldGrid();
                 const cacheDate = new Date(cachedGold.timestamp || cachedRates.timestamp);
-                document.getElementById('lastUpdate').textContent = 
-                    'Son güncelleme: ' + cacheDate.toLocaleTimeString('tr-TR') + ' (Cache – arka planda güncelleniyor)';
+                document.getElementById('lastUpdate').textContent =
+                    'Son güncelleme: ' + cacheDate.toLocaleTimeString('tr-TR') + ' (arka planda güncelleniyor)';
                 refreshPricesInBackground();
                 return;
             }
-            
-            // Cache yok veya eski: yükleniyor göster, sırayla çek
+
+            // Cache yok veya eski: döviz + altın fetch'ini PARALEL başlat
             showLoading();
             try {
-                await loadExchangeRates();
+                // Her ikisini aynı anda başlat — döviz gelince hemen göster, altın gelince ekle
+                const goldFetchPromise = fetchGoldPrices(); // arka planda başladı
+
+                await loadExchangeRates(); // döviz geldi
                 setCachedExchangeRates(exchangeRates);
                 updateHeroSection();
                 renderCurrencyTable();
-                
-                const cached = getCachedGoldPrices();
-                if (cached && isCacheValid(cached, CACHE_DURATION_MINUTES)) {
-                    goldPrices = cached.prices;
-                    goldPrices._changes = goldPrices._changes || {};
-                    updateHeroSection();
-                    renderGoldGrid();
-                    document.getElementById('lastUpdate').textContent = 
-                        'Son güncelleme: ' + new Date(cached.timestamp).toLocaleTimeString('tr-TR') + ' (Cache)';
-                    calculateGoldPrices().then(() => {
-                        updateHeroSection();
-                        renderGoldGrid();
-                        document.getElementById('lastUpdate').textContent = 
-                            'Son güncelleme: ' + new Date().toLocaleTimeString('tr-TR');
-                    }).catch(() => {});
-                    return;
-                }
-                
-                await calculateGoldPrices();
+
+                // Altın artık ya hazır ya çok az kaldı
+                const goldData = await goldFetchPromise;
+                await processGoldData(goldData);
                 updateHeroSection();
                 renderGoldGrid();
-                document.getElementById('lastUpdate').textContent = 
+                document.getElementById('lastUpdate').textContent =
                     'Son güncelleme: ' + new Date().toLocaleTimeString('tr-TR');
             } catch (error) {
                 console.error('Fiyat yükleme hatası:', error);
-                // Hata olsa bile cache varsa göster
                 if (ratesValid && cachedRates) {
                     exchangeRates = cachedRates.rates || cachedRates;
-                    updateHeroSection();
-                    renderCurrencyTable();
+                    updateHeroSection(); renderCurrencyTable();
                 }
                 if (goldValid && cachedGold) {
                     goldPrices = cachedGold.prices || cachedGold;
@@ -498,18 +500,45 @@
                 }
             }
         }
+
+        // Gold verisini işle (calculateGoldPrices'dan ayrıldı, paralel kullanım için)
+        async function processGoldData(goldData) {
+            if (!goldData) {
+                goldPrices = {}; goldPrices._changes = {}; return;
+            }
+            if (goldData.prices && !goldData.needsCalculation) {
+                goldPrices = goldData.prices;
+                goldPrices._changes = {};
+                setCachedGoldPrices(goldPrices, goldData.source);
+                Object.keys(goldPrices).forEach(t => {
+                    if (t !== '_changes' && goldPrices[t] > 0) saveHistoricalPrice(t, goldPrices[t]);
+                });
+            } else if (goldData.ons && goldData.needsCalculation) {
+                const usdTry = exchangeRates['USD'];
+                if (!usdTry || usdTry <= 0) { goldPrices = {}; goldPrices._changes = {}; return; }
+                const calc = calculateFromOnsUSD(goldData.ons, usdTry);
+                if (!calc) { goldPrices = {}; goldPrices._changes = {}; return; }
+                goldPrices = calc; goldPrices._changes = {};
+                setCachedGoldPrices(goldPrices, goldData.source);
+                Object.keys(goldPrices).forEach(t => {
+                    if (t !== '_changes' && goldPrices[t] > 0) saveHistoricalPrice(t, goldPrices[t]);
+                });
+            }
+        }
         
-        // Arka planda döviz + altın güncelle (cache varsa sayfa açıldığında çağrılır)
+        // Arka planda döviz + altın güncelle — paralel
         async function refreshPricesInBackground() {
             try {
+                const goldFetchPromise = fetchGoldPrices();
                 await loadExchangeRates();
                 setCachedExchangeRates(exchangeRates);
                 updateHeroSection();
                 renderCurrencyTable();
-                await calculateGoldPrices();
+                const goldData = await goldFetchPromise;
+                await processGoldData(goldData);
                 updateHeroSection();
                 renderGoldGrid();
-                document.getElementById('lastUpdate').textContent = 
+                document.getElementById('lastUpdate').textContent =
                     'Son güncelleme: ' + new Date().toLocaleTimeString('tr-TR');
             } catch (e) {
                 console.warn('Arka plan güncelleme hatası:', e);
@@ -642,21 +671,15 @@
                 return null;
             };
             
-            // TÜM KAYNAKLARI PARALEL DENE - İlk başarılı sonucu kullan
+            // TÜM KAYNAKLARI PARALEL DENE — ilk başarılı gelince diğerlerini beklemeden döner
             console.log('   📡 Tüm kaynaklar paralel deneniyor...');
             const allPromises = [
                 ...corsProxies.map((proxy, i) => tryProxy(proxy, i)),
                 tryFreeGoldAPI()
             ];
-            
-            // Promise.race ile ilk başarılı sonucu al
-            const results = await Promise.allSettled(allPromises);
-            
-            for (const result of results) {
-                if (result.status === 'fulfilled' && result.value) {
-                    return result.value;
-                }
-            }
+
+            const winner = await firstSuccess(allPromises);
+            if (winner) return winner;
             
             // Hiçbiri başarılı olmadıysa tahmini fiyat kullan
             const usdTry = exchangeRates['USD'];
