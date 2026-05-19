@@ -148,16 +148,6 @@
                 <!-- AKTİF FİLTRE ETİKETLERİ -->
                 <div id="aktifFiltreler" class="flex flex-wrap gap-1.5 hidden"></div>
 
-                <!-- İLAN TÜRÜ -->
-                <div>
-                    <h3 class="filter-title">İLAN TÜRÜ</h3>
-                    <div class="segment-wrapper">
-                        <button onclick="setFilter('rol', 'Hepsi', this)" class="segment-btn active">Tümü</button>
-                        <button onclick="setFilter('rol', 'isveren', this)" class="segment-btn">İşveren</button>
-                        <button onclick="setFilter('rol', 'isci', this)" class="segment-btn">İş Arayan</button>
-                    </div>
-                </div>
-
                 <!-- BELÇİKA KONUM — 3 KADEME -->
                 <div>
                     <h3 class="filter-title">KONUM (BELÇİKA)</h3>
@@ -209,22 +199,10 @@
                     <h3 class="filter-title">ÇALIŞMA ŞEKLİ</h3>
                     <div class="type-grid">
                         <button onclick="setFilter('pozisyon', 'Hepsi', this)" class="type-btn active col-span-2">Hepsi</button>
-                        <button onclick="setFilter('pozisyon', 'Ofis', this)" class="type-btn">Tam Zamanlı</button>
+                        <button onclick="setFilter('pozisyon', 'Tam Zamanli', this)" class="type-btn">Tam Zamanlı</button>
                         <button onclick="setFilter('pozisyon', 'Yari Zamanli', this)" class="type-btn">Yarı Zamanlı</button>
                         <button onclick="setFilter('pozisyon', 'Uzaktan', this)" class="type-btn">Uzaktan</button>
                         <button onclick="setFilter('pozisyon', 'Staj', this)" class="type-btn">Staj</button>
-                    </div>
-                </div>
-
-                <!-- SÖZLEŞME TÜRÜ -->
-                <div>
-                    <h3 class="filter-title">SÖZLEŞME TÜRÜ</h3>
-                    <div class="type-grid">
-                        <button onclick="setSozlesme('', this)" class="type-btn active col-span-2">Hepsi</button>
-                        <button onclick="setSozlesme('Vaste', this)" class="type-btn">Sabit (CDI)</button>
-                        <button onclick="setSozlesme('Tijdelijk', this)" class="type-btn">Geçici (CDD)</button>
-                        <button onclick="setSozlesme('Student', this)" class="type-btn">Öğrenci</button>
-                        <button onclick="setSozlesme('Flexi', this)" class="type-btn">Flexi-job</button>
                     </div>
                 </div>
 
@@ -331,9 +309,9 @@
         let markers = [];
         let tumIlanlar = [];
         let filters = {
-            rol: 'Hepsi', sektor: '', pozisyon: 'Hepsi',
+            sektor: '', pozisyon: 'Hepsi',
             bolge: '', sehirBE: '', postalMin: 0, postalMax: 0, postalExact: '',
-            kaynak: '', sozlesme: '', siralama: 'yeni', search: ''
+            kaynak: '', siralama: 'yeni', search: ''
         };
 
         // Belçika bölge → şehir → posta kodu aralığı
@@ -493,14 +471,6 @@
             filtrele();
         }
 
-        function setSozlesme(val, btn) {
-            filters.sozlesme = val;
-            document.querySelectorAll('#filterPanel .type-btn[data-sozlesme]').forEach(b => b.classList.remove('active'));
-            // Mark all sozlesme buttons, find clicked
-            document.querySelectorAll('[onclick^="setSozlesme"]').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            filtrele();
-        }
 
         function aktifFiltrelerGoster() {
             const container = document.getElementById('aktifFiltreler');
@@ -516,7 +486,6 @@
             if (filters.postalExact) etiketler.push({ label: `📮 ${filters.postalExact}`, key: 'postalExact', reset: () => { filters.postalExact = ''; document.getElementById('postalSelect').value = ''; } });
             if (filters.sektor) etiketler.push({ label: filters.sektor, key: 'sektor', reset: () => { filters.sektor = ''; document.getElementById('sektorSelect').value = ''; } });
             if (filters.kaynak) etiketler.push({ label: filters.kaynak.toUpperCase(), key: 'kaynak' });
-            if (filters.sozlesme) etiketler.push({ label: filters.sozlesme, key: 'sozlesme' });
 
             if (etiketler.length === 0) {
                 container.classList.add('hidden');
@@ -542,7 +511,7 @@
         }
 
         function tumFiltreleriSifirla() {
-            filters = { rol: 'Hepsi', sektor: '', pozisyon: 'Hepsi', bolge: '', sehirBE: '', postalMin: 0, postalMax: 0, postalExact: '', kaynak: '', sozlesme: '', siralama: 'yeni', search: '' };
+            filters = { sektor: '', pozisyon: 'Hepsi', bolge: '', sehirBE: '', postalMin: 0, postalMax: 0, postalExact: '', kaynak: '', siralama: 'yeni', search: '' };
             document.getElementById('aramaInput').value = '';
             document.getElementById('bolgeSelect').value = '';
             document.getElementById('sehirBESelect').innerHTML = '<option value="">Şehir Seç</option>';
@@ -554,8 +523,6 @@
             kaynakButonlariAyarla('');
             document.querySelectorAll('.segment-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.segment-wrapper .segment-btn:first-child').forEach(b => b.classList.add('active'));
-            document.querySelectorAll('[onclick^="setSozlesme"]').forEach(b => b.classList.remove('active'));
-            document.querySelector('[onclick="setSozlesme(\'\', this)"]')?.classList.add('active');
             filtrele();
         }
 
@@ -671,11 +638,8 @@
             // Sektör
             if (filters.sektor) q = q.ilike('sektor', `%${filters.sektor}%`);
 
-            // Çalışma şekli
-            if (filters.pozisyon && filters.pozisyon !== 'Hepsi') q = q.ilike('pozisyon', `%${filters.pozisyon}%`);
-
-            // Sözleşme türü (description alanında geçiyor)
-            if (filters.sozlesme) q = q.ilike('description', `%${filters.sozlesme}%`);
+            // Çalışma şekli — eq() ile index kullanır, ilike'den çok daha hızlı
+            if (filters.pozisyon && filters.pozisyon !== 'Hepsi') q = q.eq('pozisyon', filters.pozisyon);
 
             return q;
         }
