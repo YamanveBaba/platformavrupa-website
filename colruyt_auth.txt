@@ -1,0 +1,8 @@
+# Colruyt API Kimlik Bilgileri
+# colruyt.be'yi aç → F12 → Network → product-search-prs isteğini bul → Headers
+#
+# KEY satırına X-CG-APIKEY değerini yapıştır
+# COOKIE satırına Cookie başlık değerini yapıştır (opsiyonel, genellikle gerekmez)
+
+KEY=a8ylmv13-b285-4788-9e14-0f79b7ed2411
+COOKIE=

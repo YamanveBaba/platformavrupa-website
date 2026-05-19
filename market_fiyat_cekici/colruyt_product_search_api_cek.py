@@ -17,12 +17,33 @@ from datetime import datetime
 from typing import List
 
 # -----------------------------------------------------------------------------
-# AYARLAR (gerekirse değiştir)
+# AYARLAR — colruyt_auth.txt'den otomatik okunur
 # -----------------------------------------------------------------------------
+
+def _auth_oku() -> tuple[str, str]:
+    """colruyt_auth.txt dosyasından KEY ve COOKIE oku."""
+    auth_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "colruyt_auth.txt"))
+    key = "a8ylmv13-b285-4788-9e14-0f79b7ed2411"  # fallback
+    cookie = ""
+    if os.path.isfile(auth_path):
+        for line in open(auth_path, encoding="utf-8"):
+            line = line.strip()
+            if line.startswith("KEY=") and not line.startswith("#"):
+                v = line[4:].strip()
+                if v:
+                    key = v
+            elif line.startswith("COOKIE=") and not line.startswith("#"):
+                v = line[7:].strip()
+                if v:
+                    cookie = v
+    return key, cookie
+
+_CG_API_KEY, _CG_COOKIE = _auth_oku()
+
 CONFIG = {
     "base_url": "https://apip.colruyt.be/gateway/emec.colruyt.protected.bffsvc/cg/nl/api/product-search-prs",
-    "place_id": "762",           # Mağaza (tarayıcıdan kopyaladığın placeId)
-    "cg_api_key": "a8ylmv13-b285-4788-9e14-0f79b7ed2411",  # Site güncellenirse tarayıcı isteğinden kopyalayın
+    "place_id": "762",
+    "cg_api_key": _CG_API_KEY,  # colruyt_auth.txt'den okunur
     "page_size": 60,             # Sayfa başına ürün (max 60 — daha az istek, daha az 456)
     "max_products": 50000,       # Tam katalog için yüksek tavan (API totalProductsFound ile de sınırlanır)
     "request_timeout": 25,       # İstek zaman aşımı (saniye)
@@ -49,8 +70,10 @@ _HEADERS_WITHOUT_API_KEY = {
 
 
 def build_api_headers_base():
-    """X-CG-APIKey tek kaynak: CONFIG['cg_api_key']."""
+    """X-CG-APIKey ve opsiyonel Cookie: colruyt_auth.txt'den."""
     h = dict(_HEADERS_WITHOUT_API_KEY)
+    if _CG_COOKIE:
+        h["Cookie"] = _CG_COOKIE
     h["X-CG-APIKey"] = str(CONFIG.get("cg_api_key") or "").strip()
     return h
 
