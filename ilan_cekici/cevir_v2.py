@@ -97,14 +97,22 @@ def sb_headers(key: str) -> dict:
 
 def fetch_pending(sb_url: str, sb_key: str, limit: int) -> list[dict]:
     """title_tr IS NULL olan aktif ilanları çek — source da lazım (dil tespiti için)."""
-    r = requests.get(
-        f"{sb_url}/rest/v1/ilanlar",
-        params={"select": "id,title,source", "source": "neq.user", "title_tr": "is.null",
-                "status": "eq.active", "order": "id.asc", "limit": str(limit)},
-        headers=sb_headers(sb_key), timeout=30,
-    )
-    r.raise_for_status()
-    return r.json()
+    for deneme in range(4):
+        r = requests.get(
+            f"{sb_url}/rest/v1/ilanlar",
+            params={"select": "id,title,source", "source": "neq.user", "title_tr": "is.null",
+                    "status": "eq.active", "order": "id.asc", "limit": str(limit)},
+            headers=sb_headers(sb_key), timeout=30,
+        )
+        if r.status_code == 500:
+            bekle = 15 * (deneme + 1)
+            print(f"  Supabase 500, {bekle}sn bekleniyor (deneme {deneme+1}/4)...")
+            time.sleep(bekle)
+            continue
+        r.raise_for_status()
+        return r.json()
+    r.raise_for_status()  # 4. denemede de 500 gelirse hata fırlat
+    return []
 
 def count_pending(sb_url: str, sb_key: str) -> int:
     hdrs = {**sb_headers(sb_key), "Prefer": "count=exact", "Range": "0-0"}

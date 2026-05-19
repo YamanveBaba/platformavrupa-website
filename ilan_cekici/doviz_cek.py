@@ -137,11 +137,23 @@ def fetch_yesterday_rates() -> dict | None:
 
 # ─── ALTIN ────────────────────────────────────────────────────────────────────
 
-def fetch_gold_ons_usd() -> float | None:
-    """Ons altın fiyatını USD olarak çek."""
+def fetch_gold_ons_usd(exchange_rates: dict | None = None) -> float | None:
+    """Ons altın fiyatını USD olarak çek. Birden fazla kaynak dener."""
     print("[Altın] Ons fiyatı çekiliyor...")
 
-    # FreeGoldAPI
+    # 1. ExchangeRate-API — zaten çekilen kurlardan XAU var mı?
+    if exchange_rates and "XAU" in exchange_rates:
+        # exchange_rates[XAU] = 1 XAU = ? TRY, USD = ? TRY
+        # ons_usd = (1 XAU'nun TL değeri) / (1 USD'nin TL değeri)
+        xau_try = exchange_rates.get("XAU", 0)
+        usd_try = exchange_rates.get("USD", 0)
+        if xau_try > 0 and usd_try > 0:
+            ons_usd = xau_try / usd_try
+            if 500 < ons_usd < 20000:
+                print(f"  ExchangeRate-API (XAU): {ons_usd:.2f} USD/ons")
+                return float(ons_usd)
+
+    # 2. FreeGoldAPI (liste veya dict döner)
     try:
         r = requests.get(
             "https://freegoldapi.com/data/latest.json",
@@ -150,32 +162,36 @@ def fetch_gold_ons_usd() -> float | None:
         )
         if r.status_code == 200:
             data = r.json()
-            price = data.get("price", 0)
-            if 1000 < price < 10000:
+            if isinstance(data, list):
+                data = data[0] if data else {}
+            price = data.get("price") or data.get("gold") or data.get("xau") or 0
+            if 1000 < float(price) < 10000:
                 print(f"  FreeGoldAPI: {price:.2f} USD/ons")
                 return float(price)
     except Exception as e:
         print(f"  FreeGoldAPI hata: {e}")
 
-    # Metals API demo
+    # 3. Yahoo Finance — XAUUSD (API key gerekmez)
     try:
         r = requests.get(
-            "https://api.metals.live/v1/spot/gold",
-            headers={"User-Agent": "PlatformAvrupa/1.0"},
+            "https://query1.finance.yahoo.com/v8/finance/chart/XAUUSD=X?range=1d&interval=1m",
+            headers={"User-Agent": "Mozilla/5.0 PlatformAvrupa/1.0"},
             timeout=10,
         )
         if r.status_code == 200:
-            data = r.json()
-            price = data[0].get("gold", 0) if isinstance(data, list) else data.get("gold", 0)
-            if 1000 < float(price) < 10000:
-                print(f"  metals.live: {price:.2f} USD/ons")
-                return float(price)
+            result = r.json().get("chart", {}).get("result", [])
+            if result:
+                meta = result[0].get("meta", {})
+                price = meta.get("regularMarketPrice", 0) or meta.get("previousClose", 0)
+                if 1000 < float(price) < 10000:
+                    print(f"  Yahoo Finance: {price:.2f} USD/ons")
+                    return float(price)
     except Exception as e:
-        print(f"  metals.live hata: {e}")
+        print(f"  Yahoo Finance hata: {e}")
 
-    # Fallback: güncel piyasa tahmini
-    print("  UYARI: Canlı ons fiyatı alınamadı, tahmini kullanılıyor (2800 USD)")
-    return 2800.0
+    # 4. Fallback sabit değer
+    print("  UYARI: Canlı ons fiyatı alınamadı, sabit değer kullanılıyor (3100 USD)")
+    return 3100.0
 
 
 def calculate_gold_prices(ons_usd: float, usd_try: float) -> dict:
@@ -218,7 +234,7 @@ def main():
     print(f"  Döviz kurları Supabase'e {'yazıldı' if ok else 'YAZILAMADI'}")
 
     # 2. Altın fiyatları
-    ons_usd = fetch_gold_ons_usd()
+    ons_usd = fetch_gold_ons_usd(rates)
     usd_try = rates.get("USD", 0)
 
     if ons_usd and usd_try > 0:
