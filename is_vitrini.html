@@ -85,6 +85,7 @@
         .aktif-etiket { display: inline-flex; align-items: center; gap: 5px; background: #f3e8ff; color: #6b21a8; border: 1px solid #d8b4fe; border-radius: 99px; padding: 3px 10px; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.15s; }
         .aktif-etiket:hover { background: #ede9fe; }
         .aktif-etiket .x { font-size: 10px; opacity: 0.7; }
+        .segment-btn:disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
     </style>
 </head>
 <body class="flex flex-col min-h-screen lg:h-screen">
@@ -96,14 +97,14 @@
         </a>
         <h1 class="text-lg font-extrabold tracking-tight text-purple-700 hidden md:block">İŞ VE KARİYER</h1>
         
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3" translate="no">
             <button onclick="window.open('https://translate.google.com/translate?sl=auto&tl=tr&u='+encodeURIComponent(window.location.href),'_blank')"
                 class="flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-purple-600 bg-slate-100 hover:bg-purple-50 border border-slate-200 px-3 py-2 rounded-lg transition">
                 <i class="fa-solid fa-language"></i> <span class="hidden sm:inline">Türkçe</span>
             </button>
-            <div class="view-toggle">
-                <button onclick="setView('liste')" id="btnListe" class="view-btn active"><i class="fa-solid fa-list"></i> Liste</button>
-                <button onclick="setView('harita')" id="btnHarita" class="view-btn"><i class="fa-solid fa-map"></i> Harita</button>
+            <div class="view-toggle" translate="no">
+                <button id="btnListe" class="view-btn active"><i class="fa-solid fa-list"></i> Liste</button>
+                <button id="btnHarita" class="view-btn"><i class="fa-solid fa-map"></i> Harita</button>
             </div>
             <a href="ilan_giris.html" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-xs font-bold shadow transition transform active:scale-95 flex items-center gap-2">
                 <i class="fa-solid fa-plus"></i> <span class="hidden sm:inline">İlan Ver</span>
@@ -124,7 +125,7 @@
         <div id="filterOverlay" class="hidden fixed inset-0 bg-black/50 z-40 lg:hidden" onclick="toggleMobileFilters()"></div>
         
         <!-- Filtre Paneli -->
-        <div id="filterPanel" class="fixed lg:static w-full lg:w-[380px] bg-white lg:rounded-2xl lg:border border-gray-200 lg:shadow-sm flex flex-col mb-4 lg:mb-0 lg:h-full flex-shrink-0 transform translate-y-full lg:translate-y-0 transition-transform duration-300 bottom-0 left-0 right-0 z-50 lg:z-auto rounded-t-3xl lg:rounded-t-2xl max-h-[85vh] lg:max-h-full">
+        <div id="filterPanel" translate="no" class="fixed lg:static w-full lg:w-[380px] bg-white lg:rounded-2xl lg:border border-gray-200 lg:shadow-sm flex flex-col mb-4 lg:mb-0 lg:h-full flex-shrink-0 transform translate-y-full lg:translate-y-0 transition-transform duration-300 bottom-0 left-0 right-0 z-50 lg:z-auto rounded-t-3xl lg:rounded-t-2xl max-h-[85vh] lg:max-h-full">
             
             <!-- Mobil Header -->
             <div class="lg:hidden flex items-center justify-between p-4 border-b border-gray-200 bg-purple-50">
@@ -230,11 +231,11 @@
                 <!-- KAYNAK -->
                 <div>
                     <h3 class="filter-title">KAYNAK</h3>
-                    <div class="segment-wrapper">
-                        <button onclick="setFilter('kaynak', '', this)" class="segment-btn active">Tümü</button>
-                        <button onclick="setFilter('kaynak', 'vdab', this)" class="segment-btn">VDAB</button>
-                        <button onclick="setFilter('kaynak', 'actiris', this)" class="segment-btn">Actiris</button>
-                        <button onclick="setFilter('kaynak', 'forem', this)" class="segment-btn">FOREM</button>
+                    <div class="segment-wrapper" id="kaynakWrapper">
+                        <button id="kaynakBtn_tumu"  onclick="setFilter('kaynak', '', this)"       class="segment-btn active">Tümü</button>
+                        <button id="kaynakBtn_vdab"  onclick="setFilter('kaynak', 'vdab', this)"   class="segment-btn">VDAB</button>
+                        <button id="kaynakBtn_actiris" onclick="setFilter('kaynak', 'actiris', this)" class="segment-btn">Actiris</button>
+                        <button id="kaynakBtn_forem" onclick="setFilter('kaynak', 'forem', this)"  class="segment-btn">FOREM</button>
                     </div>
                 </div>
 
@@ -286,6 +287,44 @@
                 overlay.classList.remove('hidden');
                 document.body.style.overflow = 'hidden';
             }
+        }
+
+        const BE_SEHIR_COORDS = {
+            'Antwerpen': [51.2194, 4.4025],
+            'Brussels (Bruxelles)': [50.8503, 4.3517],
+            'Gent': [51.0543, 3.7174],
+            'Brugge': [51.2093, 3.2247],
+            'Liège': [50.6326, 5.5797],
+            'Charleroi': [50.4108, 4.4446],
+            'Namur': [50.4669, 4.8675],
+            'Leuven': [50.8798, 4.7005],
+            'Hasselt': [50.9307, 5.3326],
+            'Kortrijk': [50.8283, 3.2649],
+            'Mons': [50.4542, 3.9528],
+            'Mechelen': [51.0281, 4.4803],
+            'Aalst': [50.9377, 4.0376],
+            'Turnhout': [51.3225, 4.9500],
+            'Ostend (Oostende)': [51.2308, 2.9165],
+            'Roeselare': [50.9455, 3.1220],
+            'Genk': [50.9653, 5.4981],
+            'Sint-Niklaas': [51.1573, 4.1427],
+            'Verviers': [50.5897, 5.8659],
+            'La Louvière': [50.4796, 4.1891],
+            'Tournai': [50.6053, 3.3882],
+            'Wavre': [50.7176, 4.6109],
+            'Arlon': [49.6853, 5.8167],
+            'Belgie': [50.5039, 4.4699],
+            'Belçika': [50.5039, 4.4699],
+        };
+
+        function sehirKoordinat(city) {
+            if (!city) return null;
+            if (BE_SEHIR_COORDS[city]) return BE_SEHIR_COORDS[city];
+            // Kısmi eşleşme
+            for (const [k, v] of Object.entries(BE_SEHIR_COORDS)) {
+                if (city.toLowerCase().includes(k.toLowerCase()) || k.toLowerCase().includes(city.toLowerCase())) return v;
+            }
+            return null;
         }
 
         let map = null;
@@ -349,6 +388,31 @@
             }, 400);
         }
 
+        function kaynakButonlariAyarla(bolge) {
+            const bolgeKaynak = { 'Flanders': 'vdab', 'Brüksel': 'actiris', 'Wallonie': 'forem' };
+            const aktifKaynak = bolgeKaynak[bolge] || '';
+            const btnler = {
+                tumu: document.getElementById('kaynakBtn_tumu'),
+                vdab: document.getElementById('kaynakBtn_vdab'),
+                actiris: document.getElementById('kaynakBtn_actiris'),
+                forem: document.getElementById('kaynakBtn_forem'),
+            };
+            if (!aktifKaynak) {
+                // Tüm bölgeler — hepsini aktif et
+                Object.values(btnler).forEach(b => { b.disabled = false; });
+                btnler.tumu.classList.add('active');
+                ['vdab','actiris','forem'].forEach(k => btnler[k].classList.remove('active'));
+                filters.kaynak = '';
+            } else {
+                // Sadece ilgili kaynak aktif
+                Object.values(btnler).forEach(b => { b.disabled = true; b.classList.remove('active'); });
+                btnler[aktifKaynak].disabled = false;
+                btnler[aktifKaynak].classList.add('active');
+                btnler.tumu.disabled = false;
+                filters.kaynak = aktifKaynak;
+            }
+        }
+
         function bolgeSecildi() {
             const bolge = document.getElementById('bolgeSelect').value;
             filters.bolge = bolge;
@@ -356,6 +420,7 @@
             filters.postalMin = 0;
             filters.postalMax = 0;
             filters.postalExact = '';
+            kaynakButonlariAyarla(bolge);
 
             const sehirSel = document.getElementById('sehirBESelect');
             const postalSel = document.getElementById('postalSelect');
@@ -486,6 +551,7 @@
             document.getElementById('postalSelect').disabled = true;
             document.getElementById('sektorSelect').value = '';
             document.getElementById('siralamaSelect').value = 'yeni';
+            kaynakButonlariAyarla('');
             document.querySelectorAll('.segment-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.segment-wrapper .segment-btn:first-child').forEach(b => b.classList.add('active'));
             document.querySelectorAll('[onclick^="setSozlesme"]').forEach(b => b.classList.remove('active'));
@@ -508,6 +574,8 @@
         window.onload = function() {
             initMap();
             veriCek();
+            document.getElementById('btnListe').addEventListener('click', () => setView('liste'));
+            document.getElementById('btnHarita').addEventListener('click', () => setView('harita'));
         };
 
         function initMap() {
@@ -619,20 +687,25 @@
 
         function mapRow(i) {
             const hasTr = i.title_tr && i.title_tr.trim() && i.title_tr !== i.title;
+            const cityName = titleCase(i.city || 'Belçika');
+            // lat/lon yoksa şehir koordinat tablosundan al
+            const coords = (i.lat && i.lon)
+                ? [i.lat, i.lon]
+                : sehirKoordinat(i.city);
             return {
                 id: i.id, role: 'isveren',
                 sektor: i.sektor || 'Diğer',
                 baslik: hasTr ? i.title_tr : (i.title || 'İş İlanı'),
                 cevrilmedi: !hasTr,
                 firma: i.owner_name || '',
-                konum: titleCase(i.city || 'Belçika'),
+                konum: cityName,
                 ulke: i.country || '',
                 fiyat: i.price || '',
                 pozisyon: i.pozisyon || 'Tam Zamanlı',
                 tarih: formatDate(i.created_at),
                 source_url: i.source_url || '',
-                lat: i.lat || null,
-                lon: i.lon || null
+                lat: coords ? coords[0] : null,
+                lon: coords ? coords[1] : null
             };
         }
 
