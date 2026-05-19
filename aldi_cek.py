@@ -9,10 +9,35 @@ Kullanım:
   python aldi_cek.py --bekleme 15  # Sayfa başına 15sn bekle (yavaş internet için)
 """
 import argparse
-import webbrowser
+import subprocess
 import time
 import requests
 from bs4 import BeautifulSoup
+
+# Chrome yolları (Windows)
+CHROME_YOLLARI = [
+    r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+    r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+    r"C:\Users\{}\AppData\Local\Google\Chrome\Application\chrome.exe".format(
+        __import__('os').environ.get('USERNAME', '')
+    ),
+]
+
+def chrome_bul():
+    import os
+    for yol in CHROME_YOLLARI:
+        if os.path.isfile(yol):
+            return yol
+    return None
+
+def chrome_ac(url):
+    chrome = chrome_bul()
+    if chrome:
+        subprocess.Popen([chrome, url])
+    else:
+        print("  UYARI: Chrome bulunamadı, varsayılan tarayıcı kullanılıyor.")
+        import webbrowser
+        webbrowser.open(url)
 
 ALDI_BASE = "https://www.aldi.be"
 
@@ -85,7 +110,7 @@ def main():
 
     for i, url in enumerate(kategoriler, 1):
         print(f"[{i}/{len(kategoriler)}] Açılıyor: {url}")
-        webbrowser.open(url)
+        chrome_ac(url)
         if i < len(kategoriler):
             time.sleep(args.bekleme)
 
