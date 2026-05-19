@@ -60,7 +60,7 @@ DELAY_DEEPL = 0.5
 MYMEMORY_URL   = "https://api.mymemory.translated.net/get"
 DELAY_MYMEMORY = 0.12
 
-GEMINI_URL   = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent"
+GEMINI_URL   = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
 GEMINI_BATCH = 40
 DELAY_GEMINI = 4.2
 

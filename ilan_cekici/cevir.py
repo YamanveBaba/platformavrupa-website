@@ -13,7 +13,7 @@ Kullanım:
 import os, sys, time, re, argparse, requests
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-GEMINI_URL  = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent"
+GEMINI_URL  = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
 TITLE_BATCH = 40   # kısa metinler — 40 başlık/istek
 DESC_BATCH  = 15   # uzun metinler — 15 açıklama/istek
 SLEEP_SEC   = 4.2  # 15 RPM sınırının altında (14.3 req/dk)
