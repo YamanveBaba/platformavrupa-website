@@ -957,6 +957,52 @@ def calistir(test: bool = False, resume: bool = False,
 
             print(f"  +{yeni} ürün | Toplam: {len(urunler)}")
 
+            # ── Resim toplama: scroll sonrası tüm görünür resimleri al ──────
+            try:
+                # Sayfayı baştan sona scroll et → lazy-load tetikle
+                page.evaluate("window.scrollTo(0, 0)")
+                sl(0.5, 0.2, 0.3, 1.0)
+                say_yukseklik = page.evaluate("document.body.scrollHeight") or 5000
+                adim = 600
+                pos = 0
+                while pos < say_yukseklik:
+                    page.evaluate(f"window.scrollTo(0, {pos})")
+                    page.wait_for_timeout(400)
+                    pos += adim
+
+                # Tüm ürün resimlerini topla: alt text → src eşleşmesi
+                img_map = page.evaluate("""() => {
+                    const result = {};
+                    document.querySelectorAll('img').forEach(img => {
+                        const src = img.src || '';
+                        if (!src || src.startsWith('data:') || !src.startsWith('http')) return;
+                        const alt = (img.alt || '').trim().toLowerCase();
+                        if (alt && src.includes('aldi')) result[alt] = src;
+                    });
+                    return result;
+                }""")
+
+                if img_map:
+                    eslesme = 0
+                    for pid, u in urunler.items():
+                        if u.get("imageUrl"):
+                            continue
+                        isim_kck = u.get("name", "").strip().lower()
+                        if isim_kck in img_map:
+                            urunler[pid]["imageUrl"] = img_map[isim_kck][:400]
+                            eslesme += 1
+                        else:
+                            # Kısmi eşleşme: isim başlangıcı
+                            for alt_key, img_url in img_map.items():
+                                if isim_kck[:15] in alt_key or alt_key[:15] in isim_kck:
+                                    urunler[pid]["imageUrl"] = img_url[:400]
+                                    eslesme += 1
+                                    break
+                    if eslesme:
+                        print(f"  [resim] {eslesme} ürüne resim eşleşti")
+            except Exception as _re:
+                _log.debug(f"Resim toplama hatası: {_re}")
+
             if yeni > 0:  # 0 ürün geldiyse tekrar denenebilsin
                 tamamlananlar.add(url)
             checkpoint_kaydet(urunler, tamamlananlar)
