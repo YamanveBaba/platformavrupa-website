@@ -56,8 +56,7 @@ RSS_KAYNAKLAR = [
     # Resmi Türk kurumları
     {"url": "https://www.gumruk.gov.tr/rss/haberler.xml",        "kaynak": "Gümrük Bakanlığı"},
     {"url": "https://ytb.gov.tr/haberler/rss",                   "kaynak": "YTB Yurtdışı Türkler"},
-    # AB haberleri
-    {"url": "https://www.euractiv.com/feed/",                    "kaynak": "Euractiv"},
+    # AB haberleri (Euractiv çıkarıldı — İngilizce içerik)
     # Google News — Mevcut gurbetçi aramaları
     {"url": "https://news.google.com/rss/search?q=Avrupa+Türkler&hl=tr&gl=TR&ceid=TR:tr",                       "kaynak": "Google News TR"},
     {"url": "https://news.google.com/rss/search?q=Almanya+Türk+ikamet&hl=tr&gl=TR&ceid=TR:tr",                  "kaynak": "Google News DE"},
@@ -197,8 +196,20 @@ def rss_cek() -> list[dict]:
 
     return haberler
 
+_TR_INGILIZCE = [" the ", " of ", " and ", " for ", " in ", " to ", " is ", " are ", " on ", " at ",
+                  " with ", " from ", " this ", " that ", " have ", " has ", " will "]
+
+def ingilizce_mi(text: str) -> bool:
+    """Başlık büyük ölçüde İngilizce ise True döner."""
+    t = " " + text.lower() + " "
+    return sum(1 for k in _TR_INGILIZCE if k in t) >= 3
+
 def on_filtre(haber: dict) -> bool:
-    metin = (haber["baslik"] + " " + haber["ozet"]).lower()
+    baslik = haber["baslik"]
+    # İngilizce haberler kabul edilmez
+    if ingilizce_mi(baslik):
+        return False
+    metin = (baslik + " " + haber["ozet"]).lower()
     for k in ALAKALI_KELIMELER:
         if k.lower() in metin:
             for a in ALAKASIZ_KELIMELER:
