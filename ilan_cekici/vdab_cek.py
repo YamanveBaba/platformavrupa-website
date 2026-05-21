@@ -170,6 +170,16 @@ def normalize_city(raw: str) -> tuple[str, str]:
         if key in lower:
             return city, ""
 
+    # Büyük harf şehir adı → BE_POSTAL_CITY değerleriyle eşleştir (GENT → Gent)
+    s_title = s.title()
+    for city_val in BE_POSTAL_CITY.values():
+        if city_val.upper() == s.upper():
+            return city_val, ""
+
+    # Sadece büyük harf → title case yap
+    if s == s.upper() and len(s) > 2:
+        return s.title(), ""
+
     return s, ""
 
 
