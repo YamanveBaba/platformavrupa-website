@@ -135,8 +135,13 @@
 
             if (haber.source_url) {
                 const linkDiv = document.createElement('div');
-                linkDiv.className = 'mt-8 pt-6 border-t border-slate-200';
-                linkDiv.innerHTML = `<a href="${haber.source_url}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl transition"><i class="fa-solid fa-external-link-alt"></i> Orijinal Kaynağa Git</a>`;
+                linkDiv.className = 'mt-8 pt-6 border-t border-slate-200 text-center';
+                linkDiv.innerHTML = `
+                    <p class="text-slate-500 text-sm mb-4">Bu haber özetlenmiştir. Tam içerik için orijinal kaynağı ziyaret edin.</p>
+                    <a href="${haber.source_url}" target="_blank" rel="noopener"
+                       class="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-bold px-8 py-4 rounded-xl transition text-lg shadow-lg">
+                       <i class="fa-solid fa-newspaper"></i> Haberin Tamamını Oku →
+                    </a>`;
                 document.getElementById('haberIcerik').appendChild(linkDiv);
             }
 

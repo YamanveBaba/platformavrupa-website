@@ -182,6 +182,18 @@ def rss_cek() -> list[dict]:
                     if m:
                         gorsel = m.group(1)
 
+                # Hâlâ resim yoksa source URL'den og:image çek
+                if not gorsel and link:
+                    try:
+                        rr = requests.get(link, timeout=5,
+                            headers={"User-Agent": "Mozilla/5.0 PlatformAvrupa/1.0"})
+                        if rr.status_code == 200:
+                            og = _re.search(r'og:image[^>]*content=["\']([^"\']+)["\']', rr.text)
+                            if og:
+                                gorsel = og.group(1)
+                    except Exception:
+                        pass
+
                 haberler.append({
                     "baslik": baslik,
                     "link": link,
