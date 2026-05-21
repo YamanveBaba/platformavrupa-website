@@ -104,6 +104,10 @@ jobs:
         continue-on-error: true
         run: python -X utf8 market_fiyat_cekici/urun_eslestir.py
 
+      - name: Gunluk indirim bildirimi gonder
+        continue-on-error: true
+        run: python -X utf8 ilan_cekici/indirim_bildir.py --limit 10
+
       - name: Telegram bildirimi gonder
         if: always()
         run: python -X utf8 ilan_cekici/bildir.py
