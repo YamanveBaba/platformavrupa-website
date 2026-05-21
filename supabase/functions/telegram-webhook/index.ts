@@ -119,10 +119,12 @@ serve(async (req) => {
       const chatId = cb.message.chat.id;
       const msgId  = cb.message.message_id;
       const baslik = cb.message.text?.split("\n")[0] || "Haber";
-      const [action, idStr] = data.split("_");
-      const id = parseInt(idStr);
+      // data: "onayla_<uuid>" — UUID string olarak al (parseInt değil)
+      const sepIdx = data.indexOf("_");
+      const action = data.slice(0, sepIdx);
+      const id = data.slice(sepIdx + 1); // UUID string
 
-      if (!id || isNaN(id)) {
+      if (!id || id.length < 3) {
         await tgAnswer(cb.id, "❌ Geçersiz ID");
         return new Response("ok");
       }
