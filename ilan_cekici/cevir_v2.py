@@ -115,12 +115,25 @@ def fetch_pending(sb_url: str, sb_key: str, limit: int) -> list[dict]:
     return []
 
 def count_pending(sb_url: str, sb_key: str) -> int:
-    hdrs = {**sb_headers(sb_key), "Prefer": "count=exact", "Range": "0-0"}
-    r = requests.get(f"{sb_url}/rest/v1/ilanlar",
-                     params={"select": "id", "source": "neq.user", "title_tr": "is.null", "status": "eq.active"},
-                     headers=hdrs, timeout=30)
-    m = re.search(r"/(\d+)", r.headers.get("Content-Range", ""))
-    return int(m.group(1)) if m else 0
+    """Bekleyen ilan sayısını çek — hata olursa 999999 döndür (çalışmaya devam et)."""
+    for deneme in range(3):
+        try:
+            hdrs = {**sb_headers(sb_key), "Prefer": "count=estimated", "Range": "0-0"}
+            r = requests.get(f"{sb_url}/rest/v1/ilanlar",
+                             params={"select": "id", "source": "neq.user",
+                                     "title_tr": "is.null", "status": "eq.active"},
+                             headers=hdrs, timeout=20)
+            if r.status_code == 200:
+                m = re.search(r"/(\d+)", r.headers.get("Content-Range", ""))
+                if m:
+                    n = int(m.group(1))
+                    if n > 0:
+                        return n
+        except Exception:
+            pass
+        time.sleep(3)
+    # count çalışmıyorsa büyük değer döndür — fetch_pending 0 dönünce durur
+    return 999_999
 
 def cache_fetch(sb_url: str, sb_key: str, keys: list[str]) -> dict[str, str]:
     """Cache tablosundan verilen anahtarlar için çevirileri al."""
@@ -400,7 +413,7 @@ def ceviri_yap(sb_url: str, sb_key: str, deepl_key: str, gemini_key: str,
     start = time.time()
 
     while toplam_ceviri < hedef:
-        batch_size = min(PAGE, hedef - toplam_ceviri)
+        batch_size = min(PAGE, hedef - toplam_ceviri) if hedef < 999_999 else PAGE
         rows = fetch_pending(sb_url, sb_key, batch_size)
         if not rows:
             break
