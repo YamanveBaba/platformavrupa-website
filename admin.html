@@ -1661,7 +1661,7 @@ async function loadAnnouncements() {
         <p style="font-size:12px;color:var(--text-muted)">${escHtml(a.content || '')}</p>
         <span style="font-size:11px;color:var(--text-muted);font-family:'JetBrains Mono',monospace">${relTime(a.created_at)}</span>
       </div>
-      <button class="btn btn-danger btn-sm btn-icon" onclick="deleteAnnouncement(${a.id})"><i class="fa-solid fa-trash"></i></button>
+      <button class="btn btn-danger btn-sm btn-icon" onclick="deleteAnnouncement('${a.id}')"><i class="fa-solid fa-trash"></i></button>
     </div>`).join('');
 }
 
@@ -1674,7 +1674,7 @@ async function saveAnnouncement() {
   if (!title || !content) { toast('Başlık ve içerik zorunludur', 'error'); return; }
 
   const imgUrl = document.getElementById('annImage')?.value.trim() || null;
-  const payload = { title, content, type, status: 'published', source: 'manual', is_active: true };
+  const payload = { title, content, type, status: 'published', source: 'manual' };
   if (expiry) payload.expires_at = expiry;
   if (imgUrl) payload.image_url = imgUrl;
 

@@ -208,7 +208,7 @@
                 const etiketMetin = (haber.kategori || 'GENEL').replace(/_/g,' ').toUpperCase();
 
                 const html = `
-                <div class="news-card group" onclick="window.location.href='duyuru_detay.html?id=${haber.id}'">
+                <div class="news-card group" onclick="haberAc('${haber.source_url || ''}','${haber.id}')" style="cursor:pointer">
                     <div class="h-56 overflow-hidden relative">
                         <img src="${resim}" class="w-full h-full object-cover group-hover:scale-105 transition duration-700" loading="lazy">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60"></div>
@@ -242,6 +242,14 @@
         async function dahaFazlaYukle() {
             document.getElementById('dahaFazlaBtn').textContent = 'Yükleniyor...';
             await yukle(false);
+        }
+
+        function haberAc(sourceUrl, id) {
+            if (sourceUrl && sourceUrl.startsWith('http')) {
+                window.open(sourceUrl, '_blank');
+            } else {
+                window.location.href = 'duyuru_detay.html?id=' + id;
+            }
         }
 
         window.onload = () => veriCek();
