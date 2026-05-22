@@ -859,6 +859,10 @@ textarea.form-control { resize: vertical; min-height: 100px; }
                 <input type="date" class="form-control" id="annExpiry">
               </div>
             </div>
+            <div class="form-group" style="margin-top:10px">
+              <label class="form-label">Görsel URL (opsiyonel)</label>
+              <input type="text" class="form-control" id="annImage" placeholder="https://...">
+            </div>
             <button class="btn btn-primary" onclick="saveAnnouncement()" style="margin-top:12px">
               <i class="fa-solid fa-paper-plane"></i> Yayınla
             </button>
@@ -1669,25 +1673,34 @@ async function saveAnnouncement() {
 
   if (!title || !content) { toast('Başlık ve içerik zorunludur', 'error'); return; }
 
-  const payload = { title, content, type, is_active: true };
+  const imgUrl = document.getElementById('annImage')?.value.trim() || null;
+  const payload = { title, content, type, status: 'published', source: 'manual', is_active: true };
   if (expiry) payload.expires_at = expiry;
+  if (imgUrl) payload.image_url = imgUrl;
 
   const { error } = await sb.from('announcements').insert([payload]);
   if (!error) {
     toast('Duyuru yayınlandı', 'success');
     document.getElementById('annTitle').value = '';
     document.getElementById('annContent').value = '';
+    if (document.getElementById('annImage')) document.getElementById('annImage').value = '';
     loadAnnouncements();
   } else {
     toast('Hata: ' + error.message, 'error');
+    console.error('saveAnnouncement error:', error);
   }
 }
 
 async function deleteAnnouncement(id) {
   if (!confirm('Duyuru silinsin mi?')) return;
-  await sb.from('announcements').delete().eq('id', id);
-  toast('Duyuru silindi', 'success');
-  loadAnnouncements();
+  const { error } = await sb.from('announcements').delete().eq('id', id);
+  if (!error) {
+    toast('Duyuru silindi', 'success');
+    loadAnnouncements();
+  } else {
+    toast('Silinemedi: ' + error.message, 'error');
+    console.error('deleteAnnouncement error:', error);
+  }
 }
 
 // ─── HABER KUYRUĞU ────────────────────────────────────────────────────────────
@@ -1788,7 +1801,7 @@ async function haberSil(id) {
 async function haberTumunuOnayla() {
   if (!confirm('Listedeki tüm haberler yayınlansın mı?')) return;
   const rows = document.querySelectorAll('[id^="haber-row-"]');
-  const ids = Array.from(rows).map(r => parseInt(r.id.replace('haber-row-', '')));
+  const ids = Array.from(rows).map(r => r.id.replace('haber-row-', '')); // UUID string, parseInt değil
   if (!ids.length) { toast('Yayınlanacak haber yok', 'error'); return; }
 
   const { error } = await sb.from('announcements').update({ status: 'published' })
