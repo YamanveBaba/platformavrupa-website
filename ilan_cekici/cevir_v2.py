@@ -93,7 +93,7 @@ def load_secrets() -> tuple[str, str, str, str]:
 # ─── SUPABASE ─────────────────────────────────────────────────────────────────
 
 def sb_headers(key: str) -> dict:
-    return {"apikey": key, "Authorization": f"Bearer {key}"}
+    return {"apikey": key, "Authorization": f"Bearer {key}", "Connection": "close"}
 
 def fetch_pending(sb_url: str, sb_key: str, limit: int) -> list[dict]:
     """title_tr IS NULL olan aktif ilanları çek — source da lazım (dil tespiti için)."""
@@ -101,7 +101,7 @@ def fetch_pending(sb_url: str, sb_key: str, limit: int) -> list[dict]:
         r = requests.get(
             f"{sb_url}/rest/v1/ilanlar",
             params={"select": "id,title,source", "source": "neq.user", "title_tr": "is.null",
-                    "status": "eq.active", "order": "created_at.desc", "limit": str(limit)},
+                    "status": "eq.active", "order": "id.desc", "limit": str(limit)},
             headers=sb_headers(sb_key), timeout=30,
         )
         if r.status_code == 500:
@@ -136,20 +136,26 @@ def count_pending(sb_url: str, sb_key: str) -> int:
     return 999_999
 
 def cache_fetch(sb_url: str, sb_key: str, keys: list[str]) -> dict[str, str]:
-    """Cache tablosundan verilen anahtarlar için çevirileri al."""
+    """Cache tablosundan verilen anahtarlar için çevirileri al — 100'lük parçalar halinde."""
     if not keys:
         return {}
-    # Supabase IN filtresi: ?original_normalized=in.(key1,key2)
-    in_val = "({})".format(",".join(f'"{k}"' for k in keys))
-    r = requests.get(
-        f"{sb_url}/rest/v1/title_cache",
-        params={"select": "original_normalized,translation_tr",
-                "original_normalized": f"in.{in_val}"},
-        headers=sb_headers(sb_key), timeout=30,
-    )
-    if r.status_code != 200:
-        return {}
-    return {row["original_normalized"]: row["translation_tr"] for row in r.json()}
+    result = {}
+    for i in range(0, len(keys), 100):
+        chunk = keys[i:i + 100]
+        try:
+            in_val = "({})".format(",".join(f'"{k}"' for k in chunk))
+            r = requests.get(
+                f"{sb_url}/rest/v1/title_cache",
+                params={"select": "original_normalized,translation_tr",
+                        "original_normalized": f"in.{in_val}"},
+                headers=sb_headers(sb_key), timeout=(5, 15),
+            )
+            if r.status_code == 200:
+                for row in r.json():
+                    result[row["original_normalized"]] = row["translation_tr"]
+        except Exception:
+            pass
+    return result
 
 def cache_save(sb_url: str, sb_key: str, rows: list[dict], dry_run: bool) -> int:
     """Cache tablosuna yeni çevirileri upsert et."""
@@ -414,6 +420,7 @@ def ceviri_yap(sb_url: str, sb_key: str, deepl_key: str, gemini_key: str,
 
     while toplam_ceviri < hedef:
         batch_size = min(PAGE, hedef - toplam_ceviri) if hedef < 999_999 else PAGE
+        print(f"  [adim 1/4] ilanlar cekiliyor...", flush=True)
         try:
             rows = fetch_pending(sb_url, sb_key, batch_size)
         except Exception as e:
@@ -424,9 +431,11 @@ def ceviri_yap(sb_url: str, sb_key: str, deepl_key: str, gemini_key: str,
             break
 
         # 1. Cache lookup
+        print(f"  [adim 2/4] cache sorgulanıyor ({len(rows)} baslik)...", flush=True)
         basliklar = [r["title"] or "" for r in rows]
         anahtarlar = [normalize_key(b) for b in basliklar]
         cache_map = cache_fetch(sb_url, sb_key, anahtarlar)
+        print(f"  [adim 3/4] ceviri basliyor...", flush=True)
 
         cache_hit_ids = []
         cevrilecek_idx = []
