@@ -29,7 +29,21 @@ echo [%date% %time%] Market cekim basliyor... >> "%LOGFILE%"
 cd /d "%~dp0"
 set PYTHONIOENCODING=utf-8
 set PYTHONUTF8=1
-"%LOCALAPPDATA%\Programs\Python\Python314\python.exe" haftalik_tam.py >> "%LOGFILE%" 2>&1
+
+:: Python yolu — py launcher > python > hardcoded fallback
+where py >nul 2>&1
+if %errorlevel% == 0 (
+    set PYTHON=py -3
+) else (
+    where python >nul 2>&1
+    if %errorlevel% == 0 (
+        set PYTHON=python
+    ) else (
+        set PYTHON="%LOCALAPPDATA%\Programs\Python\Python314\python.exe"
+    )
+)
+
+%PYTHON% haftalik_tam.py >> "%LOGFILE%" 2>&1
 
 :: Basarili bitis tarihini kaydet
 powershell -NoProfile -Command "(Get-Date).ToString('yyyy-MM-dd HH:mm:ss')" > "%LOCKFILE%"

@@ -41,6 +41,7 @@ import os
 import random
 import time
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
@@ -52,7 +53,34 @@ API_BASE = (
     "https://apip.colruyt.be/gateway/emec.colruyt.protected.bffsvc"
     "/cg/nl/api/product-search-prs"
 )
-API_KEY = "a8ylmv13-b285-4788-9e14-0f79b7ed2411"  # Site güncellenirse ağdan kopyala
+
+
+def _auth_oku() -> tuple[str, str]:
+    """colruyt_auth.txt'den API key ve cookie okur. Dosya yoksa hardcoded fallback kullanır."""
+    auth_path = Path(__file__).parent.parent / "colruyt_auth.txt"
+    key = "a8ylmv13-b285-4788-9e14-0f79b7ed2411"
+    cookie = ""
+    if auth_path.exists():
+        try:
+            for line in open(auth_path, encoding="utf-8", errors="ignore"):
+                line = line.strip()
+                if line.startswith("KEY=") and not line.startswith("#"):
+                    v = line[4:].strip()
+                    if v:
+                        key = v
+                elif line.startswith("COOKIE=") and not line.startswith("#"):
+                    v = line[7:].strip()
+                    if v:
+                        cookie = v
+        except Exception:
+            pass
+    return key, cookie
+
+
+API_KEY, _AUTH_COOKIE = _auth_oku()
+
+# 406/401 hata sayacı — 3 ardışık geçersiz auth → tüm çekim durdurulur
+_HATA_406_SAYACI = 0
 PAGE_SIZE = 60            # Kategori sorgusu için (20-60 arası API kabul eder)
 MAX_URUN = 20000          # Güvenlik tavanı
 SITE_URL = "https://www.colruyt.be/nl/producten"
@@ -257,7 +285,14 @@ def kategori_urunlerini_cek(
         if resp.status != 200:
             print(f"    HTTP {resp.status} (categoryId={category_id}, skip={skip}) — atlandı")
             if resp.status in (401, 403, 406):
-                print("    Oturum geçersiz olabilir. Tarayıcıya bak.")
+                global _HATA_406_SAYACI
+                _HATA_406_SAYACI += 1
+                print(f"    Auth hatası #{_HATA_406_SAYACI}/3 — API key geçersiz olabilir.")
+                if _HATA_406_SAYACI >= 3:
+                    raise RuntimeError(
+                        "DURDURULDU: 3 ardışık auth hatası (401/403/406). "
+                        "colruyt_auth.txt'deki API key'i güncelleyin."
+                    )
             break
 
         try:

@@ -487,6 +487,7 @@ def bundesagentur_cek(max_sayfa: int = 20) -> list[dict]:
                 "bundesagentur", ref_nr,
                 source_url, firma, sehir, "DE"
             )
+            ilan["postal_code"] = plz[:20]
             ilanlar.append(ilan)
 
         gesamt = data.get("maxErgebnisse", "?")

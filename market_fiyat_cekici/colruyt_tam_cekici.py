@@ -48,7 +48,28 @@ API_BASE   = ("https://apip.colruyt.be/gateway/emec.colruyt.protected.bffsvc"
               "/cg/nl/api/product-search-prs")
 DETAIL_URL = ("https://www.colruyt.be/content/clp/nl/producten/product-detail"
               "/jcr:content/root/responsivegrid/product_detail.model.{}.json")
-API_KEY    = "a8ylmv13-b285-4788-9e14-0f79b7ed2411"
+def _auth_oku() -> tuple[str, str]:
+    """colruyt_auth.txt'den API key ve cookie okur. Dosya yoksa hardcoded fallback kullanır."""
+    auth_path = SCRIPT_DIR.parent / "colruyt_auth.txt"
+    key = "a8ylmv13-b285-4788-9e14-0f79b7ed2411"
+    cookie = ""
+    if auth_path.exists():
+        try:
+            for line in open(auth_path, encoding="utf-8", errors="ignore"):
+                line = line.strip()
+                if line.startswith("KEY=") and not line.startswith("#"):
+                    v = line[4:].strip()
+                    if v:
+                        key = v
+                elif line.startswith("COOKIE=") and not line.startswith("#"):
+                    v = line[7:].strip()
+                    if v:
+                        cookie = v
+        except Exception:
+            pass
+    return key, cookie
+
+API_KEY, _AUTH_COOKIE = _auth_oku()
 PLACE_ID   = "604"
 PAGE_SIZE  = 100
 MAX_PARALLEL = 2

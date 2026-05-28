@@ -4,7 +4,18 @@
 :: Siler: schtasks /delete /tn "PlatformAvrupa_FiyatGuncelle" /f
 
 set SCRIPT=%~dp0haftalik_tam.py
-set PYTHON=python
+
+:: Python yolu — py launcher > python > hardcoded fallback
+set PYTHON=py -3
+where py >nul 2>&1
+if not %errorlevel% == 0 (
+    where python >nul 2>&1
+    if %errorlevel% == 0 (
+        set PYTHON=python
+    ) else (
+        set PYTHON="%LOCALAPPDATA%\Programs\Python\Python314\python.exe"
+    )
+)
 
 echo Windows Gorev Zamanlayici'ya ekleniyor...
 

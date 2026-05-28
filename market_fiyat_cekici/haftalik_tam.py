@@ -43,7 +43,7 @@ ESIKLER = {
 # ─── Process timeout (saniye) — bu süreyi aşarsa zorla durdurulur ──────────────
 TIMEOUT = {
     "delhaize":  14400,  # 4 saat (34 kategori × ~7 dk)
-    "colruyt":    1800,  # 30 dk
+    "colruyt":    7200,  # 2 saat (async kategori çekimi)
     "carrefour":  9000,  # 2.5 saat
     "lidl":       7200,  # 2 saat (büyük katalog)
     "aldi":       7200,  # 2 saat
@@ -169,7 +169,7 @@ def son_json_urun_sayisi(market: str) -> int:
     # Colruyt ve ALDI html_pages/ altına kaydeder
     desenleri = {
         "delhaize":  (cikti,      "delhaize_be_v2_*.json"),
-        "colruyt":   (html_pages, "colruyt_Genel_p01_*.json"),
+        "colruyt":   (cikti,      "colruyt_be_producten_*.json"),
         "carrefour": (cikti,      "carrefour_be_v2_*.json"),
         "lidl":      (cikti,      "lidl_be_producten_*.json"),
         "aldi":      (cikti,      "aldi_be_*.json"),
@@ -213,12 +213,41 @@ def cek_delhaize(log: Path) -> int:
 
 
 def cek_colruyt(log: Path) -> tuple[int, int]:
+    # 1. Cookie yenile
     calistir([sys.executable, "colruyt_cookie_yenile.py"], 120, log)
-    ret, _ = calistir([sys.executable, "colruyt_direct.py"], TIMEOUT["colruyt"], log)
-    # Scraper timeout/hata olsa bile JSON varsa yükle
-    ret2, son = calistir([sys.executable, "html_analiz.py", "--market", "colruyt"], 300, log)
-    urun = urun_sayisi_stdout_parse(son) or son_json_urun_sayisi("colruyt")
-    return (ret2 if ret2 != 0 else ret), urun
+
+    # 2. API key probe — geçersizse boşa 2 saat harcama
+    probe_ret, _ = calistir([sys.executable, "colruyt_auth_kontrol.py"], 60, log)
+    if probe_ret != 0:
+        with open(log, "a", encoding="utf-8") as lf:
+            lf.write("[HATA] Colruyt API key geçersiz — çekim atlandı\n")
+        return probe_ret, 0
+
+    # 3. Async tam çekici (birincil yöntem)
+    ret, _ = calistir(
+        [sys.executable, "colruyt_tam_cekici.py", "--otomatik", "--no-pause"],
+        TIMEOUT["colruyt"], log,
+    )
+    dosyalar = glob.glob(str(SCRIPT_DIR / "cikti" / "colruyt_be_producten_*.json"))
+    urun = son_json_urun_sayisi("colruyt")
+
+    # 4. Eşiğin altındaysa kategori scraper ile fallback
+    if urun < ESIKLER["colruyt"]:
+        with open(log, "a", encoding="utf-8") as lf:
+            lf.write(f"[FALLBACK] colruyt_tam_cekici {urun} ürün (eşik: {ESIKLER['colruyt']}) — kategori_cek deneniyor\n")
+        ret, _ = calistir(
+            [sys.executable, "colruyt_kategori_cek.py", "--zaten-giris", "--no-pause"],
+            TIMEOUT["colruyt"], log,
+        )
+        dosyalar = glob.glob(str(SCRIPT_DIR / "cikti" / "colruyt_be_producten_*.json"))
+        urun = son_json_urun_sayisi("colruyt")
+
+    # 5. Supabase yükleme
+    if dosyalar:
+        latest = max(dosyalar, key=os.path.getmtime)
+        calistir([sys.executable, "json_to_supabase_yukle.py", "--no-pause", latest], 900, log)
+
+    return ret, urun
 
 
 def cek_carrefour(log: Path) -> int:
@@ -408,6 +437,15 @@ def main():
     print(f"  Log: {log_dosya.name}")
     print(f"{'='*60}\n")
 
+    # Başlangıç Telegram bildirimi
+    _tg_token   = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
+    _tg_chat_id = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
+    if _tg_token and _tg_chat_id:
+        _telegram_gonder(_tg_token, _tg_chat_id,
+            f"Haftalık fiyat çekimi BAŞLADI — {bugun}\n"
+            f"Marketler: {', '.join(hedefler)}"
+        )
+
     with open(log_dosya, "a", encoding="utf-8") as lf:
         lf.write(f"\n{'='*60}\n")
         lf.write(f"Başlangıç: {datetime.now().isoformat()}\n")
@@ -465,6 +503,14 @@ def main():
             sure = time.time() - baslangic
             urun_sayisi = stdout_urun2 if stdout_urun2 > 0 else son_json_urun_sayisi(market)
             basarili = urun_sayisi >= esik
+
+        # Retry sonrası da başarısızsa anlık Telegram uyarısı
+        if not basarili and _tg_token and _tg_chat_id:
+            _telegram_gonder(_tg_token, _tg_chat_id,
+                f"HATA: {market.upper()} başarısız\n"
+                f"Ürün: {urun_sayisi:,} (eşik: {esik:,})\n"
+                f"Süre: {round(sure/60, 1)} dk"
+            )
 
         ozet[market] = {
             "urun":     urun_sayisi,

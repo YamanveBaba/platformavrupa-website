@@ -61,10 +61,10 @@ MYMEMORY_URL   = "https://api.mymemory.translated.net/get"
 DELAY_MYMEMORY = 0.12
 
 GEMINI_URL   = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
-GEMINI_BATCH = 40
-DELAY_GEMINI = 4.2
+GEMINI_BATCH = 100   # 40 → 100: kısa iş başlıkları için 2K token yeterli
+DELAY_GEMINI = 4.5   # 15 RPM altında (13.3 req/min)
 
-PAGE = 500  # Supabase'den bir seferde çekilen satır sayısı
+PAGE = 1000  # 500 → 1000: daha az DB round-trip
 
 # ─── YARDIMCI ─────────────────────────────────────────────────────────────────
 
@@ -101,7 +101,7 @@ def fetch_pending(sb_url: str, sb_key: str, limit: int) -> list[dict]:
         r = requests.get(
             f"{sb_url}/rest/v1/ilanlar",
             params={"select": "id,title,source", "source": "neq.user", "title_tr": "is.null",
-                    "status": "eq.active", "order": "id.asc", "limit": str(limit)},
+                    "status": "eq.active", "order": "created_at.desc", "limit": str(limit)},
             headers=sb_headers(sb_key), timeout=30,
         )
         if r.status_code == 500:
@@ -364,7 +364,7 @@ def gemini_cevir(basliklar: list[str], gemini_key: str) -> list[str]:
             r = requests.post(
                 f"{GEMINI_URL}?key={gemini_key}",
                 json={"contents": [{"parts": [{"text": prompt}]}],
-                      "generationConfig": {"maxOutputTokens": min(100 * n, 2000), "temperature": 0.1}},
+                      "generationConfig": {"maxOutputTokens": min(150 * n, 8000), "temperature": 0.1}},
                 timeout=40,
             )
             if r.status_code == 429:
@@ -414,7 +414,12 @@ def ceviri_yap(sb_url: str, sb_key: str, deepl_key: str, gemini_key: str,
 
     while toplam_ceviri < hedef:
         batch_size = min(PAGE, hedef - toplam_ceviri) if hedef < 999_999 else PAGE
-        rows = fetch_pending(sb_url, sb_key, batch_size)
+        try:
+            rows = fetch_pending(sb_url, sb_key, batch_size)
+        except Exception as e:
+            print(f"  fetch_pending hata: {e} — 60sn bekleniyor...")
+            time.sleep(60)
+            continue
         if not rows:
             break
 

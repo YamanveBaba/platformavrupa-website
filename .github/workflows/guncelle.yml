@@ -69,27 +69,45 @@ jobs:
           echo "Baslangic gecikmesi: ${DELAY} saniye"
           sleep $DELAY
 
+      - name: Arbeitnow, Adzuna, Bundesagentur, Jobicy, Remotive cek (bulut yedegi)
+        continue-on-error: true
+        run: python -X utf8 ilan_cekici/is_ilani_cekici.py --temizle
+
       - name: FOREM cek (Valoniya)
+        continue-on-error: true
         run: python -X utf8 ilan_cekici/forem_cek.py --temizle
 
       - name: Actiris cek (Bruksel)
+        continue-on-error: true
         run: python -X utf8 ilan_cekici/actiris_cek.py --temizle
 
       - name: VDAB gunluk cek (Pazartesi-Cumartesi)
         if: github.event.schedule == '0 4 * * 1-6' || github.event_name == 'workflow_dispatch'
+        continue-on-error: true
         run: python -X utf8 ilan_cekici/vdab_cek.py --gunler 1 --max 5000 --temizle
 
       - name: VDAB haftalik tam cek (Pazar)
         if: github.event.schedule == '0 2 * * 0'
+        continue-on-error: true
         run: python -X utf8 ilan_cekici/vdab_cek.py --max 300000 --temizle
 
       - name: Haber cek (Avrupa Turkleri)
+        continue-on-error: true
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python -X utf8 ilan_cekici/haber_cek.py
 
-      - name: Ilanlari Turkceleştir (cache + Google Translate)
-        run: python -X utf8 ilan_cekici/cevir_v2.py --limit 2000
+      - name: Ilan basliklarini Turkceleştir - gunluk (cache + Gemini)
+        run: python -X utf8 ilan_cekici/cevir_v2.py --limit 15000
+
+      - name: Ilan basliklarini Turkceleştir - pazar bulk (VDAB sonrasi)
+        if: github.event.schedule == '0 2 * * 0'
+        timeout-minutes: 350
+        run: python -X utf8 ilan_cekici/cevir_v2.py --limit 280000
+
+      - name: Ilan aciklamalarini Turkceleştir (Gemini)
+        continue-on-error: true
+        run: python -X utf8 ilan_cekici/cevir.py --tablo ilanlar --mode desc --limit 500
 
       - name: Market urunlerini Turkceleştir
         run: python -X utf8 ilan_cekici/cevir.py --tablo market --limit 2000

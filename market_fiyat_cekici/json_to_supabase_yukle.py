@@ -526,8 +526,7 @@ def json_to_rows(data: dict, include_raw: bool) -> List[dict]:
             row["category_l1"] = l1
             row["category_l2"] = l2
             row["category_l3"] = l3
-            if l4:
-                row["category_l4"] = l4
+            row["category_l4"] = l4
     except ImportError:
         pass  # kategori_ata.py yoksa atla
 

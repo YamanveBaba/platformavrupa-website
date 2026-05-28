@@ -247,7 +247,7 @@ def parse_ilan(job: dict) -> dict | None:
         "title":        baslik[:300],
         "description":  " | ".join(desc_parts)[:500],
         "category":     "Is Ilani",
-        "sub_category": "Tam Zamanli",
+        "sub_category": pozisyon if pozisyon in ("Uzaktan", "Yari Zamanli") else "Tam Zamanli",
         "status":       "active",
         "source":       "vdab",
         "source_id":    job_id,

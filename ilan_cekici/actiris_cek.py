@@ -321,11 +321,12 @@ def _ilan_donustur(item: dict) -> Optional[dict]:
     aciklama_parts.append("Source: Actiris (Brüksel Bölgesi)")
     aciklama = " | ".join(aciklama_parts)
 
+    _poz = pozisyon_bul(type_cont, regime)
     return {
         "title":        baslik[:300],
         "description":  aciklama[:2000],
         "category":     "Is Ilani",
-        "sub_category": "Tam Zamanli",
+        "sub_category": _poz if _poz in ("Uzaktan", "Yari Zamanli") else "Tam Zamanli",
         "status":       "active",
         "source":       "actiris",
         "source_id":    ref,
@@ -335,7 +336,7 @@ def _ilan_donustur(item: dict) -> Optional[dict]:
         "postal_code":  postal,
         "country":      "BE",
         "sektor":       sektor_bul(baslik + " " + firma),
-        "pozisyon":     pozisyon_bul(type_cont, regime),
+        "pozisyon":     _poz,
         "price":        "",
         "created_at":   yayın_tarihi,
         "expires_at":   (datetime.now(timezone.utc) + timedelta(days=EXPIRY_GUN)).isoformat(),

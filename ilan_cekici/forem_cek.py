@@ -312,6 +312,9 @@ def _yeni_ilan(record: dict) -> Optional[dict]:
     secteurs   = _ilk_eleman(record.get("secteurs") or "")
 
     sehir = sehir_temizle(localite, region)
+    kodu_listesi = record.get("lieuxtravailcodepostal") or []
+    postal = str(kodu_listesi[0]).strip() if isinstance(kodu_listesi, list) and kodu_listesi else ""
+    _poz = contrat_tipi(type_cont, regime)
 
     if not lien:
         lien = f"https://www.leforem.be/offres-d-emploi/detail/{source_id}"
@@ -334,17 +337,17 @@ def _yeni_ilan(record: dict) -> Optional[dict]:
         "title":        baslik[:300],
         "description":  aciklama[:2000],
         "category":     "Is Ilani",
-        "sub_category": "Tam Zamanli",
+        "sub_category": _poz if _poz in ("Uzaktan", "Yari Zamanli") else "Tam Zamanli",
         "status":       "active",
         "source":       "forem",
         "source_id":    source_id,
         "source_url":   lien[:500],
         "owner_name":   firma[:200],
         "city":         sehir,
-        "postal_code":  "",
+        "postal_code":  postal[:20],
         "country":      "BE",
         "sektor":       sektor_bul(sektor_metin),
-        "pozisyon":     contrat_tipi(type_cont, regime),
+        "pozisyon":     _poz,
         "price":        "",
         "created_at":   _tarih_parse(date_pub),
         "expires_at":   (datetime.now(timezone.utc) + timedelta(days=EXPIRY_GUN)).isoformat(),
