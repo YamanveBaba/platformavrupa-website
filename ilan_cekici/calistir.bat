@@ -15,13 +15,8 @@ if not %errorlevel% == 0 (
     )
 )
 
-REM 1. Yeni ilanları çek (Arbeitnow, Adzuna, Bundesagentur, Jobicy, Remotive)
-REM    + 30 günlük eskileini expire et
-REM    NOT: FOREM/Actiris/VDAB zaten GitHub Actions üzerinden çalışıyor
-%PYTHON% is_ilani_cekici.py --temizle >> calistir_log.txt 2>&1
-
-REM 2. Çeviri GitHub Actions'daki cevir_v2.py tarafından yapılıyor (title_tr)
-REM    ilan_baslik_cevir.py kaldırıldı — cevir_v2.py ile çakışıyordu
+REM FOREM/Actiris/VDAB GitHub Actions üzerinden çalışıyor.
+REM Arbeitnow/Jobicy/Remotive/Adzuna/Bundesagentur artık kullanılmıyor.
 
 echo [%date% %time%] Tamamlandi. >> calistir_log.txt
 echo. >> calistir_log.txt

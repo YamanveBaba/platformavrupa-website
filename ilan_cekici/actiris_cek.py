@@ -33,7 +33,7 @@ except ImportError:
     sys.exit(1)
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-EXPIRY_GUN = 30
+EXPIRY_GUN = 3  # Her gün tam çekim yapılıyor, 3 günde görülmeyen ilan kalkmıştır
 
 ACTIRIS_API = "https://www.actiris.brussels/Umbraco/api/OffersApi/GetAllOffers"
 ACTIRIS_SEARCH = "https://www.actiris.brussels/fr/citoyens/offres-d-emploi/"
@@ -163,7 +163,7 @@ def expired_yap(sb_url: str, sb_key: str, dry_run: bool) -> int:
         "Range": "0-0",
     }
     params = {"source": "eq.actiris", "status": "eq.active",
-              "created_at": f"lt.{sinir}", "select": "id"}
+              "last_seen_at": f"lt.{sinir}", "select": "id"}
     r = requests.get(f"{sb_url}/rest/v1/ilanlar", params=params, headers=headers, timeout=30)
     m = re.search(r"/(\d+)", r.headers.get("Content-Range", ""))
     toplam = int(m.group(1)) if m else 0
@@ -174,7 +174,7 @@ def expired_yap(sb_url: str, sb_key: str, dry_run: bool) -> int:
         print(f"  [dry-run] {toplam} Actiris ilanı expired yapılacaktı.")
         return toplam
     patch = requests.patch(
-        f"{sb_url}/rest/v1/ilanlar?source=eq.actiris&status=eq.active&created_at=lt.{sinir}",
+        f"{sb_url}/rest/v1/ilanlar?source=eq.actiris&status=eq.active&last_seen_at=lt.{sinir}",
         json={"status": "expired"},
         headers={**headers, "Content-Type": "application/json", "Prefer": "return=minimal"},
         timeout=60,
@@ -339,6 +339,7 @@ def _ilan_donustur(item: dict) -> Optional[dict]:
         "pozisyon":     _poz,
         "price":        "",
         "created_at":   yayın_tarihi,
+        "last_seen_at": datetime.now(timezone.utc).isoformat(),
         "expires_at":   (datetime.now(timezone.utc) + timedelta(days=EXPIRY_GUN)).isoformat(),
     }
 

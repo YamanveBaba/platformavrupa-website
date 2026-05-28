@@ -29,7 +29,7 @@ except ImportError:
     sys.exit(1)
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-EXPIRY_GUN = 45  # FOREM ilanları genellikle daha uzun süre aktif
+EXPIRY_GUN = 3  # Her gün tam çekim yapılıyor, 3 günde görülmeyen ilan kalkmıştır
 
 FOREM_API = "https://leforem-digitalwallonia.opendatasoft.com/api/explore/v2.1/catalog/datasets/offres-d-emploi-forem/records"
 BATCH_LIMIT = 100  # OpenDataSoft max per request
@@ -262,7 +262,7 @@ def expired_yap(sb_url: str, sb_key: str, dry_run: bool) -> int:
     params = {
         "source": "eq.forem",
         "status": "eq.active",
-        "created_at": f"lt.{sinir}",
+        "last_seen_at": f"lt.{sinir}",
         "select": "id"
     }
     r = requests.get(f"{sb_url}/rest/v1/ilanlar", params=params, headers=headers, timeout=30)
@@ -275,7 +275,7 @@ def expired_yap(sb_url: str, sb_key: str, dry_run: bool) -> int:
         print(f"  [dry-run] {toplam} FOREM ilanı expired yapılacaktı.")
         return toplam
     patch = requests.patch(
-        f"{sb_url}/rest/v1/ilanlar?source=eq.forem&status=eq.active&created_at=lt.{sinir}",
+        f"{sb_url}/rest/v1/ilanlar?source=eq.forem&status=eq.active&last_seen_at=lt.{sinir}",
         json={"status": "expired"},
         headers={**headers, "Prefer": "return=minimal"},
         timeout=60,
@@ -350,6 +350,7 @@ def _yeni_ilan(record: dict) -> Optional[dict]:
         "pozisyon":     _poz,
         "price":        "",
         "created_at":   _tarih_parse(date_pub),
+        "last_seen_at": datetime.now(timezone.utc).isoformat(),
         "expires_at":   (datetime.now(timezone.utc) + timedelta(days=EXPIRY_GUN)).isoformat(),
     }
 
