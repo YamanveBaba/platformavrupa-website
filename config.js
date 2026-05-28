@@ -63,16 +63,17 @@ if (typeof supabase !== 'undefined') {
  */
 async function isAdmin() {
     if (!sb) return false;
-    
+
     try {
-        const { data: { user } } = await sb.auth.getUser();
+        const authRes = await sb.auth.getUser();
+        const user = authRes?.data?.user;
         if (!user) return false;
-        
+
         const { data: profile } = await sb.from('profiles')
             .select('role')
             .eq('id', user.id)
             .single();
-        
+
         return profile?.role === 'admin';
     } catch (error) {
         console.error('Admin kontrolü hatası:', error);

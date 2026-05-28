@@ -1194,24 +1194,48 @@ let pendingApprovals = [];
 let currentSection = 'dashboard';
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
+function showAuthError(msg) {
+  document.getElementById('authGate').innerHTML = `
+    <div style="text-align:center;padding:40px">
+      <i class="fa-solid fa-lock" style="font-size:48px;color:var(--danger);display:block;margin-bottom:16px"></i>
+      <h2 style="font-family:'Bricolage Grotesque',sans-serif;margin-bottom:8px">Erişim Engellendi</h2>
+      <p style="color:var(--text-muted);margin-bottom:8px">${msg}</p>
+      <p style="color:var(--text-muted);font-size:12px;margin-bottom:24px">Giriş yapmak için <a href="login.html" style="color:var(--accent)">buraya tıklayın</a>.</p>
+      <a href="index.html" class="btn btn-primary">Ana Sayfaya Dön</a>
+    </div>`;
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
-  // Auth check
-  const isAdminUser = await isAdmin();
+  // sb yoksa (supabase CDN yüklenemedi) → kısa mesaj ver
+  if (!sb) {
+    showAuthError('Bağlantı kurulamadı. Sayfayı yenileyin.');
+    return;
+  }
+
+  // 8 saniye timeout — Supabase cevap vermezse sonsuz yükleme yerine hata göster
+  const timeout = new Promise(resolve => setTimeout(() => resolve('timeout'), 8000));
+
+  let isAdminUser = false;
+  try {
+    const result = await Promise.race([isAdmin(), timeout]);
+    if (result === 'timeout') {
+      showAuthError('Kimlik doğrulama zaman aşımına uğradı. Giriş yapıp tekrar deneyin.');
+      return;
+    }
+    isAdminUser = result;
+  } catch (e) {
+    showAuthError('Kimlik doğrulama hatası: ' + (e.message || e));
+    return;
+  }
+
   if (!isAdminUser) {
-    document.getElementById('authGate').innerHTML = `
-      <div style="text-align:center;padding:40px">
-        <i class="fa-solid fa-lock" style="font-size:48px;color:var(--danger);display:block;margin-bottom:16px"></i>
-        <h2 style="font-family:'Bricolage Grotesque',sans-serif;margin-bottom:8px">Erişim Engellendi</h2>
-        <p style="color:var(--text-muted);margin-bottom:24px">Bu sayfaya erişim yetkiniz yok.</p>
-        <a href="index.html" class="btn btn-primary">Ana Sayfaya Dön</a>
-      </div>`;
+    showAuthError('Bu sayfaya erişim yetkiniz yok.');
     return;
   }
 
   document.getElementById('authGate').style.display = 'none';
   document.getElementById('app').style.display = 'block';
 
-  // Load dashboard
   loadDashboard();
   setupRealtime();
 });
