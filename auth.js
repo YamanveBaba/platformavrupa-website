@@ -43,31 +43,34 @@ async function initAuth() {
         }
     }
 
-    // Google/Facebook OAuth geri dönüşü: URL'de ?code= varsa session exchange yap (PKCE flow)
     try {
+        // 1. onAuthStateChange'i ÖNCE kur — SIGNED_IN eventi hiç kaçmasın
+        sb.auth.onAuthStateChange(handleAuthChange);
+
+        // 2. Google/Facebook OAuth callback: URL'de ?code= varsa exchange yap (PKCE)
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get('code');
         if (code) {
-            await sb.auth.exchangeCodeForSession(code);
+            try {
+                await sb.auth.exchangeCodeForSession(code);
+            } catch(e) {
+                console.warn('OAuth code exchange:', e.message);
+            }
             window.history.replaceState({}, document.title, window.location.pathname);
         }
-    } catch(e) {
-        console.warn('OAuth code exchange:', e.message);
-    }
 
-    try {
-        // 1. Mevcut session'ı kontrol et
-        const { data: { session }, error } = await sb.auth.getSession();
-        
+        // 3. Mevcut session'ı kontrol et (exchange sonrası veya daha önceden varsa)
+        const { data: { session } } = await sb.auth.getSession();
+
         if (session && session.user) {
             currentUser = session.user;
-            
-            // 2. Profil bilgilerini çek
+
+            // 4. Profil bilgilerini çek
             const { data: profile } = await sb.from('profiles')
                 .select('*')
                 .eq('id', session.user.id)
                 .single();
-            
+
             if (profile) {
                 currentProfile = profile;
                 localStorage.setItem('isLoggedIn', 'true');
@@ -80,26 +83,21 @@ async function initAuth() {
                 localStorage.setItem('userLocation', profile.city || '');
             } else {
                 currentProfile = null;
-                // Oturum var ama profil yok (örn. OAuth sonrası henüz oluşmadı) - yine de giriş yapılmış kabul et
                 const name = session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email || 'Kullanıcı';
                 localStorage.setItem('isLoggedIn', 'true');
                 localStorage.setItem('userEmail', session.user.email || '');
                 localStorage.setItem('userName', name);
             }
         } else {
-            // Session yok - temizle
             currentUser = null;
             currentProfile = null;
         }
-        
-        // 3. UI'ı güncelle
+
+        // 5. UI'ı güncelle
         updateAuthUI();
-        
-        // 4. Auth değişikliklerini dinle
-        sb.auth.onAuthStateChange(handleAuthChange);
-        
-        console.log('✅ Auth.js: Başlatıldı', currentUser ? `(${currentProfile?.full_name})` : '(Misafir)');
-        
+
+        console.log('✅ Auth.js: Başlatıldı', currentUser ? `(${currentProfile?.full_name || currentUser.email})` : '(Misafir)');
+
     } catch (error) {
         console.error('❌ Auth.js başlatma hatası:', error);
     }

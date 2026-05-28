@@ -54,9 +54,10 @@
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"></noscript>
 
+    <!-- Supabase BLOCKING yükleniyor — OAuth callback için config.js'den önce hazır olmalı -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
     <script src="utils.js"></script>
-    <script defer src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script defer src="auth.js"></script>
     
@@ -767,16 +768,7 @@
 
         // window.onload artık gerekli değil - auth.js otomatik çalışıyor
 
-        // OAuth dönüşü: hash (#access_token) veya query (?code) temizle
-        // Asıl session exchange auth.js initAuth() içinde yapılıyor
-        document.addEventListener('DOMContentLoaded', function () {
-            const hash = window.location.hash;
-            const search = window.location.search;
-            if ((hash && hash.includes('access_token')) ||
-                (search && new URLSearchParams(search).has('code'))) {
-                history.replaceState(null, '', window.location.pathname);
-            }
-        });
+        // URL temizleme auth.js initAuth() içinde yapılıyor (exchangeCodeForSession sonrası)
     </script>
     <script>
     // PWA Service Worker Kaydı
