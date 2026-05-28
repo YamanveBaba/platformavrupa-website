@@ -65,8 +65,9 @@ async function isAdmin() {
     if (!sb) return false;
 
     try {
-        const authRes = await sb.auth.getUser();
-        const user = authRes?.data?.user;
+        // getSession() localStorage'dan okur — ağ isteği yok, anında sonuç
+        const { data: { session } } = await sb.auth.getSession();
+        const user = session?.user;
         if (!user) return false;
 
         const { data: profile } = await sb.from('profiles')

@@ -1212,8 +1212,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  // 8 saniye timeout — Supabase cevap vermezse sonsuz yükleme yerine hata göster
-  const timeout = new Promise(resolve => setTimeout(() => resolve('timeout'), 8000));
+  // 15 saniye timeout — Supabase cevap vermezse sonsuz yükleme yerine hata göster
+  const timeout = new Promise(resolve => setTimeout(() => resolve('timeout'), 15000));
 
   let isAdminUser = false;
   try {
