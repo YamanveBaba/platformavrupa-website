@@ -28,14 +28,33 @@ async function initAuth() {
     // supabase.js defer ile yüklendiyse config.js çalışırken sb null olabilir — burada yeniden dene
     if (!sb) {
         if (typeof supabase !== 'undefined' && typeof SUPABASE_URL !== 'undefined') {
-            sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+                auth: {
+                    detectSessionInUrl: true,
+                    persistSession: true,
+                    autoRefreshToken: true,
+                    storageKey: 'pa-auth-token'
+                }
+            });
             window.sb = sb;
         } else {
             console.error('❌ Auth.js: Supabase bağlantısı yok!');
             return;
         }
     }
-    
+
+    // Google/Facebook OAuth geri dönüşü: URL'de ?code= varsa session exchange yap (PKCE flow)
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        if (code) {
+            await sb.auth.exchangeCodeForSession(code);
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    } catch(e) {
+        console.warn('OAuth code exchange:', e.message);
+    }
+
     try {
         // 1. Mevcut session'ı kontrol et
         const { data: { session }, error } = await sb.auth.getSession();

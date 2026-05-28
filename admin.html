@@ -1196,24 +1196,27 @@ let currentSection = 'dashboard';
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 function showAuthError(msg) {
   document.getElementById('authGate').innerHTML = `
-    <div style="text-align:center;padding:40px">
+    <div style="text-align:center;padding:40px;max-width:360px">
       <i class="fa-solid fa-lock" style="font-size:48px;color:var(--danger);display:block;margin-bottom:16px"></i>
       <h2 style="font-family:'Bricolage Grotesque',sans-serif;margin-bottom:8px">Erişim Engellendi</h2>
       <p style="color:var(--text-muted);margin-bottom:8px">${msg}</p>
       <p style="color:var(--text-muted);font-size:12px;margin-bottom:24px">Giriş yapmak için <a href="login.html" style="color:var(--accent)">buraya tıklayın</a>.</p>
-      <a href="index.html" class="btn btn-primary">Ana Sayfaya Dön</a>
+      <div style="display:flex;gap:10px;justify-content:center">
+        <a href="login.html" class="btn btn-primary">Giriş Yap</a>
+        <button onclick="location.reload()" class="btn btn-ghost">Yenile</button>
+      </div>
     </div>`;
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // sb yoksa (supabase CDN yüklenemedi) → kısa mesaj ver
+  // sb yoksa config.js henüz supabase'i bulamadı — sayfayı yenile
   if (!sb) {
-    showAuthError('Bağlantı kurulamadı. Sayfayı yenileyin.');
+    showAuthError('Bağlantı kurulamadı — sayfayı yenileyin veya giriş yapın.');
     return;
   }
 
-  // 15 saniye timeout — Supabase cevap vermezse sonsuz yükleme yerine hata göster
-  const timeout = new Promise(resolve => setTimeout(() => resolve('timeout'), 15000));
+  // 5 saniye timeout — profilsorgusundan cevap gelmezse hata göster
+  const timeout = new Promise(resolve => setTimeout(() => resolve('timeout'), 5000));
 
   let isAdminUser = false;
   try {

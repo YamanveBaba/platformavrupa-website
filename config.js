@@ -47,7 +47,14 @@ const API_KEYS = {
 let sb = null;
 
 if (typeof supabase !== 'undefined') {
-    sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+        auth: {
+            detectSessionInUrl: true,
+            persistSession: true,
+            autoRefreshToken: true,
+            storageKey: 'pa-auth-token'
+        }
+    });
     console.log("✅ Config.js: Supabase bağlantısı hazır");
 } else {
     console.error("❌ HATA: Supabase kütüphanesi yüklenmemiş!");

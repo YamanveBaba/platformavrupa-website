@@ -767,10 +767,14 @@
 
         // window.onload artık gerekli değil - auth.js otomatik çalışıyor
 
-        // OAuth dönüşü sonrasında URL'deki hash parametrelerini temizle
+        // OAuth dönüşü: hash (#access_token) veya query (?code) temizle
+        // Asıl session exchange auth.js initAuth() içinde yapılıyor
         document.addEventListener('DOMContentLoaded', function () {
-            if (window.location.hash && window.location.hash.includes('access_token')) {
-                history.replaceState(null, '', window.location.pathname + window.location.search);
+            const hash = window.location.hash;
+            const search = window.location.search;
+            if ((hash && hash.includes('access_token')) ||
+                (search && new URLSearchParams(search).has('code'))) {
+                history.replaceState(null, '', window.location.pathname);
             }
         });
     </script>
