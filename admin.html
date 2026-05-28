@@ -647,6 +647,7 @@ textarea.form-control { resize: vertical; min-height: 100px; }
         <a class="nav-item" onclick="goto('health')"><i class="icon fa-solid fa-heart-pulse"></i> Sağlık Turizmi</a>
         <a class="nav-item" onclick="goto('academy')"><i class="icon fa-solid fa-graduation-cap"></i> Akademi</a>
         <a class="nav-item" onclick="goto('market')"><i class="icon fa-solid fa-basket-shopping"></i> Market & Katalog</a>
+        <a class="nav-item" onclick="goto('silayolu')"><i class="icon fa-solid fa-road"></i> Sıla Yolu</a>
 
         <div class="nav-section-label">Sistem</div>
         <a class="nav-item" onclick="goto('settings')"><i class="icon fa-solid fa-gear"></i> Ayarlar</a>
@@ -1068,6 +1069,50 @@ textarea.form-control { resize: vertical; min-height: 100px; }
           </div>
         </div>
 
+        <!-- ══ SILA YOLU ══════════════════════════════════ -->
+        <div class="section" id="s-silayolu">
+          <div class="grid-2 mb-16">
+
+            <!-- Panel A: Yol Raporları -->
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title"><i class="fa-solid fa-triangle-exclamation" style="color:var(--warning)"></i> Yol Raporları</span>
+                <div style="display:flex;gap:8px">
+                  <select class="form-control" style="width:120px;padding:6px 10px;font-size:12px" id="roadReportFilter" onchange="loadRoadReports()">
+                    <option value="">Tüm Ülkeler</option>
+                    <option value="Türkiye">Türkiye</option>
+                    <option value="Bulgaristan">Bulgaristan</option>
+                    <option value="Sırbistan">Sırbistan</option>
+                    <option value="Avusturya">Avusturya</option>
+                    <option value="Macaristan">Macaristan</option>
+                    <option value="Romanya">Romanya</option>
+                    <option value="Almanya">Almanya</option>
+                    <option value="Belçika">Belçika</option>
+                    <option value="Hollanda">Hollanda</option>
+                    <option value="Fransa">Fransa</option>
+                  </select>
+                  <button class="btn btn-ghost btn-sm" onclick="loadRoadReports()"><i class="fa-solid fa-rotate"></i></button>
+                </div>
+              </div>
+              <div id="roadReportsWrap" style="max-height:65vh;overflow-y:auto">
+                <div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><p>Yükleniyor...</p></div>
+              </div>
+            </div>
+
+            <!-- Panel B: Sınır Bildirimleri -->
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title"><i class="fa-solid fa-clock-rotate-left" style="color:var(--accent)"></i> Sınır Bildirimleri <small style="font-size:11px;color:var(--text-muted)">(Son 48 saat)</small></span>
+                <button class="btn btn-ghost btn-sm" onclick="loadBorderReports()"><i class="fa-solid fa-rotate"></i></button>
+              </div>
+              <div id="borderReportsWrap" style="max-height:65vh;overflow-y:auto">
+                <div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><p>Yükleniyor...</p></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
         <!-- ══ SETTINGS ════════════════════════════════════ -->
         <div class="section" id="s-settings">
           <div class="card mb-16">
@@ -1138,12 +1183,12 @@ textarea.form-control { resize: vertical; min-height: 100px; }
 
 <script>
 // ─── GLOBALS ──────────────────────────────────────────────────────────────────
-const SECTIONS = ['dashboard','approval','listings','announcements','haberler','messages','members','trips','health','academy','market','settings'];
+const SECTIONS = ['dashboard','approval','listings','announcements','haberler','messages','members','trips','health','academy','market','silayolu','settings'];
 const PAGE_TITLES = {
   dashboard: 'Genel Bakış', approval: 'İlan Onayı', listings: 'Tüm İlanlar',
   announcements: 'Duyurular', haberler: 'Haber Kuyruğu', messages: 'Sohbet & Yorumlar',
   members: 'Üye Yönetimi', trips: 'Yolculuk & Kargo', health: 'Sağlık Turizmi',
-  academy: 'Akademi', market: 'Market & Katalog', settings: 'Ayarlar'
+  academy: 'Akademi', market: 'Market & Katalog', silayolu: 'Sıla Yolu Yönetimi', settings: 'Ayarlar'
 };
 let pendingApprovals = [];
 let currentSection = 'dashboard';
@@ -1211,6 +1256,7 @@ function goto(section) {
     health: () => { loadHealthLeads(); loadHealthClinics(); },
     academy: loadAcademy,
     market: loadCatalogs,
+    silayolu: loadSilayolu,
   };
   loaders[section]?.();
 }
@@ -1959,7 +2005,8 @@ async function loadMembers() {
       <td><span class="badge badge-${u.role === 'admin' ? 'danger' : u.role === 'moderator' ? 'warning' : 'muted'}">${u.role || 'user'}</span></td>
       <td style="font-family:'JetBrains Mono',monospace;font-size:11px">${relTime(u.created_at)}</td>
       <td style="text-align:right">
-        <button class="btn btn-ghost btn-sm" onclick="changeRole('${u.id}', '${u.role}')"><i class="fa-solid fa-user-gear"></i></button>
+        <button class="btn btn-ghost btn-sm" onclick="viewMember('${u.id}')"><i class="fa-solid fa-eye"></i></button>
+        <button class="btn btn-ghost btn-sm" onclick="changeRole('${u.id}', '${u.role}')" style="margin-left:4px"><i class="fa-solid fa-user-gear"></i></button>
         <button class="btn btn-danger btn-sm btn-icon" onclick="banUser('${u.id}')" style="margin-left:4px"><i class="fa-solid fa-ban"></i></button>
       </td>
     </tr>`).join('');
@@ -1988,6 +2035,70 @@ async function banUser(id) {
   await sb.from('profiles').update({ banned: true }).eq('id', id);
   toast('Kullanıcı yasaklandı', 'warning');
   loadMembers();
+}
+
+// ─── MEMBER DETAIL ────────────────────────────────────────────────────────────
+async function viewMember(id) {
+  const [profileRes, listingRes] = await Promise.all([
+    sb.from('profiles').select('*').eq('id', id).single(),
+    sb.from('listings').select('id,status').eq('user_id', id)
+  ]);
+  const u = profileRes.data;
+  if (!u) { toast('Kullanıcı bulunamadı', 'error'); return; }
+  const listings = listingRes.data || [];
+  const aktif = listings.filter(l => l.status === 'active').length;
+  const bekleyen = listings.filter(l => l.status === 'pending').length;
+  const pasif = listings.filter(l => l.status === 'inactive' || l.status === 'rejected').length;
+  const rolBadge = u.role === 'admin' ? 'badge-danger' : u.role === 'moderator' ? 'badge-warning' : 'badge-muted';
+  Swal.fire({
+    title: '',
+    html: `
+      <div style="text-align:left">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px">
+          <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(u.full_name||'U')}&background=2563EB&color=fff&size=56" style="width:56px;height:56px;border-radius:50%">
+          <div>
+            <div style="font-size:17px;font-weight:700;color:var(--text-primary)">${escHtml(u.full_name||'—')}</div>
+            <div style="font-size:12px;color:var(--text-muted)">${escHtml(u.email||'')}</div>
+            <span class="badge ${rolBadge}" style="margin-top:4px">${u.role||'user'}</span>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px">
+          <div style="background:var(--bg-elevated);border-radius:8px;padding:10px 14px">
+            <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px">Ülke / Şehir</div>
+            <div style="margin-top:4px;font-size:13px">${escHtml(u.country||'—')} / ${escHtml(u.city||'—')}</div>
+          </div>
+          <div style="background:var(--bg-elevated);border-radius:8px;padding:10px 14px">
+            <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px">Üyelik Tarihi</div>
+            <div style="margin-top:4px;font-size:13px">${u.created_at ? new Date(u.created_at).toLocaleDateString('tr-TR') : '—'}</div>
+          </div>
+          <div style="background:var(--bg-elevated);border-radius:8px;padding:10px 14px">
+            <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px">Telefon</div>
+            <div style="margin-top:4px;font-size:13px">${escHtml(u.phone||'—')}</div>
+          </div>
+          <div style="background:var(--bg-elevated);border-radius:8px;padding:10px 14px">
+            <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px">Doğrulama</div>
+            <div style="margin-top:4px;font-size:13px">${escHtml(u.verification_method||'—')}</div>
+          </div>
+        </div>
+        <div style="background:var(--bg-elevated);border-radius:8px;padding:10px 14px;margin-bottom:18px">
+          <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">İlanlar</div>
+          <div style="display:flex;gap:16px;font-size:13px">
+            <span style="color:#10B981">✅ ${aktif} Aktif</span>
+            <span style="color:#F59E0B">⏳ ${bekleyen} Bekliyor</span>
+            <span style="color:var(--text-muted)">❌ ${pasif} Pasif</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button onclick="changeRole('${u.id}','${u.role||'user'}');Swal.close()" class="btn btn-ghost btn-sm"><i class="fa-solid fa-user-gear"></i> Rol Değiştir</button>
+          <button onclick="banUser('${u.id}');Swal.close()" class="btn btn-danger btn-sm"><i class="fa-solid fa-ban"></i> Yasakla</button>
+        </div>
+      </div>`,
+    showConfirmButton: false,
+    showCloseButton: true,
+    background: 'var(--bg-card)',
+    color: 'var(--text-primary)',
+    width: '480px',
+  });
 }
 
 // ─── TRIPS ────────────────────────────────────────────────────────────────────
@@ -2213,6 +2324,111 @@ async function deleteCatalog(id) {
   await sb.from('market_catalogs').delete().eq('id', id);
   toast('Katalog silindi', 'success');
   loadCatalogs();
+}
+
+// ─── SILA YOLU ────────────────────────────────────────────────────────────────
+function loadSilayolu() {
+  loadRoadReports();
+  loadBorderReports();
+}
+
+async function loadRoadReports() {
+  const wrap = document.getElementById('roadReportsWrap');
+  wrap.innerHTML = '<div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><p>Yükleniyor...</p></div>';
+  const filterUlke = document.getElementById('roadReportFilter')?.value;
+
+  let query = sb.from('road_reports')
+    .select('id,report_type,description,country,city,reporter_name,expires_at,created_at')
+    .order('created_at', { ascending: false })
+    .limit(60);
+  if (filterUlke) query = query.eq('country', filterUlke);
+
+  const { data, error } = await query;
+
+  if (error || !data?.length) {
+    wrap.innerHTML = '<div class="empty-state"><i class="fa-solid fa-map-location-dot"></i><p>Yol raporu yok</p></div>';
+    return;
+  }
+
+  const tipRenk = { trafik: '#F59E0B', kaza: '#EF4444', yol_kapali: '#DC2626', denetim: '#8B5CF6', diger: '#64748B' };
+  const tipLabel = { trafik: 'Trafik', kaza: 'Kaza', yol_kapali: 'Yol Kapalı', denetim: 'Denetim', diger: 'Diğer' };
+
+  wrap.innerHTML = `<div class="table-wrap"><table>
+    <thead><tr>
+      <th>Tür</th><th>Konum</th><th>Açıklama</th><th>Rapor Eden</th><th>Süre Bitiş</th><th style="text-align:right">İşlem</th>
+    </tr></thead>
+    <tbody>
+    ${data.map(r => {
+      const renk = tipRenk[r.report_type] || '#64748B';
+      const tip = tipLabel[r.report_type] || escHtml(r.report_type || '—');
+      const expired = r.expires_at && new Date(r.expires_at) < new Date();
+      return `<tr style="${expired ? 'opacity:.5' : ''}">
+        <td><span class="badge" style="background:${renk}22;color:${renk};border:1px solid ${renk}44">${tip}</span></td>
+        <td><strong>${escHtml(r.country||'—')}</strong>${r.city ? ` / ${escHtml(r.city)}` : ''}</td>
+        <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(r.description||'—')}</td>
+        <td style="font-size:11px;color:var(--text-muted)">${escHtml(r.reporter_name||'Anonim')}</td>
+        <td style="font-size:11px;color:${expired ? 'var(--danger)' : 'var(--text-muted)'}">${r.expires_at ? new Date(r.expires_at).toLocaleDateString('tr-TR') : '—'}</td>
+        <td style="text-align:right">
+          <button class="btn btn-danger btn-sm btn-icon" onclick="deleteRoadReport(${r.id})"><i class="fa-solid fa-trash"></i></button>
+        </td>
+      </tr>`;
+    }).join('')}
+    </tbody></table></div>`;
+}
+
+async function deleteRoadReport(id) {
+  if (!confirm('Yol raporu silinsin mi?')) return;
+  await sb.from('road_reports').delete().eq('id', id);
+  toast('Rapor silindi', 'success');
+  loadRoadReports();
+}
+
+async function loadBorderReports() {
+  const wrap = document.getElementById('borderReportsWrap');
+  wrap.innerHTML = '<div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><p>Yükleniyor...</p></div>';
+
+  const cutoff = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
+  const { data, error } = await sb.from('sinir_bildirimleri')
+    .select('id,kapi_id,bekleme_dk,yon,kullanici_notu,created_at')
+    .gte('created_at', cutoff)
+    .order('created_at', { ascending: false })
+    .limit(100);
+
+  if (error || !data?.length) {
+    wrap.innerHTML = '<div class="empty-state"><i class="fa-solid fa-border-all"></i><p>Son 48 saatte bildirim yok</p></div>';
+    return;
+  }
+
+  wrap.innerHTML = `<div class="table-wrap"><table>
+    <thead><tr>
+      <th>Sınır Kapısı</th><th>Bekleme</th><th>Yön</th><th>Not</th><th>Zaman</th><th style="text-align:right">İşlem</th>
+    </tr></thead>
+    <tbody>
+    ${data.map(b => {
+      const anormal = b.bekleme_dk > 300;
+      const yon = b.yon === 'cikis' ? '🟠 Çıkış (TR→Avr)' : '🔵 Giriş (Avr→TR)';
+      return `<tr>
+        <td><strong>${escHtml(b.kapi_id||'—')}</strong></td>
+        <td style="color:${anormal ? '#EF4444' : 'var(--text-primary)'}">
+          ${b.bekleme_dk != null ? b.bekleme_dk + ' dk' : '—'}
+          ${anormal ? ' ⚠️' : ''}
+        </td>
+        <td style="font-size:12px">${yon}</td>
+        <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px;color:var(--text-muted)">${escHtml(b.kullanici_notu||'—')}</td>
+        <td style="font-size:11px;color:var(--text-muted)">${relTime(b.created_at)}</td>
+        <td style="text-align:right">
+          <button class="btn btn-danger btn-sm btn-icon" onclick="deleteBorderReport(${b.id})"><i class="fa-solid fa-trash"></i></button>
+        </td>
+      </tr>`;
+    }).join('')}
+    </tbody></table></div>`;
+}
+
+async function deleteBorderReport(id) {
+  if (!confirm('Bildirim silinsin mi?')) return;
+  await sb.from('sinir_bildirimleri').delete().eq('id', id);
+  toast('Bildirim silindi', 'success');
+  loadBorderReports();
 }
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────

@@ -173,7 +173,14 @@
 </script>
     <style>
         html { scroll-behavior: smooth; scroll-padding-top: 100px; }
-        body { background-color: #fafafa; color: #1d1d1f; overflow-x: hidden; }
+        body { background-color: #F1F5F9; color: #1d1d1f; overflow-x: hidden; }
+        /* Hero */
+        .hero-section { background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%); }
+        .hero-stat-card { background: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.12); border-radius: 1rem; padding: 1rem; text-align: center; }
+        /* Section başlıkları */
+        .section-label { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; }
+        .section-label-bar { width: 3px; height: 16px; border-radius: 2px; flex-shrink: 0; }
+        .section-label-text { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; color: #64748b; text-transform: uppercase; }
         .glass-panel { background: rgba(255,255,255,0.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,0,0,0.06); }
         .hover-card { transition: all 0.3s ease; border: 1px solid rgba(0,0,0,0.08); background: white; }
         .hover-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
@@ -240,12 +247,67 @@
         </div>
     </nav>
 
-    <main class="pt-24 pb-24 px-4">
+    <!-- HERO -->
+    <section class="hero-section pt-28 pb-0">
+        <div class="max-w-5xl mx-auto px-4 py-12 md:py-16">
+            <div class="flex flex-col md:flex-row items-center gap-10">
+                <div class="flex-1 text-center md:text-left">
+                    <div class="inline-flex items-center gap-2 bg-white/10 rounded-full px-4 py-1.5 text-white/80 text-xs font-semibold mb-5">
+                        <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                        Belçika · Almanya · Hollanda · Avusturya · İsviçre · Fransa
+                    </div>
+                    <h1 class="text-4xl md:text-5xl font-display font-black text-white leading-tight mb-4">
+                        Gurbetçilerin<br>
+                        <span style="color:#818cf8">Dijital Merkezi</span>
+                    </h1>
+                    <p class="text-slate-300 text-base md:text-lg mb-8 leading-relaxed max-w-md">
+                        İş ilanları, sıla yolu bekleme süreleri, market fiyatları ve daha fazlası — tek platformda, ücretsiz.
+                    </p>
+                    <div class="flex flex-wrap justify-center md:justify-start gap-3">
+                        <a href="ilan_giris.html" class="bg-white text-slate-900 font-bold px-6 py-3 rounded-xl hover:bg-slate-100 transition shadow-lg shadow-black/20 text-sm">
+                            <i class="fa-solid fa-plus mr-2"></i>İlan Ver
+                        </a>
+                        <a href="ilanlar.html" class="border border-white/25 text-white font-semibold px-6 py-3 rounded-xl hover:bg-white/10 transition text-sm">
+                            İlanları Keşfet
+                        </a>
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-3 w-full md:w-64 shrink-0">
+                    <div class="hero-stat-card col-span-3 flex items-center gap-4 px-5">
+                        <i class="fa-solid fa-briefcase text-indigo-300 text-2xl"></i>
+                        <div>
+                            <div class="text-2xl font-black text-white" id="stat-ilanlar">213K+</div>
+                            <div class="text-white/50 text-xs">Aktif İş İlanı</div>
+                        </div>
+                    </div>
+                    <div class="hero-stat-card">
+                        <div class="text-xl font-black text-white" id="stat-uyeler">—</div>
+                        <div class="text-white/50 text-[10px] mt-0.5">Üye</div>
+                    </div>
+                    <div class="hero-stat-card">
+                        <div class="text-xl font-black text-white">6</div>
+                        <div class="text-white/50 text-[10px] mt-0.5">Ülke</div>
+                    </div>
+                    <div class="hero-stat-card">
+                        <div class="text-xl font-black text-white">
+                            <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse inline-block mr-1"></span>
+                        </div>
+                        <div class="text-white/50 text-[10px] mt-0.5">Canlı Sınır</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="height:50px;overflow:hidden;margin-top:-1px;">
+            <svg viewBox="0 0 1440 50" preserveAspectRatio="none" style="width:100%;height:100%;display:block;fill:#F1F5F9;"><path d="M0,25 C360,50 1080,0 1440,25 L1440,50 L0,50 Z"/></svg>
+        </div>
+    </section>
+
+    <main class="pt-6 pb-24 px-4">
         <div class="max-w-5xl mx-auto space-y-12 md:space-y-16">
 
             <!-- Duyurular -->
             <div>
-                <p class="text-xs font-medium uppercase tracking-widest text-gray-400 mb-3">Duyurular</p>
+                <div class="section-label"><span class="section-label-bar" style="background:#e63946"></span><span class="section-label-text">Duyurular</span></div>
                 <a href="duyurular.html" class="group flex items-center gap-4 bg-white border border-gray-100 rounded-2xl p-5 hover:-translate-y-0.5 transition-all duration-200 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_12px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_24px_rgba(99,102,241,0.1)]">
                     <div class="w-11 h-11 rounded-2xl bg-gray-100 group-hover:bg-indigo-600 flex items-center justify-center shrink-0 transition-all duration-200">
                         <i class="fa-solid fa-bullhorn text-gray-500 group-hover:text-white text-base transition-colors duration-200"></i>
@@ -263,7 +325,7 @@
 
             <!-- İlanlar — Bento Grid -->
             <div>
-                <p class="text-xs font-medium uppercase tracking-widest text-gray-400 mb-3">İlanlar</p>
+                <div class="section-label"><span class="section-label-bar" style="background:#4f46e5"></span><span class="section-label-text">İlanlar</span></div>
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
                     <!-- Featured: İş İlanları — col-span-2 -->
                     <a href="is_vitrini.html" class="col-span-2 group bg-indigo-600 hover:bg-indigo-700 rounded-2xl p-6 flex items-center gap-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-200">
@@ -319,7 +381,7 @@
 
             <!-- Ekonomi & Finans -->
             <div>
-                <p class="text-xs font-medium uppercase tracking-widest text-gray-400 mb-3">Ekonomi & Finans</p>
+                <div class="section-label"><span class="section-label-bar" style="background:#059669"></span><span class="section-label-text">Ekonomi &amp; Finans</span></div>
                 <div class="grid grid-cols-2 gap-3">
                     <a href="market.html" class="group flex flex-col items-center gap-2 bg-white border border-gray-100 rounded-2xl p-5 hover:-translate-y-1 transition-all duration-200 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_12px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_24px_rgba(99,102,241,0.1)] text-center">
                         <div class="w-12 h-12 rounded-2xl bg-gray-100 group-hover:bg-indigo-600 flex items-center justify-center transition-all duration-200 mb-1">
@@ -340,7 +402,7 @@
 
             <!-- Yolculuk — Bento: Sıla Yolu Featured -->
             <div>
-                <p class="text-xs font-medium uppercase tracking-widest text-gray-400 mb-3">Yolculuk</p>
+                <div class="section-label"><span class="section-label-bar" style="background:#0ea5e9"></span><span class="section-label-text">Yolculuk</span></div>
                 <div class="space-y-3">
                     <!-- Featured: Sıla Yolu -->
                     <a href="sila_yolu.html" class="group block bg-slate-800 hover:bg-slate-750 rounded-2xl p-6 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-slate-200" style="background-color:#1e293b">
@@ -385,7 +447,7 @@
 
             <!-- Seyahat & Tatil -->
             <div>
-                <p class="text-xs font-medium uppercase tracking-widest text-gray-400 mb-3">Seyahat & Tatil</p>
+                <div class="section-label"><span class="section-label-bar" style="background:#f59e0b"></span><span class="section-label-text">Seyahat &amp; Tatil</span></div>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <a href="ucak_bileti.html" class="group flex flex-col items-center gap-2 bg-white border border-gray-100 rounded-2xl p-5 hover:-translate-y-1 transition-all duration-200 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_12px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_24px_rgba(99,102,241,0.1)] text-center">
                         <div class="w-12 h-12 rounded-2xl bg-gray-100 group-hover:bg-indigo-600 flex items-center justify-center transition-all duration-200 mb-1">
@@ -420,7 +482,7 @@
 
             <!-- Türkiye'de Tedavi -->
             <div>
-                <p class="text-xs font-medium uppercase tracking-widest text-gray-400 mb-3">Türkiye'de Tedavi</p>
+                <div class="section-label"><span class="section-label-bar" style="background:#e11d48"></span><span class="section-label-text">Türkiye'de Tedavi</span></div>
                 <a href="saglik_turizmi.html" class="group flex items-center gap-4 bg-white border border-gray-100 rounded-2xl p-5 hover:-translate-y-0.5 transition-all duration-200 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_12px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_24px_rgba(99,102,241,0.1)]">
                     <div class="w-11 h-11 rounded-2xl bg-gray-100 group-hover:bg-indigo-600 flex items-center justify-center shrink-0 transition-all duration-200">
                         <i class="fa-solid fa-heart-pulse text-gray-500 group-hover:text-white text-base transition-colors duration-200"></i>
@@ -435,7 +497,7 @@
 
             <!-- Bilgi & Rehberlik -->
             <div>
-                <p class="text-xs font-medium uppercase tracking-widest text-gray-400 mb-3">Bilgi & Rehberlik</p>
+                <div class="section-label"><span class="section-label-bar" style="background:#7c3aed"></span><span class="section-label-text">Bilgi &amp; Rehberlik</span></div>
                 <div class="grid grid-cols-2 gap-3">
                     <a href="hukuk_vitrini.html" class="group flex flex-col items-center gap-2 bg-white border border-gray-100 rounded-2xl p-5 hover:-translate-y-1 transition-all duration-200 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_12px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_24px_rgba(99,102,241,0.1)] text-center">
                         <div class="w-12 h-12 rounded-2xl bg-gray-100 group-hover:bg-indigo-600 flex items-center justify-center transition-all duration-200 mb-1">
@@ -476,7 +538,7 @@
     </main>
 
     <footer class="border-t border-gray-100 bg-white py-8 text-center text-gray-400 text-xs">
-        &copy; 2025 Platform Avrupa. Tüm hakları saklıdır.
+        &copy; 2026 Platform Avrupa. Tüm hakları saklıdır.
     </footer>
 
     <div id="universalModal" class="modal-overlay">
@@ -736,7 +798,22 @@
             if (window.location.hash && window.location.hash.includes('access_token')) {
                 history.replaceState(null, '', window.location.pathname + window.location.search);
             }
+            heroStatsCek();
         });
+
+        async function heroStatsCek() {
+            try {
+                if (!sb && typeof supabase !== 'undefined') {
+                    sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                }
+                if (!sb) return;
+                const { count } = await sb.from('profiles').select('id', { count: 'exact', head: true });
+                if (count) {
+                    const el = document.getElementById('stat-uyeler');
+                    if (el) el.textContent = count >= 1000 ? Math.floor(count / 1000) + 'K+' : count + '+';
+                }
+            } catch(e) { /* sessiz hata */ }
+        }
     </script>
     <script>
     // PWA Service Worker Kaydı

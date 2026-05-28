@@ -25,9 +25,15 @@ let currentProfile = null;   // Profiles tablosundan gelen profil
  * Auth sistemini başlatır - sayfa yüklendiğinde otomatik çağrılır
  */
 async function initAuth() {
+    // supabase.js defer ile yüklendiyse config.js çalışırken sb null olabilir — burada yeniden dene
     if (!sb) {
-        console.error('❌ Auth.js: Supabase bağlantısı yok!');
-        return;
+        if (typeof supabase !== 'undefined' && typeof SUPABASE_URL !== 'undefined') {
+            sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            window.sb = sb;
+        } else {
+            console.error('❌ Auth.js: Supabase bağlantısı yok!');
+            return;
+        }
     }
     
     try {
@@ -160,16 +166,16 @@ function updateAuthUI() {
         authButtons.innerHTML = `
             <div class="flex items-center gap-3">
                 <a href="profil.html" class="flex items-center gap-2 hover:opacity-80 transition">
-                    <img src="${avatarUrl}" alt="${sanitize(displayName)}" class="w-8 h-8 rounded-full border border-white/20">
-                    <span class="text-white font-bold text-sm hidden md:block">${sanitize(displayName)}</span>
+                    <img src="${avatarUrl}" alt="${sanitize(displayName)}" class="w-8 h-8 rounded-full border border-slate-200">
+                    <span class="text-gray-800 font-semibold text-sm hidden md:block">${sanitize(displayName)}</span>
                 </a>
-                <button onclick="signOut()" class="text-red-400 text-xs hover:text-red-300 ml-2" title="Çıkış Yap">
+                <button onclick="signOut()" class="text-slate-400 text-xs hover:text-red-500 ml-1 transition" title="Çıkış Yap">
                     <i class="fa-solid fa-right-from-bracket"></i>
                 </button>
             </div>`;
     } else {
         authButtons.innerHTML = `
-            <a href="login.html" class="text-sm font-bold text-white hover:text-indigo-400 transition">Giriş Yap</a>`;
+            <a href="login.html" class="text-sm font-semibold text-gray-600 hover:text-indigo-600 transition">Giriş Yap</a>`;
     }
     
     // Özel auth-check elementlerini güncelle

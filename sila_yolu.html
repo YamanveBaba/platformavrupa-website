@@ -742,30 +742,37 @@
     // ════════════════════════════════════════════════
     // SINIR KAPILARI — Supabase'den Gerçek Veri
     // ════════════════════════════════════════════════
+    let _secilenYon = 'giris';
+
     async function loadGates() {
         const container = document.getElementById('gatesList');
         container.innerHTML = '<div class="col-span-full text-center py-8 text-white/60"><i class="fa-solid fa-circle-notch fa-spin text-2xl"></i></div>';
 
-        // Son 2 saatin bildirimleri, kapi bazında ortalama bekleme
         const ikiSaatOnce = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
-        let raporlar = {};
+        let girisRaporlar = {};
+        let cikisRaporlar = {};
 
         try {
             const { data } = await sb
                 .from('sinir_bildirimleri')
-                .select('kapi, bekleme_dk, created_at')
+                .select('kapi, bekleme_dk, yon, created_at')
                 .gte('created_at', ikiSaatOnce)
                 .order('created_at', { ascending: false });
 
             if (data) {
                 data.forEach(r => {
-                    if (!raporlar[r.kapi]) raporlar[r.kapi] = [];
-                    raporlar[r.kapi].push(r);
+                    const yon = r.yon || 'giris';
+                    if (yon === 'cikis') {
+                        if (!cikisRaporlar[r.kapi]) cikisRaporlar[r.kapi] = [];
+                        cikisRaporlar[r.kapi].push(r);
+                    } else {
+                        if (!girisRaporlar[r.kapi]) girisRaporlar[r.kapi] = [];
+                        girisRaporlar[r.kapi].push(r);
+                    }
                 });
             }
         } catch(e) { /* Supabase yoksa boş devam */ }
 
-        // Google Maps bekleme verisi
         const googleWaits = {};
         try {
             const { data: gwData } = await sb
@@ -779,12 +786,20 @@
 
         container.innerHTML = '';
         KAPILER.forEach(kapi => {
-            const kayitlar = raporlar[kapi.id] || [];
-            const ortalama = kayitlar.length
-                ? Math.round(kayitlar.reduce((s, r) => s + r.bekleme_dk, 0) / kayitlar.length)
+            const girisKayitlar = girisRaporlar[kapi.id] || [];
+            const cikisKayitlar = cikisRaporlar[kapi.id] || [];
+            const girisOrtalama = girisKayitlar.length
+                ? Math.round(girisKayitlar.reduce((s, r) => s + r.bekleme_dk, 0) / girisKayitlar.length)
                 : null;
-            const sonRapor = kayitlar.length ? kayitlar[0] : null;
-            container.innerHTML += kapiKartiOlustur(kapi, ortalama, kayitlar.length, sonRapor, googleWaits[kapi.id] ?? null);
+            const cikisOrtalama = cikisKayitlar.length
+                ? Math.round(cikisKayitlar.reduce((s, r) => s + r.bekleme_dk, 0) / cikisKayitlar.length)
+                : null;
+            container.innerHTML += kapiKartiOlustur(
+                kapi,
+                girisOrtalama, girisKayitlar.length, girisKayitlar[0] || null,
+                cikisOrtalama, cikisKayitlar.length,
+                googleWaits[kapi.id] ?? null
+            );
         });
     }
 
@@ -796,18 +811,17 @@
         return          { renk: 'wait-black', metin: `${dk}+ dk`, emoji: '⚫' };
     }
 
-    function kapiKartiOlustur(kapi, ortalama, raporSayisi, sonRapor, googleDk = null) {
-        const gosterilecek = (ortalama !== null) ? ortalama : googleDk;
-        const b = beklemeSinifi(gosterilecek);
-        const kaynakEtiketi = (ortalama === null && googleDk !== null)
+    function kapiKartiOlustur(kapi, girisOrtalama, girisCount, sonRapor, cikisOrtalama, cikisCount, googleDk = null) {
+        const anaGosterilecek = (girisOrtalama !== null) ? girisOrtalama : googleDk;
+        const b = beklemeSinifi(anaGosterilecek);
+        const kaynakEtiketi = (girisOrtalama === null && googleDk !== null)
             ? `<span class="text-white/70 text-[10px] font-normal ml-1">📡 Google tahmini</span>`
             : '';
         const sonGuncelleme = sonRapor
             ? getTimeAgo(new Date(sonRapor.created_at)) + ' güncellendi'
             : 'Henüz bildirim yok';
-        const raporMetin = raporSayisi > 0
-            ? `${raporSayisi} kişi bildirdi`
-            : 'İlk bildirimi sen yap!';
+        const bg = beklemeSinifi(girisOrtalama !== null ? girisOrtalama : googleDk);
+        const bc = beklemeSinifi(cikisOrtalama);
 
         return `
         <div class="border-card">
@@ -826,9 +840,18 @@
                         ${kapi.acik ? 'Açık' : 'Kapalı'}
                     </span>
                 </div>
-                <p class="text-xs text-slate-400 mb-4">
-                    <i class="fa-solid fa-users mr-1"></i>${raporMetin}
-                </p>
+                <div class="grid grid-cols-2 gap-2 mb-4 text-sm">
+                    <div class="bg-blue-50 border border-blue-100 rounded-xl p-3">
+                        <div class="text-blue-700 font-bold text-[11px] mb-1">🔵 Giriş (Avr→TR)</div>
+                        <div class="font-black text-slate-800">${bg.emoji} ${bg.metin}</div>
+                        <div class="text-xs text-slate-400 mt-1">${girisCount > 0 ? girisCount + ' kişi bildirdi' : 'Bildirim yok'}</div>
+                    </div>
+                    <div class="bg-orange-50 border border-orange-100 rounded-xl p-3">
+                        <div class="text-orange-700 font-bold text-[11px] mb-1">🟠 Çıkış (TR→Avr)</div>
+                        <div class="font-black text-slate-800">${bc.emoji} ${bc.metin}</div>
+                        <div class="text-xs text-slate-400 mt-1">${cikisCount > 0 ? cikisCount + ' kişi bildirdi' : 'Bildirim yok'}</div>
+                    </div>
+                </div>
                 <div class="flex gap-2">
                     <button onclick="beklemeRaporla('${kapi.id}', '${kapi.isim}')"
                         class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl text-sm font-bold transition">
@@ -844,10 +867,22 @@
     }
 
     async function beklemeRaporla(kapiId, kapiIsim) {
+        _secilenYon = 'giris';
+
         const { value: dk } = await Swal.fire({
             title: `<i class="fa-solid fa-clock text-blue-500 mr-2"></i>${kapiIsim}`,
             html: `
-                <p class="text-slate-600 mb-4">Şu an kaç dakika bekleme var?</p>
+                <div class="flex gap-2 mb-4">
+                    <button type="button" id="yon-giris" onclick="setYon('giris')"
+                        class="flex-1 py-2 rounded-xl text-sm font-bold border-2 border-blue-500 bg-blue-500 text-white transition">
+                        🔵 Avrupa → Türkiye
+                    </button>
+                    <button type="button" id="yon-cikis" onclick="setYon('cikis')"
+                        class="flex-1 py-2 rounded-xl text-sm font-bold border-2 border-slate-200 bg-white text-slate-600 transition">
+                        🟠 Türkiye → Avrupa
+                    </button>
+                </div>
+                <p class="text-slate-600 mb-3 text-sm">Kaç dakika bekleme var?</p>
                 <div class="grid grid-cols-4 gap-2 mb-4" id="hizliSecim">
                     <button type="button" onclick="hizliSec(15)"  class="hizli-btn bg-green-100 text-green-800 py-2 rounded-xl font-bold text-sm hover:bg-green-200">15 dk</button>
                     <button type="button" onclick="hizliSec(30)"  class="hizli-btn bg-green-100 text-green-800 py-2 rounded-xl font-bold text-sm hover:bg-green-200">30 dk</button>
@@ -868,6 +903,15 @@
                 window.hizliSec = (val) => {
                     document.getElementById('swal-dk').value = val;
                 };
+                window.setYon = (yon) => {
+                    _secilenYon = yon;
+                    document.getElementById('yon-giris').className = yon === 'giris'
+                        ? 'flex-1 py-2 rounded-xl text-sm font-bold border-2 border-blue-500 bg-blue-500 text-white transition'
+                        : 'flex-1 py-2 rounded-xl text-sm font-bold border-2 border-slate-200 bg-white text-slate-600 transition';
+                    document.getElementById('yon-cikis').className = yon === 'cikis'
+                        ? 'flex-1 py-2 rounded-xl text-sm font-bold border-2 border-orange-500 bg-orange-500 text-white transition'
+                        : 'flex-1 py-2 rounded-xl text-sm font-bold border-2 border-slate-200 bg-white text-slate-600 transition';
+                };
             },
             preConfirm: () => {
                 const val = parseInt(document.getElementById('swal-dk').value);
@@ -885,12 +929,14 @@
             await sb.from('sinir_bildirimleri').insert([{
                 kapi: kapiId,
                 bekleme_dk: dk,
+                yon: _secilenYon,
                 created_at: new Date().toISOString()
             }]);
+            const yonMetin = _secilenYon === 'giris' ? 'Avrupa→Türkiye' : 'Türkiye→Avrupa';
             Swal.fire({
                 icon: 'success',
                 title: 'Teşekkürler!',
-                text: `${kapiIsim} için ${dk} dk bekleme bildirdiniz. Diğer yolcular size minnettar! 🙏`,
+                text: `${kapiIsim} (${yonMetin}) için ${dk} dk bekleme bildirdiniz. 🙏`,
                 timer: 2500,
                 showConfirmButton: false
             });
