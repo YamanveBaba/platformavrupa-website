@@ -635,7 +635,6 @@
         { id: 'derekoy',     isim: 'Dereköy',      ulke: 'Bulgaristan 🇧🇬', lat: 41.9741, lon: 27.4693, acik: true },
         { id: 'ipsala',      isim: 'İpsala',       ulke: 'Yunanistan 🇬🇷',  lat: 40.9269, lon: 26.3872, acik: true },
         { id: 'pazarkule',   isim: 'Pazarkule',    ulke: 'Yunanistan 🇬🇷',  lat: 41.7118, lon: 26.3314, acik: true },
-        { id: 'horgos',      isim: 'Horgoş',       ulke: 'Sırbistan/Macaristan 🇷🇸🇭🇺', lat: 46.1553, lon: 19.9869, acik: true },
     ];
 
     // ════════════════════════════════════════════════
@@ -773,14 +772,18 @@
             }
         } catch(e) { /* Supabase yoksa boş devam */ }
 
-        const googleWaits = {};
+        const googleGirisWaits = {};
+        const googleCikisWaits = {};
         try {
             const { data: gwData } = await sb
                 .from('border_wait_times')
-                .select('gate_slug, wait_mins')
+                .select('gate_slug, wait_mins, yon')
                 .order('checked_at', { ascending: false });
             if (gwData) gwData.forEach(r => {
-                if (!googleWaits[r.gate_slug]) googleWaits[r.gate_slug] = r.wait_mins;
+                if (r.yon === 'giris' && !googleGirisWaits[r.gate_slug])
+                    googleGirisWaits[r.gate_slug] = r.wait_mins;
+                else if (r.yon !== 'giris' && !googleCikisWaits[r.gate_slug])
+                    googleCikisWaits[r.gate_slug] = r.wait_mins;
             });
         } catch(e) {}
 
@@ -798,7 +801,8 @@
                 kapi,
                 girisOrtalama, girisKayitlar.length, girisKayitlar[0] || null,
                 cikisOrtalama, cikisKayitlar.length,
-                googleWaits[kapi.id] ?? null
+                googleGirisWaits[kapi.id] ?? null,
+                googleCikisWaits[kapi.id] ?? null
             );
         });
     }
@@ -811,21 +815,21 @@
         return          { renk: 'wait-black', metin: `${dk}+ dk`, emoji: '⚫' };
     }
 
-    function kapiKartiOlustur(kapi, girisOrtalama, girisCount, sonRapor, cikisOrtalama, cikisCount, googleDk = null) {
-        const anaGosterilecek = (girisOrtalama !== null) ? girisOrtalama : googleDk;
+    function kapiKartiOlustur(kapi, girisOrtalama, girisCount, sonRapor, cikisOrtalama, cikisCount, googleGirisDk = null, googleCikisDk = null) {
+        const girisGosterilecek = girisOrtalama !== null ? girisOrtalama : googleGirisDk;
+        const cikisGosterilecek = cikisOrtalama !== null ? cikisOrtalama : googleCikisDk;
+        const bg = beklemeSinifi(girisGosterilecek);
+        const bc = beklemeSinifi(cikisGosterilecek);
+        const anaGosterilecek = girisGosterilecek ?? cikisGosterilecek;
         const b = beklemeSinifi(anaGosterilecek);
-        const kaynakEtiketi = (girisOrtalama === null && googleDk !== null)
+        const kaynakEtiketi = (girisOrtalama === null && googleGirisDk !== null)
             ? `<span class="text-white/70 text-[10px] font-normal ml-1">📡 Google tahmini</span>`
             : '';
         const sonGuncelleme = sonRapor
             ? getTimeAgo(new Date(sonRapor.created_at)) + ' güncellendi'
             : 'Henüz bildirim yok';
-        const girisGosterilecek = girisOrtalama !== null ? girisOrtalama : googleDk;
-        const cikisGosterilecek = cikisOrtalama !== null ? cikisOrtalama : googleDk;
-        const bg = beklemeSinifi(girisGosterilecek);
-        const bc = beklemeSinifi(cikisGosterilecek);
-        const girisTahmini = girisOrtalama === null && googleDk !== null;
-        const cikisTahmini = cikisOrtalama === null && googleDk !== null;
+        const girisTahmini = girisOrtalama === null && googleGirisDk !== null;
+        const cikisTahmini = cikisOrtalama === null && googleCikisDk !== null;
 
         return `
         <div class="border-card">

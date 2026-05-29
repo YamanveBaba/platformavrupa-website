@@ -1,47 +1,65 @@
 // Supabase Edge Function: sinir-bekleme
 // Google Maps Directions API ile sınır kapılarındaki anlık trafik süresi ölçer.
+// Her kapı için hem giriş (Avrupa→TR) hem çıkış (TR→Avrupa) yönü ayrı ölçülür.
 // Çağrı: POST /functions/v1/sinir-bekleme
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const GOOGLE_KEY = Deno.env.get('GOOGLE_MAPS_API_KEY')!;
 
-// Her kapı için: Turkish side origin (yaklaşık 8 km önce) → diğer taraf destination (5 km sonra)
+// Her kapı için TR tarafı ve Avrupa tarafı koordinatları
+// cikis: TR→Avrupa (gurbetçi tatilden dönerken Türkiye'den çıkış)
+// giris: Avrupa→TR (gurbetçi tatile giderken Türkiye'ye giriş)
 // Baseline: trafik yokken beklenen normal seyahat süresi (saniye)
 const KAPILER = [
   {
     slug: 'kapikule',
     isim: 'Kapıkule',
-    origin: '41.7200,26.6400',    // E80 Edirne yakını, TR tarafı
-    dest:   '41.7550,26.4900',    // Bulgarian A4, BG tarafı
-    baseline: 660,                 // ~11 dk normal süre
+    cikis_origin:   '41.7200,26.6400',  // E80 Edirne yakını, TR tarafı
+    cikis_dest:     '41.7550,26.4900',  // Bulgarian A4, BG tarafı
+    cikis_baseline: 660,
+    giris_origin:   '41.7550,26.4900',  // Bulgarian A4, BG tarafı
+    giris_dest:     '41.7200,26.6400',  // E80 Edirne yakını, TR tarafı
+    giris_baseline: 660,
   },
   {
     slug: 'hamzabeyli',
     isim: 'Hamzabeyli',
-    origin: '41.7000,26.7200',    // TR D550 yaklaşımı
-    dest:   '41.7300,26.5500',    // BG tarafı Lesovo sonrası
-    baseline: 600,
+    cikis_origin:   '41.7000,26.7200',  // TR D550 yaklaşımı
+    cikis_dest:     '41.7300,26.5500',  // BG tarafı Lesovo sonrası
+    cikis_baseline: 600,
+    giris_origin:   '41.7300,26.5500',
+    giris_dest:     '41.7000,26.7200',
+    giris_baseline: 600,
   },
   {
     slug: 'ipsala',
     isim: 'İpsala',
-    origin: '40.9200,26.4600',    // TR D110 İpsala öncesi
-    dest:   '40.9150,26.2800',    // GR Kipi sonrası
-    baseline: 600,
+    cikis_origin:   '40.9200,26.4600',  // TR D110 İpsala öncesi
+    cikis_dest:     '40.9150,26.2800',  // GR Kipi sonrası
+    cikis_baseline: 600,
+    giris_origin:   '40.9150,26.2800',
+    giris_dest:     '40.9200,26.4600',
+    giris_baseline: 600,
   },
   {
     slug: 'derekoy',
     isim: 'Dereköy',
-    origin: '41.9600,27.5100',    // TR tarafı yaklaşım
-    dest:   '42.0050,27.3600',    // BG Malko Tarnovo sonrası
-    baseline: 720,
+    cikis_origin:   '41.9600,27.5100',  // TR tarafı yaklaşım
+    cikis_dest:     '42.0050,27.3600',  // BG Malko Tarnovo sonrası
+    cikis_baseline: 720,
+    giris_origin:   '42.0050,27.3600',
+    giris_dest:     '41.9600,27.5100',
+    giris_baseline: 720,
   },
   {
     slug: 'pazarkule',
     isim: 'Pazarkule',
-    origin: '41.6950,26.4200',    // TR Edirne güneyi
-    dest:   '41.7450,26.2700',    // GR Kastanies sonrası
-    baseline: 660,
+    cikis_origin:   '41.6950,26.4200',  // TR Edirne güneyi
+    cikis_dest:     '41.7450,26.2700',  // GR Kastanies sonrası
+    cikis_baseline: 660,
+    giris_origin:   '41.7450,26.2700',
+    giris_dest:     '41.6950,26.4200',
+    giris_baseline: 660,
   },
 ];
 
@@ -59,7 +77,6 @@ async function googleSureCek(origin: string, dest: string): Promise<number | nul
       return null;
     }
     const leg = data.routes?.[0]?.legs?.[0];
-    // duration_in_traffic varsa kullan, yoksa duration
     return leg?.duration_in_traffic?.value ?? leg?.duration?.value ?? null;
   } catch (e) {
     console.error('Fetch hata:', e);
@@ -73,23 +90,50 @@ Deno.serve(async (req) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   );
 
-  const sonuclar: Array<{ slug: string; wait: number | null; travel: number | null }> = [];
+  const sonuclar: Array<{
+    slug: string;
+    cikis_wait: number | null;
+    giris_wait: number | null;
+  }> = [];
 
   for (const kapi of KAPILER) {
-    const travel = await googleSureCek(kapi.origin, kapi.dest);
-    const wait = travel !== null ? Math.max(0, Math.round((travel - kapi.baseline) / 60)) : null;
-    sonuclar.push({ slug: kapi.slug, wait, travel });
+    // Çıkış: TR → Avrupa
+    const cikisTravel = await googleSureCek(kapi.cikis_origin, kapi.cikis_dest);
+    const cikisWait = cikisTravel !== null
+      ? Math.max(0, Math.round((cikisTravel - kapi.cikis_baseline) / 60))
+      : null;
 
-    // Upsert: her kapı için tek satır, her çağrıda güncellenir
+    await new Promise(r => setTimeout(r, 300));
+
+    // Giriş: Avrupa → TR
+    const girisTravel = await googleSureCek(kapi.giris_origin, kapi.giris_dest);
+    const girisWait = girisTravel !== null
+      ? Math.max(0, Math.round((girisTravel - kapi.giris_baseline) / 60))
+      : null;
+
+    sonuclar.push({ slug: kapi.slug, cikis_wait: cikisWait, giris_wait: girisWait });
+
+    // Çıkış upsert
     await sb.from('border_wait_times').upsert({
-      gate_slug:    kapi.slug,
-      gate_name:    kapi.isim,
-      wait_mins:    wait,
-      travel_secs:  travel,
-      checked_at:   new Date().toISOString(),
-    }, { onConflict: 'gate_slug' });
+      gate_slug:   kapi.slug,
+      gate_name:   kapi.isim,
+      yon:         'cikis',
+      wait_mins:   cikisWait,
+      travel_secs: cikisTravel,
+      checked_at:  new Date().toISOString(),
+    }, { onConflict: 'gate_slug,yon' });
 
-    // Google rate limit için kısa bekleme
+    // Giriş upsert
+    await sb.from('border_wait_times').upsert({
+      gate_slug:   kapi.slug,
+      gate_name:   kapi.isim,
+      yon:         'giris',
+      wait_mins:   girisWait,
+      travel_secs: girisTravel,
+      checked_at:  new Date().toISOString(),
+    }, { onConflict: 'gate_slug,yon' });
+
+    // Google rate limit için bekleme
     await new Promise(r => setTimeout(r, 300));
   }
 
