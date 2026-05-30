@@ -744,7 +744,9 @@
     let _secilenYon = 'giris';
 
     async function loadGates() {
+      try {
         const container = document.getElementById('gatesList');
+        if (!container) return;
         container.innerHTML = '<div class="col-span-full text-center py-8 text-white/60"><i class="fa-solid fa-circle-notch fa-spin text-2xl"></i></div>';
 
         const ikiSaatOnce = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
@@ -805,6 +807,9 @@
                 googleCikisWaits[kapi.id] ?? null
             );
         });
+      } catch(e) {
+        console.warn('loadGates hata:', e);
+      }
     }
 
     function beklemeSinifi(dk) {
@@ -816,25 +821,22 @@
     }
 
     function kapiKartiOlustur(kapi, girisOrtalama, girisCount, sonRapor, cikisOrtalama, cikisCount, googleGirisDk = null, googleCikisDk = null) {
-        const girisGosterilecek = girisOrtalama !== null ? girisOrtalama : googleGirisDk;
-        const cikisGosterilecek = cikisOrtalama !== null ? cikisOrtalama : googleCikisDk;
+        // Yön bazlı Google verisi yoksa mevcut olanı paylaş (fallback)
+        const anyGoogle = googleGirisDk ?? googleCikisDk ?? null;
+        const girisGosterilecek = girisOrtalama !== null ? girisOrtalama : (googleGirisDk ?? anyGoogle);
+        const cikisGosterilecek = cikisOrtalama !== null ? cikisOrtalama : (googleCikisDk ?? anyGoogle);
         const bg = beklemeSinifi(girisGosterilecek);
         const bc = beklemeSinifi(cikisGosterilecek);
         const anaGosterilecek = girisGosterilecek ?? cikisGosterilecek;
         const b = beklemeSinifi(anaGosterilecek);
-        const kaynakEtiketi = (girisOrtalama === null && googleGirisDk !== null)
-            ? `<span class="text-white/70 text-[10px] font-normal ml-1">📡 Google tahmini</span>`
-            : '';
         const sonGuncelleme = sonRapor
             ? getTimeAgo(new Date(sonRapor.created_at)) + ' güncellendi'
             : 'Henüz bildirim yok';
-        const girisTahmini = girisOrtalama === null && googleGirisDk !== null;
-        const cikisTahmini = cikisOrtalama === null && googleCikisDk !== null;
 
         return `
         <div class="border-card">
             <div class="${b.renk} px-6 py-3 flex items-center justify-between">
-                <div class="text-white font-black text-2xl">${b.emoji} ${b.metin}${kaynakEtiketi}</div>
+                <div class="text-white font-black text-2xl">${b.emoji} ${b.metin}</div>
                 <div class="text-white/80 text-xs">${sonGuncelleme}</div>
             </div>
             <div class="p-5">
@@ -852,12 +854,12 @@
                     <div class="bg-blue-50 border border-blue-100 rounded-xl p-3">
                         <div class="text-blue-700 font-bold text-[11px] mb-1">🔵 Giriş (Avr→TR)</div>
                         <div class="font-black text-slate-800">${bg.emoji} ${bg.metin}</div>
-                        <div class="text-xs text-slate-400 mt-1">${girisCount > 0 ? girisCount + ' kişi bildirdi' : girisTahmini ? '📡 Google tahmini' : 'Bildirim yok'}</div>
+                        <div class="text-xs text-slate-400 mt-1">${girisCount > 0 ? girisCount + ' kişi bildirdi' : 'Bildirim yok'}</div>
                     </div>
                     <div class="bg-orange-50 border border-orange-100 rounded-xl p-3">
                         <div class="text-orange-700 font-bold text-[11px] mb-1">🟠 Çıkış (TR→Avr)</div>
                         <div class="font-black text-slate-800">${bc.emoji} ${bc.metin}</div>
-                        <div class="text-xs text-slate-400 mt-1">${cikisCount > 0 ? cikisCount + ' kişi bildirdi' : cikisTahmini ? '📡 Google tahmini' : 'Bildirim yok'}</div>
+                        <div class="text-xs text-slate-400 mt-1">${cikisCount > 0 ? cikisCount + ' kişi bildirdi' : 'Bildirim yok'}</div>
                     </div>
                 </div>
                 <div class="flex gap-2">
@@ -1457,8 +1459,8 @@
         loadPopularRoutes();
         ulkeleriDoldur('routeStartCountry');
         ulkeleriDoldur('routeEndCountry');
-        // Her 3 dakikada kapı verilerini yenile
-        setInterval(loadGates, 3 * 60 * 1000);
+        // Her 10 dakikada kapı verilerini yenile (hata olursa sessizce geç)
+        setInterval(() => { loadGates().catch(() => {}); }, 10 * 60 * 1000);
     };
     </script>
 </body>

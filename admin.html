@@ -1281,14 +1281,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  // 5 saniye timeout — profilsorgusundan cevap gelmezse hata göster
-  const timeout = new Promise(resolve => setTimeout(() => resolve('timeout'), 5000));
+  // Önce session'ı kontrol et — session yoksa direkt login'e yönlendir
+  const { data: { session } } = await sb.auth.getSession().catch(() => ({ data: { session: null } }));
+  if (!session) {
+    showAuthError('Oturum bulunamadı. Lütfen giriş yapın.');
+    return;
+  }
+
+  // Önbellekte admin onayı var mı? (5 dk TTL)
+  const cached = sessionStorage.getItem('pa_admin_ok');
+  const cachedAt = parseInt(sessionStorage.getItem('pa_admin_ts') || '0');
+  if (cached === '1' && Date.now() - cachedAt < 5 * 60 * 1000) {
+    document.getElementById('authGate').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    loadDashboard(); setupRealtime();
+    return;
+  }
+
+  // 10 saniye timeout
+  const timeout = new Promise(resolve => setTimeout(() => resolve('timeout'), 10000));
 
   let isAdminUser = false;
   try {
     const result = await Promise.race([isAdmin(), timeout]);
     if (result === 'timeout') {
-      showAuthError('Kimlik doğrulama zaman aşımına uğradı. Giriş yapıp tekrar deneyin.');
+      showAuthError('Bağlantı yavaş. <a href="javascript:location.reload()" style="color:#6366f1;text-decoration:underline">Yenile</a> veya bekle.');
       return;
     }
     isAdminUser = result;
@@ -1301,6 +1318,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     showAuthError('Bu sayfaya erişim yetkiniz yok.');
     return;
   }
+
+  // Admin onayını önbelleğe al
+  sessionStorage.setItem('pa_admin_ok', '1');
+  sessionStorage.setItem('pa_admin_ts', Date.now().toString());
 
   document.getElementById('authGate').style.display = 'none';
   document.getElementById('app').style.display = 'block';
