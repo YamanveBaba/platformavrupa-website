@@ -648,6 +648,7 @@ textarea.form-control { resize: vertical; min-height: 100px; }
         <a class="nav-item" onclick="goto('academy')"><i class="icon fa-solid fa-graduation-cap"></i> Akademi</a>
         <a class="nav-item" onclick="goto('market')"><i class="icon fa-solid fa-basket-shopping"></i> Market & Katalog</a>
         <a class="nav-item" onclick="goto('silayolu')"><i class="icon fa-solid fa-road"></i> Sıla Yolu</a>
+        <a class="nav-item" onclick="goto('bildirim')"><i class="icon fa-solid fa-bell"></i> Bildirim Gönder</a>
 
         <div class="nav-section-label">Sistem</div>
         <a class="nav-item" onclick="goto('settings')"><i class="icon fa-solid fa-gear"></i> Ayarlar</a>
@@ -1114,6 +1115,70 @@ textarea.form-control { resize: vertical; min-height: 100px; }
         </div>
 
         <!-- ══ SETTINGS ════════════════════════════════════ -->
+        <!-- ═══════════════════════════════════════════════════════ BİLDİRİM -->
+        <div class="section" id="s-bildirim">
+          <div class="card mb-16">
+            <div class="card-header">
+              <span class="card-title"><i class="fa-solid fa-bell" style="color:#6366f1"></i> Push Bildirim Gönder</span>
+            </div>
+            <div class="card-body" style="display:grid;gap:16px">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                <div>
+                  <label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:6px">Başlık *</label>
+                  <input id="bn-title" type="text" placeholder="Örn: Yeni iş ilanları eklendi" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-size:13px;background:var(--bg-page);box-sizing:border-box">
+                </div>
+                <div>
+                  <label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:6px">Hedef Sayfa URL (opsiyonel)</label>
+                  <input id="bn-url" type="text" placeholder="/ veya /ilanlar.html" value="/" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-size:13px;background:var(--bg-page);box-sizing:border-box">
+                </div>
+              </div>
+              <div>
+                <label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:6px">Mesaj *</label>
+                <textarea id="bn-body" rows="3" placeholder="Bildirim içeriği..." style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-size:13px;background:var(--bg-page);resize:vertical;box-sizing:border-box"></textarea>
+              </div>
+              <div style="display:grid;grid-template-columns:180px 1fr;gap:12px;align-items:end">
+                <div>
+                  <label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:6px">Hedef Kitle</label>
+                  <select id="bn-hedef" onchange="bnHedefDegis()" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-size:13px;background:var(--bg-page)">
+                    <option value="herkese">🌍 Herkese</option>
+                    <option value="ulke">🏳️ Ülkeye Göre</option>
+                    <option value="sehir">🏙️ Şehire Göre</option>
+                    <option value="bireysel">👤 Bireysel (user_id)</option>
+                  </select>
+                </div>
+                <div id="bn-hedef-extra" style="display:none">
+                  <label id="bn-hedef-label" style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:6px">Değer</label>
+                  <input id="bn-hedef-val" type="text" placeholder="" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-size:13px;background:var(--bg-page);box-sizing:border-box">
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+                <button onclick="bnGonder()" style="background:#6366f1;color:#fff;border:none;padding:11px 24px;border-radius:12px;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px">
+                  <i class="fa-solid fa-paper-plane"></i> Bildirimi Gönder
+                </button>
+                <div id="bn-status" style="font-size:13px;color:var(--text-muted)"></div>
+              </div>
+              <div style="background:var(--bg-page);border:1px solid var(--border);border-radius:12px;padding:14px">
+                <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:8px">HEDEF KILAVUZU</div>
+                <div style="font-size:12px;color:var(--text-muted);line-height:1.8">
+                  🌍 <b>Herkese</b> — bildirim iznini kabul eden tüm kullanıcılar<br>
+                  🏳️ <b>Ülkeye Göre</b> — ülke kodu gir: <code>BE</code>, <code>DE</code>, <code>NL</code>, <code>FR</code>, <code>AT</code>, <code>CH</code><br>
+                  🏙️ <b>Şehire Göre</b> — profilde kayıtlı şehir adı (Türkçe tam yazım)<br>
+                  👤 <b>Bireysel</b> — Supabase profiles tablosundaki UUID
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title"><i class="fa-solid fa-chart-bar" style="color:#6366f1"></i> Abonelik İstatistikleri</span>
+              <button onclick="bnIstatistikYukle()" class="btn btn-sm btn-ghost"><i class="fa-solid fa-rotate-right"></i> Yenile</button>
+            </div>
+            <div class="card-body" id="bn-stats">
+              <div style="color:var(--text-muted);font-size:13px">Yükleniyor...</div>
+            </div>
+          </div>
+        </div>
+
         <div class="section" id="s-settings">
           <div class="card mb-16">
             <div class="card-header">
@@ -1183,12 +1248,13 @@ textarea.form-control { resize: vertical; min-height: 100px; }
 
 <script>
 // ─── GLOBALS ──────────────────────────────────────────────────────────────────
-const SECTIONS = ['dashboard','approval','listings','announcements','haberler','messages','members','trips','health','academy','market','silayolu','settings'];
+const SECTIONS = ['dashboard','approval','listings','announcements','haberler','messages','members','trips','health','academy','market','silayolu','bildirim','settings'];
 const PAGE_TITLES = {
   dashboard: 'Genel Bakış', approval: 'İlan Onayı', listings: 'Tüm İlanlar',
   announcements: 'Duyurular', haberler: 'Haber Kuyruğu', messages: 'Sohbet & Yorumlar',
   members: 'Üye Yönetimi', trips: 'Yolculuk & Kargo', health: 'Sağlık Turizmi',
-  academy: 'Akademi', market: 'Market & Katalog', silayolu: 'Sıla Yolu Yönetimi', settings: 'Ayarlar'
+  academy: 'Akademi', market: 'Market & Katalog', silayolu: 'Sıla Yolu Yönetimi',
+  bildirim: 'Push Bildirim', settings: 'Ayarlar'
 };
 let pendingApprovals = [];
 let currentSection = 'dashboard';
@@ -1284,6 +1350,7 @@ function goto(section) {
     academy: loadAcademy,
     market: loadCatalogs,
     silayolu: loadSilayolu,
+    bildirim: bnIstatistikYukle,
   };
   loaders[section]?.();
 }
@@ -2456,6 +2523,81 @@ async function deleteBorderReport(id) {
   await sb.from('sinir_bildirimleri').delete().eq('id', id);
   toast('Bildirim silindi', 'success');
   loadBorderReports();
+}
+
+// ─── BİLDİRİM ─────────────────────────────────────────────────────────────────
+function bnHedefDegis() {
+  const hedef = document.getElementById('bn-hedef').value;
+  const extra = document.getElementById('bn-hedef-extra');
+  const label = document.getElementById('bn-hedef-label');
+  const input = document.getElementById('bn-hedef-val');
+  if (hedef === 'herkese') { extra.style.display = 'none'; return; }
+  extra.style.display = 'block';
+  if (hedef === 'ulke')       { label.textContent = 'Ülke Kodu (BE, DE, NL…)'; input.placeholder = 'BE'; }
+  else if (hedef === 'sehir') { label.textContent = 'Şehir Adı';               input.placeholder = 'Brüksel'; }
+  else                        { label.textContent = 'Kullanıcı UUID';           input.placeholder = 'xxxxxxxx-xxxx-…'; }
+}
+
+async function bnGonder() {
+  const title  = document.getElementById('bn-title').value.trim();
+  const body   = document.getElementById('bn-body').value.trim();
+  const url    = document.getElementById('bn-url').value.trim() || '/';
+  const hedef  = document.getElementById('bn-hedef').value;
+  const val    = document.getElementById('bn-hedef-val').value.trim();
+  const status = document.getElementById('bn-status');
+
+  if (!title || !body) { toast('Başlık ve mesaj zorunlu', 'error'); return; }
+
+  status.textContent = '⏳ Gönderiliyor...';
+  try {
+    const payload = { title, body, url, hedef };
+    if (hedef === 'ulke')      payload.ulke    = val;
+    if (hedef === 'sehir')     payload.sehir   = val;
+    if (hedef === 'bireysel')  payload.user_id = val;
+
+    const { data: { session } } = await sb.auth.getSession();
+    const res = await fetch(`${window.SUPABASE_URL}/functions/v1/bildirim-gonder`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+        'apikey': window.SUPABASE_KEY,
+      },
+      body: JSON.stringify(payload),
+    });
+    const result = await res.json();
+    if (result.ok) {
+      status.innerHTML = `<span style="color:#22c55e">✅ ${result.gonderildi} kişiye gönderildi (${result.toplam} abone, ${result.hata} hata)</span>`;
+      toast(`${result.gonderildi} bildirim gönderildi`, 'success');
+    } else {
+      status.textContent = '❌ Hata: ' + (result.error || 'Bilinmeyen');
+    }
+  } catch(e) {
+    status.textContent = '❌ ' + e.message;
+  }
+}
+
+async function bnIstatistikYukle() {
+  const wrap = document.getElementById('bn-stats');
+  wrap.innerHTML = '<div style="color:var(--text-muted);font-size:13px">Yükleniyor...</div>';
+  try {
+    const { data: total }   = await sb.from('push_subscriptions').select('id', { count: 'exact', head: true });
+    const { data: byCountry } = await sb.from('push_subscriptions')
+      .select('country').order('country');
+    const ulkeSayac = {};
+    (byCountry || []).forEach(r => {
+      const k = r.country || 'Bilinmiyor';
+      ulkeSayac[k] = (ulkeSayac[k] || 0) + 1;
+    });
+    const satirlar = Object.entries(ulkeSayac).sort((a,b) => b[1]-a[1])
+      .map(([k,v]) => `<tr><td>${escHtml(k)}</td><td><strong>${v}</strong></td></tr>`).join('');
+    wrap.innerHTML = `
+      <div style="font-size:28px;font-weight:900;margin-bottom:8px">${total?.length ?? 0}</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:16px">toplam aktif abone</div>
+      ${satirlar ? `<table style="width:100%;font-size:13px"><thead><tr><th>Ülke</th><th>Abone</th></tr></thead><tbody>${satirlar}</tbody></table>` : '<div style="color:var(--text-muted);font-size:13px">Henüz abone yok</div>'}`;
+  } catch(e) {
+    wrap.innerHTML = '<div style="color:var(--danger);font-size:13px">Yüklenemedi: ' + e.message + '</div>';
+  }
 }
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
