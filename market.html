@@ -920,7 +920,7 @@ function buildPromoCard(row) {
     return `<div class="promo-card" data-chain="${esc(row.chain_slug)}">
         <div style="height:3px;background:${cfg.color}"></div>
         ${imgUrl ? `
-        <div class="bg-white flex items-center justify-center relative" style="height:120px">
+        <div class="promo-card-img bg-white flex items-center justify-center relative" style="height:120px">
             <img src="${esc(imgUrl)}" alt="${esc(display)}"
                 loading="lazy"
                 class="max-h-full max-w-full object-contain p-2"

@@ -1,6 +1,8 @@
 @echo off
 :: Platform Avrupa — Market Fiyatlari Haftalik Guncelleme
 :: Son calisma tarihini kontrol eder — 5 gunden eskiyse ceker
+:: GECICI DEVRE DISI: Yeni sistem GitHub Actions (promo_cek.py) uzerinden calisiyor
+exit /b 0
 
 set LOCKFILE=%~dp0son_calisma.txt
 set LOGFILE=%~dp0market_log.txt

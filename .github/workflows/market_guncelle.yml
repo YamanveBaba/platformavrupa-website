@@ -15,6 +15,9 @@ jobs:
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      COLRUYT_API_KEY: ${{ secrets.COLRUYT_API_KEY }}
+      COLRUYT_COOKIE: ${{ secrets.COLRUYT_COOKIE }}
+      LIDL_COOKIE: ${{ secrets.LIDL_COOKIE }}
       DISPLAY: ':99'
 
     steps:
@@ -49,8 +52,8 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.SUPABASE_ACCESS_TOKEN }}")
           echo "Proje durumu: $STATUS"
 
-      - name: Tüm marketleri çek
-        run: python -X utf8 market_fiyat_cekici/be_tum_zincirler_cek.py
+      - name: Promosyon urunleri cek (promo_cek.py)
+        run: python -X utf8 market_fiyat_cekici/promo_cek.py
         continue-on-error: true
 
       - name: Ürünleri kategorile
