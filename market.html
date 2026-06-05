@@ -693,6 +693,26 @@ function aramaKategoriFiltre(kat) {
     renderAramaSonuclari(window._sonAramaData, window._sonAramaQ);
 }
 
+function birimFiyat(fiyat, icerik) {
+    if (!fiyat || !icerik) return null;
+    const s = String(icerik).toLowerCase().replace(',', '.').replace(/\s+/g, '');
+    const carpanli = s.match(/^(\d+)x(\d+\.?\d*)(g|ml|kg|l|cl)$/);
+    if (carpanli) {
+        return hesapla(fiyat, parseFloat(carpanli[1]) * parseFloat(carpanli[2]), carpanli[3]);
+    }
+    const tekil = s.match(/(\d+\.?\d*)(g|ml|kg|l|cl)$/);
+    if (tekil) return hesapla(fiyat, parseFloat(tekil[1]), tekil[2]);
+    return null;
+    function hesapla(p, m, b) {
+        if (b === 'kg') return { fiyat: p / m,        etiket: '€/kg' };
+        if (b === 'g')  return { fiyat: p / (m/1000), etiket: '€/kg' };
+        if (b === 'l')  return { fiyat: p / m,        etiket: '€/L'  };
+        if (b === 'cl') return { fiyat: p / (m/100),  etiket: '€/L'  };
+        if (b === 'ml') return { fiyat: p / (m/1000), etiket: '€/L'  };
+        return null;
+    }
+}
+
 function renderAramaSonuclari(data, q) {
     const gorulecek = _aktifKategori
         ? data.filter(r => (r.category_tr || 'Diğer') === _aktifKategori)
@@ -709,6 +729,9 @@ function renderAramaSonuclari(data, q) {
     const grouped = {};
     SLUGS.forEach(s => grouped[s] = []);
     gorulecek.forEach(r => { if (grouped[r.chain_slug]) grouped[r.chain_slug].push(r); });
+
+    const _bfListe = gorulecek.map(r => birimFiyat(r.promo_price ?? r.price, r.unit_or_content)).filter(Boolean).map(b => b.fiyat);
+    const enUcuzBirimFiyat = _bfListe.length ? Math.min(..._bfListe) : null;
 
     const toplam = gorulecek.length;
     const katLabel = _aktifKategori ? ` · <span class="text-emerald-600">${esc(_aktifKategori)}</span>` : '';
@@ -739,12 +762,16 @@ function renderAramaSonuclari(data, q) {
                         : `<div class="w-14 h-14 bg-slate-100 rounded-xl shrink-0 flex items-center justify-center text-slate-300"><i class="fa-solid fa-box"></i></div>`}
                     <div class="flex-1 min-w-0">
                         <p class="text-sm font-semibold text-slate-800 leading-snug line-clamp-2">${esc(isim)}</p>
-                        ${birim ? `<p class="text-xs text-slate-400 mt-0.5">${esc(birim)}</p>` : ''}
-                        <div class="flex items-center gap-2 mt-1.5">
+                        <div class="flex items-center gap-1.5 flex-wrap mt-0.5">
+                            ${birim ? `<span class="text-xs text-slate-400">${esc(birim)}</span>` : ''}
+                            ${r.in_promo ? `<span class="text-xs font-bold px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600">İndirimde</span>` : ''}
+                        </div>
+                        <div class="flex items-center gap-2 mt-1">
                             <span class="text-base font-black text-slate-900">${fmtP(fiyat, r.currency)}</span>
                             ${eski ? `<span class="text-xs text-slate-400 line-through">${fmtP(eski, r.currency)}</span>` : ''}
                             ${pct ? `<span class="bg-red-50 text-red-500 text-xs font-bold px-2 py-0.5 rounded-full">-${pct}%</span>` : ''}
                         </div>
+                        ${(() => { const bf = birimFiyat(fiyat, r.unit_or_content); if (!bf) return ''; const enUcuz = enUcuzBirimFiyat !== null && Math.abs(bf.fiyat - enUcuzBirimFiyat) < 0.005; return `<div class="flex items-center gap-1.5 mt-0.5"><span class="text-xs text-slate-400">${bf.etiket} ${bf.fiyat.toFixed(2)}</span>${enUcuz ? '<span class="text-xs font-bold px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-600">⭐ En Ucuz</span>' : ''}</div>`; })()}
                     </div>
                 </div>`;
             }).join('')}
