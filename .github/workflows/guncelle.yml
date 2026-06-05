@@ -86,6 +86,14 @@ jobs:
         continue-on-error: true
         run: python -X utf8 ilan_cekici/vdab_cek.py --max 300000 --temizle
 
+      - name: Almanya + Hollanda + EU is ilanlari (Bundesagentur, Adzuna, Arbeitnow)
+        continue-on-error: true
+        run: python -X utf8 ilan_cekici/is_ilani_cekici.py --temizle
+
+      - name: Werk.nl Hollanda (RSS gunluk)
+        continue-on-error: true
+        run: python -X utf8 ilan_cekici/werk_nl_cek.py --temizle
+
       - name: Haber cek (Avrupa Turkleri)
         continue-on-error: true
         env:

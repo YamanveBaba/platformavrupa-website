@@ -81,14 +81,23 @@ def telegram_gonder(token, chat_id, mesaj):
 def main():
     sb_url, sb_key, tg_token, tg_chat = load_secrets()
 
-    # Is ilanlari
+    # Is ilanlari — Belcika
     actiris = supabase_say(sb_url, sb_key, "ilanlar", "&source=eq.actiris&status=eq.active")
     forem   = supabase_say(sb_url, sb_key, "ilanlar", "&source=eq.forem&status=eq.active")
     vdab    = supabase_say(sb_url, sb_key, "ilanlar", "&source=eq.vdab&status=eq.active")
     try:
-        ilan_toplam = actiris + forem + vdab
+        be_toplam = actiris + forem + vdab
     except Exception:
-        ilan_toplam = "?"
+        be_toplam = "?"
+    ilan_toplam = be_toplam  # geriye donuk uyumluluk
+
+    # Is ilanlari — Hollanda + Almanya
+    de_toplam  = supabase_say(sb_url, sb_key, "ilanlar", "&country=eq.DE&status=eq.active")
+    nl_toplam  = supabase_say(sb_url, sb_key, "ilanlar", "&country=eq.NL&status=eq.active")
+    try:
+        eu_toplam = be_toplam + de_toplam + nl_toplam
+    except Exception:
+        eu_toplam = "?"
 
     # Market urunleri
     colruyt  = supabase_say(sb_url, sb_key, "market_chain_products", "&chain_slug=eq.colruyt_be")
@@ -152,10 +161,14 @@ def main():
         f"✅ <b>Platform Avrupa — Günlük Güncelleme</b>\n"
         f"📅 {saat}\n\n"
         f"💼 <b>İş İlanları</b>\n"
-        f"  🟦 Actiris (Brüksel):  <b>{fmt(actiris)}</b>\n"
-        f"  🟩 FOREM (Valoniya):   <b>{fmt(forem)}</b>\n"
-        f"  🟧 VDAB (Flandriya):   <b>{fmt(vdab)}</b>\n"
-        f"  📊 Toplam:             <b>{fmt(ilan_toplam)}</b>\n\n"
+        f"  🇧🇪 Belçika\n"
+        f"    🟦 Actiris (Brüksel):  <b>{fmt(actiris)}</b>\n"
+        f"    🟩 FOREM (Valoniya):   <b>{fmt(forem)}</b>\n"
+        f"    🟧 VDAB (Flandriya):   <b>{fmt(vdab)}</b>\n"
+        f"    Ara toplam:            <b>{fmt(be_toplam)}</b>\n"
+        f"  🇩🇪 Almanya:             <b>{fmt(de_toplam)}</b>\n"
+        f"  🇳🇱 Hollanda:            <b>{fmt(nl_toplam)}</b>\n"
+        f"  🌍 Toplam Avrupa:        <b>{fmt(eu_toplam)}</b>\n\n"
         f"🛒 <b>Market Ürünleri</b>\n"
         f"  Colruyt:   <b>{fmt(colruyt)}</b>\n"
         f"  Delhaize:  <b>{fmt(delhaize)}</b>\n"
