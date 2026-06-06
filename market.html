@@ -602,7 +602,7 @@ const TR_ALIAS = {
     'kuru üzüm':      'rozijnen',
     'üzüm yaprağı':   'druivenbladeren wijnbladeren',
     // ── Yayılabilir & Kahvaltılık ─────────────────────────────────────────────
-    'nutella':        'chocopasta hazelnootpasta smeerpasta',
+    'nutella':        'chocopasta hazelnootpasta',
     'çikolata ezmesi':'chocopasta hazelnootpasta',
     'fındık ezmesi':  'chocopasta hazelnootpasta',
     'fıstık ezmesi':  'pindakaas',
@@ -847,9 +847,11 @@ function birimFiyat(fiyat, icerik) {
 }
 
 function renderAramaSonuclari(data, q) {
-    const gorulecek = _aktifKategori
-        ? data.filter(r => (r.category_tr || 'Diğer') === _aktifKategori)
-        : data;
+    const gorulecek = (
+        _aktifKategori
+            ? data.filter(r => (r.category_tr || 'Diğer') === _aktifKategori)
+            : data
+    ).filter(r => (r.price > 0) || (r.promo_price != null && r.promo_price > 0));
 
     if (!gorulecek.length) {
         document.getElementById('aramaBosSonucText').textContent = `"${_aktifKategori}" kategorisinde sonuç yok.`;
@@ -883,7 +885,7 @@ function renderAramaSonuclari(data, q) {
                 <span class="text-slate-400 text-xs font-normal">(${urunler.length} ürün)</span>
             </div>
             <div class="space-y-2">
-            ${urunler.slice(0, 30).map(r => {
+            ${[...urunler].sort((a,b)=>(b.image_url?1:0)-(a.image_url?1:0)).slice(0, 30).map(r => {
                 const isim = bestName(r);
                 const fiyat = r.promo_price != null ? r.promo_price : r.price;
                 const eski = r.promo_price != null && Number(r.price) !== Number(r.promo_price) ? r.price : null;
@@ -892,7 +894,7 @@ function renderAramaSonuclari(data, q) {
                 return `<div class="arama-satir flex items-center gap-3 p-3">
                     ${r.image_url
                         ? `<img src="${esc(r.image_url)}" alt="${esc(isim)}" class="w-14 h-14 object-contain rounded-xl bg-slate-50 shrink-0 border border-slate-100" loading="lazy" onerror="this.style.display='none'">`
-                        : `<div class="w-14 h-14 bg-slate-100 rounded-xl shrink-0 flex items-center justify-center text-slate-300"><i class="fa-solid fa-box"></i></div>`}
+                        : `<div class="w-14 h-14 rounded-xl shrink-0 flex items-center justify-center text-xs font-bold text-slate-400" style="background:#f1f5f9;letter-spacing:-0.02em">${(isim.split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase())||'?'}</div>`}
                     <div class="flex-1 min-w-0">
                         <p class="text-sm font-semibold text-slate-800 leading-snug line-clamp-2">${esc(isim)}</p>
                         <div class="flex items-center gap-1.5 flex-wrap mt-0.5">
