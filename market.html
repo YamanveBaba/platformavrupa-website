@@ -254,6 +254,10 @@
             class="tab-btn active whitespace-nowrap">
             🔥 İndirimler
         </button>
+        <button id="tab-urunler" onclick="switchTab('urunler')"
+            class="tab-btn whitespace-nowrap">
+            🛒 300 Ürün
+        </button>
         <button id="tab-karsilastir" onclick="switchTab('karsilastir')"
             class="tab-btn whitespace-nowrap">
             ⚖️ Karşılaştır
@@ -367,6 +371,67 @@
         <div id="upcomingGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"></div>
     </div>
 
+</div>
+
+<!-- ═══ TAB: 300 ÜRÜN ═══════════════════════════════════════════ -->
+<div id="sec-urunler" class="hidden px-4 max-w-7xl mx-auto py-4 space-y-4">
+
+    <!-- Kategori filtreleri -->
+    <div class="flex gap-2 overflow-x-auto no-scroll pb-1 pt-1" id="urunKategoriChips">
+        <button class="filter-chip active" data-cat="all" onclick="urunKategoriFiltre('all')">Tümü</button>
+        <button class="filter-chip" data-cat="Süt &amp; Süt Ürünleri"   onclick="urunKategoriFiltre('Süt &amp; Süt Ürünleri')">🥛 Süt</button>
+        <button class="filter-chip" data-cat="Et Tavuk Balık"          onclick="urunKategoriFiltre('Et Tavuk Balık')">🥩 Et</button>
+        <button class="filter-chip" data-cat="Sebze"                   onclick="urunKategoriFiltre('Sebze')">🥦 Sebze</button>
+        <button class="filter-chip" data-cat="Meyve"                   onclick="urunKategoriFiltre('Meyve')">🍎 Meyve</button>
+        <button class="filter-chip" data-cat="Temel Kuru Gıda"         onclick="urunKategoriFiltre('Temel Kuru Gıda')">🌾 Temel</button>
+        <button class="filter-chip" data-cat="Bakliyat &amp; Konserve" onclick="urunKategoriFiltre('Bakliyat &amp; Konserve')">🫘 Bakliyat</button>
+        <button class="filter-chip" data-cat="Yağ Sirke Sos"           onclick="urunKategoriFiltre('Yağ Sirke Sos')">🫙 Yağ</button>
+        <button class="filter-chip" data-cat="Baharat Çeşni"           onclick="urunKategoriFiltre('Baharat Çeşni')">🌶️ Baharat</button>
+        <button class="filter-chip" data-cat="Ekmek Unlu Mamul"        onclick="urunKategoriFiltre('Ekmek Unlu Mamul')">🍞 Ekmek</button>
+        <button class="filter-chip" data-cat="Kahvaltılık"             onclick="urunKategoriFiltre('Kahvaltılık')">🍯 Kahvaltı</button>
+        <button class="filter-chip" data-cat="İçecek"                  onclick="urunKategoriFiltre('İçecek')">🥤 İçecek</button>
+        <button class="filter-chip" data-cat="Atıştırmalık Tatlı"      onclick="urunKategoriFiltre('Atıştırmalık Tatlı')">🍫 Atıştırmalık</button>
+        <button class="filter-chip" data-cat="Dondurulmuş"             onclick="urunKategoriFiltre('Dondurulmuş')">🧊 Dondurulmuş</button>
+        <button class="filter-chip" data-cat="Temizlik"                onclick="urunKategoriFiltre('Temizlik')">🧹 Temizlik</button>
+        <button class="filter-chip" data-cat="Kişisel Bakım Kağıt"     onclick="urunKategoriFiltre('Kişisel Bakım Kağıt')">🧴 Kişisel</button>
+        <button class="filter-chip" data-cat="Bebek Çocuk"             onclick="urunKategoriFiltre('Bebek Çocuk')">👶 Bebek</button>
+    </div>
+
+    <!-- Durum: yükleniyor -->
+    <div id="urunYukleniyor" class="text-center py-16 text-slate-400">
+        <i class="fa-solid fa-spinner fa-spin text-3xl mb-3 block"></i>
+        <p class="text-sm">300 ürün yükleniyor…</p>
+    </div>
+
+    <!-- Durum: hata -->
+    <div id="urunHata" class="hidden text-center py-12">
+        <div class="light-card p-8 inline-block max-w-sm">
+            <i class="fa-solid fa-triangle-exclamation text-amber-400 text-3xl mb-3 block"></i>
+            <p class="text-slate-600 font-semibold mb-1">Ürün listesi yüklenemedi</p>
+            <p class="text-slate-400 text-xs" id="urunHataMesaj">Lütfen daha sonra tekrar deneyin.</p>
+        </div>
+    </div>
+
+    <!-- Market başlık satırı (sadece geniş ekran) -->
+    <div id="urunBaslik" class="hidden md:flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-400 uppercase tracking-wide">
+        <div class="flex-1 min-w-0">Ürün</div>
+        <div class="w-20 text-center shrink-0">Colruyt</div>
+        <div class="w-20 text-center shrink-0">Aldi</div>
+        <div class="w-20 text-center shrink-0">Delhaize</div>
+        <div class="w-20 text-center shrink-0">Lidl</div>
+        <div class="w-20 text-center shrink-0">Carrefour</div>
+    </div>
+
+    <!-- Ürün listesi -->
+    <div id="urunListesi" class="space-y-2"></div>
+
+    <!-- Daha fazla yükle -->
+    <div id="urunDahaFazla" class="hidden text-center py-4">
+        <button onclick="urunDahaFazlaYukle()"
+            class="bg-white border border-slate-200 text-slate-600 font-semibold px-6 py-2.5 rounded-xl text-sm hover:bg-slate-50 transition shadow-sm">
+            Daha fazla göster
+        </button>
+    </div>
 </div>
 
 <!-- ═══ TAB: KARŞILAŞTIR ══════════════════════════════════════════ -->
@@ -1032,6 +1097,12 @@ function navBack() {
         wizBack();
         return;
     }
+    // 300 Ürün sekmesindeyse → İndirimler'e
+    const secU = document.getElementById('sec-urunler');
+    if (secU && !secU.classList.contains('hidden')) {
+        switchTab('indirimler');
+        return;
+    }
     // Karşılaştır sekmesindeyse → İndirimler'e
     if (secK && !secK.classList.contains('hidden')) {
         switchTab('indirimler');
@@ -1050,7 +1121,7 @@ function navBack() {
 // ═══════════════════════════════════════════════════════════════════
 function switchTab(tab) {
     // Tüm section'ları gizle
-    ['indirimler','karsilastir','marketler','arama'].forEach(t => {
+    ['indirimler','urunler','karsilastir','marketler','arama'].forEach(t => {
         const sec = document.getElementById('sec-'+t);
         if (sec) sec.classList.add('hidden');
         const btn = document.getElementById('tab-'+t);
@@ -1066,6 +1137,155 @@ function switchTab(tab) {
         setTimeout(() => document.getElementById('aramaInput')?.focus(), 50);
     }
     if (tab === 'karsilastir' && typeof wizShow === 'function') wizShow(0);
+    if (tab === 'urunler' && !window._urunlerYuklendi) loadUrunler();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// 300 ÜRÜN — Canonical karşılaştırma listesi
+// ═══════════════════════════════════════════════════════════════════
+let _allUrunler = [];        // tüm canonical ürünler + offers
+let _aktifUrunKat = 'all';   // aktif kategori filtresi
+let _urunlerYuklendi = false;
+const URUN_PAGE = 40;        // sayfa başına ürün
+let _urunSayfa = 0;
+
+async function loadUrunler() {
+    if (!sb) {
+        document.getElementById('urunYukleniyor').classList.add('hidden');
+        document.getElementById('urunHata').classList.remove('hidden');
+        document.getElementById('urunHataMesaj').textContent = 'Supabase bağlantısı yok.';
+        return;
+    }
+    try {
+        // product_comparison view'ını sorgula: canonical + tüm teklifler JSON'da
+        const { data, error } = await sb
+            .from('product_comparison')
+            .select('id,slug,name_tr,category,unit_type,offers')
+            .order('category')
+            .order('name_tr');
+        if (error) throw error;
+        _allUrunler = (data || []).map(row => ({
+            ...row,
+            offers: Array.isArray(row.offers) ? row.offers : []
+        }));
+        _urunlerYuklendi = true;
+        window._urunlerYuklendi = true;
+        document.getElementById('urunYukleniyor').classList.add('hidden');
+        if (!_allUrunler.length) {
+            document.getElementById('urunHata').classList.remove('hidden');
+            document.getElementById('urunHataMesaj').textContent =
+                'Henüz ürün verisi yok. canonical_eslestir.py çalıştırıldıktan sonra burada görünecek.';
+            return;
+        }
+        _urunSayfa = 0;
+        document.getElementById('urunBaslik').classList.remove('hidden');
+        renderUrunler();
+    } catch(e) {
+        console.warn('loadUrunler:', e);
+        document.getElementById('urunYukleniyor').classList.add('hidden');
+        document.getElementById('urunHata').classList.remove('hidden');
+        document.getElementById('urunHataMesaj').textContent =
+            'Ürün listesi yüklenemedi: ' + (e.message || 'bilinmeyen hata');
+    }
+}
+
+function urunKategoriFiltre(cat) {
+    _aktifUrunKat = cat;
+    _urunSayfa = 0;
+    document.querySelectorAll('#urunKategoriChips .filter-chip').forEach(b => {
+        b.classList.toggle('active', b.dataset.cat === cat);
+    });
+    renderUrunler();
+}
+
+function urunDahaFazlaYukle() {
+    _urunSayfa++;
+    renderUrunler(true);
+}
+
+function renderUrunler(append = false) {
+    const liste = document.getElementById('urunListesi');
+    const dahaBtn = document.getElementById('urunDahaFazla');
+    if (!liste) return;
+
+    const filtered = _aktifUrunKat === 'all'
+        ? _allUrunler
+        : _allUrunler.filter(u => u.category === _aktifUrunKat);
+
+    const start = 0;
+    const end = (_urunSayfa + 1) * URUN_PAGE;
+    const slice = filtered.slice(start, end);
+    const hasMore = filtered.length > end;
+
+    const html = slice.map(urun => buildUrunRow(urun)).join('');
+    liste.innerHTML = html;
+    dahaBtn.classList.toggle('hidden', !hasMore);
+}
+
+function buildUrunRow(urun) {
+    const offerMap = {};
+    for (const o of (urun.offers || [])) {
+        offerMap[o.chain] = o;
+    }
+
+    // En ucuz efektif fiyat bul
+    let minPrice = Infinity;
+    for (const chain of SLUGS) {
+        const o = offerMap[chain];
+        if (!o) continue;
+        const p = o.in_promo && o.promo_price != null ? Number(o.promo_price) : Number(o.price);
+        if (Number.isFinite(p) && p > 0 && p < minPrice) minPrice = p;
+    }
+
+    // Masaüstü: 5 market sütunu
+    const cols = SLUGS.map(chain => {
+        const o = offerMap[chain];
+        const cfg = CHAINS[chain];
+        if (!o || (!o.price && !o.promo_price)) {
+            return `<div class="w-20 text-center shrink-0 text-slate-300 font-semibold text-sm">—</div>`;
+        }
+        const eff = o.in_promo && o.promo_price != null ? Number(o.promo_price) : Number(o.price);
+        const isMin = Number.isFinite(eff) && Math.abs(eff - minPrice) < 0.005 && minPrice < Infinity;
+        const isPromo = o.in_promo;
+        const until = o.promo_valid_until ? fmtDate(o.promo_valid_until) : null;
+        const promoTr = o.promo_text_tr || '';
+        return `<div class="w-20 text-center shrink-0 ${isMin ? 'text-emerald-600 font-black' : 'text-slate-700 font-semibold'} text-sm ${isPromo ? 'relative' : ''}">
+            <div title="${esc(promoTr||cfg.label)}">${eff > 0 ? eff.toFixed(2)+' €' : '—'}</div>
+            ${isPromo ? `<div class="text-[.6rem] text-amber-500 font-bold">${until?until+' kadar':'kampanya'}</div>` : ''}
+        </div>`;
+    }).join('');
+
+    // Mobil: en ucuz market göster
+    let mobileExtra = '';
+    if (minPrice < Infinity) {
+        const cheapChain = SLUGS.find(c => {
+            const o = offerMap[c];
+            if (!o) return false;
+            const p = o.in_promo && o.promo_price != null ? Number(o.promo_price) : Number(o.price);
+            return Number.isFinite(p) && Math.abs(p - minPrice) < 0.005;
+        });
+        if (cheapChain) {
+            const cfg = CHAINS[cheapChain];
+            mobileExtra = `<span class="text-emerald-600 font-black text-base">${minPrice.toFixed(2)} €</span>
+                <span class="text-xs text-slate-400 ml-1">${esc(cfg.label)}</span>`;
+        }
+    }
+
+    const promoAny = SLUGS.some(c => offerMap[c]?.in_promo);
+
+    return `<div class="light-card flex items-center gap-3 px-3 py-2.5 rounded-xl ${promoAny ? 'border border-amber-200 bg-amber-50/20' : ''}">
+        <!-- Sol: ürün adı -->
+        <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="text-sm font-semibold text-slate-800 leading-snug">${esc(urun.name_tr)}</span>
+                ${promoAny ? `<span class="badge-amber" style="font-size:.58rem">İndirim</span>` : ''}
+            </div>
+            <div class="flex items-center gap-1.5 mt-0.5 md:hidden">${mobileExtra}</div>
+            <div class="text-[.65rem] text-slate-400">${esc(urun.unit_type||'')}</div>
+        </div>
+        <!-- Masaüstü: 5 sütun -->
+        <div class="hidden md:flex items-center gap-0">${cols}</div>
+    </div>`;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -1143,17 +1363,54 @@ async function loadPromos() {
         return;
     }
     try {
-        // Her marketten ayrı ayrı çek → dengeli sonuç garantisi
-        const perChain = await Promise.all(SLUGS.map(slug =>
-            sb.from('market_chain_products')
-                .select('name,name_tr,price,promo_price,currency,chain_slug,in_promo,promo_valid_from,promo_valid_until,image_url')
-                .eq('chain_slug', slug)
-                .or('in_promo.eq.true,promo_price.not.is.null')
-                .gt('price', 0)
-                .order('image_url', { ascending: false, nullsFirst: false })
-                .limit(200)
-                .then(({ data }) => (data || []))
-        ));
+        // Önce yeni active_promos view'ını dene (Türkçe promo metinleri var)
+        let usedCanonical = false;
+        let perChainFlat = null;
+        try {
+            const { data: promoData, error: promoErr } = await sb
+                .from('active_promos')
+                .select('canonical_name_tr,chain,price,promo_price,in_promo,promo_text_tr,promo_valid_from,promo_valid_until,image_url,unit_type')
+                .limit(500);
+            if (!promoErr && promoData && promoData.length > 0) {
+                // canonical_name_tr → name_tr, chain → chain_slug olarak normalize et
+                perChainFlat = promoData.map(r => ({
+                    name: r.canonical_name_tr,
+                    name_tr: r.canonical_name_tr,
+                    price: r.price,
+                    promo_price: r.promo_price,
+                    currency: 'EUR',
+                    chain_slug: r.chain,
+                    in_promo: true,
+                    promo_valid_from: r.promo_valid_from,
+                    promo_valid_until: r.promo_valid_until,
+                    image_url: r.image_url,
+                    promo_text_tr: r.promo_text_tr,
+                }));
+                usedCanonical = true;
+            }
+        } catch(_) { /* yeni tablolar henüz yok, fallback'e geç */ }
+
+        let perChain;
+        if (usedCanonical && perChainFlat) {
+            // active_promos'tan gelen veriyi zincir bazlı ayır
+            const byChain = {};
+            SLUGS.forEach(s => byChain[s] = []);
+            for (const r of perChainFlat) if (byChain[r.chain_slug]) byChain[r.chain_slug].push(r);
+            perChain = SLUGS.map(s => byChain[s]);
+        } else {
+            // Fallback: eski market_chain_products tablosunu kullan
+            // Her marketten ayrı ayrı çek → dengeli sonuç garantisi
+            perChain = await Promise.all(SLUGS.map(slug =>
+                sb.from('market_chain_products')
+                    .select('name,name_tr,price,promo_price,currency,chain_slug,in_promo,promo_valid_from,promo_valid_until,image_url')
+                    .eq('chain_slug', slug)
+                    .or('in_promo.eq.true,promo_price.not.is.null')
+                    .gt('price', 0)
+                    .order('image_url', { ascending: false, nullsFirst: false })
+                    .limit(200)
+                    .then(({ data }) => (data || []))
+            ));
+        }
 
         // Marketleri karıştır: 1 Colruyt, 1 ALDI, 1 Delhaize, 1 Lidl, 1 Carrefour sırasıyla
         const lists = perChain.map(arr =>
@@ -2350,7 +2607,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         waited += 100;
     }
 
-    // Load in parallel
+    // Load in parallel (urunler lazy — sadece sekme açılınca yüklenir)
     await Promise.all([loadPromos(), loadMarketCards()]);
 });
 </script>

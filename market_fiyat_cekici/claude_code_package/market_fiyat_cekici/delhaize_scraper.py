@@ -19,6 +19,12 @@ from dotenv import load_dotenv
 from supabase import create_client, Client
 from playwright.async_api import async_playwright
 
+try:
+    from camoufox.async_api import AsyncCamoufox
+    USE_CAMOUFOX = True
+except ImportError:
+    USE_CAMOUFOX = False
+
 load_dotenv()
 logging.basicConfig(
     level=logging.INFO,
@@ -85,6 +91,14 @@ async def accept_cookies(page) -> bool:
     return False
 
 
+def _clean_ean(val) -> str | None:
+    """EAN/GTIN/barcode alanından 8-14 haneli numeriği ayıkla."""
+    if not val:
+        return None
+    digits = re.sub(r"\D", "", str(val))
+    return digits if 8 <= len(digits) <= 14 else None
+
+
 def _to_iso_date(val) -> str | None:
     """'25/03/2026 23:00:00' veya '25-03-2026' → '2026-03-25'"""
     if not val:
@@ -124,6 +138,11 @@ def _parse_product(raw: dict, cat_name: str) -> dict | None:
         name = str(raw.get("name") or "").strip()
         if not pid or not name:
             return None
+
+        ean = (
+            _clean_ean(raw.get("ean") or raw.get("gtin") or raw.get("barcode"))
+            or _clean_ean(raw.get("code"))
+        )
 
         price = _parse_price(raw.get("price"))
         if price is None:
@@ -178,6 +197,7 @@ def _parse_product(raw: dict, cat_name: str) -> dict | None:
             "chain_slug":           CHAIN_SLUG,
             "country_code":         COUNTRY_CODE,
             "external_product_id":  pid,
+            "ean":                  ean,
             "name":                 name,
             "brand":                brand,
             "category_name":        cat_name,
@@ -352,23 +372,8 @@ async def _run_async() -> int:
     sb = create_client(SUPABASE_URL, SUPABASE_KEY)
     total_saved = 0
 
-    async with async_playwright() as p:
-        browser = await p.chromium.launch(
-            headless=True,
-            args=[
-                "--no-sandbox",
-                "--disable-blink-features=AutomationControlled",
-                "--disable-dev-shm-usage",
-            ]
-        )
-        context = await browser.new_context(
-            user_agent=CHROME_UA,
-            viewport={"width": 1280, "height": 900},
-            locale="nl-BE",
-            timezone_id="Europe/Brussels",
-            extra_http_headers={"Accept-Language": "nl-BE,nl;q=0.9,fr;q=0.8,en;q=0.7"},
-        )
-
+    async def _scrape_with_context(context):
+        nonlocal total_saved
         for cat_name, cat_code in CATEGORIES:
             log.info(f"\n  [{CATEGORIES.index((cat_name, cat_code))+1}/{len(CATEGORIES)}] {cat_name} ({cat_code})")
             prods = await scrape_category(context, cat_name, cat_code)
@@ -378,7 +383,37 @@ async def _run_async() -> int:
                 log.info(f"    -> {saved} kaydedildi (toplam: {total_saved})")
             await human_pause(3.0, 7.0)
 
-        await browser.close()
+    if USE_CAMOUFOX:
+        log.info("  Camoufox kullanılıyor (güçlü anti-tespit)")
+        async with AsyncCamoufox(
+            headless=True,
+            locale="nl-BE",
+            timezone_id="Europe/Brussels",
+        ) as browser:
+            context = await browser.new_context(
+                viewport={"width": 1280, "height": 900},
+            )
+            await _scrape_with_context(context)
+    else:
+        log.info("  Playwright Chromium kullanılıyor (camoufox yüklü değil)")
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(
+                headless=True,
+                args=[
+                    "--no-sandbox",
+                    "--disable-blink-features=AutomationControlled",
+                    "--disable-dev-shm-usage",
+                ]
+            )
+            context = await browser.new_context(
+                user_agent=CHROME_UA,
+                viewport={"width": 1280, "height": 900},
+                locale="nl-BE",
+                timezone_id="Europe/Brussels",
+                extra_http_headers={"Accept-Language": "nl-BE,nl;q=0.9,fr;q=0.8,en;q=0.7"},
+            )
+            await _scrape_with_context(context)
+            await browser.close()
 
     log.info("=" * 60)
     log.info(f"DELHAIZE TAMAMLANDI — Toplam: {total_saved} ürün")

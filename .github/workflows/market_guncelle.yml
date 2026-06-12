@@ -2,22 +2,25 @@ name: Market Fiyatları Güncelle
 
 on:
   schedule:
-    - cron: '0 1 * * 0'   # Her Pazar 01:00 UTC (03:00 Brüksel)
+    - cron: '0 3 * * *'   # Her gün 03:00 UTC (05:00 Brüksel)
   workflow_dispatch:       # Manuel tetikleme
 
 jobs:
   market:
     runs-on: ubuntu-latest
-    timeout-minutes: 360   # 6 saat (market çekimi uzun sürebilir)
+    timeout-minutes: 360   # 6 saat
 
     env:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
       COLRUYT_API_KEY: ${{ secrets.COLRUYT_API_KEY }}
       COLRUYT_COOKIE: ${{ secrets.COLRUYT_COOKIE }}
       LIDL_COOKIE: ${{ secrets.LIDL_COOKIE }}
+      AZURE_TRANSLATE_KEY: ${{ secrets.AZURE_TRANSLATE_KEY }}
+      AZURE_TRANSLATE_REGION: ${{ secrets.AZURE_TRANSLATE_REGION }}
       DISPLAY: ':99'
 
     steps:
@@ -36,10 +39,11 @@ jobs:
 
       - name: Playwright + Camoufox kur
         run: |
-          pip install playwright camoufox
+          pip install playwright camoufox rapidfuzz
           python -m playwright install chromium firefox --with-deps
+          python -m camoufox fetch || true
 
-      - name: Sanal ekran başlat (headless için)
+      - name: Sanal ekran başlat
         run: |
           sudo apt-get install -y xvfb
           Xvfb :99 -screen 0 1280x720x24 &
@@ -52,15 +56,16 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.SUPABASE_ACCESS_TOKEN }}")
           echo "Proje durumu: $STATUS"
 
-      - name: Promosyon urunleri cek (promo_cek.py)
-        run: python -X utf8 market_fiyat_cekici/promo_cek.py
+      - name: 5 marketten ürün çek (main.py)
+        working-directory: market_fiyat_cekici/claude_code_package/market_fiyat_cekici
+        run: python -X utf8 main.py
+
+      - name: Kanonik ürünleri eşleştir (canonical_eslestir.py)
+        working-directory: market_fiyat_cekici/claude_code_package/market_fiyat_cekici
+        run: python -X utf8 canonical_eslestir.py
         continue-on-error: true
 
-      - name: Ürünleri kategorile
-        run: python -X utf8 ilan_cekici/market_kategorile.py
-        continue-on-error: true
-
-      - name: Marketler arası ürün eşleştir
+      - name: Marketler arası ürün eşleştir (eski şema)
         run: python -X utf8 market_fiyat_cekici/urun_eslestir.py
         continue-on-error: true
 
@@ -68,6 +73,7 @@ jobs:
         run: python -X utf8 ilan_cekici/cevir.py --tablo market --limit 2000
         continue-on-error: true
 
-      - name: Telegram bildirimi gönder
+      - name: Sağlık kontrolü yap
+        working-directory: market_fiyat_cekici/claude_code_package/market_fiyat_cekici
+        run: python -X utf8 health_check.py
         if: always()
-        run: python -X utf8 ilan_cekici/bildir.py
