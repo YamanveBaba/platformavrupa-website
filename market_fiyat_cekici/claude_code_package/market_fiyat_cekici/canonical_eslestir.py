@@ -55,7 +55,7 @@ def load_chain_products(sb: Client, chain: str) -> list[dict]:
     while True:
         resp = (
             sb.table("market_chain_products")
-            .select("external_product_id,ean,name,brand,price,promo_price,in_promo,"
+            .select("external_product_id,name,brand,price,promo_price,in_promo,"
                     "promo_valid_from,promo_valid_until,image_url,captured_at,category_name")
             .eq("chain_slug", chain)
             .range(offset, offset + FETCH_CHUNK - 1)
