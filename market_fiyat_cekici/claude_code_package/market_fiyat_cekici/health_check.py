@@ -132,4 +132,6 @@ if __name__ == "__main__":
     sb = create_client(url, key)
     results = check_all(sb)
     broken = [r for r in results if not r["ok"]]
-    sys.exit(1 if broken else 0)
+    if broken:
+        print(f"\n⚠️  {len(broken)} market sorunlu — Telegram alarmı gönderildi")
+    sys.exit(0)

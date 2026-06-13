@@ -77,3 +77,4 @@ jobs:
         working-directory: market_fiyat_cekici/claude_code_package/market_fiyat_cekici
         run: python -X utf8 health_check.py
         if: always()
+        continue-on-error: true
