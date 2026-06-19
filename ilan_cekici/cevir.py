@@ -140,42 +140,82 @@ def gemini_cevir(metinler: list, gm_key: str, alan: str = "başlık") -> list:
     return metinler  # tüm denemeler başarısız → orijinali döndür
 
 
-# ── İlanlar: Başlık ──────────────────────────────────────────────────────────
+# ── İlanlar: Başlık (TEKİL MOD — benzersiz başlık = 1 API çağrısı) ──────────
 
 def cevir_ilanlar_title(sb_url, sb_key, gm_key, limit):
-    print(f"\n[BAŞLIK ÇEVİRİSİ] — Hedef: {limit:,} ilan")
-    toplam = 0
+    """
+    Benzersiz başlıkları bir kez çevirip tüm eşleşen satırlara toplu yazar.
+    Örnek: 'Verpleegkundige' 4000 ilanda geçse, 1 Gemini isteğiyle 4000 satır güncellenir.
+    """
+    import urllib.parse
 
-    while toplam < limit:
-        kalan  = min(PAGE, limit - toplam)
-        satırlar = sb_get(
-            sb_url, sb_key, "ilanlar",
-            "title_tr=is.null",
-            "id,title", limit=kalan,
-        )
-        if not satırlar:
-            print("  Çevrilecek başlık kalmadı.")
+    headers_ro = {"apikey": sb_key, "Authorization": f"Bearer {sb_key}"}
+    headers_rw = {**headers_ro, "Content-Type": "application/json", "Prefer": "return=minimal"}
+
+    # 1. Tüm benzersiz çevrilmemiş başlıkları topla (sadece title sütunu, sayfalanmış)
+    print("\n[BAŞLIK ÇEVİRİSİ — TEKİL MOD]")
+    print("  Benzersiz başlıklar toplanıyor...")
+    baslik_sayac: dict[str, int] = {}
+    offset = 0
+    FETCH = 2000
+    while True:
+        url = (f"{sb_url}/rest/v1/ilanlar?select=title&title_tr=is.null"
+               f"&status=eq.active&limit={FETCH}&offset={offset}")
+        try:
+            r = requests.get(url, headers=headers_ro, timeout=30)
+            rows = r.json() if r.status_code == 200 else []
+        except Exception:
+            rows = []
+        for row in rows:
+            t = (row.get("title") or "").strip()
+            if t:
+                baslik_sayac[t] = baslik_sayac.get(t, 0) + 1
+        if len(rows) < FETCH:
             break
+        offset += FETCH
 
-        for i in range(0, len(satırlar), TITLE_BATCH):
-            batch     = satırlar[i : i + TITLE_BATCH]
-            ids       = [r["id"] for r in batch]
-            basliklar = [r.get("title") or "" for r in batch]
+    # En sık görülenden en aza doğru sırala
+    sirali = sorted(baslik_sayac, key=lambda k: baslik_sayac[k], reverse=True)
+    toplam_satir = sum(baslik_sayac.values())
+    print(f"  {toplam_satir:,} satır → {len(sirali):,} benzersiz başlık bulundu")
 
-            ceviriler = gemini_cevir(basliklar, gm_key, "başlık")
-            time.sleep(SLEEP_SEC)
+    if not sirali:
+        print("  Çevrilecek başlık kalmadı.")
+        return 0
 
-            for row_id, ceviri in zip(ids, ceviriler):
-                if sb_patch(sb_url, sb_key, "ilanlar", row_id, {"title_tr": ceviri}):
-                    toplam += 1
+    # 2. Benzersiz başlıkları çevir (limit = en fazla kaç benzersiz başlık)
+    hedef = sirali[:limit]
+    cevrildi = 0
+    guncellenen_satir = 0
 
-            print(f"  +{len(batch)} başlık → toplam {toplam:,}")
+    for i in range(0, len(hedef), TITLE_BATCH):
+        batch     = hedef[i : i + TITLE_BATCH]
+        ceviriler = gemini_cevir(batch, gm_key, "başlık")
+        time.sleep(SLEEP_SEC)
 
-            if toplam >= limit:
-                break
+        for orijinal, ceviri in zip(batch, ceviriler):
+            if not ceviri or ceviri.strip() == orijinal.strip():
+                continue
+            # Bu başlığa sahip TÜM satırları tek PATCH ile güncelle
+            enc = urllib.parse.quote(orijinal, safe="")
+            try:
+                resp = requests.patch(
+                    f"{sb_url}/rest/v1/ilanlar?title=eq.{enc}",
+                    headers=headers_rw,
+                    json={"title_tr": ceviri.strip()},
+                    timeout=20,
+                )
+                if resp.status_code in (200, 204):
+                    sayi = baslik_sayac.get(orijinal, 1)
+                    guncellenen_satir += sayi
+                    cevrildi += 1
+            except Exception as e:
+                print(f"  PATCH hatası: {str(e)[:60]}")
 
-    print(f"  ✓ Toplam {toplam:,} başlık çevrildi.")
-    return toplam
+        print(f"  [{i + len(batch):,}/{len(hedef):,} benzersiz] ~{guncellenen_satir:,} satır güncellendi")
+
+    print(f"  ✓ {cevrildi:,} benzersiz başlık → ~{guncellenen_satir:,} satır güncellendi")
+    return guncellenen_satir
 
 
 # ── İlanlar: Açıklama ────────────────────────────────────────────────────────
