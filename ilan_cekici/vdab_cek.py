@@ -259,7 +259,6 @@ def parse_ilan(job: dict) -> dict | None:
         "sektor":       VDAB_JOBCAT_TR.get(jobcat_code) or sektor_bul(baslik + " " + firma),
         "pozisyon":     pozisyon,
         "price":        "",
-        "created_at":   datetime.now(timezone.utc).isoformat(),
         "last_seen_at": datetime.now(timezone.utc).isoformat(),
         "expires_at":   (datetime.now(timezone.utc) + timedelta(days=EXPIRY_GUN)).isoformat(),
     }
