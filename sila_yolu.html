@@ -821,10 +821,8 @@
     }
 
     function kapiKartiOlustur(kapi, girisOrtalama, girisCount, sonRapor, cikisOrtalama, cikisCount, googleGirisDk = null, googleCikisDk = null) {
-        // Yön bazlı Google verisi yoksa mevcut olanı paylaş (fallback)
-        const anyGoogle = googleGirisDk ?? googleCikisDk ?? null;
-        const girisGosterilecek = girisOrtalama !== null ? girisOrtalama : (googleGirisDk ?? anyGoogle);
-        const cikisGosterilecek = cikisOrtalama !== null ? cikisOrtalama : (googleCikisDk ?? anyGoogle);
+        const girisGosterilecek = girisOrtalama !== null ? girisOrtalama : (googleGirisDk ?? null);
+        const cikisGosterilecek = cikisOrtalama !== null ? cikisOrtalama : (googleCikisDk ?? null);
         const bg = beklemeSinifi(girisGosterilecek);
         const bc = beklemeSinifi(cikisGosterilecek);
         const anaGosterilecek = girisGosterilecek ?? cikisGosterilecek;

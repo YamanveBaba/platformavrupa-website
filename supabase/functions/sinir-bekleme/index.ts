@@ -14,52 +14,62 @@ const KAPILER = [
   {
     slug: 'kapikule',
     isim: 'Kapıkule',
-    cikis_origin:   '41.7200,26.6400',  // E80 Edirne yakını, TR tarafı
-    cikis_dest:     '41.7550,26.4900',  // Bulgarian A4, BG tarafı
-    cikis_baseline: 660,
-    giris_origin:   '41.7550,26.4900',  // Bulgarian A4, BG tarafı
-    giris_dest:     '41.7200,26.6400',  // E80 Edirne yakını, TR tarafı
-    giris_baseline: 660,
+    // Çıkış: TR E80'de Edirne'den sınıra yaklaşma (~5km TR tarafı)
+    cikis_origin:   '41.7140,26.6250',
+    cikis_dest:     '41.7310,26.5810',
+    cikis_baseline: 300,
+    // Giriş: BG A4'te Bulgaristan tarafından sınıra yaklaşma (~5km BG tarafı)
+    giris_origin:   '41.7600,26.4870',
+    giris_dest:     '41.7440,26.5480',
+    giris_baseline: 300,
   },
   {
     slug: 'hamzabeyli',
     isim: 'Hamzabeyli',
-    cikis_origin:   '41.7000,26.7200',  // TR D550 yaklaşımı
-    cikis_dest:     '41.7300,26.5500',  // BG tarafı Lesovo sonrası
-    cikis_baseline: 600,
-    giris_origin:   '41.7300,26.5500',
-    giris_dest:     '41.7000,26.7200',
-    giris_baseline: 600,
+    // Çıkış: TR D550'de sınıra yaklaşma
+    cikis_origin:   '41.7050,26.6780',
+    cikis_dest:     '41.7180,26.6420',
+    cikis_baseline: 240,
+    // Giriş: BG tarafı Svilengrad'dan sınıra yaklaşma
+    giris_origin:   '41.7380,26.5700',
+    giris_dest:     '41.7250,26.6050',
+    giris_baseline: 240,
   },
   {
     slug: 'ipsala',
     isim: 'İpsala',
-    cikis_origin:   '40.9200,26.4600',  // TR D110 İpsala öncesi
-    cikis_dest:     '40.9150,26.2800',  // GR Kipi sonrası
-    cikis_baseline: 600,
-    giris_origin:   '40.9150,26.2800',
-    giris_dest:     '40.9200,26.4600',
-    giris_baseline: 600,
+    // Çıkış: TR D110 (E90) sınıra yaklaşma
+    cikis_origin:   '40.8970,26.4580',
+    cikis_dest:     '40.9100,26.3980',
+    cikis_baseline: 300,
+    // Giriş: GR tarafı Kipi'den sınıra yaklaşma
+    giris_origin:   '40.9250,26.3050',
+    giris_dest:     '40.9130,26.3680',
+    giris_baseline: 300,
   },
   {
     slug: 'derekoy',
     isim: 'Dereköy',
-    cikis_origin:   '41.9600,27.5100',  // TR tarafı yaklaşım
-    cikis_dest:     '42.0050,27.3600',  // BG Malko Tarnovo sonrası
-    cikis_baseline: 720,
-    giris_origin:   '42.0050,27.3600',
-    giris_dest:     '41.9600,27.5100',
-    giris_baseline: 720,
+    // Çıkış: TR D100 Kırklareli'den sınıra yaklaşma
+    cikis_origin:   '41.9480,27.4920',
+    cikis_dest:     '41.9680,27.4590',
+    cikis_baseline: 360,
+    // Giriş: BG Malko Tarnovo tarafından yaklaşma
+    giris_origin:   '42.0100,27.3750',
+    giris_dest:     '41.9870,27.4250',
+    giris_baseline: 360,
   },
   {
     slug: 'pazarkule',
     isim: 'Pazarkule',
-    cikis_origin:   '41.6950,26.4200',  // TR Edirne güneyi
-    cikis_dest:     '41.7450,26.2700',  // GR Kastanies sonrası
-    cikis_baseline: 660,
-    giris_origin:   '41.7450,26.2700',
-    giris_dest:     '41.6950,26.4200',
-    giris_baseline: 660,
+    // Çıkış: TR D060 Edirne'den sınıra yaklaşma
+    cikis_origin:   '41.6840,26.4140',
+    cikis_dest:     '41.7010,26.3630',
+    cikis_baseline: 300,
+    // Giriş: GR Kastanies tarafından yaklaşma
+    giris_origin:   '41.7420,26.2700',
+    giris_dest:     '41.7160,26.3340',
+    giris_baseline: 300,
   },
 ];
 
