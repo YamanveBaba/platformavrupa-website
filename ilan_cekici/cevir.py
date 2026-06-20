@@ -160,7 +160,7 @@ def cevir_ilanlar_title(sb_url, sb_key, gm_key, limit):
     FETCH = 2000
     while True:
         url = (f"{sb_url}/rest/v1/ilanlar?select=title&title_tr=is.null"
-               f"&status=eq.active&limit={FETCH}&offset={offset}")
+               f"&status=eq.active&order=created_at.desc&limit={FETCH}&offset={offset}")
         try:
             r = requests.get(url, headers=headers_ro, timeout=30)
             rows = r.json() if r.status_code == 200 else []
