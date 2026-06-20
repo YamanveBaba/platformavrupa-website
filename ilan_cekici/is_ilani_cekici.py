@@ -192,7 +192,7 @@ def expired_yap(sb_url: str, sb_key: str, dry_run: bool) -> int:
         "Prefer": "count=exact",
         "Range": "0-0",
     }
-    params = {"source": "not.eq.user", "status": "eq.active", "created_at": f"lt.{sinir}", "select": "id"}
+    params = {"source": "not.eq.user", "status": "eq.active", "last_seen_at": f"lt.{sinir}", "select": "id"}
     r = requests.get(f"{sb_url}/rest/v1/ilanlar", params=params, headers=headers, timeout=30)
     m = re.search(r"/(\d+)", r.headers.get("Content-Range", ""))
     toplam = int(m.group(1)) if m else 0
@@ -209,7 +209,7 @@ def expired_yap(sb_url: str, sb_key: str, dry_run: bool) -> int:
         "Prefer": "return=minimal",
     }
     patch = requests.patch(
-        f"{sb_url}/rest/v1/ilanlar?source=not.eq.user&status=eq.active&created_at=lt.{sinir}",
+        f"{sb_url}/rest/v1/ilanlar?source=not.eq.user&status=eq.active&last_seen_at=lt.{sinir}",
         json={"status": "expired"},
         headers=patch_headers,
         timeout=60,
@@ -236,7 +236,7 @@ def _yeni_ilan(title, aciklama, source, source_id, source_url, firma, sehir, ulk
         "sektor":       sektor_bul(title + " " + aciklama),
         "pozisyon":     "Ofis",
         "price":        "",
-        "created_at":   datetime.now(timezone.utc).isoformat(),
+        "last_seen_at": datetime.now(timezone.utc).isoformat(),
         "expires_at":   (datetime.now(timezone.utc) + timedelta(days=EXPIRY_GUN)).isoformat(),
     }
 

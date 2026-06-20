@@ -95,7 +95,7 @@ def expired_yap(sb_url: str, sb_key: str, dry_run: bool) -> int:
         print(f"  [dry-run] werk_nl expired adayi kontrol edilmedi.")
         return 0
     r = requests.patch(
-        f"{sb_url}/rest/v1/ilanlar?source=eq.{SOURCE}&status=eq.active&created_at=lt.{sinir}",
+        f"{sb_url}/rest/v1/ilanlar?source=eq.{SOURCE}&status=eq.active&last_seen_at=lt.{sinir}",
         json={"status": "expired"}, headers=headers, timeout=30,
     )
     if r.status_code not in (200, 204):
@@ -181,7 +181,6 @@ def rss_cek(sb_url: str, sb_key: str, dry_run: bool) -> int:
             "sub_category": subcat_bul(tekst),
             "sektor":       sektor_bul(tekst),
             "price":        "",
-            "created_at":   now,
             "last_seen_at": now,
         })
 
@@ -242,7 +241,6 @@ def dump_cek(sb_url: str, sb_key: str, dry_run: bool) -> int:
             "sub_category": subcat_bul(tekst),
             "sektor":       sektor_bul(tekst),
             "price":        "",
-            "created_at":   now,
             "last_seen_at": now,
         })
         if len(batch) >= 200:
