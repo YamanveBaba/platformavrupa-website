@@ -56,9 +56,16 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.SUPABASE_ACCESS_TOKEN }}")
           echo "Proje durumu: $STATUS"
 
-      - name: 5 marketten ürün çek (main.py)
+      # Colruyt/Delhaize/Carrefour Cloudflare bypass'a bağımlı — GitHub Actions'ın
+      # datacenter IP'sinden ve tazelenmeyen statik cookie'den güvenilir çekilemiyor.
+      # Bu 3 market artık sadece yerelde (market_guncelle.bat) çekiliyor.
+      - name: Aldi ürünlerini çek (main.py)
         working-directory: market_fiyat_cekici/claude_code_package/market_fiyat_cekici
-        run: python -X utf8 main.py
+        run: python -X utf8 main.py --market aldi
+
+      - name: Lidl ürünlerini çek (main.py)
+        working-directory: market_fiyat_cekici/claude_code_package/market_fiyat_cekici
+        run: python -X utf8 main.py --market lidl
 
       - name: Kanonik ürünleri eşleştir (canonical_eslestir.py)
         working-directory: market_fiyat_cekici/claude_code_package/market_fiyat_cekici
@@ -70,7 +77,7 @@ jobs:
         continue-on-error: true
 
       - name: Market ürünlerini Türkçeleştir
-        run: python -X utf8 ilan_cekici/cevir.py --tablo market --limit 2000
+        run: python -X utf8 ilan_cekici/cevir.py --tablo market --limit 5000
         continue-on-error: true
 
       - name: Sağlık kontrolü yap

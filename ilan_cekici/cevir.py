@@ -243,7 +243,9 @@ def cevir_ilanlar_desc(sb_url, sb_key, gm_key, limit):
             ceviriler = gemini_cevir(aciklamalar, gm_key, "açıklama")
             time.sleep(SLEEP_SEC)
 
-            for row_id, ceviri in zip(ids, ceviriler):
+            for row_id, ceviri, orig in zip(ids, ceviriler, aciklamalar):
+                if not ceviri or ceviri.strip() == orig.strip():
+                    continue
                 if sb_patch(sb_url, sb_key, "ilanlar", row_id, {"description_tr": ceviri}):
                     toplam += 1
 
@@ -281,7 +283,9 @@ def cevir_market(sb_url, sb_key, gm_key, limit):
             ceviriler = gemini_cevir(isimler, gm_key, "ürün adı")
             time.sleep(SLEEP_SEC)
 
-            for row_id, ceviri in zip(ids, ceviriler):
+            for row_id, ceviri, orig in zip(ids, ceviriler, isimler):
+                if not ceviri or ceviri.strip() == orig.strip():
+                    continue
                 if sb_patch(sb_url, sb_key, "market_chain_products", row_id, {"name_tr": ceviri}):
                     toplam += 1
 
